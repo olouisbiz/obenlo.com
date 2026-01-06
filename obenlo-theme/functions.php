@@ -1,18 +1,17 @@
 <?php
 /**
- * Obenlo Theme Functions - Asset Loader
+ * Obenlo Theme Functions - Lean UI Layer
  */
+if (!defined('ABSPATH')) exit;
 
+// Enqueue Tailwind and Google Fonts
 add_action('wp_enqueue_scripts', function() {
-    // Load CSS
-    wp_enqueue_style('obenlo-style', get_stylesheet_uri());
+    wp_enqueue_style('obenlo-style', get_stylesheet_uri(), [], '1.1.0');
+    wp_enqueue_style('obenlo-fonts', 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap', [], null);
+});
 
-    // Load JS (ensure jQuery is loaded first)
-    wp_enqueue_script('obenlo-main-bridge', get_template_directory_uri() . '/assets/js/main.js', ['jquery'], '1.0.0', true);
-
-    // Pass PHP data to JS
-    wp_localize_script('obenlo-main-bridge', 'obenlo_vars', [
-        'ajaxurl' => admin_url('admin-ajax.php'),
-        'nonce'   => wp_create_nonce('obenlo_secure_nonce')
-    ]);
+// Theme Support
+add_action('after_setup_theme', function() {
+    add_theme_support('post-thumbnails');
+    add_theme_support('title-tag');
 });
