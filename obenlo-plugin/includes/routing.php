@@ -1,31 +1,25 @@
 <?php
 /**
- * Obenlo Template Router
- * Location: /obenlo-plugin/includes/routing.php
+ * Obenlo Routing Engine - Template-Based
  */
-
 if (!defined('ABSPATH')) exit;
 
-add_filter('template_include', function($template) {
-    // 1. If viewing an SES Listing, force the Single Listing Template
-    if (is_singular('obenlo_listing')) {
-        $new_template = locate_template(['single-obenlo_listing.php']);
-        return ($new_template) ? $new_template : $template;
-    }
+add_action('template_include', function($template) {
+    $path = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+    $segments = explode('/', $path);
+    $base_route = $segments[0];
 
-    // 2. If viewing the 'Account' page, route by Role
-    if (is_page('account')) {
-        if (!is_user_logged_in()) {
-            return locate_template(['templates/view-auth-gate.php']);
-        }
-        
-        $user = wp_get_current_user();
-        if (in_array('obenlo_vendor', (array) $user->roles)) {
-            return locate_template(['templates/dashboard-host.php']);
-        } else {
-            return locate_template(['templates/dashboard-traveler.php']);
-        }
-    }
+    $routes = [
+        'dashboard-host'    => 'dashboard-host.php',
+        'dashboard-traveler'=> 'dashboard-traveler.php',
+        'messages'          => 'message-hub.php',
+        'explore'           => 'page-explore.php',
+        'checkout'          => 'page-checkout.php'
+    ];
 
+    if (isset($routes[$base_route])) {
+        $custom_template = get_stylesheet_directory() . '/templates/' . $routes[$base_route];
+        if (file_exists($custom_template)) return $custom_template;
+    }
     return $template;
 });

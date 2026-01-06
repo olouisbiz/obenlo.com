@@ -1,21 +1,27 @@
 <?php
 /**
- * Obenlo Custom Post Types
+ * Obenlo Asset Registrations - Template-Based Logic
  */
-
 if (!defined('ABSPATH')) exit;
 
-if (!function_exists('obenlo_register_post_types')) {
-    function obenlo_register_post_types() {
-        register_post_type('obenlo_listing', [
-            'labels'      => ['name' => 'SES Listings', 'singular_name' => 'Listing'],
-            'public'      => true,
-            'has_archive' => true,
-            'menu_icon'   => 'dashicons-palmtree',
-            'supports'    => ['title', 'editor', 'thumbnail', 'author'],
-            'show_in_rest' => true,
-            'rewrite'     => ['slug' => 'experience'],
-        ]);
-    }
-    add_action('init', 'obenlo_register_post_types');
-}
+add_action('init', function() {
+    // 1. SES ASSETS: The core products of Obenlo
+    register_post_type('obenlo_ses', [
+        'labels'      => ['name' => 'Obenlo Assets', 'singular_name' => 'Asset'],
+        'public'      => true,
+        'has_archive' => true,
+        'supports'    => ['title', 'editor', 'thumbnail', 'author'],
+        'menu_icon'   => 'dashicons-admin-home',
+        'show_in_rest' => true,
+        'rewrite'     => ['slug' => 'explore-asset']
+    ]);
+
+    // 2. BOOKINGS: Internal record tracking
+    register_post_type('obenlo_booking', [
+        'labels'      => ['name' => 'Bookings'],
+        'public'      => false,
+        'show_ui'     => true,
+        'supports'    => ['title', 'author', 'custom-fields'],
+        'menu_icon'   => 'dashicons-calendar-alt'
+    ]);
+});

@@ -1,36 +1,27 @@
 <?php
-/**
- * Obenlo AJAX Handlers
- * Path: /obenlo-plugin/includes/ajax-handlers.php
- */
-
 if (!defined('ABSPATH')) exit;
 
-// FAVORITES TOGGLE
-add_action('wp_ajax_obenlo_toggle_favorite', function() {
-    if (!is_user_logged_in()) wp_send_json_error();
-    $user_id = get_current_user_id();
-    $host_id = intval($_POST['host_id']);
-    $favs = get_user_meta($user_id, 'obenlo_fav_hosts', true) ?: [];
-    
-    if (in_array($host_id, $favs)) {
-        $favs = array_diff($favs, [$host_id]);
-        $is_fav = false;
-    } else {
-        $favs[] = $host_id;
-        $is_fav = true;
-    }
-    update_user_meta($user_id, 'obenlo_fav_hosts', array_values($favs));
-    wp_send_json_success(['is_fav' => $is_fav]);
-});
-
-// REPORT HOST
-add_action('wp_ajax_obenlo_report_host', function() {
-    $host_name = sanitize_text_field($_POST['reported_host']);
-    $reason = sanitize_text_field($_POST['reason']);
-    $admin_email = get_option('admin_email');
-    $subject = "🚩 FLAG: Host Profile Reported - " . $host_name;
-    $body = "Reason: $reason\nDetails: " . sanitize_textarea_field($_POST['details']);
-    wp_mail($admin_email, $subject, $body);
+/**
+ * 1. MESSAGING (Airbnb/Booking Hybrid)
+ */
+add_action('wp_ajax_obenlo_send_message', function() {
+    check_ajax_referer('obenlo_nonce', 'nonce');
+    global $wpdb;
+    $wpdb->insert($wpdb->prefix . 'obenlo_messages', [
+        'sender_id'   => get_current_user_id(),
+        'receiver_id' => intval($_POST['receiver_id']),
+        'message_text'=> sanitize_textarea_field($_POST['message']),
+        'sent_at'     => current_time('mysql')
+    ]);
     wp_send_json_success();
 });
+
+/**
+ * 2. SEARCH & FILTER
+ */
+add_action('wp_ajax_nopriv_obenlo_filter', 'handle_obenlo_filter');
+add_action('wp_ajax_obenlo_filter', 'handle_obenlo_filter');
+function handle_obenlo_filter() {
+    // Hybrid Filter Logic here
+    wp_die();
+}
