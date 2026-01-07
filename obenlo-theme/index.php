@@ -1,4 +1,7 @@
 <?php
-// Fallback to front-page or explore if index is hit
-wp_redirect(home_url('/explore'));
+/**
+ * Obenlo Marketplace - Safety Fallback
+ * Redirects unauthorized or lost traffic to the primary Marketplace Explorer.
+ */
+wp_redirect(home_url('/listings'));
 exit;
