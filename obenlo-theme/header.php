@@ -1,7 +1,5 @@
 <?php
-/**
- * Obenlo Master Header
- */
+/** Obenlo Marketplace Master Header **/
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -9,28 +7,19 @@
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php wp_head(); ?>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: 'Outfit', sans-serif; -webkit-font-smoothing: antialiased; }
-        .nav-blur { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); }
-    </style>
 </head>
-<body <?php body_class('bg-white text-slate-900 flex flex-col min-h-screen'); ?>>
-
-<nav class="nav-blur sticky top-0 z-[100] border-b border-slate-100/80 h-20 flex items-center">
+<body <?php body_class('bg-white text-slate-900 flex flex-col min-h-screen font-outfit'); ?>>
+<nav class="sticky top-0 z-[100] bg-white/95 backdrop-blur-md border-b border-slate-100 h-20 flex items-center">
     <div class="max-w-7xl mx-auto px-6 w-full flex justify-between items-center">
-        <a href="<?php echo home_url(); ?>" class="text-2xl font-black tracking-tighter">
-            Obenlo<span class="text-indigo-600">.</span>
-        </a>
-        <div class="flex gap-8 items-center">
-            <a href="<?php echo home_url('/explore'); ?>" class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">Explorer</a>
+        <a href="<?php echo home_url(); ?>" class="text-2xl font-black tracking-tighter uppercase">Obenlo<span class="text-indigo-600">.</span></a>
+        <div class="hidden md:flex gap-8 items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <a href="<?php echo home_url('/listings'); ?>" class="hover:text-indigo-600 transition-colors">Marketplace</a>
             <?php if (is_user_logged_in()): ?>
-                <a href="<?php echo home_url('/dashboard-host'); ?>" class="bg-slate-900 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">Console</a>
+                <a href="<?php echo home_url('/host-console'); ?>" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl">Host Console</a>
             <?php else: ?>
-                <a href="<?php echo home_url('/login-hub'); ?>" class="text-[10px] font-black uppercase tracking-widest text-indigo-600">Sign In</a>
+                <a href="<?php echo home_url('/login-hub'); ?>" class="text-indigo-600">Partner Login</a>
             <?php endif; ?>
         </div>
     </div>
 </nav>
-
-<div id="obenlo-app-root" class="flex-grow">
+<div id="obenlo-marketplace-root" class="flex-grow">

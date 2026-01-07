@@ -1,7 +1,11 @@
 /*
-Theme Name: Obenlo Nomadic Tech
-Theme URI: https://obenlo.com
+Theme Name: Obenlo Marketplace
 Author: Obenlo Team
-Description: Custom Hybrid Marketplace Template (Airbnb x Booking Style)
-Version: 1.1.0
+Description: Professional Two-Sided Booking Platform.
+Version: 1.2.0
 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { font-family: 'Outfit', sans-serif; }

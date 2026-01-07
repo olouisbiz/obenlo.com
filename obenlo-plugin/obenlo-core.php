@@ -1,15 +1,15 @@
 <?php
 /**
- * Plugin Name: Obenlo Core
- * Description: Unified Command Center for SES Management, Routing, and Auth.
- * Version: 1.1.0
+ * Plugin Name: Obenlo Marketplace Core
+ * Description: High-performance engine for Host/Traveler transactions and booking security.
+ * Version: 1.2.0
  */
 
 if (!defined('ABSPATH')) exit;
 
 define('OBENLO_PATH', plugin_dir_path(__FILE__));
 
-function obenlo_load_modules() {
+function obenlo_init_marketplace() {
     $modules = [
         'database.php',
         'post-types.php',
@@ -23,4 +23,4 @@ function obenlo_load_modules() {
         if (file_exists($path)) require_once $path;
     }
 }
-obenlo_load_modules();
+add_action('plugins_loaded', 'obenlo_init_marketplace');
