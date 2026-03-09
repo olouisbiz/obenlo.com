@@ -1,0 +1,391 @@
+/*
+Theme Name: Obenlo
+Author: Obenc
+Description: Custom theme for the Obenlo booking platform.
+Version: 1.0.0
+*/
+
+body { 
+    margin: 0; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    color: #222;
+}
+
+.site-header {
+    background: #ffffff;
+    border-bottom: 1px solid #ebebeb;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 15px 40px;
+}
+
+.header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.site-branding a {
+    color: #e61e4d;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Middle Search/Nav area */
+.header-search-nav {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.smart-search-bar {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #dddddd;
+    border-radius: 40px;
+    padding: 5px 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s ease;
+}
+
+.smart-search-bar:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+}
+
+.search-input {
+    border: none;
+    background: transparent;
+    padding: 10px 15px;
+    font-size: 0.95rem;
+    color: #222;
+    outline: none;
+    width: 250px;
+}
+
+.search-input::placeholder {
+    color: #717171;
+}
+
+.search-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 15px;
+    font-weight: 600;
+    color: #222222;
+    cursor: pointer;
+    border-right: 1px solid #dddddd;
+}
+
+.search-btn:last-child {
+    border-right: none;
+}
+
+.search-icon-btn {
+    background: #e61e4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+/* User Menu Area */
+.header-user-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+}
+
+.become-host-link {
+    text-decoration: none;
+    color: #222222;
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 20px;
+    transition: background 0.2s;
+}
+
+.become-host-link:hover {
+    background: #f7f7f7;
+}
+
+.user-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border: 1px solid #dddddd;
+    border-radius: 30px;
+    padding: 5px 5px 5px 12px;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.user-dropdown-btn:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+}
+
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    background: #717171;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* Dropdown Menu */
+.user-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: #ffffff;
+    min-width: 240px;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+    padding: 10px 0;
+    border: 1px solid #dddddd;
+}
+
+.header-user-menu.active .user-dropdown-menu,
+.header-language-switcher.active .user-dropdown-menu {
+    display: block;
+}
+
+.user-dropdown-menu a {
+    display: block;
+    padding: 12px 20px;
+    color: #222222;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.user-dropdown-menu a:hover {
+    background: #f7f7f7;
+}
+
+.menu-divider {
+    height: 1px;
+    background: #dddddd;
+    margin: 5px 0;
+}
+
+/* Success Modal */
+#obenlo-success-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+
+#obenlo-success-modal .modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+#obenlo-success-modal.active .modal-content {
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .header-search-nav { display: none; }
+    .site-header { padding: 15px 20px; }
+}
+
+/* Single Listing Page */
+.obenlo-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.listing-header { margin-bottom: 30px; }
+.listing-title { margin-bottom: 5px; }
+.listing-gallery { margin-bottom: 40px; }
+.gallery-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; height: 400px; border-radius: 12px; overflow: hidden; }
+.gallery-main { background-size: cover; background-position: center; cursor: pointer; }
+.listing-layout { display: flex; gap: 40px; flex-wrap: wrap; }
+.listing-main-content { flex: 2; min-width: 300px; }
+.listing-sidebar { flex: 1; min-width: 300px; }
+.booking-widget { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 25px; position: sticky; top: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.listing-tabs { margin-bottom: 20px; border-bottom: 1px solid #ddd; display: flex; gap: 20px; }
+.tab-btn { background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; color: #666; transition: all 0.2s; }
+.tab-btn.active { border-bottom-color: #e61e4d; color: #e61e4d; }
+.tab-content { display: none; line-height: 1.6; font-size: 1.1em; margin-bottom: 30px; }
+.tab-content.active { display: block; }
+.price-header { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+.price-value { font-size: 1.5em; font-weight: bold; }
+.booking-form { display: flex; flex-direction: column; gap: 15px; }
+.reserve-btn { width: 100%; padding: 15px; background: #e61e4d; color: white; border: none; border-radius: 8px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+.reserve-btn:hover { background: #d91b42; }
+
+/* Become a Host Page */
+.become-host-hero { padding: 100px 20px; text-align: center; color: white; background-size: cover; background-position: center; }
+.become-host-hero h1 { font-size: 3.5em; margin-bottom: 20px; }
+.become-host-hero p { font-size: 1.5em; margin-bottom: 40px; font-weight: 300; }
+.host-benefits { padding: 80px 20px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; }
+.benefit-item { text-align: center; padding: 30px; border-radius: 20px; transition: transform 0.3s; }
+.benefit-item:hover { transform: translateY(-10px); }
+.benefit-icon { font-size: 3em; margin-bottom: 20px; }
+.how-it-works-brief { background: #f7f7f7; padding: 80px 20px; text-align: center; }
+.how-it-works-brief h2 { margin-bottom: 50px; }
+.step-container { max-width: 1000px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; }
+.step-item { flex: 1; min-width: 250px; }
+.step-number { background: #222; color: white; width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px; font-weight: bold; }
+.ready-to-host { padding: 100px 20px; text-align: center; }
+.ready-to-host h2 { font-size: 2.5em; margin-bottom: 30px; }
+.cta-button { display: inline-block; background: #e61e4d; color: white; padding: 18px 40px; border-radius: 12px; text-decoration: none; font-size: 1.2em; font-weight: bold; box-shadow: 0 4px 15px rgba(230, 30, 77, 0.4); transition: all 0.2s; }
+.cta-button:hover { transform: scale(1.02); opacity: 0.95; }
+.cta-button.dark { background: #222; box-shadow: none; }
+
+/* Static Pages */
+.static-page-header { background: #f7f7f7; padding: 60px 20px; text-align: center; border-bottom: 1px solid #eee; }
+.static-page-header h1 { font-size: 3em; }
+.static-page-header p { color: #666; font-size: 1.2em; }
+.static-page-content { max-width: 1000px; margin: 0 auto; padding: 80px 20px; }
+.static-section { margin-bottom: 100px; }
+.static-section h2 { display: flex; align-items: center; gap: 15px; margin-bottom: 40px; }
+.static-icon-box { color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.standard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+.standard-card { padding: 25px; background: #fff; border: 1px solid #eee; border-radius: 16px; transition: box-shadow 0.2s; }
+.standard-card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.standard-card h4 { margin-bottom: 15px; }
+.standard-card p { color: #666; font-size: 0.95em; }
+.faq-content { max-width: 800px; margin: 0 auto; padding: 80px 20px; }
+.faq-item { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+.faq-item h4 { margin-bottom: 10px; color: #333; }
+.faq-item p { color: #666; line-height: 1.6; }
+
+/* Blog Styles */
+.archive-content .blog-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #eee;
+    border-radius: 16px;
+    background: #fff;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.archive-content .blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.pagination .nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pagination .page-numbers {
+    padding: 10px 18px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #222;
+    font-weight: 600;
+}
+
+.pagination .page-numbers.current {
+    background: #e61e4d;
+    color: #fff;
+    border-color: #e61e4d;
+}
+
+/* Single Post Styles */
+.entry-content p {
+    margin-bottom: 1.5em;
+}
+
+.entry-content h2, .entry-content h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    color: #222;
+}
+
+.entry-content blockquote {
+    border-left: 4px solid #e61e4d;
+    padding-left: 20px;
+    margin: 30px 0;
+    font-style: italic;
+    color: #555;
+}
+
+.author-bio img {
+    border: 2px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Host Badges Styling */
+.host-badges {
+    display: flex;
+    gap: 10px;
+}
+
+.host-badge {
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
+}
+
+.host-badge:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+@media (max-width: 768px) {
+    .archive-header h1 { font-size: 2.2rem; }
+    .single-post-wrapper { padding: 40px 20px; }
+    .entry-header h1 { font-size: 2.2rem; }
+    .host-badges { flex-wrap: wrap; }
+}
+
+/* Wishlist Button */
+.wishlist-btn {
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wishlist-btn:hover {
+    transform: scale(1.15) !important;
+}
+
+.wishlist-btn.active svg {
+    fill: #e61e4d !important;
+}
+
+.wishlist-btn.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+}
+

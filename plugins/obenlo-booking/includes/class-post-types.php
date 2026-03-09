@@ -1,0 +1,238 @@
+<?php
+/**
+ * Post Types & Taxonomies
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+class Obenlo_Booking_Post_Types {
+
+    public function init() {
+        add_action( 'init', array( $this, 'register_custom_post_types' ) );
+        add_action( 'init', array( $this, 'register_taxonomies' ) );
+    }
+
+    public function register_custom_post_types() {
+        // 1. Listing CPT (Hierarchical to support parent/child)
+        $listing_labels = array(
+            'name'                  => _x( 'Listings', 'Post Type General Name', 'obenlo-booking' ),
+            'singular_name'         => _x( 'Listing', 'Post Type Singular Name', 'obenlo-booking' ),
+            'menu_name'             => __( 'Listings', 'obenlo-booking' ),
+            'name_admin_bar'        => __( 'Listing', 'obenlo-booking' ),
+            'archives'              => __( 'Listing Archives', 'obenlo-booking' ),
+            'attributes'            => __( 'Listing Attributes', 'obenlo-booking' ),
+            'parent_item_colon'     => __( 'Parent Listing:', 'obenlo-booking' ),
+            'all_items'             => __( 'All Listings', 'obenlo-booking' ),
+            'add_new_item'          => __( 'Add New Listing', 'obenlo-booking' ),
+            'add_new'               => __( 'Add New', 'obenlo-booking' ),
+            'new_item'              => __( 'New Listing', 'obenlo-booking' ),
+            'edit_item'             => __( 'Edit Listing', 'obenlo-booking' ),
+            'update_item'           => __( 'Update Listing', 'obenlo-booking' ),
+            'view_item'             => __( 'View Listing', 'obenlo-booking' ),
+            'view_items'            => __( 'View Listings', 'obenlo-booking' ),
+            'search_items'          => __( 'Search Listing', 'obenlo-booking' ),
+        );
+        $listing_args = array(
+            'label'                 => __( 'Listing', 'obenlo-booking' ),
+            'labels'                => $listing_labels,
+            'supports'              => array( 'title', 'editor', 'thumbnail', 'page-attributes', 'comments' ),
+            'hierarchical'          => true, // Enable Parent/Child logic
+            'public'                => true,
+            'show_ui'               => true,
+            'show_in_menu'          => true,
+            'menu_position'         => 5,
+            'menu_icon'             => 'dashicons-building',
+            'show_in_admin_bar'     => true,
+            'show_in_nav_menus'     => true,
+            'can_export'            => true,
+            'has_archive'           => true,
+            'exclude_from_search'   => false,
+            'publicly_queryable'    => true,
+            'capability_type'       => array( 'listing', 'listings' ), // Custom capabilities
+            'map_meta_cap'          => true,
+            'show_in_rest'          => true,
+        );
+        register_post_type( 'listing', $listing_args );
+
+        // 2. Booking CPT
+        $booking_labels = array(
+            'name'                  => _x( 'Bookings', 'Post Type General Name', 'obenlo-booking' ),
+            'singular_name'         => _x( 'Booking', 'Post Type Singular Name', 'obenlo-booking' ),
+            'menu_name'             => __( 'Bookings', 'obenlo-booking' ),
+            'name_admin_bar'        => __( 'Booking', 'obenlo-booking' ),
+            'all_items'             => __( 'All Bookings', 'obenlo-booking' ),
+            'add_new_item'          => __( 'Add New Booking', 'obenlo-booking' ),
+            'add_new'               => __( 'Add New', 'obenlo-booking' ),
+            'new_item'              => __( 'New Booking', 'obenlo-booking' ),
+            'edit_item'             => __( 'Edit Booking', 'obenlo-booking' ),
+            'update_item'           => __( 'Update Booking', 'obenlo-booking' ),
+            'view_item'             => __( 'View Booking', 'obenlo-booking' ),
+            'search_items'          => __( 'Search Booking', 'obenlo-booking' ),
+        );
+        $booking_args = array(
+            'label'                 => __( 'Booking', 'obenlo-booking' ),
+            'labels'                => $booking_labels,
+            'supports'              => array( 'title' ),
+            'hierarchical'          => false,
+            'public'                => false, // Internal post type
+            'show_ui'               => true,
+            'show_in_menu'          => true,
+            'menu_position'         => 6,
+            'menu_icon'             => 'dashicons-calendar-alt',
+            'show_in_admin_bar'     => false,
+            'show_in_nav_menus'     => false,
+            'can_export'            => true,
+            'has_archive'           => false,
+            'exclude_from_search'   => true,
+            'publicly_queryable'    => false,
+            'capability_type'       => array( 'booking', 'bookings' ),
+            'map_meta_cap'          => true,
+            'show_in_rest'          => true,
+        );
+        register_post_type( 'booking', $booking_args );
+
+        // 3. Ticket CPT (Support & Disputes)
+        register_post_type( 'ticket', array(
+            'label'           => __( 'Ticket', 'obenlo-booking' ),
+            'labels'          => array( 'name' => 'Tickets', 'singular_name' => 'Ticket' ),
+            'supports'        => array( 'title', 'editor', 'comments' ),
+            'public'          => false,
+            'show_ui'         => true,
+            'show_in_menu'    => true,
+            'menu_icon'       => 'dashicons-sos',
+            'capability_type' => 'post',
+            'has_archive'     => false,
+            'show_in_rest'    => true,
+        ) );
+
+        // 4. Broadcast CPT (Admin messages)
+        register_post_type( 'broadcast', array(
+            'label'           => __( 'Broadcast', 'obenlo-booking' ),
+            'labels'          => array( 'name' => 'Broadcasts', 'singular_name' => 'Broadcast' ),
+            'supports'        => array( 'title', 'editor' ),
+            'public'          => false,
+            'show_ui'         => true,
+            'show_in_menu'    => true,
+            'menu_icon'       => 'dashicons-megaphone',
+            'capability_type' => 'post',
+            'has_archive'     => false,
+            'show_in_rest'    => true,
+        ) );
+
+        // 5. Message CPT (P2P & Admin-User chats)
+        register_post_type( 'obenlo_message', array(
+            'label'           => __( 'Messages', 'obenlo-booking' ),
+            'labels'          => array( 'name' => 'Messages', 'singular_name' => 'Message' ),
+            'supports'        => array( 'title', 'editor', 'author' ),
+            'public'          => false,
+            'show_ui'         => true,
+            'show_in_menu'    => true,
+            'menu_icon'       => 'dashicons-email-alt',
+            'capability_type' => 'post',
+            'has_archive'     => false,
+            'show_in_rest'    => true,
+        ) );
+    }
+
+    public function register_taxonomies() {
+        // Taxonomy: Listing Type (Stay, Experience, Service)
+        $type_labels = array(
+            'name'                       => _x( 'Listing Types', 'Taxonomy General Name', 'obenlo-booking' ),
+            'singular_name'              => _x( 'Listing Type', 'Taxonomy Singular Name', 'obenlo-booking' ),
+            'menu_name'                  => __( 'Types', 'obenlo-booking' ),
+            'all_items'                  => __( 'All Types', 'obenlo-booking' ),
+            'parent_item'                => __( 'Parent Type', 'obenlo-booking' ),
+            'parent_item_colon'          => __( 'Parent Type:', 'obenlo-booking' ),
+            'new_item_name'              => __( 'New Type Name', 'obenlo-booking' ),
+            'add_new_item'               => __( 'Add New Type', 'obenlo-booking' ),
+            'edit_item'                  => __( 'Edit Type', 'obenlo-booking' ),
+            'update_item'                => __( 'Update Type', 'obenlo-booking' ),
+            'view_item'                  => __( 'View Type', 'obenlo-booking' ),
+            'separate_items_with_commas' => __( 'Separate types with commas', 'obenlo-booking' ),
+            'add_or_remove_items'        => __( 'Add or remove types', 'obenlo-booking' ),
+            'choose_from_most_used'      => __( 'Choose from the most used', 'obenlo-booking' ),
+            'popular_items'              => __( 'Popular Types', 'obenlo-booking' ),
+            'search_items'               => __( 'Search Types', 'obenlo-booking' ),
+            'not_found'                  => __( 'Not Found', 'obenlo-booking' ),
+        );
+        $type_args = array(
+            'labels'                     => $type_labels,
+            'hierarchical'               => true,
+            'public'                     => true,
+            'show_ui'                    => true,
+            'show_admin_column'          => true,
+            'show_in_nav_menus'          => true,
+            'show_tagcloud'              => false,
+            'show_in_rest'               => true,
+            'rewrite'                    => array( 'slug' => 'type', 'with_front' => false ),
+        );
+        register_taxonomy( 'listing_type', array( 'listing' ), $type_args );
+        flush_rewrite_rules();
+
+        // Taxonomy: Listing Amenities
+        $amenity_labels = array(
+            'name'                       => _x( 'Amenities', 'Taxonomy General Name', 'obenlo-booking' ),
+            'singular_name'              => _x( 'Amenity', 'Taxonomy Singular Name', 'obenlo-booking' ),
+            'menu_name'                  => __( 'Amenities', 'obenlo-booking' ),
+            'all_items'                  => __( 'All Amenities', 'obenlo-booking' ),
+            'new_item_name'              => __( 'New Amenity Name', 'obenlo-booking' ),
+            'add_new_item'               => __( 'Add New Amenity', 'obenlo-booking' ),
+            'edit_item'                  => __( 'Edit Amenity', 'obenlo-booking' ),
+            'update_item'                => __( 'Update Amenity', 'obenlo-booking' ),
+        );
+        $amenity_args = array(
+            'labels'                     => $amenity_labels,
+            'hierarchical'               => false, // Checkboxes/Tags
+            'public'                     => true,
+            'show_ui'                    => true,
+            'show_admin_column'          => true,
+            'show_in_nav_menus'          => true,
+            'show_tagcloud'              => true,
+            'show_in_rest'               => true,
+        );
+        register_taxonomy( 'listing_amenity', array( 'listing' ), $amenity_args );
+
+        // Seed default terms
+        $this->seed_default_terms();
+    }
+
+    private function seed_default_terms() {
+        // Parent categories
+        $parent_types = array( 'Stay', 'Experience', 'Service', 'Event' );
+        $parent_ids = array();
+        foreach ( $parent_types as $type ) {
+            if ( ! term_exists( $type, 'listing_type' ) ) {
+                $result = wp_insert_term( $type, 'listing_type' );
+                $parent_ids[ strtolower($type) ] = is_array($result) ? $result['term_id'] : 0;
+            } else {
+                $term = get_term_by( 'name', $type, 'listing_type' );
+                $parent_ids[ strtolower($type) ] = $term ? $term->term_id : 0;
+            }
+        }
+
+        // Sub-types: name => parent_key
+        $sub_types = array(
+            'Hotel'              => 'stay',
+            'Guest House'        => 'stay',
+            'Chauffeur'          => 'service',
+            'Cook'               => 'service',
+            'Barbershop'         => 'service',
+            'Hairdresser'        => 'service',
+            'Concierge'          => 'service',
+            'Personal Assistant' => 'service',
+            'Babysitter'         => 'service',
+            'Dogsitter'          => 'service',
+            'Tour'               => 'experience',
+            'Show'               => 'event',
+        );
+
+        foreach ( $sub_types as $name => $parent_key ) {
+            if ( ! term_exists( $name, 'listing_type' ) ) {
+                $parent_id = isset( $parent_ids[ $parent_key ] ) ? $parent_ids[ $parent_key ] : 0;
+                wp_insert_term( $name, 'listing_type', array( 'parent' => $parent_id ) );
+            }
+        }
+    }
+}
