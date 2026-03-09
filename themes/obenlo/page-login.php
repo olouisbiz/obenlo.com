@@ -85,7 +85,7 @@ get_header();
                     </button>
                     
                     <p style="text-align: center; color: #666; font-size: 0.8rem; margin-top: 25px;">
-                        By signing up, you agree to our <a href="<?php echo home_url('/terms-of-service'); ?>" style="color: inherit;">Terms</a> and <a href="<?php echo home_url('/privacy-policy'); ?>" style="color: inherit;">Privacy Policy</a>.
+                        By signing up, you agree to our <a href="<?php echo home_url('/terms'); ?>" style="color: inherit;">Terms</a> and <a href="<?php echo home_url('/privacy'); ?>" style="color: inherit;">Privacy Policy</a>.
                     </p>
                 </form>
             </div>
