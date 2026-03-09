@@ -54,8 +54,9 @@
     </div>
     <div style="max-width: 1200px; margin: 40px auto 0; padding-top: 40px; border-top: 1px solid #eee; display: flex; flex-direction: column; align-items: center; gap: 20px;">
         <a href="<?php echo esc_url( home_url( '/' ) ); ?>">
-            <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo.png' ); ?>" alt="<?php bloginfo( 'name' ); ?>" style="height: 28px; width: auto; opacity: 0.8; filter: grayscale(1);">
+            <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo-wordmark.png' ); ?>" alt="<?php bloginfo( 'name' ); ?>" style="height: 28px; width: auto; opacity: 0.8; filter: grayscale(1);">
         </a>
+
         <div style="color: #666; font-size: 0.85em;">
             &copy; <?php echo date('Y'); ?> <?php bloginfo( 'name' ); ?>, Inc. All rights reserved. &middot; <a href="<?php echo home_url('/privacy'); ?>" style="color: inherit; text-decoration: none;">Privacy</a> &middot; <a href="<?php echo home_url('/terms'); ?>" style="color: inherit; text-decoration: none;">Terms</a> &middot; Sitemap
         </div>
