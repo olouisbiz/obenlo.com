@@ -53,8 +53,10 @@
         </div>
     </div>
     <div style="max-width: 1200px; margin: 40px auto 0; padding-top: 40px; border-top: 1px solid #eee; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-        <a href="<?php echo esc_url( home_url( '/' ) ); ?>">
-            <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo-wordmark.png' ); ?>" alt="<?php bloginfo( 'name' ); ?>" style="height: 28px; width: auto; opacity: 0.8; filter: grayscale(1);">
+        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="display: block; text-decoration: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" style="height: 28px; width: auto; opacity: 0.8; filter: grayscale(1); display: block;">
+                <text x="0" y="38" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="38" font-weight="800" fill="#e61e4d" letter-spacing="-1.5">Obenlo</text>
+            </svg>
         </a>
 
         <div style="color: #666; font-size: 0.85em;">

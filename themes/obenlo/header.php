@@ -25,9 +25,12 @@
     <div class="header-inner">
         
         <div class="site-branding">
-            <a href="<?php echo esc_url( home_url( '/' ) ); ?>">
-                <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo-wordmark.png' ); ?>" alt="<?php bloginfo( 'name' ); ?>" style="height: 48px; width: auto; display: block;">
+            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="display: block; text-decoration: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" style="height: 38px; width: auto; display: block;">
+                    <text x="0" y="38" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="38" font-weight="800" fill="#e61e4d" letter-spacing="-1.5">Obenlo</text>
+                </svg>
             </a>
+
         </div>
 
         <div class="header-search-nav">
