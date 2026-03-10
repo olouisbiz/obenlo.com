@@ -146,17 +146,3 @@ function obenlo_force_listings_archive_template( $template ) {
     return $template;
 }
 add_filter( 'template_include', 'obenlo_force_listings_archive_template', 99 );
-                    'post_title'   => $data['title'],
-                    'post_content' => $data['content'],
-                    'post_status'  => 'publish',
-                    'post_name'    => $slug
-                ) );
-            }
-        }
-        error_log('Obenlo Activation: Finished successfully.');
-    } catch (Throwable $e) {
-        error_log('Obenlo Activation FATAL ERROR: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
-        error_log('Obenlo Activation Trace: ' . $e->getTraceAsString());
-    }
-}
-register_activation_hook( __FILE__, 'obenlo_booking_activate' );
