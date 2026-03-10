@@ -26,7 +26,7 @@
         
         <div class="site-branding">
             <a href="<?php echo esc_url(home_url('/')); ?>" style="display: block; text-decoration: none;">
-                <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-wordmark.svg'); ?>" alt="<?php bloginfo('name'); ?>" style="height: 38px; width: auto; display: block;">
+                <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/obenlo-logo-no-background.svg'); ?>" alt="<?php bloginfo('name'); ?>" style="height: 38px; width: auto; display: block;">
             </a>
 
         </div>
