@@ -115,33 +115,37 @@ function obenlo_booking_activate() {
         update_option( 'default_role', 'guest' );
         error_log('Obenlo Activation: Options updated.');
 
-        // Create essential pages if they don't exist
-        $essential_pages = array(
-            'wishlists' => array(
-                'title'   => 'Wishlists',
-                'content' => '', // Template handles content
-            ),
-            'messages' => array(
-                'title'   => 'Messages',
-                'content' => '[obenlo_messages_page]',
-            ),
-            'support' => array(
-                'title'   => 'Support',
-                'content' => '[obenlo_support_page]',
-            ),
-            'blog' => array(
-                'title'   => 'Blog',
-                'content' => '',
-            ),
-        );
-
         foreach ( $essential_pages as $slug => $data ) {
             error_log('Obenlo Activation: Checking page ' . $slug);
             $page_check = get_page_by_path( $slug );
             if ( ! isset( $page_check->ID ) ) {
-                error_log('Obenlo Activation: Creating page ' . $slug);
                 wp_insert_post( array(
+                    'post_title'   => $data['title'],
+                    'post_name'    => $slug,
+                    'post_content' => $data['content'],
+                    'post_status'  => 'publish',
                     'post_type'    => 'page',
+                ) );
+                error_log('Obenlo Activation: Created page ' . $slug);
+            }
+        }
+    } catch (Exception $e) {
+        error_log('Obenlo Activation Error: ' . $e->getMessage());
+    }
+}
+register_activation_hook( __FILE__, 'obenlo_booking_activate' );
+
+// Force /listings page to load the directory archive template
+function obenlo_force_listings_archive_template( $template ) {
+    if ( is_page( 'listings' ) ) {
+        $archive_template = locate_template( 'archive-listing.php' );
+        if ( $archive_template ) {
+            return $archive_template;
+        }
+    }
+    return $template;
+}
+add_filter( 'template_include', 'obenlo_force_listings_archive_template', 99 );
                     'post_title'   => $data['title'],
                     'post_content' => $data['content'],
                     'post_status'  => 'publish',
