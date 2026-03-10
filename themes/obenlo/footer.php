@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Custom PWA Install Prompt -->
 <div id="obenlo-pwa-prompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; background:#fff; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.15); z-index:10000; padding:20px; font-family:'Inter', sans-serif; align-items:center; gap:15px; border:1px solid #eee;">
     <div style="width:50px; height:50px; background:#f0f0f0; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-        <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/favicon-new.png' ); ?>" alt="Obenlo App" style="width:32px; height:32px; border-radius:8px;">
+        <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/favicon-32x32.png' ); ?>" alt="Obenlo App" style="width:32px; height:32px; border-radius:8px;">
     </div>
     <div style="flex-grow:1;">
         <h4 style="margin:0 0 4px 0; font-size:16px; color:#222; font-weight:700;">Install Obenlo App</h4>

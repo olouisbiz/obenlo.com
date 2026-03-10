@@ -5,7 +5,7 @@ const ASSETS_TO_CACHE = [
   '/',
   '/wp-content/themes/obenlo/style.css',
   '/wp-content/themes/obenlo/assets/images/logo-wordmark.png',
-  '/wp-content/themes/obenlo/assets/images/favicon-new.png'
+  '/wp-content/themes/obenlo/assets/images/favicon-32x32.png'
 ];
 
 self.addEventListener('install', (event) => {
