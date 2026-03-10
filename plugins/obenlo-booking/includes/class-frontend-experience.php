@@ -21,7 +21,10 @@ class Obenlo_Booking_Frontend_Experience {
 
         // Bespoke Form Handlers
         add_action( 'admin_post_nopriv_obenlo_bespoke_login', array( $this, 'handle_bespoke_login' ) );
+        add_action( 'admin_post_obenlo_bespoke_login', array( $this, 'handle_bespoke_login' ) );
+        
         add_action( 'admin_post_nopriv_obenlo_bespoke_register', array( $this, 'handle_bespoke_register' ) );
+        add_action( 'admin_post_obenlo_bespoke_register', array( $this, 'handle_bespoke_register' ) );
     }
 
     /**
