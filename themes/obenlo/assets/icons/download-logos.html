@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Obenlo Logos</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 40px; background: #f7f7f9; color: #333; max-width: 800px; margin: 0 auto; }
+        h1 { color: #e61e4d; }
+        .logo-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+        .logo-preview { max-width: 200px; max-height: 100px; border: 1px dashed #ccc; }
+        .logo-info h3 { margin: 0 0 5px 0; }
+        .logo-info p { margin: 0; color: #666; font-size: 14px; }
+        .btn { background: #e61e4d; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: background 0.2s; text-decoration: none; display: inline-block; margin-left: 10px; }
+        .btn:hover { background: #c5183f; }
+        .btn-outline { background: transparent; color: #e61e4d; border: 2px solid #e61e4d; }
+        .btn-outline:hover { background: #fff0f3; color: #c5183f; border-color: #c5183f;}
+        .actions { display: flex; }
+    </style>
+</head>
+<body>
+    <h1>Obenlo Logo Downloads</h1>
+    <p>Click the buttons below to download your logos in either high-quality PNG or vector SVG format.</p>
+
+    <div class="logo-list">
+        <!-- Generates from JS -->
+    </div>
+
+    <script>
+        const logos = [
+            { id: 'no-background', name: 'Transparent Background', desc: 'Best for overlaying on other colors (2000x600)', file: 'obenlo-logo-no-background.svg' },
+            { id: 'social-profile', name: 'Social Media Profile', desc: 'Square 1080x1080 (White background)', file: 'obenlo-logo-social-profile.svg' },
+            { id: 'social-banner', name: 'Social Media Banner', desc: 'Wide 1500x500 (Red background)', file: 'obenlo-logo-social-banner.svg' },
+            { id: 'official', name: 'Official Communication', desc: 'Letterhead style 1200x630 (White background)', file: 'obenlo-logo-official-communication.svg' }
+        ];
+
+        const container = document.querySelector('.logo-list');
+
+        logos.forEach(logo => {
+            const card = document.createElement('div');
+            card.className = 'logo-card';
+            card.innerHTML = `
+                <div style="flex:1">
+                    <img src="${logo.file}" class="logo-preview" alt="${logo.name}" />
+                </div>
+                <div class="logo-info" style="flex:2; padding: 0 20px;">
+                    <h3>${logo.name}</h3>
+                    <p>${logo.desc}</p>
+                </div>
+                <div class="actions">
+                    <a href="${logo.file}" download="${logo.file}" class="btn btn-outline">Download SVG</a>
+                    <button class="btn" onclick="downloadAsPNG('${logo.file}', '${logo.file.replace('.svg', '.png')}')">Download PNG</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        function downloadAsPNG(svgUrl, pngName) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                
+                const a = document.createElement('a');
+                a.download = pngName;
+                a.href = canvas.toDataURL('image/png');
+                a.click();
+            };
+            img.src = svgUrl;
+        }
+    </script>
+</body>
+</html>
