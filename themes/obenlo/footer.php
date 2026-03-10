@@ -18,7 +18,7 @@
             <ul style="list-style: none; padding: 0; font-size: 0.9em; line-height: 2;">
                 <li><a href="<?php echo home_url('/become-a-host'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Obenlo your home', 'obenlo' ); ?></a></li>
                 <li><a href="<?php echo home_url('/host-dashboard'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Host Dashboard', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/support'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Support for Hosts', 'obenlo' ); ?></a></li>
+                <li><a href="<?php echo home_url('/faq?type=host'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Support for Hosts', 'obenlo' ); ?></a></li>
             </ul>
         </div>
 

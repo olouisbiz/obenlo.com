@@ -35,14 +35,10 @@ get_header(); ?>
         </div>
     </div>
 
-    <div style="background: #f7f7f7; border-radius: 20px; padding: 60px; display: flex; align-items: center; gap: 40px;">
-        <div style="flex: 1;">
-            <h2 style="margin-bottom: 15px;"><?php esc_html_e( 'Still need help?', 'obenlo' ); ?></h2>
-            <p style="color: #666;"><?php esc_html_e( 'Our support team is available 24/7 to assist you with any questions or issues.', 'obenlo' ); ?></p>
-        </div>
-        <div>
-            <a href="#" class="trigger-contact-modal" style="padding: 15px 35px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;"><?php esc_html_e( 'Contact Us', 'obenlo' ); ?></a>
-        </div>
+    <div id="ticket-section" style="background: #fcfcfc; border: 1px solid #eee; border-radius: 20px; padding: 60px; margin-bottom: 40px;">
+        <h2 style="margin-bottom: 15px; text-align: center;"><?php esc_html_e( 'Submit a Support Ticket', 'obenlo' ); ?></h2>
+        <p style="color: #666; text-align: center; margin-bottom: 30px;"><?php esc_html_e( 'Need more help? Open a secure support ticket below and our team will assist you.', 'obenlo' ); ?></p>
+        <?php echo do_shortcode('[obenlo_support_page]'); ?>
     </div>
 
 </div>
