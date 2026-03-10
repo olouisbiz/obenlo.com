@@ -61,6 +61,18 @@ $grid_query = new WP_Query($grid_args);
 
 <main class="blog-main" style="max-width: 1400px; margin: 0 auto; padding: 20px 40px;">
     
+    <!-- Newsletter Hero Section -->
+    <div style="background: linear-gradient(135deg, #222, #111); color: #fff; padding: 60px 40px; text-align: center; margin-bottom: 40px; border-radius: 16px; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px;">The Obenlo Blog</h1>
+        <p style="font-size: 1.15rem; color: #ccc; max-width: 600px; margin: 0 auto 30px; line-height: 1.6;">
+            Discover travel tips, top host stories, and local guides. Subscribe to our newsletter to receive inspiration straight to your inbox.
+        </p>
+        <form style="display: flex; max-width: 500px; margin: 0 auto; gap: 10px;" onsubmit="event.preventDefault(); alert('Thanks for subscribing!'); this.reset();">
+            <input type="email" placeholder="Your email address" required style="flex-grow: 1; padding: 16px 24px; border-radius: 30px; border: none; font-size: 1rem; outline: none;">
+            <button type="submit" style="background: #e61e4d; color: white; border: none; padding: 16px 32px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s;">Subscribe</button>
+        </form>
+    </div>
+
     <!-- Category Toolbar (Same design as front page taxonomies) -->
     <div class="blog-filters" style="display: flex; gap: 32px; justify-content: center; margin-bottom: 40px; overflow-x: auto; border-bottom: 1px solid #eee; padding-top: 10px;">
         <a href="<?php echo home_url('/blog'); ?>" class="blog-cat-item <?php echo empty($current_category) ? 'active' : ''; ?>">

@@ -220,8 +220,22 @@ body {
 }
 
 @media (max-width: 768px) {
-    .header-search-nav { display: none; }
-    .site-header { padding: 15px 20px; }
+    .site-header { padding: 15px; }
+    .header-inner { flex-wrap: wrap; gap: 15px; justify-content: space-between; }
+    .header-search-nav { order: 3; width: 100%; display: flex; }
+    .smart-search-bar { width: 100%; box-sizing: border-box; justify-content: space-between; }
+    .search-input { width: 100%; font-size: 1rem; }
+    .become-host-link { display: none; } /* Save space on mobile header */
+    .user-dropdown-menu { right: -20px; } /* Prevent horizontal scroll on small screens */
+    
+    /* Listing Grid & Tables */
+    .gallery-grid { grid-template-columns: 1fr; grid-template-rows: 300px; height: auto; }
+    .gallery-grid > div:not(:first-child) { display: none; } /* Show only main image on mobile */
+    .listing-layout { flex-direction: column; }
+    table { display: block; overflow-x: auto; white-space: nowrap; width: 100%; }
+    
+    /* Touch Targets */
+    button, .tab-btn, .reserve-btn, .cta-button, .search-icon-btn { min-height: 44px; min-width: 44px; }
 }
 
 /* Single Listing Page */

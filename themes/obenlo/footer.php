@@ -9,6 +9,7 @@
                 <li><a href="<?php echo home_url('/support'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Help Center', 'obenlo' ); ?></a></li>
                 <li><a href="<?php echo home_url('/how-it-works'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'How Obenlo works', 'obenlo' ); ?></a></li>
                 <li><a href="<?php echo home_url('/faq'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'FAQ', 'obenlo' ); ?></a></li>
+                <li><a href="#" class="trigger-contact-modal" style="color: inherit; text-decoration: none;">Contact Us</a></li>
             </ul>
         </div>
 
@@ -139,6 +140,18 @@
             }, 10);
         }
 
+        // Language Switcher Logic
+        document.querySelectorAll('.obenlo-lang-switch').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const lang = this.getAttribute('data-lang');
+                // Set cookie for 1 year
+                document.cookie = "obenlo_lang=" + lang + "; path=/; max-age=" + (60*60*24*365);
+                // Reload to apply translation
+                window.location.reload();
+            });
+        });
+
         // Close user dropdown when clicking outside
         document.addEventListener('click', function(event) {
             var menu = document.getElementById('headerUserMenu');
@@ -151,10 +164,304 @@
             }
         });
 
-        });
     });
 </script>
 
+<!-- Contact Us Modal -->
+<div id="obenlo-contact-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; align-items: center; justify-content: center;">
+    <div style="background: #fff; width: 100%; max-width: 500px; border-radius: 16px; padding: 30px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+        <button id="close-contact-modal" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+        <h2 style="margin-bottom: 10px; font-size: 1.5rem;">Contact Us</h2>
+        <p style="color: #666; margin-bottom: 20px;">Have a question? Send us a message and we'll get back to you shortly.</p>
+        
+        <form id="contact-us-form">
+            <input type="hidden" name="action" value="obenlo_submit_contact_form">
+            <input type="hidden" name="contact_nonce" value="<?php echo wp_create_nonce('obenlo_contact_nonce'); ?>">
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Your Name</label>
+                <input type="text" name="contact_name" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Your Email</label>
+                <input type="email" name="contact_email" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Message</label>
+                <textarea name="contact_message" required rows="4" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: vertical;"></textarea>
+            </div>
+            
+            <button type="submit" style="background: #e61e4d; color: #fff; font-weight: bold; padding: 14px 24px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1rem;">
+                Send Message
+            </button>
+            <div id="contact-form-response" style="margin-top: 15px; font-weight: bold; text-align: center; display: none;"></div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('obenlo-contact-modal');
+    const triggers = document.querySelectorAll('.trigger-contact-modal');
+    const closeBtn = document.getElementById('close-contact-modal');
+    const form = document.getElementById('contact-us-form');
+    const responseDiv = document.getElementById('contact-form-response');
+
+    if(modal && triggers.length > 0) {
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                modal.style.display = 'flex';
+            });
+        });
+
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+            responseDiv.style.display = 'none';
+            form.reset();
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target == modal) {
+                modal.style.display = 'none';
+                responseDiv.style.display = 'none';
+                form.reset();
+            }
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerText = 'Sending...';
+            submitBtn.disabled = true;
+            responseDiv.style.display = 'none';
+
+            const formData = new FormData(form);
+
+            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                submitBtn.innerText = 'Send Message';
+                submitBtn.disabled = false;
+                responseDiv.style.display = 'block';
+                
+                if (data.success) {
+                    responseDiv.style.color = 'green';
+                    responseDiv.innerText = data.data.message || 'Message sent successfully!';
+                    form.reset();
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        responseDiv.style.display = 'none';
+                    }, 3000);
+                } else {
+                    responseDiv.style.color = 'red';
+                    responseDiv.innerText = data.data.message || 'Error sending message. Please try again.';
+                }
+            })
+            .catch(error => {
+                submitBtn.innerText = 'Send Message';
+                submitBtn.disabled = false;
+                responseDiv.style.display = 'block';
+                responseDiv.style.color = 'red';
+                responseDiv.innerText = 'Network error. Please try again later.';
+            });
+        });
+    }
+});
+</script>
+
+
+<!-- Contact Us Modal -->
+<div id="obenlo-contact-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; align-items: center; justify-content: center;">
+    <div style="background: #fff; width: 100%; max-width: 500px; border-radius: 16px; padding: 30px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+        <button id="close-contact-modal" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+        <h2 style="margin-bottom: 10px; font-size: 1.5rem;">Contact Us</h2>
+        <p style="color: #666; margin-bottom: 20px;">Have a question? Send us a message and we'll get back to you shortly.</p>
+        
+        <form id="contact-us-form">
+            <input type="hidden" name="action" value="obenlo_submit_contact_form">
+            <input type="hidden" name="contact_nonce" value="<?php echo wp_create_nonce('obenlo_contact_nonce'); ?>">
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Your Name</label>
+                <input type="text" name="contact_name" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Your Email</label>
+                <input type="email" name="contact_email" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Message</label>
+                <textarea name="contact_message" required rows="4" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: vertical;"></textarea>
+            </div>
+            
+            <button type="submit" style="background: #e61e4d; color: #fff; font-weight: bold; padding: 14px 24px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1rem;">
+                Send Message
+            </button>
+            <div id="contact-form-response" style="margin-top: 15px; font-weight: bold; text-align: center; display: none;"></div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('obenlo-contact-modal');
+    const triggers = document.querySelectorAll('.trigger-contact-modal');
+    const closeBtn = document.getElementById('close-contact-modal');
+    const form = document.getElementById('contact-us-form');
+    const responseDiv = document.getElementById('contact-form-response');
+
+    if(modal && triggers.length > 0) {
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                modal.style.display = 'flex';
+            });
+        });
+
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+            responseDiv.style.display = 'none';
+            form.reset();
+        });
+
+        window.addEventListener('click', function(e) {
+            if (e.target == modal) {
+                modal.style.display = 'none';
+                responseDiv.style.display = 'none';
+                form.reset();
+            }
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerText = 'Sending...';
+            submitBtn.disabled = true;
+            responseDiv.style.display = 'none';
+
+            const formData = new FormData(form);
+
+            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                submitBtn.innerText = 'Send Message';
+                submitBtn.disabled = false;
+                responseDiv.style.display = 'block';
+                
+                if (data.success) {
+                    responseDiv.style.color = 'green';
+                    responseDiv.innerText = data.data.message || 'Message sent successfully!';
+                    form.reset();
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        responseDiv.style.display = 'none';
+                    }, 3000);
+                } else {
+                    responseDiv.style.color = 'red';
+                    responseDiv.innerText = data.data.message || 'Error sending message. Please try again.';
+                }
+            })
+            .catch(error => {
+                submitBtn.innerText = 'Send Message';
+                submitBtn.disabled = false;
+                responseDiv.style.display = 'block';
+                responseDiv.style.color = 'red';
+                responseDiv.innerText = 'Network error. Please try again later.';
+            });
+        });
+    }
+});
+</script>
+
+
+<!-- Custom PWA Install Prompt -->
+<div id="obenlo-pwa-prompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; background:#fff; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.15); z-index:10000; padding:20px; font-family:'Inter', sans-serif; align-items:center; gap:15px; border:1px solid #eee;">
+    <div style="width:50px; height:50px; background:#f0f0f0; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/favicon-new.png' ); ?>" alt="Obenlo App" style="width:32px; height:32px; border-radius:8px;">
+    </div>
+    <div style="flex-grow:1;">
+        <h4 style="margin:0 0 4px 0; font-size:16px; color:#222; font-weight:700;">Install Obenlo App</h4>
+        <p style="margin:0; font-size:13px; color:#666; line-height:1.4;" id="pwa-prompt-desc">Book faster and get notifications directly on your phone.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+        <button id="pwa-install-btn" style="background:#e61e4d; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer;">Install</button>
+        <button id="pwa-dismiss-btn" style="background:transparent; color:#999; border:none; padding:4px; font-size:12px; cursor:pointer; text-decoration:underline;">Not Now</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let deferredPrompt;
+    const promptUI = document.getElementById('obenlo-pwa-prompt');
+    const installBtn = document.getElementById('pwa-install-btn');
+    const dismissBtn = document.getElementById('pwa-dismiss-btn');
+    
+    // Check if already dismissed in this session/cookie
+    if (localStorage.getItem('obenlo_pwa_dismissed') === 'true') {
+        return;
+    }
+
+    // Is iOS?
+    const isIos = () => {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test( userAgent );
+    };
+    // Is running standalone?
+    const isStandalone = () => {
+        return ('standalone' in window.navigator) && (window.navigator.standalone);
+    };
+
+    if (isIos() && !isStandalone()) {
+        // Show iOS specific prompt after 5 seconds
+        setTimeout(() => {
+            document.getElementById('pwa-prompt-desc').innerHTML = 'Tap the Share icon <svg viewBox="0 0 24 24" style="width:14px;height:14px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:2;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> and select "Add to Home Screen".';
+            installBtn.style.display = 'none'; // Hide native install button for iOS
+            promptUI.style.display = 'flex';
+        }, 5000);
+    } else {
+        // Standard Android/Desktop BeforeInstallPrompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Show the custom UI after 5 seconds
+            setTimeout(() => {
+                promptUI.style.display = 'flex';
+            }, 5000);
+        });
+
+        installBtn.addEventListener('click', async () => {
+            // Hide our custom UI
+            promptUI.style.display = 'none';
+            // Show the native prompt
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                // We no longer need the prompt. Clear it up.
+                deferredPrompt = null;
+            }
+        });
+    }
+
+    dismissBtn.addEventListener('click', () => {
+        promptUI.style.display = 'none';
+        localStorage.setItem('obenlo_pwa_dismissed', 'true');
+    });
+});
+</script>
 
 <?php get_template_part( 'template-parts/live-chat-widget' ); ?>
 
