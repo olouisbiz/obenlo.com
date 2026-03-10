@@ -221,19 +221,17 @@ class Obenlo_Booking_Notifications
     public static function notify_live_chat_webhook($session_id, $message)
     {
         $bot_token = get_option('obenlo_telegram_bot_token');
-        $chat_ids = get_option('obenlo_telegram_chat_id');
+        $chat_ids_string = get_option('obenlo_telegram_chat_id'); // Assuming this option stores a comma-separated string of chat IDs
 
-        if (!$bot_token || !$chat_ids)
+        if (!$bot_token || !$chat_ids_string)
             return;
-
-        // Split multiple IDs by comma
-        $chat_id_array = array_map('trim', explode(',', $chat_ids));
 
         $msg = "📢 <b>Obenlo Live Chat Alert</b>\n";
         $msg .= "Session: <code>$session_id</code>\n\n";
         $msg .= "Message: " . esc_html($message) . "\n\n";
         $msg .= "Reply directly to THIS message to respond to the guest.";
 
+        $chat_id_array = array_map('trim', explode(',', $chat_ids_string));
         $api_url = "https://api.telegram.org/bot{$bot_token}/sendMessage";
 
         foreach ($chat_id_array as $chat_id) {

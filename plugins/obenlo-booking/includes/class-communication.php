@@ -43,37 +43,12 @@ class Obenlo_Booking_Communication
         ));
     }
 
-    /**
-     * Send the webhook URL to Telegram API
-     */
-    public static function sync_telegram_webhook()
-    {
-        $bot_token = get_option('obenlo_telegram_bot_token');
-        if (!$bot_token)
-            return array('success' => false, 'message' => 'No Bot Token found.');
-
-        $webhook_url = rest_url('obenlo/v1/telegram-webhook');
-        $api_url = "https://api.telegram.org/bot{$bot_token}/setWebhook?url=" . urlencode($webhook_url);
-
-        $response = wp_remote_get($api_url, array('sslverify' => false));
-
-        if (is_wp_error($response)) {
-            return array('success' => false, 'message' => $response->get_error_message());
-        }
-
-        $body = json_decode(wp_remote_retrieve_body($response), true);
-
-        if (isset($body['ok']) && $body['ok']) {
-            return array('success' => true, 'message' => 'Webhook synced successfully! Telegram now knows where to send replies.');
-        }
-
-        return array('success' => false, 'message' => isset($body['description']) ? $body['description'] : 'Telegram API error.');
-    }
-
     public function handle_telegram_webhook(WP_REST_Request $request)
     {
         $body = $request->get_json_params();
 
+        // Log incoming webhook for debugging
+        error_log('Obenlo Telegram Webhook: ' . print_r($body, true));
         // Ensure this is a message we care about
         if (!isset($body['message']) || !isset($body['message']['reply_to_message'])) {
             return new WP_REST_Response('Not a reply', 200);
@@ -104,7 +79,80 @@ class Obenlo_Booking_Communication
             }
         }
 
-        return new WP_REST_Response('Failed to parse', 400);
+        return new WP_REST_Response('Failed to parse', 200); // Always 200 to prevent Telegram from retrying failed parse
+    }
+
+    public static function sync_telegram_webhook()
+    {
+        $token = get_option('obenlo_telegram_bot_token');
+        if (!$token) {
+            return array('success' => false, 'message' => 'Missing Bot Token');
+        }
+
+        $webhook_url = rest_url('obenlo/v1/telegram-webhook');
+
+        // If local site, warn user
+        if (strpos($webhook_url, '.local') !== false) {
+            return array('success' => false, 'message' => 'Telegram cannot reach local .local sites. Please deploy to the live server or use a tunnel like ngrok.');
+        }
+
+        $api_url = "https://api.telegram.org/bot{$token}/setWebhook?url=" . urlencode($webhook_url);
+
+        $response = wp_remote_get($api_url);
+        if (is_wp_error($response)) {
+            return array('success' => false, 'message' => 'API Call Failed: ' . $response->get_error_message());
+        }
+
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        if (isset($body['ok']) && $body['ok']) {
+            return array('success' => true, 'message' => 'Webhook synced successfully! Telegram now knows where to send replies.');
+        }
+
+        return array('success' => false, 'message' => 'Telegram Error: ' . ($body['description'] ?? 'Unknown error'));
+    }
+
+    public static function send_test_telegram_message()
+    {
+        $bot_token = get_option('obenlo_telegram_bot_token');
+        $chat_ids = get_option('obenlo_telegram_chat_id');
+
+        if (!$bot_token || !$chat_ids) {
+            return array('success' => false, 'message' => 'Missing Token or Chat ID');
+        }
+
+        $chat_id_array = array_map('trim', explode(',', $chat_ids));
+        $results = array();
+
+        foreach ($chat_id_array as $chat_id) {
+            if (empty($chat_id))
+                continue;
+
+            $msg = "🔧 <b>Obenlo Connection Test</b>\nIf you see this, your Telegram connection is working! (v1.0.2)";
+            $api_url = "https://api.telegram.org/bot{$bot_token}/sendMessage";
+
+            $response = wp_remote_post($api_url, array(
+                'body' => array(
+                    'chat_id' => $chat_id,
+                    'text' => $msg,
+                    'parse_mode' => 'HTML'
+                )
+            ));
+
+            if (is_wp_error($response)) {
+                $results[] = "ID $chat_id: Failed (" . $response->get_error_message() . ")";
+            }
+            else {
+                $body = json_decode(wp_remote_retrieve_body($response), true);
+                if (isset($body['ok']) && $body['ok']) {
+                    $results[] = "ID $chat_id: Success!";
+                }
+                else {
+                    $results[] = "ID $chat_id: Error (" . ($body['description'] ?? 'Unknown') . ")";
+                }
+            }
+        }
+
+        return array('success' => true, 'message' => implode(' | ', $results));
     }
 
     public function add_contact_button_to_listing($content)

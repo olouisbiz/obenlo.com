@@ -259,17 +259,19 @@ class Obenlo_Booking_Admin_Dashboard
         $global_fee = get_option('obenlo_global_platform_fee', '10');
         $telegram_bot_token = get_option('obenlo_telegram_bot_token', '');
         $telegram_chat_id = get_option('obenlo_telegram_chat_id', '');
-
-        // Sync Notifications
         if (isset($_GET['sync_status'])) {
             $color = ($_GET['sync_status'] === 'success') ? '#155724' : '#721c24';
             $bg = ($_GET['sync_status'] === 'success') ? '#d4edda' : '#f8d7da';
             $border = ($_GET['sync_status'] === 'success') ? '#c3e6cb' : '#f5c6cb';
             echo '<div style="background:' . $bg . '; color:' . $color . '; border:1px solid ' . $border . '; padding:15px; border-radius:8px; margin-bottom:20px; font-weight:600;">' . esc_html(urldecode($_GET['sync_msg'])) . '</div>';
         }
+        if (isset($_GET['test_status'])) {
+            $color = ($_GET['test_status'] === 'success') ? '#155724' : '#721c24';
+            $bg = ($_GET['test_status'] === 'success') ? '#d4edda' : '#f8d7da';
+            $border = ($_GET['test_status'] === 'success') ? '#c3e6cb' : '#f5c6cb';
+            echo '<div style="background:' . $bg . '; color:' . $color . '; border:1px solid ' . $border . '; padding:15px; border-radius:8px; margin-bottom:20px; font-weight:600;">' . esc_html(urldecode($_GET['test_msg'])) . '</div>';
+        }
 ?>
-        <h3>Global Platform Settings</h3>
-        <div style="background:#fff; border:1px solid #eee; padding:30px; border-radius:12px; max-width:600px;">
             <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST">
                 <input type="hidden" name="action" value="obenlo_save_settings">
                 <?php wp_nonce_field('save_settings', 'settings_nonce'); ?>
@@ -290,7 +292,8 @@ class Obenlo_Booking_Admin_Dashboard
                     
                     <div style="background:#f9f9f9; padding:20px; border-radius:12px; border:1px solid #eee; margin-top:10px;">
                         <button type="submit" name="sync_telegram_webhook" value="1" style="background:#222; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700; font-size:1em; width:100%; margin-bottom:10px;">🔄 Sync Telegram Webhook</button>
-                        <p style="font-size:0.8em; color:#666; margin:0; text-align:center;">Click this <b>after</b> saving your token to link Telegram to your site.</p>
+                        <button type="submit" name="test_telegram_connection" value="1" style="background:#fff; color:#222; border:1px solid #ddd; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700; font-size:1em; width:100%;">⚡ Send Test Message</button>
+                        <p style="font-size:0.8em; color:#666; margin:10px 0 0 0; text-align:center;">Use <b>Sync</b> to register the bot, and <b>Test</b> to verify the connection.</p>
                     </div>
                 </div>
 
@@ -361,6 +364,8 @@ class Obenlo_Booking_Admin_Dashboard
         check_admin_referer('save_settings', 'settings_nonce');
         error_log('Obenlo Settings: Nonce verified.');
 
+        $redirect_url = add_query_arg('tab', 'settings', wp_get_referer());
+
         if (isset($_POST['global_fee'])) {
             update_option('obenlo_global_platform_fee', sanitize_text_field($_POST['global_fee']));
         }
@@ -374,9 +379,6 @@ class Obenlo_Booking_Admin_Dashboard
             update_option('obenlo_telegram_chat_id', sanitize_text_field($_POST['telegram_chat_id']));
             error_log('Obenlo Settings: Updated chat ID(s).');
         }
-
-        $redirect_url = add_query_arg('tab', 'settings', wp_get_referer());
-
         // Handle Webhook Sync Request
         if (isset($_POST['sync_telegram_webhook'])) {
             error_log('Obenlo Settings: Webhook sync requested.');
@@ -384,6 +386,16 @@ class Obenlo_Booking_Admin_Dashboard
             $redirect_url = add_query_arg(array(
                 'sync_status' => $sync_result['success'] ? 'success' : 'error',
                 'sync_msg' => urlencode($sync_result['message'])
+            ), $redirect_url);
+        }
+
+        // Handle Test Message Request
+        if (isset($_POST['test_telegram_connection'])) {
+            error_log('Obenlo Settings: Test message requested.');
+            $test_result = Obenlo_Booking_Communication::send_test_telegram_message();
+            $redirect_url = add_query_arg(array(
+                'test_status' => $test_result['success'] ? 'success' : 'error',
+                'test_msg' => urlencode($test_result['message'])
             ), $redirect_url);
         }
 
