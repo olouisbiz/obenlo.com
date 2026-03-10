@@ -64,6 +64,18 @@ class Obenlo_Booking_Admin_Dashboard {
                 <?php endif; ?>
             </div>
 
+            <?php if ( in_array($tab, array('communication', 'bookings', 'verifications')) ) : ?>
+            <script>
+                // Auto-refresh the current admin tab every 60 seconds to ensure real-time data
+                setTimeout(function() {
+                    window.location.reload();
+                }, 60000);
+            </script>
+            <div style="text-align: right; font-size: 0.8em; color: #999; margin-bottom: 10px;">
+                <span class="dashicons dashicons-update" style="font-size: 14px; line-height: 1;"></span> Auto-refreshing every 60s
+            </div>
+            <?php endif; ?>
+
             <?php
             switch ( $tab ) {
                 case 'listings':

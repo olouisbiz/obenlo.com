@@ -74,6 +74,20 @@ get_header();
                         <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: bold; color: #444;">Email Address</label>
                         <input type="email" name="user_email" required style="width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem;">
                     </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: bold; color: #444;">I want to be a:</label>
+                        <div style="display: flex; gap: 20px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 8px; flex: 1;">
+                                <input type="radio" name="user_role" value="guest" checked>
+                                <span>Guest</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 8px; flex: 1;">
+                                <input type="radio" name="user_role" value="host">
+                                <span>Host</span>
+                            </label>
+                        </div>
+                    </div>
 
                     <div style="margin-bottom: 30px;">
                         <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: bold; color: #444;">Password</label>

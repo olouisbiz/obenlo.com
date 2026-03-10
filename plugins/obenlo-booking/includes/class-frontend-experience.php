@@ -89,11 +89,18 @@ class Obenlo_Booking_Frontend_Experience {
         } else {
             // Log them in immediately
             wp_set_auth_cookie( $user_id );
-            // Assign role
-            $user = new WP_User( $user_id );
-            $user->set_role( 'guest' );
             
-            wp_safe_redirect( home_url('/host-dashboard') );
+            // Assign role based on selection
+            $user = new WP_User( $user_id );
+            $requested_role = isset($_POST['user_role']) ? sanitize_text_field($_POST['user_role']) : 'guest';
+            
+            if ( $requested_role === 'host' ) {
+                $user->set_role( 'host' );
+                wp_safe_redirect( home_url('/host-onboarding') );
+            } else {
+                $user->set_role( 'guest' );
+                wp_safe_redirect( home_url('/host-dashboard') );
+            }
         }
         exit;
     }

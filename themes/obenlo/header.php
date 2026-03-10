@@ -47,9 +47,9 @@
                 <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display:block;fill:none;height:16px;width:16px;stroke:currentColor;stroke-width:2;overflow:visible"><circle cx="16" cy="16" r="14"></circle><ellipse cx="16" cy="16" rx="6" ry="14"></ellipse><path d="M2 16h28"></path></svg>
             </button>
             <div id="headerLangMenu" class="user-dropdown-menu" style="min-width: 150px; right: 0; left: auto;">
-                <a href="?lang=en" style="font-weight: <?php echo (!isset($_COOKIE['obenlo_lang']) || $_COOKIE['obenlo_lang'] == 'en') ? 'bold' : 'normal'; ?>">English</a>
-                <a href="?lang=es" style="font-weight: <?php echo (isset($_COOKIE['obenlo_lang']) && $_COOKIE['obenlo_lang'] == 'es') ? 'bold' : 'normal'; ?>">Español</a>
-                <a href="?lang=fr" style="font-weight: <?php echo (isset($_COOKIE['obenlo_lang']) && $_COOKIE['obenlo_lang'] == 'fr') ? 'bold' : 'normal'; ?>">Français</a>
+                <a href="#" class="obenlo-lang-switch" data-lang="en" style="font-weight: <?php echo (!isset($_COOKIE['obenlo_lang']) || $_COOKIE['obenlo_lang'] == 'en') ? 'bold' : 'normal'; ?>">English</a>
+                <a href="#" class="obenlo-lang-switch" data-lang="es" style="font-weight: <?php echo (isset($_COOKIE['obenlo_lang']) && $_COOKIE['obenlo_lang'] == 'es') ? 'bold' : 'normal'; ?>">Español</a>
+                <a href="#" class="obenlo-lang-switch" data-lang="fr" style="font-weight: <?php echo (isset($_COOKIE['obenlo_lang']) && $_COOKIE['obenlo_lang'] == 'fr') ? 'bold' : 'normal'; ?>">Français</a>
             </div>
         </div>
 

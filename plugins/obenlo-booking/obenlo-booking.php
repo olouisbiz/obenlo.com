@@ -31,6 +31,7 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-payout-manager.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-badges.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-wishlist.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-i18n.php'; // i18n Localization
+require_once OBENLO_BOOKING_DIR . 'includes/class-live-chat-admin.php'; // Live Chat Backend
 
 // Initialize the plugin
 function obenlo_booking_init() {
@@ -80,6 +81,9 @@ function obenlo_booking_init() {
 
     $i18n = new Obenlo_Booking_i18n();
     $i18n->init();
+
+    $live_chat_admin = new Obenlo_Booking_Live_Chat_Admin();
+    $live_chat_admin->init();
 }
 add_action( 'plugins_loaded', 'obenlo_booking_init' );
 
