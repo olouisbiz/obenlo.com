@@ -801,32 +801,35 @@ class Obenlo_Booking_Frontend_Dashboard {
             var initTypeId = '<?php echo esc_js($init_type_id); ?>';
             
             var typeSelect = document.querySelector('select[name="listing_type"]');
-            var priceLabel = document.querySelector('input[name="listing_price"]').parentElement;
-            var capacityLabel = document.querySelector('input[name="listing_capacity"]').parentElement;
+            var priceInput = document.querySelector('input[name="listing_price"]');
+            var priceLabel = priceInput ? priceInput.closest('div').parentElement.querySelector('label') : null;
+            
+            var capInput = document.querySelector('input[name="listing_capacity"]');
+            var capContainer = capInput ? capInput.closest('div') : null;
+            var capLabel = capContainer ? capContainer.querySelector('label') : null;
             
             function updateFormLogic(typeId) {
                 var category = typeMap[typeId] || 'default';
                 
                 if (category === 'stay') {
-                    priceLabel.innerHTML = 'Price (Per Night): <br><input type="number" step="0.01" name="listing_price" value="' + priceLabel.querySelector('input').value + '" style="width:100%; padding: 8px; margin-top: 5px;">';
-                    capacityLabel.style.display = 'block';
-                    capacityLabel.innerHTML = 'Capacity/Max Guests: <br><input type="number" name="listing_capacity" value="' + capacityLabel.querySelector('input').value + '" style="width:100%; padding: 8px; margin-top: 5px;">';
+                    if (priceLabel) priceLabel.innerText = 'Price (Per Night)';
+                    if (capContainer) capContainer.style.display = 'block';
+                    if (capLabel) capLabel.innerText = 'Capacity/Max Guests';
                 } else if (category === 'experience') {
-                    priceLabel.innerHTML = 'Price (Per Person/Ticket): <br><input type="number" step="0.01" name="listing_price" value="' + priceLabel.querySelector('input').value + '" style="width:100%; padding: 8px; margin-top: 5px;">';
-                    capacityLabel.style.display = 'block';
-                    capacityLabel.innerHTML = 'Max Tickets/Participants: <br><input type="number" name="listing_capacity" value="' + capacityLabel.querySelector('input').value + '" style="width:100%; padding: 8px; margin-top: 5px;">';
+                    if (priceLabel) priceLabel.innerText = 'Price (Per Person/Ticket)';
+                    if (capContainer) capContainer.style.display = 'block';
+                    if (capLabel) capLabel.innerText = 'Max Tickets/Participants';
                 } else if (category === 'service') {
-                    priceLabel.innerHTML = 'Price (Per Session): <br><input type="number" step="0.01" name="listing_price" value="' + priceLabel.querySelector('input').value + '" style="width:100%; padding: 8px; margin-top: 5px;">';
+                    if (priceLabel) priceLabel.innerText = 'Price (Per Session)';
                     // Services usually don't have a "capacity" per slot, it's just 1 appointment.
-                    capacityLabel.style.display = 'none'; 
+                    if (capContainer) capContainer.style.display = 'none'; 
                     // Ensure hidden input keeps its value or defaults to 1
-                    var capInput = capacityLabel.querySelector('input');
-                    if(capInput.value === '') capInput.value = '1';
+                    if (capInput && capInput.value === '') capInput.value = '1';
                 } else {
                     // Default fallback
-                    priceLabel.innerHTML = 'Price (Base): <br><input type="number" step="0.01" name="listing_price" value="' + priceLabel.querySelector('input').value + '" style="width:100%; padding: 8px; margin-top: 5px;">';
-                    capacityLabel.style.display = 'block';
-                    capacityLabel.innerHTML = 'Capacity/Max Guests: <br><input type="number" name="listing_capacity" value="' + capacityLabel.querySelector('input').value + '" style="width:100%; padding: 8px; margin-top: 5px;">';
+                    if (priceLabel) priceLabel.innerText = 'Price (Base)';
+                    if (capContainer) capContainer.style.display = 'block';
+                    if (capLabel) capLabel.innerText = 'Capacity/Max Guests';
                 }
             }
             
