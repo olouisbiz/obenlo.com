@@ -41,7 +41,7 @@ get_header(); ?>
             <p style="color: #666;"><?php esc_html_e( 'Our support team is available 24/7 to assist you with any questions or issues.', 'obenlo' ); ?></p>
         </div>
         <div>
-            <a href="mailto:support@obenlo.com" style="padding: 15px 35px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;"><?php esc_html_e( 'Contact Us', 'obenlo' ); ?></a>
+            <a href="#" class="trigger-contact-modal" style="padding: 15px 35px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;"><?php esc_html_e( 'Contact Us', 'obenlo' ); ?></a>
         </div>
     </div>
 
