@@ -6,13 +6,13 @@
  * Author: Your Name
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
+if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-define( 'OBENLO_BOOKING_VERSION', '1.0.0' );
-define( 'OBENLO_BOOKING_DIR', plugin_dir_path( __FILE__ ) );
-define( 'OBENLO_BOOKING_URL', plugin_dir_url( __FILE__ ) );
+define('OBENLO_BOOKING_VERSION', '1.0.0');
+define('OBENLO_BOOKING_DIR', plugin_dir_path(__FILE__));
+define('OBENLO_BOOKING_URL', plugin_dir_url(__FILE__));
 
 // Include necessary classes
 require_once OBENLO_BOOKING_DIR . 'includes/class-post-types.php';
@@ -34,7 +34,8 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-i18n.php'; // i18n Localizatio
 require_once OBENLO_BOOKING_DIR . 'includes/class-live-chat-admin.php'; // Live Chat Backend
 
 // Initialize the plugin
-function obenlo_booking_init() {
+function obenlo_booking_init()
+{
     $post_types = new Obenlo_Booking_Post_Types();
     $post_types->init();
 
@@ -85,24 +86,53 @@ function obenlo_booking_init() {
     $live_chat_admin = new Obenlo_Booking_Live_Chat_Admin();
     $live_chat_admin->init();
 }
-add_action( 'plugins_loaded', 'obenlo_booking_init' );
+add_action('plugins_loaded', 'obenlo_booking_init');
 
-// Change author base to host safely
-function obenlo_custom_author_base() {
-    global $wp_rewrite;
-    $wp_rewrite->author_base = 'host';
+// Route root user profile requests (obenlo.com/username) safely without breaking pages
+function obenlo_root_author_request($query_vars)
+{
+    // Check if the query is attempting to load a page or post slug (which catches root URLs)
+    if (isset($query_vars['pagename']) || isset($query_vars['name'])) {
+        $slug = isset($query_vars['pagename']) ? $query_vars['pagename'] : $query_vars['name'];
+        // We only care about root-level slugs (no slashes)
+        if (strpos($slug, '/') === false) {
+            $user = get_user_by('slug', $slug);
+            if ($user) {
+                // Valid user found! Convert this page query into an author query
+                $query_vars['author_name'] = $slug;
+                unset($query_vars['pagename']);
+                unset($query_vars['name']);
+                if (isset($query_vars['error'])) {
+                    unset($query_vars['error']);
+                }
+            }
+        }
+    }
+    return $query_vars;
 }
-add_action( 'init', 'obenlo_custom_author_base' );
+add_filter('request', 'obenlo_root_author_request');
+
+// Change author link dynamically so get_author_posts_url returns root instead of /author/
+function obenlo_author_link($link, $author_id)
+{
+    $author = get_userdata($author_id);
+    if ($author) {
+        return home_url('/' . $author->user_nicename . '/');
+    }
+    return $link;
+}
+add_filter('author_link', 'obenlo_author_link', 10, 2);
 
 // Activation hook for defining roles and rewriting rules
-function obenlo_booking_activate() {
+function obenlo_booking_activate()
+{
     try {
         error_log('Obenlo Activation: Starting...');
-        
+
         $post_types = new Obenlo_Booking_Post_Types();
         $post_types->register_custom_post_types();
         error_log('Obenlo Activation: Post types registered.');
-        
+
         flush_rewrite_rules();
         error_log('Obenlo Activation: Rewrite rules flushed.');
 
@@ -111,38 +141,40 @@ function obenlo_booking_activate() {
         error_log('Obenlo Activation: Roles added.');
 
         // Enable user registration
-        update_option( 'users_can_register', 1 );
-        update_option( 'default_role', 'guest' );
+        update_option('users_can_register', 1);
+        update_option('default_role', 'guest');
         error_log('Obenlo Activation: Options updated.');
 
-        foreach ( $essential_pages as $slug => $data ) {
+        foreach ($essential_pages as $slug => $data) {
             error_log('Obenlo Activation: Checking page ' . $slug);
-            $page_check = get_page_by_path( $slug );
-            if ( ! isset( $page_check->ID ) ) {
-                wp_insert_post( array(
-                    'post_title'   => $data['title'],
-                    'post_name'    => $slug,
+            $page_check = get_page_by_path($slug);
+            if (!isset($page_check->ID)) {
+                wp_insert_post(array(
+                    'post_title' => $data['title'],
+                    'post_name' => $slug,
                     'post_content' => $data['content'],
-                    'post_status'  => 'publish',
-                    'post_type'    => 'page',
-                ) );
+                    'post_status' => 'publish',
+                    'post_type' => 'page',
+                ));
                 error_log('Obenlo Activation: Created page ' . $slug);
             }
         }
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         error_log('Obenlo Activation Error: ' . $e->getMessage());
     }
 }
-register_activation_hook( __FILE__, 'obenlo_booking_activate' );
+register_activation_hook(__FILE__, 'obenlo_booking_activate');
 
 // Force /listings page to load the directory archive template
-function obenlo_force_listings_archive_template( $template ) {
-    if ( is_page( 'listings' ) ) {
-        $archive_template = locate_template( 'archive-listing.php' );
-        if ( $archive_template ) {
+function obenlo_force_listings_archive_template($template)
+{
+    if (is_page('listings')) {
+        $archive_template = locate_template('archive-listing.php');
+        if ($archive_template) {
             return $archive_template;
         }
     }
     return $template;
 }
-add_filter( 'template_include', 'obenlo_force_listings_archive_template', 99 );
+add_filter('template_include', 'obenlo_force_listings_archive_template', 99);

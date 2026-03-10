@@ -4,43 +4,43 @@
     <div class="footer-inner" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: left; color: #222;">
         
         <div class="footer-col">
-            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e( 'Support', 'obenlo' ); ?></h4>
+            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e('Support', 'obenlo'); ?></h4>
             <ul style="list-style: none; padding: 0; font-size: 0.9em; line-height: 2;">
-                <li><a href="<?php echo home_url('/support'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Help Center', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/how-it-works'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'How Obenlo works', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/faq'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'FAQ', 'obenlo' ); ?></a></li>
+                <li><a href="<?php echo home_url('/support'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Help Center', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/how-it-works'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('How Obenlo works', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/faq'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('FAQ', 'obenlo'); ?></a></li>
                 <li><a href="#" class="trigger-contact-modal" style="color: inherit; text-decoration: none;">Contact Us</a></li>
             </ul>
         </div>
 
         <div class="footer-col">
-            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e( 'Hosting', 'obenlo' ); ?></h4>
+            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e('Hosting', 'obenlo'); ?></h4>
             <ul style="list-style: none; padding: 0; font-size: 0.9em; line-height: 2;">
-                <li><a href="<?php echo home_url('/become-a-host'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Obenlo your home', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/host-dashboard'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Host Dashboard', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/faq?type=host'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Support for Hosts', 'obenlo' ); ?></a></li>
+                <li><a href="<?php echo home_url('/become-a-host'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Obenlo your home', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/host-dashboard'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Host Dashboard', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/faq?type=host'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Support for Hosts', 'obenlo'); ?></a></li>
             </ul>
         </div>
 
         <div class="footer-col">
-            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e( 'Obenlo', 'obenlo' ); ?></h4>
+            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e('Obenlo', 'obenlo'); ?></h4>
             <ul style="list-style: none; padding: 0; font-size: 0.9em; line-height: 2;">
-                <li><a href="<?php echo home_url('/about-us'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'About Us', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/blog'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Blog', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/community'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Community', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/trust-safety'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Trust & Safety', 'obenlo' ); ?></a></li>
+                <li><a href="<?php echo home_url('/about-us'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('About Us', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/blog'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Blog', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/community'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Community', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/trust-safety'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Trust & Safety', 'obenlo'); ?></a></li>
             </ul>
         </div>
 
         <div class="footer-col">
-            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e( 'Legal', 'obenlo' ); ?></h4>
+            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e('Legal', 'obenlo'); ?></h4>
             <ul style="list-style: none; padding: 0; font-size: 0.9em; line-height: 2;">
-                <li><a href="<?php echo home_url('/privacy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Privacy Policy', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/terms'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Terms of Service', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/cancellation-policy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Cancellation Policy', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/refund-policy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Refund Policy', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/guest-rules'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Guest Rules', 'obenlo' ); ?></a></li>
-                <li><a href="<?php echo home_url('/global-policies'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'Global Policies', 'obenlo' ); ?></a></li>
+                <li><a href="<?php echo home_url('/privacy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Privacy Policy', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/terms'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Terms of Service', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/cancellation-policy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Cancellation Policy', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/refund-policy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Refund Policy', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/guest-rules'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Guest Rules', 'obenlo'); ?></a></li>
+                <li><a href="<?php echo home_url('/global-policies'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Global Policies', 'obenlo'); ?></a></li>
             </ul>
         </div>
 
@@ -54,14 +54,14 @@
         </div>
     </div>
     <div style="max-width: 1200px; margin: 40px auto 0; padding-top: 40px; border-top: 1px solid #eee; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="display: block; text-decoration: none;">
+        <a href="<?php echo esc_url(home_url('/')); ?>" style="display: block; text-decoration: none;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" style="height: 28px; width: auto; opacity: 0.8; filter: grayscale(1); display: block;">
                 <text x="0" y="38" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="38" font-weight="800" fill="#e61e4d" letter-spacing="-1.5">Obenlo</text>
             </svg>
         </a>
 
         <div style="color: #666; font-size: 0.85em;">
-            &copy; <?php echo date('Y'); ?> <?php bloginfo( 'name' ); ?>, Inc. All rights reserved. &middot; <a href="<?php echo home_url('/privacy'); ?>" style="color: inherit; text-decoration: none;">Privacy</a> &middot; <a href="<?php echo home_url('/terms'); ?>" style="color: inherit; text-decoration: none;">Terms</a> &middot; Sitemap
+            &copy; <?php echo date('Y'); ?> <?php bloginfo('name'); ?>, Inc. All rights reserved. &middot; <a href="<?php echo home_url('/privacy'); ?>" style="color: inherit; text-decoration: none;">Privacy</a> &middot; <a href="<?php echo home_url('/terms'); ?>" style="color: inherit; text-decoration: none;">Terms</a> &middot; Sitemap
         </div>
     </div>
 </footer>
@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Custom PWA Install Prompt -->
 <div id="obenlo-pwa-prompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; background:#fff; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.15); z-index:10000; padding:20px; font-family:'Inter', sans-serif; align-items:center; gap:15px; border:1px solid #eee;">
     <div style="width:50px; height:50px; background:#f0f0f0; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-        <img src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/favicon-32x32.png' ); ?>" alt="Obenlo App" style="width:32px; height:32px; border-radius:8px;">
+        <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/favicon-32x32.png'); ?>" alt="Obenlo App" style="width:32px; height:32px; border-radius:8px;">
     </div>
     <div style="flex-grow:1;">
         <h4 style="margin:0 0 4px 0; font-size:16px; color:#222; font-weight:700;">Install Obenlo App</h4>
@@ -460,10 +460,20 @@ document.addEventListener('DOMContentLoaded', function() {
         promptUI.style.display = 'none';
         localStorage.setItem('obenlo_pwa_dismissed', 'true');
     });
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+    }
 });
 </script>
 
-<?php get_template_part( 'template-parts/live-chat-widget' ); ?>
+<?php get_template_part('template-parts/live-chat-widget'); ?>
 
 <?php wp_footer(); ?>
 </body>
