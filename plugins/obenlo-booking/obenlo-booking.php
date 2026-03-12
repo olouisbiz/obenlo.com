@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-define('OBENLO_BOOKING_VERSION', '1.0.0');
+define('OBENLO_BOOKING_VERSION', '1.0.3');
 define('OBENLO_BOOKING_DIR', plugin_dir_path(__FILE__));
 define('OBENLO_BOOKING_URL', plugin_dir_url(__FILE__));
 
@@ -89,8 +89,55 @@ function obenlo_booking_init()
 
     $push_notifications = new Obenlo_Booking_Push_Notifications();
     $push_notifications->init();
+
+    // Check if we need to run DB updates
+    obenlo_booking_update_check();
 }
 add_action('plugins_loaded', 'obenlo_booking_init');
+
+// Routine to automatically create tables on live site if plugin is already active
+function obenlo_booking_update_check()
+{
+    if (get_site_option('obenlo_booking_db_version') !== OBENLO_BOOKING_VERSION) {
+        obenlo_booking_install_tables();
+        update_site_option('obenlo_booking_db_version', OBENLO_BOOKING_VERSION);
+    }
+}
+
+function obenlo_booking_install_tables()
+{
+    global $wpdb;
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $table_chat = $wpdb->prefix . 'obenlo_chat_messages';
+    $sql_chat = "CREATE TABLE $table_chat (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        sender_id bigint(20) NOT NULL,
+        receiver_id bigint(20) NOT NULL,
+        message text NOT NULL,
+        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        is_read tinyint(1) DEFAULT 0 NOT NULL,
+        PRIMARY KEY  (id),
+        KEY sender_id (sender_id),
+        KEY receiver_id (receiver_id)
+    ) $charset_collate;";
+
+    $table_push = $wpdb->prefix . 'obenlo_push_subscribers';
+    $sql_push = "CREATE TABLE $table_push (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        user_id bigint(20) NOT NULL,
+        endpoint text NOT NULL,
+        p256dh varchar(255) NOT NULL,
+        auth varchar(255) NOT NULL,
+        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        PRIMARY KEY  (id),
+        KEY user_id (user_id)
+    ) $charset_collate;";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql_chat);
+    dbDelta($sql_push);
+}
 
 // Route root user profile requests (obenlo.com/username) safely without breaking pages
 function obenlo_root_author_request($query_vars)
@@ -150,37 +197,8 @@ function obenlo_booking_activate()
         error_log('Obenlo Activation: Options updated.');
 
         // Initialize Native DB Tables
-        global $wpdb;
-        $charset_collate = $wpdb->get_charset_collate();
-
-        $table_chat = $wpdb->prefix . 'obenlo_chat_messages';
-        $sql_chat = "CREATE TABLE $table_chat (
-            id bigint(20) NOT NULL AUTO_INCREMENT,
-            sender_id bigint(20) NOT NULL,
-            receiver_id bigint(20) NOT NULL,
-            message text NOT NULL,
-            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
-            is_read tinyint(1) DEFAULT 0 NOT NULL,
-            PRIMARY KEY  (id),
-            KEY sender_id (sender_id),
-            KEY receiver_id (receiver_id)
-        ) $charset_collate;";
-
-        $table_push = $wpdb->prefix . 'obenlo_push_subscribers';
-        $sql_push = "CREATE TABLE $table_push (
-            id bigint(20) NOT NULL AUTO_INCREMENT,
-            user_id bigint(20) NOT NULL,
-            endpoint text NOT NULL,
-            p256dh varchar(255) NOT NULL,
-            auth varchar(255) NOT NULL,
-            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
-            PRIMARY KEY  (id),
-            KEY user_id (user_id)
-        ) $charset_collate;";
-
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql_chat);
-        dbDelta($sql_push);
+        obenlo_booking_install_tables();
+        update_site_option('obenlo_booking_db_version', OBENLO_BOOKING_VERSION);
         error_log('Obenlo Activation: Custom tables created.');
 
         foreach ($essential_pages as $slug => $data) {
