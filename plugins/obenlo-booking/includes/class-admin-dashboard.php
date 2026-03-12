@@ -295,6 +295,31 @@ class Obenlo_Booking_Admin_Dashboard
                         <button type="submit" name="test_telegram_connection" value="1" style="background:#fff; color:#222; border:1px solid #ddd; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700; font-size:1em; width:100%;">⚡ Send Test Message</button>
                         <p style="font-size:0.8em; color:#666; margin:10px 0 0 0; text-align:center;">Use <b>Sync</b> to register the bot, and <b>Test</b> to verify the connection.</p>
                     </div>
+
+                    <div style="background:#fff3cd; padding:20px; border-radius:12px; border:1px solid #ffeeba; margin-top:20px;">
+                        <h4 style="margin-top:0; color:#856404;">Emergency Database Repair</h4>
+                        <p style="font-size:0.85em; color:#856404; margin-bottom:15px;">If Chat or Push Notification tables fail to install on a live site update, click below to forcefully reinstall them.</p>
+                        <button type="button" id="force-install-db" style="background:#dc3545; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700; font-size:1em; width:100%;">⚙️ Force Install Database Tables</button>
+                        <script>
+                        document.getElementById('force-install-db').addEventListener('click', function() {
+                            if(!confirm('This will attempt to run the database table creation scripts. Continue?')) return;
+                            const btn = this;
+                            btn.textContent = 'Installing...';
+                            const formData = new FormData();
+                            formData.append('action', 'obenlo_force_install_db');
+                            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                                method: 'POST', body: formData
+                            }).then(r => r.json()).then(res => {
+                                alert(res.data);
+                                btn.textContent = '⚙️ Force Install Database Tables';
+                            }).catch(err => {
+                                alert('Error installing tables. Check console.');
+                                console.error(err);
+                                btn.textContent = '⚙️ Force Install Database Tables';
+                            });
+                        });
+                        </script>
+                    </div>
                 </div>
 
                 <div style="margin-top:30px; border-top:2px solid #eee; padding-top:20px;">

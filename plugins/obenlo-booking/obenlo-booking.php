@@ -141,6 +141,46 @@ function obenlo_booking_install_tables()
     dbDelta($sql_push);
 }
 
+// Emergency manual trigger via admin-ajax
+add_action('wp_ajax_obenlo_force_install_db', function() {
+    if (!current_user_can('manage_options')) wp_die('Unauthorized');
+    obenlo_booking_install_tables();
+    update_site_option('obenlo_booking_db_version', OBENLO_BOOKING_VERSION);
+    wp_send_json_success('Tables forcefully created!');
+});
+
+    $table_chat = $wpdb->prefix . 'obenlo_chat_messages';
+    $sql_chat = "CREATE TABLE $table_chat (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        sender_id bigint(20) NOT NULL,
+        receiver_id bigint(20) NOT NULL,
+        message text NOT NULL,
+        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        is_read tinyint(1) DEFAULT 0 NOT NULL,
+        PRIMARY KEY  (id),
+        KEY sender_id (sender_id),
+        KEY receiver_id (receiver_id)
+    ) $charset_collate;";
+
+    $table_push = $wpdb->prefix . 'obenlo_push_subscribers';
+    $sql_push = "CREATE TABLE $table_push (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        user_id bigint(20) NOT NULL,
+        endpoint text NOT NULL,
+        p256dh varchar(255) NOT NULL,
+        auth varchar(255) NOT NULL,
+        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        PRIMARY KEY  (id),
+        KEY user_id (user_id)
+    ) $charset_collate;";
+
+    if (!function_exists('dbDelta')) {
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    }
+    dbDelta($sql_chat);
+    dbDelta($sql_push);
+}
+
 // Route root user profile requests (obenlo.com/username) safely without breaking pages
 function obenlo_root_author_request($query_vars)
 {
