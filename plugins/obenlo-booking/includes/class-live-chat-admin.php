@@ -177,7 +177,7 @@ class Obenlo_Booking_Live_Chat_Admin
             function fetchMessages() {
                 if (!activeSession) return;
                 
-                $.get(ajaxurl, {
+                $.post(ajaxurl, {
                     action: 'obenlo_fetch_live_messages',
                     session_id: activeSession,
                     last_id: lastId
