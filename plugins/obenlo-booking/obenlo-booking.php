@@ -98,7 +98,7 @@ add_action('plugins_loaded', 'obenlo_booking_init');
 // Routine to automatically create tables on live site if plugin is already active
 function obenlo_booking_update_check()
 {
-    if (get_site_option('obenlo_booking_db_version') !== OBENLO_BOOKING_VERSION) {
+    if (is_admin() && get_site_option('obenlo_booking_db_version') !== OBENLO_BOOKING_VERSION) {
         obenlo_booking_install_tables();
         update_site_option('obenlo_booking_db_version', OBENLO_BOOKING_VERSION);
     }
@@ -134,7 +134,9 @@ function obenlo_booking_install_tables()
         KEY user_id (user_id)
     ) $charset_collate;";
 
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    if (!function_exists('dbDelta')) {
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    }
     dbDelta($sql_chat);
     dbDelta($sql_push);
 }
