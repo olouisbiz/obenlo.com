@@ -577,9 +577,15 @@ class Obenlo_Booking_Admin_Dashboard
                 <?php
         else: ?>
                     <?php foreach ($sessions as $session): ?>
-                        <div class="chat-session-item" data-id="<?php echo esc_attr($session->session_id); ?>" style="padding:15px 20px; border-bottom:1px solid #eee; cursor:pointer; hover:background:#fff;">
-                            <div style="font-weight:bold; font-size:0.9em;">Guest Session</div>
-                            <div style="font-size:0.75em; color:#888;"><?php echo esc_html($session->session_id); ?></div>
+                        <?php
+                $display_name = $session->session_id;
+                if (strpos($display_name, 'guest_') === 0) {
+                    $display_name = 'Guest (' . substr($display_name, 6, 4) . ')';
+                }
+?>
+                        <div class="chat-session-item" data-id="<?php echo esc_attr($session->session_id); ?>" data-name="<?php echo esc_attr($display_name); ?>" style="padding:15px 20px; border-bottom:1px solid #eee; cursor:pointer; transition: background 0.2s;">
+                            <div style="font-weight:bold; font-size:0.9em;"><?php echo esc_html($display_name); ?></div>
+                            <div style="font-size:0.75em; color:#888;"><?php echo esc_html(strpos($session->session_id, 'guest_') === 0 ? 'Anonymous' : 'Registered'); ?></div>
                         </div>
                     <?php
             endforeach; ?>
@@ -589,7 +595,10 @@ class Obenlo_Booking_Admin_Dashboard
 
             <!-- Chat Area -->
             <div id="live-chat-admin-area" style="display:flex; flex-direction:column; background:#fff;">
-                <div id="chat-header" style="padding:15px 25px; border-bottom:1px solid #ddd; font-weight:bold;">Select a session to start chatting</div>
+                <div id="chat-header" style="padding:15px 25px; border-bottom:1px solid #ddd; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
+                    <span id="chat-header-title">Select a session to start chatting</span>
+                    <button id="admin-chat-delete" style="display:none; color: #a00; border: 1px solid #a00; border-radius: 4px; padding: 4px 12px; background: transparent; cursor: pointer; font-size: 0.85em;">Delete Chat</button>
+                </div>
                 <div id="chat-messages" style="flex-grow:1; padding:25px; overflow-y:auto; background:#fff;"></div>
                 
                 <div id="chat-input-area" style="padding:20px; border-top:1px solid #ddd; background:#f9f9f9; display:none;">
@@ -608,7 +617,8 @@ class Obenlo_Booking_Admin_Dashboard
             let pollInterval = null;
             
             const sessionItems = document.querySelectorAll('.chat-session-item');
-            const chatHeader = document.getElementById('chat-header');
+            const chatHeaderTitle = document.getElementById('chat-header-title');
+            const chatDeleteBtn = document.getElementById('admin-chat-delete');
             const chatMessages = document.getElementById('chat-messages');
             const chatInputArea = document.getElementById('chat-input-area');
             const chatForm = document.getElementById('admin-chat-form');
@@ -620,7 +630,9 @@ class Obenlo_Booking_Admin_Dashboard
                     sessionItems.forEach(i => i.style.background = 'transparent');
                     this.style.background = '#fff';
                     activeSession = this.getAttribute('data-id');
-                    chatHeader.textContent = 'Chatting with ' + activeSession;
+                    const sessionName = this.getAttribute('data-name');
+                    chatHeaderTitle.textContent = 'Chatting with ' + sessionName;
+                    chatDeleteBtn.style.display = 'block';
                     chatMessages.innerHTML = '';
                     chatInputArea.style.display = 'block';
                     lastId = 0;
@@ -688,6 +700,32 @@ class Obenlo_Booking_Admin_Dashboard
                 })
                 .catch(e => console.error(e));
             });
+
+            if (chatDeleteBtn) {
+                chatDeleteBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (!activeSession) return;
+                    if (!confirm('Are you sure you want to delete this entire chat history? This cannot be undone.')) return;
+
+                    const formData = new FormData();
+                    formData.append('action', 'obenlo_admin_delete_chat');
+                    formData.append('session_id', activeSession);
+
+                    fetch(ajaxUrl, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.success) {
+                            window.location.reload();
+                        } else {
+                            alert('Error deleting chat: ' + (res.data || 'Unknown error'));
+                        }
+                    })
+                    .catch(e => console.error(e));
+                });
+            }
         });
         </script>
         <?php

@@ -14,21 +14,24 @@
     <div id="chat-window" style="display:none; width:350px; height:500px; background:#fff; border-radius:16px; box-shadow:0 15px 50px rgba(0,0,0,0.15); flex-direction:column; overflow:hidden; border:1px solid #eee;">
         <div style="background:#e61e4d; color:white; padding:20px; display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <strong style="display:block;"><?php esc_html_e( 'Obenlo Support', 'obenlo' ); ?></strong>
-                <span style="font-size:0.8em; opacity:0.9;"><?php esc_html_e( "We're online and ready to help", "obenlo" ); ?></span>
+                <strong style="display:block;"><?php esc_html_e('Obenlo Support', 'obenlo'); ?></strong>
+                <span style="font-size:0.8em; opacity:0.9;"><?php esc_html_e("We're online and ready to help", "obenlo"); ?></span>
             </div>
             <span id="close-chat" style="cursor:pointer; font-size:24px;">&times;</span>
         </div>
         
-        <div id="chat-content" style="flex-grow:1; padding:20px; overflow-y:auto; background:#f9f9f9; display:flex; flex-direction:column; gap:10px;">
-            <div style="background:#fff; padding:12px; border-radius:12px; font-size:0.9em; box-shadow:0 2px 5px rgba(0,0,0,0.02); margin-right:40px;">
-                <?php esc_html_e( 'Hello! How can we help you today?', 'obenlo' ); ?>
+        <div id="chat-content" style="flex-grow:1; padding:20px; overflow-y:auto; background:#f9f9f9; display:flex; flex-direction:column; gap:12px;">
+            <div style="max-width: 80%; display: flex; flex-direction: column; gap: 4px; margin-right:20px; align-self: flex-start;">
+                <span style="font-size: 0.75em; opacity: 0.7; text-align: left;">Obenlo Support</span>
+                <div style="background:#fff; color:#222; padding:12px 16px; border-radius:16px; border-bottom-left-radius: 4px; font-size:0.95em; box-shadow:0 2px 5px rgba(0,0,0,0.05); line-height: 1.4;">
+                    <?php esc_html_e('Hello! How can we help you today?', 'obenlo'); ?>
+                </div>
             </div>
         </div>
 
         <div style="padding:15px; border-top:1px solid #eee; background:#fff;">
             <form id="chat-form" style="display:flex; gap:10px;">
-                <input type="text" id="chat-input" placeholder="<?php esc_attr_e( 'Type a message...', 'obenlo' ); ?>" style="flex-grow:1; border:1px solid #eee; padding:10px 15px; border-radius:25px; outline:none; font-size:0.9em; background:#f5f5f5;">
+                <input type="text" id="chat-input" placeholder="<?php esc_attr_e('Type a message...', 'obenlo'); ?>" style="flex-grow:1; border:1px solid #eee; padding:10px 15px; border-radius:25px; outline:none; font-size:0.9em; background:#f5f5f5;">
                 <button type="submit" style="background:#e61e4d; border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.2s;">
                     <svg viewBox="0 0 24 24" style="width:20px; height:20px; fill:white; transform:rotate(-45deg) translate(2px, -2px);"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                 </button>
@@ -42,7 +45,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Generate or retrieve session entirely on the client side to avoid page cache issues
     let sessionId = sessionStorage.getItem('obenlo_chat_session');
     if (!sessionId) {
-        sessionId = 'guest_' + Math.random().toString(36).substring(2, 10);
+        <?php if (is_user_logged_in()): ?>
+            <?php $current_user = wp_get_current_user(); ?>
+            sessionId = 'User <?php echo esc_js($current_user->display_name); ?>';
+        <?php
+else: ?>
+            const adjectives = ['Happy', 'Lucky', 'Clever', 'Brave', 'Sunny', 'Cool'];
+            const animals = ['Panda', 'Fox', 'Tiger', 'Lion', 'Bear', 'Wolf', 'Eagle', 'Dolphin'];
+            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const anim = animals[Math.floor(Math.random() * animals.length)];
+            sessionId = 'Guest ' + adj + ' ' + anim + ' ' + Math.floor(10 + Math.random() * 90);
+        <?php
+endif; ?>
         sessionStorage.setItem('obenlo_chat_session', sessionId);
     }
     
@@ -115,10 +129,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function appendMessage(content, isStaff) {
-        const align = isStaff ? 'margin-right:40px; background:#fff;' : 'margin-left:40px; background:#e61e4d; color:white;';
+        let align, bg, text, label;
+        if (isStaff) {
+            align = 'margin-right:20px; align-self: flex-start; border-bottom-left-radius: 4px;';
+            bg = '#ffffff';
+            text = '#222222';
+            label = 'Obenlo Support';
+        } else {
+            align = 'margin-left:20px; align-self: flex-end; border-bottom-right-radius: 4px;';
+            bg = '#e61e4d';
+            text = '#ffffff';
+            label = 'You';
+        }
+
         const div = document.createElement('div');
-        div.style.cssText = `padding:12px; border-radius:12px; font-size:0.9em; box-shadow:0 2px 5px rgba(0,0,0,0.02); ${align}`;
-        div.innerHTML = content;
+        div.style.cssText = `max-width: 80%; display: flex; flex-direction: column; gap: 4px; ${align}`;
+        
+        const labelDiv = document.createElement('span');
+        labelDiv.style.cssText = `font-size: 0.75em; opacity: 0.7; ${isStaff ? 'text-align: left;' : 'text-align: right;'}`;
+        labelDiv.innerText = label;
+
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.style.cssText = `padding:12px 16px; border-radius:16px; font-size:0.95em; box-shadow:0 2px 5px rgba(0,0,0,0.05); background:${bg}; color:${text}; line-height: 1.4; word-break: break-word;`;
+        bubbleDiv.innerHTML = content;
+
+        div.appendChild(labelDiv);
+        div.appendChild(bubbleDiv);
         chatContent.appendChild(div);
         scrollBottom();
     }

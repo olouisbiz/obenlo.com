@@ -17,7 +17,6 @@ class Obenlo_Booking_Communication
         add_action('admin_post_obenlo_submit_ticket', array($this, 'handle_submit_ticket'));
         add_action('admin_post_nopriv_obenlo_submit_ticket', array($this, 'handle_submit_ticket'));
         add_action('admin_post_obenlo_send_broadcast', array($this, 'handle_send_broadcast'));
-        add_action('admin_post_obenlo_send_direct_message', array($this, 'handle_send_direct_message'));
         add_action('admin_post_obenlo_submit_ticket_reply', array($this, 'handle_submit_ticket_reply'));
         add_action('admin_post_obenlo_update_ticket_status', array($this, 'handle_ticket_status'));
 
@@ -27,8 +26,16 @@ class Obenlo_Booking_Communication
         add_action('wp_ajax_nopriv_obenlo_fetch_live_messages', array($this, 'handle_fetch_live_messages'));
         add_action('wp_ajax_obenlo_fetch_live_messages', array($this, 'handle_fetch_live_messages'));
 
+        // Native Host-Guest Chat AJAX
+        add_action('wp_ajax_obenlo_send_chat_message', array($this, 'handle_send_chat_message'));
+        add_action('wp_ajax_obenlo_fetch_chat_messages', array($this, 'handle_fetch_chat_messages'));
+        add_action('wp_ajax_obenlo_fetch_chat_contacts', array($this, 'handle_fetch_chat_contacts'));
+
         // Add Contact Host button to listings
         add_filter('the_content', array($this, 'add_contact_button_to_listing'));
+
+        // Frontend Chat Widget
+        add_action('wp_footer', array($this, 'render_frontend_chat_widget'));
 
         // Telegram Webhook
         add_action('rest_api_init', array($this, 'register_telegram_webhook'));
@@ -167,62 +174,13 @@ class Obenlo_Booking_Communication
 
                 $button = '<div style="margin:20px 0; padding:20px; border:1px solid #eee; border-radius:12px; display:flex; justify-content:space-between; align-items:center; background:#f9f9f9;">';
                 $button .= '<div><strong>Have questions?</strong><br><span style="font-size:0.9em; color:#666;">Chat directly with the host before booking.</span></div>';
-                $button .= '<a href="' . esc_url($contact_url) . '" style="background:#222; color:white; padding:12px 25px; border-radius:8px; text-decoration:none; font-weight:bold;">Contact Host</a>';
+                $host_name = get_the_author_meta('display_name', $host_id);
+                $button .= '<a href="javascript:void(0);" onclick="window.obenloStartChatWith(' . $host_id . ', \'' . esc_js($host_name) . '\')" style="background:#222; color:white; padding:12px 25px; border-radius:8px; text-decoration:none; font-weight:bold;">Contact Host</a>';
                 $button .= '</div>';
                 $content .= $button;
             }
         }
         return $content;
-    }
-
-    /**
-     * Handle sending a direct message
-     */
-    public function handle_send_direct_message()
-    {
-        if (!is_user_logged_in()) {
-            wp_die('Please log in');
-        }
-
-        if (!isset($_POST['message_nonce']) || !wp_verify_nonce($_POST['message_nonce'], 'send_message')) {
-            wp_die('Security check failed');
-        }
-
-        $sender_id = get_current_user_id();
-        $recipient_id = intval($_POST['recipient_id']);
-        $content = wp_kses_post($_POST['message_content']);
-        $thread_id = isset($_POST['thread_id']) ? sanitize_text_field($_POST['thread_id']) : $this->generate_thread_id($sender_id, $recipient_id);
-
-        $message_id = wp_insert_post(array(
-            'post_type' => 'obenlo_message',
-            'post_title' => "Message Thread: $thread_id",
-            'post_content' => $content,
-            'post_status' => 'publish',
-            'post_author' => $sender_id
-        ));
-
-        if ($message_id) {
-            update_post_meta($message_id, '_obenlo_recipient_id', $recipient_id);
-            update_post_meta($message_id, '_obenlo_thread_id', $thread_id);
-            update_post_meta($message_id, '_obenlo_is_read', 0);
-
-            // Notify Recipient
-            Obenlo_Booking_Notifications::notify_message_event($message_id, $recipient_id);
-
-            $redirect_url = add_query_arg('msg_sent', '1', wp_get_referer());
-            if (isset($_POST['redirect_to_thread'])) {
-                $redirect_url = add_query_arg('thread', $thread_id, home_url('/messages'));
-            }
-            wp_safe_redirect($redirect_url);
-            exit;
-        }
-    }
-
-    private function generate_thread_id($u1, $u2)
-    {
-        $ids = array($u1, $u2);
-        sort($ids);
-        return "thread_" . $ids[0] . "_" . $ids[1];
     }
 
     public function render_messages_center()
@@ -232,193 +190,173 @@ class Obenlo_Booking_Communication
         }
 
         $current_user_id = get_current_user_id();
-        $threads = $this->get_user_threads($current_user_id);
-        $active_thread = isset($_GET['thread']) ? sanitize_text_field($_GET['thread']) : '';
-
-        // Auto-initiate new chat if parameters present
-        if (isset($_GET['new_chat']) && isset($_GET['recipient_id'])) {
-            $recipient_id = intval($_GET['recipient_id']);
-            $potential_thread = $this->generate_thread_id($current_user_id, $recipient_id);
-            $active_thread = $potential_thread;
-        }
+        $pre_selected_contact = isset($_GET['recipient_id']) ? intval($_GET['recipient_id']) : 0;
 
         ob_start();
 ?>
         <div class="obenlo-message-center" style="display:grid; grid-template-columns: 320px 1fr; gap:0; height:750px; background:#fff; border:1px solid #eee; border-radius:20px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
             <!-- Threads Sidebar -->
-            <div class="message-threads" style="border-right:1px solid #f0f0f0; background:#fcfcfc; overflow-y:auto; display:flex; flex-direction:column;">
+            <div class="message-threads" style="border-right:1px solid #f0f0f0; background:#fcfcfc; display:flex; flex-direction:column;">
                 <div style="padding:25px 20px; border-bottom:1px solid #f0f0f0; font-weight:800; background:#fff; font-size:1.1rem; color:#222; display:flex; justify-content:space-between; align-items:center;">
                     Inbox
-                    <span style="background:#e61e4d; color:#fff; font-size:0.7rem; padding:2px 8px; border-radius:10px;"><?php echo count($threads); ?></span>
                 </div>
-                
-                <div style="flex-grow:1;">
-                    <?php if (empty($threads)): ?>
-                        <div style="padding:40px 20px; text-align:center; color:#999;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:30px; height:30px; margin-bottom:10px; opacity:0.3;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            <p style="font-size:0.9rem;">No messages yet.</p>
-                        </div>
-                    <?php
-        else:
-            foreach ($threads as $thread):
-                $other_user_id = ($thread['u1'] == $current_user_id) ? $thread['u2'] : $thread['u1'];
-                $other_user = get_userdata($other_user_id);
-                $is_active = ($active_thread === $thread['id']);
-                $unread_class = ''; // Could implement unread logic
-?>
-                            <a href="<?php echo add_query_arg('thread', $thread['id']); ?>" style="display:block; padding:20px; border-bottom:1px solid #f5f5f5; text-decoration:none; color:inherit; transition:all 0.2s; <?php echo $is_active ? 'background:#fff; border-left:4px solid #e61e4d;' : ''; ?>" onmouseover="this.style.background='#fff'">
-                                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                                    <strong style="font-size:1rem; color:<?php echo $is_active ? '#e61e4d' : '#222'; ?>;"><?php echo esc_html($other_user->display_name); ?></strong>
-                                    <span style="font-size:0.7rem; color:#aaa;"><?php echo date('M j', strtotime($thread['date'])); ?></span>
-                                </div>
-                                <div style="font-size:0.85rem; color:#666; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.4;">
-                                    <?php echo esc_html($thread['last_msg']); ?>
-                                </div>
-                            </a>
-                        <?php
-            endforeach; ?>
-                    <?php
-        endif; ?>
+                <div id="obenlo-center-contacts" style="flex-grow:1; overflow-y:auto;">
+                    <div style="padding:40px 20px; text-align:center; color:#999;">Loading...</div>
                 </div>
             </div>
 
             <!-- Chat Window -->
             <div class="message-chat" style="display:flex; flex-direction:column; background:#fff;">
-                <?php if ($active_thread):
-            $chat_messages = $this->get_thread_messages($active_thread);
+                <div id="obenlo-center-header" style="padding:20px 30px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:15px; background:#fff; z-index:10; display:none;">
+                    <div id="obenlo-center-avatar" style="width:40px; height:40px; background:#f0f0f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#888;"></div>
+                    <div>
+                        <div id="obenlo-center-title" style="font-weight:800; font-size:1.1rem; color:#222;"></div>
+                        <div style="font-size:0.75rem; color:#10b981; font-weight:600;">Active Now</div>
+                    </div>
+                </div>
 
-            if (empty($chat_messages) && isset($_GET['recipient_id'])) {
-                $recipient_id = intval($_GET['recipient_id']);
-            }
-            elseif (!empty($chat_messages)) {
-                $recipient_id = ($chat_messages[0]->post_author == $current_user_id) ? get_post_meta($chat_messages[0]->ID, '_obenlo_recipient_id', true) : $chat_messages[0]->post_author;
-            }
-            else {
-                $recipient_id = 0;
-            }
+                <div id="obenlo-center-empty" style="flex-grow:1; display:flex; align-items:center; justify-content:center; color:#999; flex-direction:column; background:#fafafa;">
+                    <div style="background:#fff; width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#e61e4d" stroke-width="2" style="width:40px; height:40px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <h4 style="margin:0; color:#333; font-weight:800;">Your Messages</h4>
+                    <p style="font-size:0.95rem; margin-top:8px;">Choose a contact from the left to start a conversation.</p>
+                </div>
 
-            $recipient = $recipient_id ? get_userdata($recipient_id) : null;
-?>
-                    <div style="padding:20px 30px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:15px; background:#fff; z-index:10;">
-                        <div style="width:40px; height:40px; background:#f0f0f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#888;">
-                            <?php echo $recipient ? strtoupper(substr($recipient->display_name, 0, 1)) : '?'; ?>
+                <div id="obenlo-center-room" style="flex-grow:1; padding:30px; overflow-y:auto; background:#fafafa; display:none; flex-direction:column;">
+                </div>
+
+                <div id="obenlo-center-input-area" style="padding:25px 30px; border-top:1px solid #f0f0f0; background:#fff; display:none;">
+                    <div style="display:flex; gap:15px; align-items:center; width:100%;">
+                        <div style="flex-grow:1; position:relative;">
+                            <input type="text" id="obenlo-center-input" placeholder="Type your message here..." style="width:100%; padding:15px 25px; border:1px solid #eee; border-radius:30px; background:#f9f9f9; outline:none; transition:all 0.2s;" onkeypress="if(event.keyCode===13) obenloCenterSendMessage()">
                         </div>
-                        <div>
-                            <div style="font-weight:800; font-size:1.1rem; color:#222;"><?php echo $recipient ? esc_html($recipient->display_name) : 'Conversation'; ?></div>
-                            <div style="font-size:0.75rem; color:#10b981; font-weight:600;">Active Now</div>
-                        </div>
+                        <button onclick="obenloCenterSendMessage()" style="background:#e61e4d; color:white; border:none; width:50px; height:50px; border-radius:50%; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; box-shadow: 0 4px 10px rgba(230,30,77,0.2);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:20px; height:20px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
                     </div>
-
-                    <div id="obenlo-chat-box" style="flex-grow:1; padding:30px; overflow-y:auto; background:#fafafa; display:flex; flex-direction:column;">
-                        <?php if (empty($chat_messages)): ?>
-                            <div style="text-align:center; color:#999; margin:auto;">
-                                <div style="font-size:3rem; margin-bottom:15px;">👋</div>
-                                <p style="font-weight:700; color:#444; margin:0;">Say hello!</p>
-                                <p style="font-size:0.9rem;">Start your conversation with <?php echo $recipient ? esc_html($recipient->display_name) : 'this user'; ?>.</p>
-                            </div>
-                        <?php
-            else: ?>
-                            <?php foreach ($chat_messages as $msg):
-                    $is_me = ($msg->post_author == $current_user_id);
-                    $bubble_style = $is_me ? 'background:#e61e4d; color:white; border-radius:15px 15px 2px 15px; margin-left:auto;' : 'background:#fff; color:#333; border-radius:15px 15px 15px 2px; margin-right:auto; border:1px solid #eee;';
-?>
-                                <div style="max-width:75%; padding:14px 20px; margin-bottom:12px; font-size:0.95rem; line-height:1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); <?php echo $bubble_style; ?>">
-                                    <?php echo wp_kses_post($msg->post_content); ?>
-                                    <div style="font-size:0.7rem; opacity:0.6; margin-top:6px; text-align:right;">
-                                        <?php echo get_the_date('H:i', $msg->ID); ?>
-                                    </div>
-                                </div>
-                            <?php
-                endforeach; ?>
-                        <?php
-            endif; ?>
-                    </div>
-
-                    <!-- Reply Form -->
-                    <div style="padding:25px 30px; border-top:1px solid #f0f0f0; background:#fff;">
-                        <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:flex; gap:15px; align-items:center;">
-                            <input type="hidden" name="action" value="obenlo_send_direct_message">
-                            <input type="hidden" name="recipient_id" value="<?php echo $recipient_id; ?>">
-                            <input type="hidden" name="thread_id" value="<?php echo $active_thread; ?>">
-                            <input type="hidden" name="redirect_to_thread" value="1">
-                            <?php wp_nonce_field('send_message', 'message_nonce'); ?>
-                            
-                            <div style="flex-grow:1; position:relative;">
-                                <input type="text" name="message_content" required placeholder="Type your message here..." style="width:100%; padding:15px 25px; border:1px solid #eee; border-radius:30px; background:#f9f9f9; outline:none; transition:all 0.2s;" onfocus="this.style.background='#fff';this.style.borderColor='#e61e4d';this.style.boxShadow='0 0 0 4px rgba(230,30,77,0.05)'" onblur="this.style.background='#f9f9f9';this.style.borderColor='#eee';this.style.boxShadow='none'">
-                            </div>
-                            <button type="submit" style="background:#e61e4d; color:white; border:none; width:50px; height:50px; border-radius:50%; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; box-shadow: 0 4px 10px rgba(230,30,77,0.2);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:20px; height:20px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                            </button>
-                        </form>
-                    </div>
-                <?php
-        else: ?>
-                    <div style="flex-grow:1; display:flex; align-items:center; justify-content:center; color:#999; flex-direction:column; background:#fafafa;">
-                        <div style="background:#fff; width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#e61e4d" stroke-width="2" style="width:40px; height:40px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        </div>
-                        <h4 style="margin:0; color:#333; font-weight:800;">Your Messages</h4>
-                        <p style="font-size:0.95rem; margin-top:8px;">Choose a contact from the left to start a conversation.</p>
-                    </div>
-                <?php
-        endif; ?>
+                </div>
             </div>
         </div>
+
+        <style>
+            .obenlo-center-contact-item { padding:20px; border-bottom:1px solid #f5f5f5; cursor:pointer; transition:all 0.2s; display:block; }
+            .obenlo-center-contact-item:hover { background:#fff; }
+            .obenlo-center-contact-item.active { background:#fff; border-left:4px solid #e61e4d; }
+            .obenlo-center-msg { max-width:75%; padding:14px 20px; margin-bottom:12px; font-size:0.95rem; line-height:1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); word-wrap: break-word; }
+            .obenlo-center-msg.sent { background:#e61e4d; color:white; border-radius:15px 15px 2px 15px; margin-left:auto; }
+            .obenlo-center-msg.received { background:#fff; color:#333; border-radius:15px 15px 15px 2px; margin-right:auto; border:1px solid #eee; }
+        </style>
+
         <script>
-            // Scroll to bottom of chat
-            var chatBox = document.getElementById('obenlo-chat-box');
-            if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+            let obenloCenterContact = <?php echo $pre_selected_contact; ?>;
+            let obenloCenterLastId = 0;
+            let obenloCenterInterval = null;
+            let obenloCenterUserId = <?php echo $current_user_id; ?>;
+
+            function obenloCenterFetchContacts() {
+                jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    action: 'obenlo_fetch_chat_contacts'
+                }, function(res) {
+                    let html = '';
+                    if (res.success && res.data.length > 0) {
+                        res.data.forEach(function(c) {
+                            let act = (c.contact_id == obenloCenterContact) ? 'active' : '';
+                            html += '<div class="obenlo-center-contact-item ' + act + '" onclick="obenloCenterOpenRoom(' + c.contact_id + ', \'' + c.contact_name.replace(/'/g, "\\'") + '\')">';
+                            html += '<div style="display:flex; justify-content:space-between; margin-bottom:5px;">';
+                            html += '<strong style="font-size:1rem; color:' + (act ? '#e61e4d' : '#222') + ';">' + c.contact_name + '</strong>';
+                            html += '<span style="font-size:0.7rem; color:#aaa;">' + c.last_message_time + '</span>';
+                            html += '</div>';
+                            html += '<div style="font-size:0.85rem; color:#666; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + c.last_message + '</div>';
+                            html += '</div>';
+                        });
+                    } else {
+                        html = '<div style="padding:40px 20px; text-align:center; color:#999;">No messages yet.</div>';
+                    }
+                    document.getElementById('obenlo-center-contacts').innerHTML = html;
+                });
+            }
+
+            function obenloCenterOpenRoom(contactId, contactName) {
+                obenloCenterContact = contactId;
+                document.getElementById('obenlo-center-empty').style.display = 'none';
+                document.getElementById('obenlo-center-header').style.display = 'flex';
+                document.getElementById('obenlo-center-room').style.display = 'flex';
+                document.getElementById('obenlo-center-input-area').style.display = 'block';
+                
+                document.getElementById('obenlo-center-title').innerText = contactName;
+                document.getElementById('obenlo-center-avatar').innerText = contactName.charAt(0).toUpperCase();
+                
+                document.getElementById('obenlo-center-room').innerHTML = '';
+                obenloCenterLastId = 0;
+                
+                obenloCenterFetchContacts(); // refresh active state
+                obenloCenterFetchMessages();
+                
+                if (obenloCenterInterval) clearInterval(obenloCenterInterval);
+                obenloCenterInterval = setInterval(obenloCenterFetchMessages, 3000); // 3 sec polling
+            }
+
+            function obenloCenterFetchMessages() {
+                if (!obenloCenterContact) return;
+                jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    action: 'obenlo_fetch_chat_messages',
+                    contact_id: obenloCenterContact,
+                    last_id: obenloCenterLastId
+                }, function(res) {
+                    if (res.success && res.data.length > 0) {
+                        let room = document.getElementById('obenlo-center-room');
+                        let isScrolledToBottom = room.scrollHeight - room.clientHeight <= room.scrollTop + 20;
+
+                        res.data.forEach(function(msg) {
+                            if (msg.id > obenloCenterLastId) {
+                                let type = (msg.sender_id == obenloCenterUserId) ? 'sent' : 'received';
+                                let html = '<div class="obenlo-center-msg ' + type + '">';
+                                html += msg.message;
+                                html += '<div style="font-size:0.7rem; opacity:0.6; margin-top:6px; text-align:' + (type === 'sent' ? 'right' : 'left') + ';">' + msg.time + '</div>';
+                                html += '</div>';
+                                room.insertAdjacentHTML('beforeend', html);
+                                obenloCenterLastId = msg.id;
+                            }
+                        });
+                        if (isScrolledToBottom) {
+                            room.scrollTop = room.scrollHeight;
+                        }
+                    }
+                });
+            }
+
+            function obenloCenterSendMessage() {
+                let input = document.getElementById('obenlo-center-input');
+                let txt = input.value.trim();
+                if (!txt || !obenloCenterContact) return;
+                
+                input.value = '';
+                jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    action: 'obenlo_send_chat_message',
+                    receiver_id: obenloCenterContact,
+                    message: txt
+                }, function(res) {
+                    if (res.success) {
+                        obenloCenterFetchMessages();
+                        obenloCenterFetchContacts(); // update last message in sidebar
+                    }
+                });
+            }
+
+            // Init
+            obenloCenterFetchContacts();
+            if (obenloCenterContact > 0) {
+                // Fetch user info for pre-selected contact to open room
+                obenloCenterOpenRoom(obenloCenterContact, 'Conversation'); // Ideally we fetch the name, but this suffices to open the UI
+            }
         </script>
         <?php
         return ob_get_clean();
     }
 
-    private function get_user_threads($user_id)
-    {
-        global $wpdb;
-        $results = $wpdb->get_results($wpdb->prepare(
-            "SELECT pm.meta_value as thread_id, p.post_content, p.post_author, p.post_date 
-             FROM {$wpdb->postmeta} pm 
-             JOIN {$wpdb->posts} p ON p.ID = pm.post_id 
-             WHERE pm.meta_key = '_obenlo_thread_id' 
-             AND (p.post_author = %d OR p.ID IN (SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_obenlo_recipient_id' AND meta_value = %d))
-             ORDER BY p.post_date DESC",
-            $user_id, $user_id
-        ));
-
-        $threads = array();
-        foreach ($results as $row) {
-            if (!isset($threads[$row->thread_id])) {
-                $parts = explode('_', $row->thread_id);
-                $threads[$row->thread_id] = array(
-                    'id' => $row->thread_id,
-                    'u1' => $parts[1],
-                    'u2' => $parts[2],
-                    'last_msg' => $row->post_content,
-                    'date' => $row->post_date
-                );
-            }
-        }
-        return $threads;
-    }
-
-    private function get_thread_messages($thread_id)
-    {
-        return get_posts(array(
-            'post_type' => 'obenlo_message',
-            'meta_key' => '_obenlo_thread_id',
-            'meta_value' => $thread_id,
-            'posts_per_page' => -1,
-            'order' => 'ASC'
-        ));
-    }
-
     public function render_support_page()
     {
-        if (!is_user_logged_in()) {
-            return '<p>Please log in to contact support.</p>';
-        }
-
         $current_user_id = get_current_user_id();
         $ticket_id = isset($_GET['ticket_id']) ? intval($_GET['ticket_id']) : 0;
 
@@ -617,6 +555,14 @@ class Obenlo_Booking_Communication
                     </select>
                 </div>
 
+                <?php if (!is_user_logged_in()): ?>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; font-weight:bold; margin-bottom:8px;">Your Email:</label>
+                    <input type="email" name="ticket_email" required placeholder="For us to reply to you" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                </div>
+                <?php
+        endif; ?>
+
                 <div style="margin-bottom:20px;">
                     <label style="display:block; font-weight:bold; margin-bottom:8px;">Subject:</label>
                     <input type="text" name="ticket_title" required placeholder="Brief summary of the issue" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
@@ -655,6 +601,7 @@ class Obenlo_Booking_Communication
         $content = wp_kses_post($_POST['ticket_content']);
         $type = sanitize_text_field($_POST['ticket_type']); // 'support' or 'dispute'
         $target_host_id = isset($_POST['host_id']) ? intval($_POST['host_id']) : 0;
+        $ticket_email = isset($_POST['ticket_email']) ? sanitize_email($_POST['ticket_email']) : '';
 
         $ticket_id = wp_insert_post(array(
             'post_type' => 'ticket',
@@ -669,6 +616,9 @@ class Obenlo_Booking_Communication
             update_post_meta($ticket_id, '_obenlo_ticket_status', 'open');
             if ($target_host_id) {
                 update_post_meta($ticket_id, '_obenlo_target_host_id', $target_host_id);
+            }
+            if ($ticket_email) {
+                update_post_meta($ticket_id, '_obenlo_ticket_email', $ticket_email);
             }
 
             // Handle Photo Attachments (for proof)
@@ -918,5 +868,366 @@ class Obenlo_Booking_Communication
         }
 
         wp_send_json_success($data);
+    }
+
+    /**
+     * Handle Native Chat AJAX Send (Using Custom Table)
+     */
+    public function handle_send_chat_message()
+    {
+        $sender_id = get_current_user_id();
+        $receiver_id = isset($_POST['receiver_id']) ? intval($_POST['receiver_id']) : 0;
+        $message = isset($_POST['message']) ? sanitize_textarea_field(wp_unslash($_POST['message'])) : '';
+
+        if (!$sender_id || !$receiver_id || empty($message)) {
+            wp_send_json_error('Invalid request');
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'obenlo_chat_messages';
+
+        $inserted = $wpdb->insert(
+            $table,
+            array(
+            'sender_id' => $sender_id,
+            'receiver_id' => $receiver_id,
+            'message' => $message,
+            'created_at' => current_time('mysql'),
+            'is_read' => 0
+        ),
+            array('%d', '%d', '%s', '%s', '%d')
+        );
+
+        if ($inserted) {
+            $msg_id = $wpdb->insert_id;
+
+            // Trigger Push Notification
+            if (class_exists('Obenlo_Booking_Push_Notifications')) {
+                $sender_info = get_userdata($sender_id);
+                $sender_name = $sender_info ? $sender_info->display_name : 'Someone';
+                Obenlo_Booking_Push_Notifications::send_push(
+                    $receiver_id,
+                    "New message from $sender_name",
+                    wp_trim_words($message, 15, '...'),
+                    home_url('/messages')
+                );
+            }
+
+            wp_send_json_success(array(
+                'id' => $msg_id,
+                'sender_id' => $sender_id,
+                'receiver_id' => $receiver_id,
+                'message' => wp_kses_post($message),
+                'time' => current_time('H:i')
+            ));
+        }
+
+        wp_send_json_error('Database error');
+    }
+
+    /**
+     * Handle Native Chat AJAX Fetch (Using Custom Table)
+     */
+    public function handle_fetch_chat_messages()
+    {
+        $user_id = get_current_user_id();
+        $contact_id = isset($_GET['contact_id']) ? intval($_GET['contact_id']) : 0;
+        $last_id = isset($_GET['last_id']) ? intval($_GET['last_id']) : 0;
+
+        if (!$user_id || !$contact_id) {
+            wp_send_json_error('Invalid request');
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'obenlo_chat_messages';
+
+        $query = $wpdb->prepare("
+            SELECT * FROM $table 
+            WHERE ((sender_id = %d AND receiver_id = %d) 
+               OR (sender_id = %d AND receiver_id = %d))
+              AND id > %d
+            ORDER BY id ASC
+            LIMIT 100
+        ", $user_id, $contact_id, $contact_id, $user_id, $last_id);
+
+        $messages = $wpdb->get_results($query);
+        $data = array();
+
+        foreach ($messages as $msg) {
+            $data[] = array(
+                'id' => $msg->id,
+                'sender_id' => $msg->sender_id,
+                'message' => wp_kses_post($msg->message),
+                'time' => gmdate('H:i', strtotime($msg->created_at) + (get_option('gmt_offset') * HOUR_IN_SECONDS))
+            );
+
+            // Mark as read if received by current user
+            if ($msg->receiver_id == $user_id && $msg->is_read == 0) {
+                $wpdb->update($table, array('is_read' => 1), array('id' => $msg->id));
+            }
+        }
+
+        wp_send_json_success($data);
+    }
+
+    /**
+     * Handle Native Chat AJAX Fetch Contacts (Recent conversations)
+     */
+    public function handle_fetch_chat_contacts()
+    {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error('Not logged in');
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'obenlo_chat_messages';
+
+        // Get all unique contacts the user has chatted with
+        $query = $wpdb->prepare("
+            SELECT DISTINCT
+                CASE WHEN sender_id = %d THEN receiver_id ELSE sender_id END as contact_id
+            FROM $table
+            WHERE sender_id = %d OR receiver_id = %d
+        ", $user_id, $user_id, $user_id);
+
+        $results = $wpdb->get_results($query);
+        $contacts = array();
+
+        foreach ($results as $row) {
+            $contact_user = get_userdata($row->contact_id);
+            if ($contact_user) {
+                // Get last message info
+                $last_msg_query = $wpdb->prepare("
+                    SELECT message, is_read, sender_id, created_at 
+                    FROM $table 
+                    WHERE (sender_id = %d AND receiver_id = %d) OR (sender_id = %d AND receiver_id = %d)
+                    ORDER BY id DESC LIMIT 1
+                ", $user_id, $row->contact_id, $row->contact_id, $user_id);
+
+                $last_msg = $wpdb->get_row($last_msg_query);
+
+                // Check unread count
+                $unread_query = $wpdb->prepare("
+                    SELECT COUNT(*) 
+                    FROM $table 
+                    WHERE receiver_id = %d AND sender_id = %d AND is_read = 0
+                ", $user_id, $row->contact_id);
+
+                $unread_count = $wpdb->get_var($unread_query);
+
+                $contacts[] = array(
+                    'contact_id' => $row->contact_id,
+                    'contact_name' => $contact_user->display_name,
+                    'last_message' => $last_msg ? wp_trim_words($last_msg->message, 8) : '',
+                    'last_message_time' => $last_msg ? gmdate('M j, H:i', strtotime($last_msg->created_at) + (get_option('gmt_offset') * HOUR_IN_SECONDS)) : '',
+                    'unread_count' => intval($unread_count)
+                );
+            }
+        }
+
+        // Sort contacts by latest message time theoretically, but simplify for now
+        wp_send_json_success($contacts);
+    }
+
+    /**
+     * Render Frontend Floating Chat Widget for logged-in users
+     */
+    public function render_frontend_chat_widget()
+    {
+        if (!is_user_logged_in() || current_user_can('manage_options')) {
+            return; // Don't show for logged out users or admins
+        }
+        $current_user_id = get_current_user_id();
+?>
+        <div id="obenlo-floating-chat-container">
+            <style>
+                #obenlo-floating-chat-container {
+                    position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                }
+                #obenlo-chat-bubble {
+                    width: 60px; height: 60px; background: #e61e4d; color: white;
+                    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                    cursor: pointer; box-shadow: 0 4px 15px rgba(230,30,77,0.4); transition: transform 0.2s;
+                }
+                #obenlo-chat-bubble:hover { transform: scale(1.05); }
+                #obenlo-chat-bubble svg { width: 30px; height: 30px; }
+                #obenlo-chat-window {
+                    display: none; position: absolute; bottom: 80px; right: 0;
+                    width: 350px; height: 500px; background: #fff; border-radius: 16px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden; flex-direction: column;
+                }
+                .obenlo-chat-header {
+                    background: #e61e4d; color: white; padding: 15px 20px; font-weight: bold;
+                    display: flex; justify-content: space-between; align-items: center;
+                }
+                .obenlo-chat-header-close { cursor: pointer; font-size: 20px; line-height: 1; }
+                .obenlo-chat-header-back { cursor: pointer; display: none; margin-right: 10px; }
+                #obenlo-chat-contacts, #obenlo-chat-room { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+                #obenlo-chat-room { display: none; }
+                .obenlo-chat-contact-item { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; display: flex; align-items: center; transition: background 0.2s; }
+                .obenlo-chat-contact-item:hover { background: #f9f9f9; }
+                .obenlo-badge { background: #e61e4d; color: white; font-size: 12px; border-radius: 10px; padding: 2px 6px; margin-left: auto; }
+                .obenlo-chat-messages-list { flex-grow: 1; padding: 15px; overflow-y: auto; background: #fafafa; }
+                .obenlo-chat-msg { max-width: 80%; padding: 10px 14px; margin-bottom: 10px; border-radius: 12px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+                .obenlo-chat-msg.sent { background: #e61e4d; color: white; margin-left: auto; border-bottom-right-radius: 2px; }
+                .obenlo-chat-msg.received { background: #fff; color: #333; border: 1px solid #eee; margin-right: auto; border-bottom-left-radius: 2px; }
+                .obenlo-chat-input-area { padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: #fff; }
+                .obenlo-chat-input-area input { flex-grow: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+                .obenlo-chat-input-area button { background: #e61e4d; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+                @media (max-width: 400px) {
+                    #obenlo-chat-window { position: fixed; bottom: 0; right: 0; width: 100%; height: 100%; border-radius: 0; }
+                }
+            </style>
+            
+            <div id="obenlo-chat-window">
+                <div class="obenlo-chat-header">
+                    <div style="display:flex; align-items:center;">
+                        <span class="obenlo-chat-header-back" onclick="obenloBackToContacts()">←</span>
+                        <span id="obenlo-chat-title">Messages</span>
+                    </div>
+                    <span class="obenlo-chat-header-close" onclick="obenloToggleChat()">×</span>
+                </div>
+                
+                <div id="obenlo-chat-contacts">
+                    <div style="padding: 20px; text-align: center; color: #999;" id="obenlo-contacts-loading">Loading...</div>
+                </div>
+                
+                <div id="obenlo-chat-room">
+                    <div class="obenlo-chat-messages-list" id="obenlo-messages-container"></div>
+                    <div class="obenlo-chat-input-area">
+                        <input type="text" id="obenlo-chat-input-field" placeholder="Type a message..." onkeypress="if(event.keyCode===13) obenloSendMessage()">
+                        <button onclick="obenloSendMessage()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="obenlo-chat-bubble" onclick="obenloToggleChat()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            </div>
+        </div>
+
+        <script>
+            let obenloChatOpen = false;
+            let obenloCurrentContact = 0;
+            let obenloLastMsgId = 0;
+            let obenloChatInterval = null;
+            let obenloCurrentUserId = <?php echo $current_user_id; ?>;
+
+            function obenloToggleChat() {
+                obenloChatOpen = !obenloChatOpen;
+                document.getElementById('obenlo-chat-window').style.display = obenloChatOpen ? 'flex' : 'none';
+                if (obenloChatOpen) {
+                    if (obenloCurrentContact === 0) {
+                        obenloFetchContacts();
+                    } else {
+                        obenloFetchMessages();
+                    }
+                } else {
+                    if (obenloChatInterval) clearInterval(obenloChatInterval);
+                }
+            }
+
+            function obenloFetchContacts() {
+                jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    action: 'obenlo_fetch_chat_contacts'
+                }, function(res) {
+                    let html = '';
+                    if (res.success && res.data.length > 0) {
+                        res.data.forEach(function(c) {
+                            let unread = c.unread_count > 0 ? '<span class="obenlo-badge">' + c.unread_count + '</span>' : '';
+                            html += '<div class="obenlo-chat-contact-item" onclick="obenloOpenRoom(' + c.contact_id + ', \'' + c.contact_name.replace(/'/g, "\\'") + '\')">';
+                            html += '<div style="width:40px;height:40px;background:#eee;border-radius:50%;margin-right:15px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#666;">' + c.contact_name.charAt(0).toUpperCase() + '</div>';
+                            html += '<div style="flex-grow:1;overflow:hidden;">';
+                            html += '<div style="font-weight:bold;color:#222;">' + c.contact_name + '</div>';
+                            html += '<div style="font-size:12px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + c.last_message + '</div>';
+                            html += '</div>' + unread + '</div>';
+                        });
+                    } else {
+                        html = '<div style="padding:40px 20px;text-align:center;color:#999;">No conversations yet</div>';
+                    }
+                    document.getElementById('obenlo-chat-contacts').innerHTML = html;
+                });
+            }
+
+            function obenloOpenRoom(contactId, contactName) {
+                obenloCurrentContact = contactId;
+                document.getElementById('obenlo-chat-contacts').style.display = 'none';
+                document.getElementById('obenlo-chat-room').style.display = 'flex';
+                document.querySelector('.obenlo-chat-header-back').style.display = 'block';
+                document.getElementById('obenlo-chat-title').innerText = contactName;
+                document.getElementById('obenlo-messages-container').innerHTML = '';
+                obenloLastMsgId = 0;
+                
+                obenloFetchMessages();
+                if (obenloChatInterval) clearInterval(obenloChatInterval);
+                obenloChatInterval = setInterval(obenloFetchMessages, 3000); // 3 sec polling
+            }
+
+            function obenloBackToContacts() {
+                obenloCurrentContact = 0;
+                if (obenloChatInterval) clearInterval(obenloChatInterval);
+                document.getElementById('obenlo-chat-contacts').style.display = 'flex';
+                document.getElementById('obenlo-chat-room').style.display = 'none';
+                document.querySelector('.obenlo-chat-header-back').style.display = 'none';
+                document.getElementById('obenlo-chat-title').innerText = 'Messages';
+                obenloFetchContacts();
+            }
+
+            function obenloFetchMessages() {
+                if (!obenloCurrentContact) return;
+                jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    action: 'obenlo_fetch_chat_messages',
+                    contact_id: obenloCurrentContact,
+                    last_id: obenloLastMsgId
+                }, function(res) {
+                    if (res.success && res.data.length > 0) {
+                        let container = document.getElementById('obenlo-messages-container');
+                        let isScrolledToBottom = container.scrollHeight - container.clientHeight <= container.scrollTop + 20;
+                        
+                        res.data.forEach(function(msg) {
+                            if (msg.id > obenloLastMsgId) {
+                                let typeClass = (msg.sender_id == obenloCurrentUserId) ? 'sent' : 'received';
+                                let html = '<div class="obenlo-chat-msg ' + typeClass + '">';
+                                html += msg.message;
+                                html += '<div style="font-size:10px;opacity:0.7;margin-top:4px;text-align:right;">' + msg.time + '</div>';
+                                html += '</div>';
+                                container.insertAdjacentHTML('beforeend', html);
+                                obenloLastMsgId = msg.id;
+                            }
+                        });
+                        if (isScrolledToBottom) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    }
+                });
+            }
+
+            function obenloSendMessage() {
+                let input = document.getElementById('obenlo-chat-input-field');
+                let txt = input.value.trim();
+                if (!txt || !obenloCurrentContact) return;
+                
+                input.value = '';
+                jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    action: 'obenlo_send_chat_message',
+                    receiver_id: obenloCurrentContact,
+                    message: txt
+                }, function(res) {
+                    if (res.success) {
+                        obenloFetchMessages();
+                    }
+                });
+            }
+
+            window.obenloStartChatWith = function(hostId, hostName) {
+                if (!obenloChatOpen) obenloToggleChat();
+                obenloOpenRoom(hostId, hostName);
+            };
+        </script>
+        <?php
     }
 }

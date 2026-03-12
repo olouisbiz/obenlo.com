@@ -4,6 +4,21 @@
  */
 
 get_header();
+?>
+<style>
+.storefront-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 40px;
+    align-items: start;
+}
+@media (max-width: 768px) {
+    .storefront-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+<?php
 
 $curauth = get_queried_object();
 
@@ -106,7 +121,7 @@ endif; ?>
 
 <div class="obenlo-container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
     
-    <div style="display:grid; grid-template-columns: 1fr 300px; gap: 40px; align-items: start;">
+    <div class="storefront-grid">
         <div>
             <?php if ($store_desc): ?>
             <div class="storefront-about" style="margin-bottom:40px; font-size:1.1em; line-height:1.6;">

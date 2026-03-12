@@ -3,31 +3,36 @@
  * Live Chat Admin Backend
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
-class Obenlo_Booking_Live_Chat_Admin {
+class Obenlo_Booking_Live_Chat_Admin
+{
 
-    public function init() {
-        add_action( 'admin_menu', array( $this, 'add_chat_menu' ) );
-        add_action( 'wp_ajax_obenlo_admin_fetch_sessions', array( $this, 'ajax_fetch_sessions' ) );
+    public function init()
+    {
+        add_action('admin_menu', array($this, 'add_chat_menu'));
+        add_action('wp_ajax_obenlo_admin_fetch_sessions', array($this, 'ajax_fetch_sessions'));
+        add_action('wp_ajax_obenlo_admin_delete_chat', array($this, 'ajax_delete_chat'));
     }
 
-    public function add_chat_menu() {
+    public function add_chat_menu()
+    {
         add_menu_page(
             'Live Chat',
             'Live Chat',
             'manage_options',
             'obenlo-live-chat',
-            array( $this, 'render_chat_page' ),
+            array($this, 'render_chat_page'),
             'dashicons-format-chat',
             30
         );
     }
 
-    public function render_chat_page() {
-        ?>
+    public function render_chat_page()
+    {
+?>
         <div class="wrap">
             <h1 class="wp-heading-inline">Live Chat Support</h1>
             <p>Monitor and respond to guests actively chatting on the frontend.</p>
@@ -42,7 +47,10 @@ class Obenlo_Booking_Live_Chat_Admin {
 
                 <!-- Chat Window -->
                 <div style="flex-grow: 1; background: #fff; border: 1px solid #ccd0d4; display: flex; flex-direction: column;">
-                    <div style="padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; background: #fcfcfc;" id="active-session-title">Select a session from the left</div>
+                    <div style="padding: 15px; border-bottom: 1px solid #eee; background: #fcfcfc; display: flex; justify-content: space-between; align-items: center;">
+                        <div id="active-session-title" style="font-weight: bold;">Select a session from the left</div>
+                        <button id="admin-chat-delete" class="button button-link-delete" style="display:none; color: #a00; border: 1px solid #a00; border-radius: 4px; padding: 2px 10px;">Delete Chat</button>
+                    </div>
                     <div id="admin-chat-content" style="flex-grow: 1; padding: 20px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px;">
                         <div style="margin: auto; color: #999; text-align: center;">
                             <span class="dashicons dashicons-format-chat" style="font-size: 40px; width: 40px; height: 40px; margin-bottom: 15px; opacity: 0.5;"></span>
@@ -80,7 +88,7 @@ class Obenlo_Booking_Live_Chat_Admin {
                                 let border = (activeSession === session.id) ? 'border-left: 4px solid #e61e4d;' : 'border-left: 4px solid transparent;';
                                 html += '<div class="chat-session-item" data-id="' + session.id + '" style="padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; background: ' + bg + '; ' + border + ' transition: background 0.2s;">';
                                 html += '<div style="display: flex; justify-content: space-between; margin-bottom: 5px;">';
-                                html += '<strong style="color: #222;">' + (session.id.startsWith('guest_') ? 'Guest (' + session.id.substr(6,4) + ')' : 'Session: ' + session.id) + '</strong>';
+                                html += '<strong style="color: #222;">' + session.id + '</strong>';
                                 html += '<span style="font-size: 0.75em; color: #999;">' + session.time + '</span>';
                                 html += '</div>';
                                 html += '<div style="font-size: 0.85em; color: #666; max-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + session.last_msg + '</div>';
@@ -104,7 +112,8 @@ class Obenlo_Booking_Live_Chat_Admin {
                 $('.chat-session-item').css({'background': '#fff', 'border-left': '4px solid transparent'});
                 $(this).css({'background': '#f0f0f1', 'border-left': '4px solid #e61e4d'});
                 
-                $('#active-session-title').html('<span style="color: #4CAF50;">●</span> Chatting with: <strong>' + (activeSession.startsWith('guest_') ? 'Guest (' + activeSession.substr(6,4) + ')' : activeSession) + '</strong>');
+                $('#active-session-title').html('<span style="color: #4CAF50;">●</span> Chatting with: <strong>' + activeSession + '</strong>');
+                $('#admin-chat-delete').show();
                 $('#admin-session-id').val(activeSession);
                 $('#admin-chat-input, #admin-chat-submit').prop('disabled', false);
                 $('#admin-chat-input').focus();
@@ -135,6 +144,31 @@ class Obenlo_Booking_Live_Chat_Admin {
                 }, function(response) {
                     if (response.success) {
                         fetchMessages();
+                    }
+                });
+            });
+
+            // Handle chat deletion
+            $('#admin-chat-delete').on('click', function(e) {
+                e.preventDefault();
+                if (!activeSession) return;
+                if (!confirm('Are you sure you want to delete this entire chat history? This cannot be undone.')) return;
+
+                $.post(ajaxurl, {
+                    action: 'obenlo_admin_delete_chat',
+                    session_id: activeSession
+                }, function(response) {
+                    if (response.success) {
+                        activeSession = '';
+                        $('#active-session-title').html('Select a session from the left');
+                        $('#admin-chat-delete').hide();
+                        $('#admin-chat-content').html('<div style="margin: auto; color: #999; text-align: center;"><span class="dashicons dashicons-format-chat" style="font-size: 40px; width: 40px; height: 40px; margin-bottom: 15px; opacity: 0.5;"></span><br>Chat deleted</div>');
+                        $('#admin-session-id').val('');
+                        $('#admin-chat-input, #admin-chat-submit').prop('disabled', true);
+                        if (pollInterval) clearInterval(pollInterval);
+                        fetchSessions();
+                    } else {
+                        alert('Error deleting chat: ' + (response.data || 'Unknown error'));
                     }
                 });
             });
@@ -181,8 +215,9 @@ class Obenlo_Booking_Live_Chat_Admin {
         <?php
     }
 
-    public function ajax_fetch_sessions() {
-        if ( ! current_user_can('manage_options') ) {
+    public function ajax_fetch_sessions()
+    {
+        if (!current_user_can('manage_options')) {
             wp_send_json_error('Unauthorized');
         }
 
@@ -199,20 +234,54 @@ class Obenlo_Booking_Live_Chat_Admin {
             LIMIT 50
         ";
 
-        $results = $wpdb->get_results( $query );
+        $results = $wpdb->get_results($query);
         $sessions = array();
 
-        foreach ( $results as $row ) {
-            $last_msg = get_post( $row->last_msg_id );
-            if ( $last_msg ) {
+        foreach ($results as $row) {
+            $last_msg = get_post($row->last_msg_id);
+            if ($last_msg) {
                 $sessions[] = array(
                     'id' => $row->session_id,
-                    'last_msg' => wp_kses_post( wp_trim_words( $last_msg->post_content, 10 ) ),
-                    'time' => get_the_date( 'M j, H:i', $last_msg->ID )
+                    'last_msg' => wp_kses_post(wp_trim_words($last_msg->post_content, 10)),
+                    'time' => get_the_date('M j, H:i', $last_msg->ID)
                 );
             }
         }
 
-        wp_send_json_success( $sessions );
+        wp_send_json_success($sessions);
+    }
+
+    public function ajax_delete_chat()
+    {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+
+        $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
+
+        if (empty($session_id)) {
+            wp_send_json_error('No session ID provided');
+        }
+
+        global $wpdb;
+
+        // Find all posts with this session ID
+        $query = $wpdb->prepare("
+            SELECT post_id 
+            FROM {$wpdb->postmeta} 
+            WHERE meta_key = '_obenlo_chat_session' AND meta_value = %s
+        ", $session_id);
+
+        $post_ids = $wpdb->get_col($query);
+
+        if (!empty($post_ids)) {
+            foreach ($post_ids as $pid) {
+                wp_delete_post($pid, true); // Force delete
+            }
+            wp_send_json_success('Chat deleted');
+        }
+        else {
+            wp_send_json_error('No messages found for this session');
+        }
     }
 }

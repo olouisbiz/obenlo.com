@@ -72,6 +72,9 @@ class Obenlo_Booking_Notifications
                 $msg = "A new booking has been requested for your listing: $listing_title.\nTotal: $$total\nView details: " . home_url('/host-dashboard/?action=bookings');
                 self::send_to_user($host_id, $subject, $msg);
                 self::send_to_admin("New Platform Booking #$booking_id", "A new booking request for $listing_title ($$total) has been made.");
+                if (class_exists('Obenlo_Booking_Push_Notifications')) {
+                    Obenlo_Booking_Push_Notifications::send_push($host_id, 'New Booking Request', "For $listing_title ($$total)", home_url('/host-dashboard/?action=bookings'));
+                }
                 break;
 
             case 'booking_confirmed':
@@ -86,6 +89,9 @@ class Obenlo_Booking_Notifications
                 $msg .= "Total: $$total\n";
                 $msg .= "View all your bookings: " . home_url('/trips');
                 self::send_to_user($guest_id, $subject, $msg);
+                if (class_exists('Obenlo_Booking_Push_Notifications')) {
+                    Obenlo_Booking_Push_Notifications::send_push($guest_id, 'Booking Confirmed!', "Your trip to $listing_title is set.", home_url('/trips'));
+                }
                 break;
 
             case 'booking_cancelled':
@@ -93,6 +99,10 @@ class Obenlo_Booking_Notifications
                 $msg = "The booking for $listing_title has been cancelled.\nTotal refund: $$total\nView details: " . home_url();
                 self::send_to_user($guest_id, $subject, $msg);
                 self::send_to_user($host_id, $subject, $msg);
+                if (class_exists('Obenlo_Booking_Push_Notifications')) {
+                    Obenlo_Booking_Push_Notifications::send_push($guest_id, 'Booking Cancelled', "Trip to $listing_title cancelled.", home_url('/trips'));
+                    Obenlo_Booking_Push_Notifications::send_push($host_id, 'Booking Cancelled', "Trip to $listing_title cancelled.", home_url('/host-dashboard/?action=bookings'));
+                }
                 break;
         }
     }

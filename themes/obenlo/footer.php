@@ -461,14 +461,78 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('obenlo_pwa_dismissed', 'true');
     });
 
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('/sw.js').then(function(registration) {
                 console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                
+                // Prompt for push notifications if logged in
+                let currentUserId = <?php echo is_user_logged_in() ? get_current_user_id() : 0; ?>;
+                if (currentUserId > 0) {
+                    // Check if we haven't asked recently or if we must ask
+                    obenloSubscribeToPush(registration);
+                }
             }, function(err) {
                 console.log('ServiceWorker registration failed: ', err);
             });
         });
+    }
+
+    // Push notification subscription logic
+    async function obenloSubscribeToPush(registration) {
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                console.log('Push notification permission denied.');
+                return;
+            }
+
+            const subscription = await registration.pushManager.getSubscription();
+            if (subscription) {
+                // Already subscribed
+                return;
+            }
+
+            // Fetch VAPID public key from backend
+            const vapidResponse = await fetch('<?php echo admin_url('admin-ajax.php?action=obenlo_get_vapid_key'); ?>');
+            const vapidData = await vapidResponse.json();
+            if(!vapidData.success) {
+                console.log('Failed to fetch VAPID key');
+                return;
+            }
+
+            const publicVapidKey = vapidData.data;
+            const convertedVapidKey = urlBase64ToUint8Array(publicVapidKey);
+
+            const newSubscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertedVapidKey
+            });
+
+            // Send subscription to backend
+            await fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    action: 'obenlo_save_push_subscription',
+                    subscription: JSON.stringify(newSubscription)
+                })
+            });
+            console.log('Push notification subscribed and saved.');
+        } catch (error) {
+            console.error('Error during service worker push registration:', error);
+        }
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
     }
 });
 </script>
