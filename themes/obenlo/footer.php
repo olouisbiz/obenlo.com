@@ -536,9 +536,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-<?php get_template_part('template-parts/live-chat-widget'); ?>
-
 <?php wp_footer(); ?>
 </body>
 </html>
