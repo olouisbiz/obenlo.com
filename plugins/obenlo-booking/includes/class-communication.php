@@ -835,15 +835,15 @@ class Obenlo_Booking_Communication
      */
     public function handle_fetch_live_messages()
     {
-        $session_id = sanitize_text_field($_GET['session_id']);
-        $last_id = isset($_GET['last_id']) ? intval($_GET['last_id']) : 0;
+        $session_id = sanitize_text_field($_REQUEST['session_id']);
+        $last_id = isset($_REQUEST['last_id']) ? intval($_REQUEST['last_id']) : 0;
 
         if (empty($session_id))
             wp_send_json_error('Missing session');
 
         $args = array(
             'post_type' => 'obenlo_message',
-            'post_status' => 'any', // Required for guests to read custom post types
+            'post_status' => 'publish', // Publish bypasses capability drops
             'meta_key' => '_obenlo_chat_session',
             'meta_value' => $session_id,
             'posts_per_page' => -1,

@@ -107,12 +107,15 @@ endif; ?>
     });
 
     function fetchMessages() {
-        const url = new URL(ajaxUrl);
-        url.searchParams.append('action', 'obenlo_fetch_live_messages');
-        url.searchParams.append('session_id', sessionId);
-        url.searchParams.append('last_id', lastId);
+        const formData = new FormData();
+        formData.append('action', 'obenlo_fetch_live_messages');
+        formData.append('session_id', sessionId);
+        formData.append('last_id', lastId);
 
-        fetch(url)
+        fetch(ajaxUrl, {
+            method: 'POST',
+            body: formData
+        })
             .then(response => response.json())
             .then(res => {
                 if (res.success && res.data.length > 0) {
