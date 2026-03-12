@@ -228,6 +228,7 @@ class Obenlo_Booking_Live_Chat_Admin
             FROM {$wpdb->posts} p
             JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
             WHERE p.post_type = 'obenlo_message'
+            AND p.post_status = 'publish'
             AND pm.meta_key = '_obenlo_chat_session'
             GROUP BY pm.meta_value
             ORDER BY last_msg_id DESC
