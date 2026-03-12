@@ -57,9 +57,7 @@ class Obenlo_Booking_Frontend_Experience
      */
     public function handle_bespoke_login()
     {
-        if (!isset($_POST['login_nonce']) || !wp_verify_nonce($_POST['login_nonce'], 'obenlo_login')) {
-            wp_die('Security check failed');
-        }
+        // Nonce check removed for PWA compatibility (cached pages cause stale nonces)
 
         $creds = array(
             'user_login' => sanitize_text_field($_POST['log']),
@@ -89,9 +87,7 @@ class Obenlo_Booking_Frontend_Experience
      */
     public function handle_bespoke_register()
     {
-        if (!isset($_POST['register_nonce']) || !wp_verify_nonce($_POST['register_nonce'], 'obenlo_register')) {
-            wp_die('Security check failed');
-        }
+        // Nonce check removed for PWA compatibility (cached pages cause stale nonces)
 
         $username = sanitize_user($_POST['user_login']);
         $email = sanitize_email($_POST['user_email']);
