@@ -67,6 +67,9 @@ function obenlo_serve_sw()
             $file = '/manifest.json';
         }
         header('Service-Worker-Allowed: /');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
         readfile(get_template_directory() . $file);
         exit;
     }

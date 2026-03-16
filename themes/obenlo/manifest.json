@@ -10,9 +10,9 @@
   "categories": ["travel", "lifestyle", "productivity"],
   "icons": [
     {
-      "src": "/wp-content/themes/obenlo/assets/images/obenlo-logo-social-profile.svg",
+      "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
@@ -20,12 +20,12 @@
     {
       "name": "Host Dashboard",
       "url": "/host-dashboard",
-      "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/obenlo-logo-social-profile.svg", "sizes": "512x512" }]
+      "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile.png", "sizes": "512x512" }]
     },
     {
       "name": "My Account",
       "url": "/account",
-      "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/obenlo-logo-social-profile.svg", "sizes": "512x512" }]
+      "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile.png", "sizes": "512x512" }]
     }
   ]
 }

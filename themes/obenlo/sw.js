@@ -1,10 +1,11 @@
-const CACHE_NAME = 'obenlo-v1.0.6';
+const CACHE_NAME = 'obenlo-v1.0.7';
 const OFFLINE_URL = '/';
 
 const ASSETS_TO_CACHE = [
   '/',
   '/wp-content/themes/obenlo/style.css',
   '/wp-content/themes/obenlo/assets/images/logo-wordmark.svg',
+  '/wp-content/themes/obenlo/assets/images/logo-social-profile.png',
   '/wp-content/themes/obenlo/assets/images/obenlo-logo-social-profile.svg'
 ];
 
