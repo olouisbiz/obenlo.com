@@ -79,19 +79,25 @@ class Obenlo_Booking_Notifications
 
             case 'booking_confirmed':
                 $confirmation_code = get_post_meta($booking_id, '_obenlo_confirmation_code', true);
+                $guest_id_val = get_post_meta($booking_id, '_obenlo_guest_id', true);
                 $subject = "Booking Confirmed! - $listing_title";
                 $msg = "Great news! Your booking for $listing_title has been confirmed.\n\n";
                 $msg .= "━━━━━━━━━━━━━━━━━━━━━━━\n";
                 $msg .= "  BOOKING CONFIRMATION CODE\n";
                 $msg .= "  " . ($confirmation_code ?: 'N/A') . "\n";
+                
+                if ($guest_id_val) {
+                    $msg .= "  GUEST ID: " . $guest_id_val . "\n";
+                }
                 $msg .= "━━━━━━━━━━━━━━━━━━━━━━━\n\n";
-                $msg .= "Keep this code safe — the host will use it to verify your booking at check-in.\n\n";
+                $msg .= "Keep this code and ID — the host will use them to verify your booking at check-in.\n\n";
 
                 $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
                 if ($virtual_link) {
+                    $secure_join_url = Obenlo_Booking_Virtual_Security::get_secure_join_url($booking_id);
                     $msg .= "🌐 VIRTUAL CLASS/EVENT LINK:\n";
-                    $msg .= esc_url($virtual_link) . "\n\n";
-                    $msg .= "Please use this link to join the event at the scheduled time.\n\n";
+                    $msg .= $secure_join_url . "\n\n";
+                    $msg .= "Please use this SECURE link to join the event. Do not share this link with others.\n\n";
                 }
 
                 $msg .= "Total: $$total\n";

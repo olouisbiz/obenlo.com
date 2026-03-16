@@ -55,8 +55,22 @@ class Obenlo_Booking_Communication
                 $button = '<div style="margin:20px 0; padding:20px; border:1px solid #eee; border-radius:12px; display:flex; justify-content:space-between; align-items:center; background:#f9f9f9;">';
                 $button .= '<div><strong>Have questions?</strong><br><span style="font-size:0.9em; color:#666;">Chat directly with the host before booking.</span></div>';
                 $host_name = get_the_author_meta('display_name', $host_id);
-                $button .= '<a href="javascript:void(0);" onclick="window.obenloStartChatWith(' . $host_id . ', \'' . esc_js($host_name) . '\')" style="background:#222; color:white; padding:12px 25px; border-radius:8px; text-decoration:none; font-weight:bold;">Contact Host</a>';
-                $button .= '</div>';
+                $host_avatar = get_avatar_url($host_id);
+                
+                $button = '
+                <div style="margin:40px 0; padding:25px; border:1px solid #eee; border-radius:24px; display:flex; justify-content:space-between; align-items:center; background:#fff; box-shadow: 0 10px 30px rgba(0,0,0,0.03); font-family: \'Inter\', sans-serif;">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <img src="' . esc_url($host_avatar) . '" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                        <div>
+                            <div style="font-weight:800; color:#222; font-size:1.05rem;">Hosted by ' . esc_html($host_name) . '</div>
+                            <div style="font-size:0.85rem; color:#666; margin-top:2px;">Usually responds within an hour</div>
+                        </div>
+                    </div>
+                    <a href="javascript:void(0);" onclick="window.obenloStartChatWith(' . $host_id . ', \'' . esc_js($host_name) . '\', \'' . esc_url($host_avatar) . '\')" style="background:#222; color:white; padding:12px 28px; border-radius:14px; text-decoration:none; font-weight:700; font-size:0.95rem; transition: transform 0.2s; display:inline-flex; align-items:center; gap:8px;" onmouseover="this.style.transform=\'scale(1.02)\';this.style.background=\'#000\'" onmouseout="this.style.transform=\'scale(1)\';this.style.background=\'#222\'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px; height:16px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        Contact Host
+                    </a>
+                </div>';
                 $content .= $button;
             }
         }
@@ -1019,8 +1033,12 @@ class Obenlo_Booking_Communication
                     if (res.success && res.data.length > 0) {
                         res.data.forEach(function(c) {
                             let unread = c.unread_count > 0 ? '<span class="obenlo-badge">' + c.unread_count + '</span>' : '';
-                            html += '<div class="obenlo-chat-contact-item" onclick="obenloOpenRoom(' + c.contact_id + ', \'' + c.contact_name.replace(/'/g, "\\'") + '\')">';
-                            html += '<div style="width:40px;height:40px;background:#eee;border-radius:50%;margin-right:15px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#666;">' + c.contact_name.charAt(0).toUpperCase() + '</div>';
+                            html += '<div class="obenlo-chat-contact-item" onclick="obenloOpenRoom(' + c.contact_id + ', \'' + c.contact_name.replace(/'/g, "\\'") + '\', \'' + (c.contact_avatar || '') + '\')">';
+                            if (c.contact_avatar) {
+                                html += '<img src="' + c.contact_avatar + '" style="width:40px;height:40px;border-radius:50%;margin-right:15px;object-fit:cover;">';
+                            } else {
+                                html += '<div style="width:40px;height:40px;background:#eee;border-radius:50%;margin-right:15px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#666;">' + c.contact_name.charAt(0).toUpperCase() + '</div>';
+                            }
                             html += '<div style="flex-grow:1;overflow:hidden;">';
                             html += '<div style="font-weight:bold;color:#222;">' + c.contact_name + '</div>';
                             html += '<div style="font-size:12px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + c.last_message + '</div>';
@@ -1033,12 +1051,19 @@ class Obenlo_Booking_Communication
                 });
             }
 
-            function obenloOpenRoom(contactId, contactName) {
+            function obenloOpenRoom(contactId, contactName, contactAvatar) {
                 obenloCurrentContact = contactId;
                 document.getElementById('obenlo-chat-contacts').style.display = 'none';
                 document.getElementById('obenlo-chat-room').style.display = 'flex';
                 document.querySelector('.obenlo-chat-header-back').style.display = 'block';
                 document.getElementById('obenlo-chat-title').innerText = contactName;
+                
+                if (contactAvatar) {
+                    document.getElementById('obenlo-center-avatar').innerHTML = '<img src="' + contactAvatar + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+                } else {
+                    document.getElementById('obenlo-center-avatar').innerText = contactName.charAt(0).toUpperCase();
+                }
+                document.getElementById('obenlo-center-header').style.display = 'flex';
                 document.getElementById('obenlo-messages-container').innerHTML = '';
                 obenloLastMsgId = 0;
                 
@@ -1103,9 +1128,9 @@ class Obenlo_Booking_Communication
                 });
             }
 
-            window.obenloStartChatWith = function(hostId, hostName) {
+            window.obenloStartChatWith = function(hostId, hostName, hostAvatar) {
                 if (!obenloChatOpen) obenloToggleChat();
-                obenloOpenRoom(hostId, hostName);
+                obenloOpenRoom(hostId, hostName, hostAvatar);
             };
         </script>
         <?php

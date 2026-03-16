@@ -433,6 +433,8 @@ class Obenlo_Booking_Frontend_Dashboard
                 $total = get_post_meta($booking->ID, '_obenlo_total_price', true);
                 $status = get_post_meta($booking->ID, '_obenlo_booking_status', true);
                 $conf_code = get_post_meta($booking->ID, '_obenlo_confirmation_code', true);
+                $guest_id = get_post_meta($booking->ID, '_obenlo_guest_id', true);
+                $checked_in = get_post_meta($booking->ID, '_obenlo_checked_in', true) === 'yes';
 
                 $guest_user = get_user_by('id', $booking->post_author);
                 $guest_info = $guest_user ? $guest_user->display_name : 'Guest #' . $booking->post_author;
@@ -452,13 +454,33 @@ class Obenlo_Booking_Frontend_Dashboard
                                 <div><?php echo esc_html($start_date); ?><?php echo $end_date ? ' → ' . esc_html($end_date) : ''; ?></div>
                                 <div style="font-size:0.75rem; color:#888;"><?php echo esc_html($guests); ?> guests</div>
                             </td>
-                            <td><?php echo esc_html($guest_info); ?></td>
+                             <td>
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <strong><?php echo esc_html($guest_info); ?></strong>
+                                    <?php if ($guest_user) : ?>
+                                        <button onclick="window.obenloStartChatWith(<?php echo $guest_user->ID; ?>, '<?php echo esc_js($guest_user->display_name); ?>', '<?php echo esc_url(get_avatar_url($guest_user->ID)); ?>')" style="padding:5px; border:1px solid #eee; background:#f9f9f9; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;" title="Message Guest" onmouseover="this.style.background='#fff';this.style.borderColor='#e61e4d';this.style.color='#e61e4d';" onmouseout="this.style.background='#f9f9f9';this.style.borderColor='#eee';this.style.color='inherit';">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ($guest_id) : ?>
+                                    <div class="guest-id-val" style="font-size:0.75rem; color:#888; font-family:monospace; margin-top:2px;">ID: <?php echo esc_html($guest_id); ?></div>
+                                <?php endif; ?>
+                            </td>
                             <td><span style="font-weight:700; color:#222;">$<?php echo number_format(floatval($total), 2); ?></span></td>
                             <td><span class="badge <?php echo $status_badge; ?>"><?php echo esc_html(str_replace('_', ' ', $status)); ?></span></td>
                             <?php if ($limit === -1): ?>
-                            <td><?php if ($conf_code): ?><code style="background:#f9f9f9; border:1px solid #eee; padding:4px 8px; border-radius:6px; font-family:monospace; font-weight:700; color:#e61e4d; font-size:0.85rem;"><?php echo esc_html($conf_code); ?></code><?php
-                    else: ?><span style="color:#ccc;">—</span><?php
-                    endif; ?></td>
+                            <td>
+                                <?php if ($conf_code): ?>
+                                    <code class="conf-code-val" style="background:#f9f9f9; border:1px solid #eee; padding:4px 8px; border-radius:6px; font-family:monospace; font-weight:700; color:#e61e4d; font-size:0.85rem;"><?php echo esc_html($conf_code); ?></code>
+                                <?php else: ?>
+                                    <span style="color:#ccc;">—</span>
+                                <?php endif; ?>
+
+                                <?php if ($checked_in) : ?>
+                                    <div style="margin-top:8px;"><span class="badge badge-success" style="font-size:0.7rem; padding:3px 8px;">✓ CHECKED IN</span></div>
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <div style="display:flex; gap:10px;">
                                     <?php
@@ -473,6 +495,13 @@ class Obenlo_Booking_Frontend_Dashboard
                         else {
                             echo '<a href="' . esc_url($complete_url) . '" onclick="return confirm(\'Mark as completed?\')" style="color:#3b82f6; font-weight:700; text-decoration:none;">Complete</a>';
                         }
+                        
+                        // Check-in Action
+                        if (($status === 'approved' || $status === 'confirmed' || $status === 'completed') && !$checked_in) {
+                            $checkin_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=checkin'), 'booking_action_' . $booking->ID);
+                            echo '<a href="' . esc_url($checkin_url) . '" onclick="return confirm(\'Check in this guest?\')" style="background:#e61e4d; color:#fff; padding:4px 10px; border-radius:8px; font-weight:700; text-decoration:none; font-size:0.8rem;">Check In</a>';
+                        }
+
                         echo '<a href="' . esc_url($decline_url) . '" onclick="return confirm(\'Decline this booking?\')" style="color:#ef4444; font-weight:700; text-decoration:none;">Decline</a>';
                     }
                     else {
@@ -488,6 +517,36 @@ class Obenlo_Booking_Frontend_Dashboard
             endforeach; ?>
                 </tbody>
             </table>
+
+            <script>
+            function filterBookings() {
+                var input = document.getElementById('booking-code-search');
+                var filter = input.value.toUpperCase();
+                var table = document.getElementById('bookings-table');
+                var tr = table.getElementsByTagName('tr');
+                var count = 0;
+
+                for (var i = 1; i < tr.length; i++) {
+                    var confCode = tr[i].querySelector('.conf-code-val') ? tr[i].querySelector('.conf-code-val').textContent : '';
+                    var guestId = tr[i].querySelector('.guest-id-val') ? tr[i].querySelector('.guest-id-val').textContent : '';
+                    
+                    if (confCode.toUpperCase().indexOf(filter) > -1 || guestId.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                        count++;
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+                
+                var countDisplay = document.getElementById('booking-search-count');
+                if (filter === "") {
+                    countDisplay.textContent = "";
+                } else {
+                    countDisplay.textContent = "Found " + count + " booking(s)";
+                }
+            }
+            document.getElementById('booking-code-search').addEventListener('keyup', filterBookings);
+            </script>
         <?php
         endif;
     }
@@ -1631,6 +1690,12 @@ class Obenlo_Booking_Frontend_Dashboard
         elseif ($do_action === 'decline') {
             update_post_meta($booking_id, '_obenlo_booking_status', 'declined');
             Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'booking_cancelled');
+        }
+        elseif ($do_action === 'checkin') {
+            // Verify if already checked in
+            if (get_post_meta($booking_id, '_obenlo_checked_in', true) !== 'yes') {
+                update_post_meta($booking_id, '_obenlo_checked_in', 'yes');
+            }
         }
 
         $redirect_url = remove_query_arg(array('booking_id', 'do_action', '_wpnonce'), wp_get_referer());

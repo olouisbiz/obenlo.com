@@ -136,6 +136,28 @@ class Obenlo_Booking_Payments
         wp_send_json_success(array('slots' => $slots));
     }
 
+    /**
+     * Generate a unique Guest ID (e.g. G-X1Y2Z3)
+     */
+    public static function generate_guest_id()
+    {
+        return 'G-' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));
+    }
+
+    /**
+     * Get or create Guest ID for a user
+     */
+    public static function get_user_guest_id($user_id)
+    {
+        if (!$user_id) return '';
+        $guest_id = get_user_meta($user_id, '_obenlo_guest_id', true);
+        if (!$guest_id) {
+            $guest_id = self::generate_guest_id();
+            update_user_meta($user_id, '_obenlo_guest_id', $guest_id);
+        }
+        return $guest_id;
+    }
+
     public function handle_booking_submission()
     {
         if (!isset($_POST['obenlo_booking_nonce']) || !wp_verify_nonce($_POST['obenlo_booking_nonce'], 'obenlo_submit_booking_action')) {
@@ -317,6 +339,15 @@ class Obenlo_Booking_Payments
         // Generate a unique confirmation code
         $confirmation_code = 'OB-' . strtoupper(substr(md5(uniqid($booking_id, true)), 0, 4)) . '-' . strtoupper(substr(md5(uniqid($listing_id, true)), 0, 4));
 
+        // Guest ID Handling
+        $guest_id_val = '';
+        if (is_user_logged_in()) {
+            $guest_id_val = self::get_user_guest_id(get_current_user_id());
+        } else {
+            // Visitor: Single use temporary Guest ID for this booking
+            $guest_id_val = self::generate_guest_id();
+        }
+
         // Save Meta
         update_post_meta($booking_id, '_obenlo_listing_id', $listing_id);
         update_post_meta($booking_id, '_obenlo_host_id', $listing->post_author);
@@ -327,6 +358,7 @@ class Obenlo_Booking_Payments
         update_post_meta($booking_id, '_obenlo_payment_method', $payment_method);
         update_post_meta($booking_id, '_obenlo_booking_status', 'pending_payment');
         update_post_meta($booking_id, '_obenlo_confirmation_code', $confirmation_code);
+        update_post_meta($booking_id, '_obenlo_guest_id', $guest_id_val);
         if ($duration_mins > 0) {
             update_post_meta($booking_id, '_obenlo_duration_mins', $duration_mins);
         }

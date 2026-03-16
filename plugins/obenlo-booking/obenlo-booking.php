@@ -33,6 +33,7 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-wishlist.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-i18n.php'; // i18n Localization
 require_once OBENLO_BOOKING_DIR . 'includes/class-live-chat-admin.php'; // Live Chat Backend
 require_once OBENLO_BOOKING_DIR . 'includes/class-push-notifications.php'; // Web Push Notifications
+require_once OBENLO_BOOKING_DIR . 'includes/class-virtual-security.php'; // Virtual Event Security
 
 // Initialize the plugin
 function obenlo_booking_init()
@@ -89,6 +90,9 @@ function obenlo_booking_init()
 
     $push_notifications = new Obenlo_Booking_Push_Notifications();
     $push_notifications->init();
+
+    $virtual_security = new Obenlo_Booking_Virtual_Security();
+    $virtual_security->init();
 
     // Check if we need to run DB updates
     obenlo_booking_update_check();
