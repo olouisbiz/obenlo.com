@@ -52,10 +52,10 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
 
 ?>
 
-<div class="obenlo-account-container" style="max-width: 1200px; margin: 60px auto; padding: 0 20px; display: flex; gap: 40px; min-height: 600px;">
+<div class="obenlo-account-container listing-layout" style="max-width: 1200px; margin: 60px auto; padding: 0 20px; display: flex; gap: 40px; min-height: 600px;">
     
     <!-- Sidebar -->
-    <div style="width: 250px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
+    <div class="listing-sidebar" style="width: 250px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
         <h1 style="font-size: 2rem; font-weight: 800; margin: 0 0 20px 0; color: #222;">Account</h1>
         
         <a href="?tab=profile" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'profile' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'profile' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='profile')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='profile')this.style.background='transparent'">
@@ -96,12 +96,12 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
                 <input type="hidden" name="action" value="update_profile">
                 <?php wp_nonce_field( 'update_user_profile', 'profile_nonce' ); ?>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div>
+                <div class="grid-row" style="margin-bottom: 20px;">
+                    <div class="grid-col-1-2">
                         <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #444;">First Name</label>
                         <input type="text" name="first_name" value="<?php echo esc_attr( $user->first_name ); ?>" required style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
                     </div>
-                    <div>
+                    <div class="grid-col-1-2">
                         <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #444;">Last Name</label>
                         <input type="text" name="last_name" value="<?php echo esc_attr( $user->last_name ); ?>" style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
                     </div>

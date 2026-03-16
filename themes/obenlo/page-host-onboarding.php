@@ -21,7 +21,7 @@ if ( $status === 'verified' && ! isset( $_GET['force'] ) ) {
 }
 ?>
 
-<div class="onboarding-wrapper" style="max-width: 800px; margin: 60px auto; padding: 40px; background: #fff; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05);">
+<div class="onboarding-wrapper" style="max-width: 800px; margin: 40px auto; padding: 25px; background: #fff; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;">
     
     <div class="onboarding-header" style="text-align: center; margin-bottom: 50px;">
         <h1 style="font-size: 2.5rem; margin-bottom: 10px; color: #222;"><?php esc_html_e( 'Host Onboarding', 'obenlo' ); ?></h1>

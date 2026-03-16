@@ -8,7 +8,8 @@ get_header(); ?>
 <main id="primary" class="site-main site-content" style="max-width: 1400px; margin: 0 auto; padding: 20px 40px;">
 
     <!-- Category Filter Bar -->
-    <div class="category-filters" style="display: flex; gap: 30px; justify-content: center; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; border-bottom: 1px solid #ebebeb;">
+    <!-- Category Filter Bar -->
+    <div class="category-filters" style="display: flex; gap: 30px; justify-content: flex-start; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; border-bottom: 1px solid #ebebeb; -webkit-overflow-scrolling: touch; white-space: nowrap;">
         
         <?php
         $current_cat = '';

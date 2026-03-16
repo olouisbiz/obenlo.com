@@ -304,9 +304,9 @@ class Obenlo_Booking_Frontend_Dashboard
                 <thead>
                     <tr>
                         <th>Listing</th>
-                        <th>Category</th>
+                        <th class="mobile-hide">Category</th>
                         <th>Status</th>
-                        <th>Units/Sessions</th>
+                        <th class="mobile-hide">Units/Sessions</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -332,8 +332,9 @@ class Obenlo_Booking_Frontend_Dashboard
                                 </div>
                             </td>
                             <td><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
+                            <td class="mobile-hide"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
                             <td><span class="badge badge-success"><?php echo ucfirst($listing->post_status); ?></span></td>
-                            <td>
+                            <td class="mobile-hide">
                                 <span style="font-weight:600; color:#444;"><?php echo count($children); ?> units</span>
                                 <a href="?action=add&parent_id=<?php echo $listing->ID; ?>" style="display:block; font-size:0.75rem; color:#e61e4d; text-decoration:none;">+ Add unit</a>
                             </td>
@@ -348,6 +349,8 @@ class Obenlo_Booking_Frontend_Dashboard
                             <?php foreach ($children as $child): ?>
                                 <tr style="background:#fafafa;">
                                     <td style="padding-left:60px; font-size:0.85rem;">└─ <?php echo esc_html($child->post_title); ?></td>
+                                    <td class="mobile-hide"></td>
+                                    <td class="mobile-hide"></td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -415,9 +418,9 @@ class Obenlo_Booking_Frontend_Dashboard
                     <tr>
                         <th>Booking ID</th>
                         <th>Listing</th>
-                        <th>Dates / Details</th>
+                        <th class="mobile-hide">Dates / Details</th>
                         <th>Guest</th>
-                        <th>Total</th>
+                        <th class="mobile-hide">Total</th>
                         <th>Status</th>
                         <?php if ($limit === -1): ?><th>Confirmation Code</th><th>Actions</th><?php
             endif; ?>
@@ -789,16 +792,16 @@ class Obenlo_Booking_Frontend_Dashboard
                         </div>
 
                         <div id="fixed_time_fields" style="display:<?php echo ($event_is_fixed === 'yes') ? 'block' : 'none'; ?>; margin-bottom:20px;">
-                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;">
-                                <div>
+                            <div class="grid-row">
+                                <div class="grid-col-1-3">
                                     <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;">Event Date</label>
                                     <input type="date" name="event_date" value="<?php echo esc_attr($event_date); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                                 </div>
-                                <div>
+                                <div class="grid-col-1-3">
                                     <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;">Start Time</label>
                                     <input type="time" name="event_start_time" value="<?php echo esc_attr($event_start_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                                 </div>
-                                <div>
+                                <div class="grid-col-1-3">
                                     <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;">End Time</label>
                                     <input type="time" name="event_end_time" value="<?php echo esc_attr($event_end_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                                 </div>
@@ -829,15 +832,15 @@ class Obenlo_Booking_Frontend_Dashboard
                 <div class="form-section">
                     <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Pricing & Booking Rules</h4>
                     
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
-                        <div>
+                    <div class="grid-row" style="margin-bottom:20px;">
+                        <div class="grid-col-1-2">
                             <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Base Price</label>
                             <div style="position:relative;">
                                 <span style="position:absolute; left:12px; top:12px; color:#888;">$</span>
                                 <input type="number" step="0.01" name="listing_price" value="<?php echo esc_attr($price); ?>" required style="width:100%; padding:12px 12px 12px 30px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
                             </div>
                         </div>
-                        <div id="pricing_model_wrapper">
+                        <div id="pricing_model_wrapper" class="grid-col-1-2">
                             <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Pricing Model</label>
                             <select name="pricing_model" id="pricing_model" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
                                 <option value="per_night" <?php selected($pricing_model, 'per_night'); ?>>Per Night</option>
@@ -850,12 +853,12 @@ class Obenlo_Booking_Frontend_Dashboard
                         </div>
                     </div>
 
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
-                        <div id="capacity_wrapper">
+                    <div class="grid-row" style="margin-bottom:20px;">
+                        <div id="capacity_wrapper" class="grid-col-1-2">
                             <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Max Capacity (Guests/Tickets)</label>
                             <input type="number" name="listing_capacity" value="<?php echo esc_attr($capacity); ?>" placeholder="Leave blank if not applicable" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
                         </div>
-                        <div id="duration_wrapper" style="display:flex; gap:10px;">
+                        <div id="duration_wrapper" class="grid-col-1-2" style="display:flex; gap:10px;">
                             <div style="flex:1;">
                                 <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Duration</label>
                                 <input type="number" step="0.5" name="duration_val" value="<?php echo esc_attr($duration_val); ?>" placeholder="e.g. 1.5" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
