@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/obenlo-logo-social-profile.svg'); ?>">
     <link rel="profile" href="https://gmpg.org/xfn/11">
     <link rel="icon" type="image/svg+xml" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/obenlo-logo-social-profile.svg'); ?>">
-    <link rel="manifest" href="<?php echo esc_url(get_template_directory_uri() . '/manifest.json?v=1.0.1'); ?>">
+    <link rel="manifest" href="/manifest.json?v=1.0.2">
     <?php wp_head(); ?>
 </head>
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'obenlo-v1.0.5';
+const CACHE_NAME = 'obenlo-v1.0.6';
 const OFFLINE_URL = '/';
 
 const ASSETS_TO_CACHE = [
@@ -35,6 +35,11 @@ self.addEventListener('activate', (event) => {
 // Stale-While-Revalidate Strategy for Automatic Updates
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  
+  // Do not cache the manifest or the service worker itself
+  if (event.request.url.includes('manifest.json') || event.request.url.includes('sw.js')) {
+    return;
+  }
 
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {

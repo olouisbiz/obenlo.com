@@ -56,11 +56,16 @@ remove_action('wp_head', 'wp_shortlink_wp_head');
 function obenlo_serve_sw()
 {
     $request_uri = $_SERVER['REQUEST_URI'] ?? '';
-    // Check if the request is exactly for /sw.js or /sw.js?something
-    if (preg_match('#^/sw\.js#', $request_uri)) {
-        header('Content-Type: application/javascript; charset=utf-8');
+    // Check if the request is for /sw.js or /manifest.json
+    if (preg_match('#^/(sw\.js|manifest\.json)#', $request_uri)) {
+        if (strpos($request_uri, 'sw.js') !== false) {
+            header('Content-Type: application/javascript; charset=utf-8');
+        } else {
+            header('Content-Type: application/json; charset=utf-8');
+        }
         header('Service-Worker-Allowed: /');
-        readfile(get_template_directory() . '/sw.js');
+        $file = (strpos($request_uri, 'sw.js') !== false) ? '/sw.js' : '/manifest.json';
+        readfile(get_template_directory() . $file);
         exit;
     }
 }

@@ -19,7 +19,7 @@
   "shortcuts": [
     {
       "name": "Host Dashboard",
-      "url": "/dashboard",
+      "url": "/host-dashboard",
       "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/obenlo-logo-social-profile.svg", "sizes": "512x512" }]
     },
     {
