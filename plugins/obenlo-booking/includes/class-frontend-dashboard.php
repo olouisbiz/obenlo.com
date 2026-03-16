@@ -561,6 +561,12 @@ class Obenlo_Booking_Frontend_Dashboard
         $policy_other = '';
         $parent_id = isset($_GET['parent_id']) ? intval($_GET['parent_id']) : 0;
         $selected_type = '';
+        $virtual_link = '';
+        $event_is_fixed = 'no';
+        $event_date = '';
+        $event_start_time = '';
+        $event_end_time = '';
+        $event_location_type = 'virtual';
 
         if ($listing_id > 0) {
             $post = get_post($listing_id);
@@ -571,6 +577,12 @@ class Obenlo_Booking_Frontend_Dashboard
                 $price = get_post_meta($listing_id, '_obenlo_price', true);
                 $capacity = get_post_meta($listing_id, '_obenlo_capacity', true);
                 $location = get_post_meta($listing_id, '_obenlo_location', true);
+                $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
+                $event_is_fixed = get_post_meta($listing_id, '_obenlo_event_is_fixed', true) ?: 'no';
+                $event_date = get_post_meta($listing_id, '_obenlo_event_date', true);
+                $event_start_time = get_post_meta($listing_id, '_obenlo_event_start_time', true);
+                $event_end_time = get_post_meta($listing_id, '_obenlo_event_end_time', true);
+                $event_location_type = get_post_meta($listing_id, '_obenlo_event_location_type', true) ?: 'virtual';
 
                 $addons_json = get_post_meta($listing_id, '_obenlo_addons_structured', true);
                 if (!empty($addons_json)) {
@@ -620,6 +632,24 @@ class Obenlo_Booking_Frontend_Dashboard
 
         $form_action = esc_url(admin_url('admin-post.php'));
         $title_label = $is_child ? 'Unit / Session Name' : 'Listing Title';
+
+        // Derive category flag for dynamic headings
+        $category_flag = 'default';
+        if ($selected_type) {
+            $type_term = get_term($selected_type, 'listing_type');
+            if ($type_term && !is_wp_error($type_term)) {
+                $slug = $type_term->slug;
+                $name_lower = strtolower($type_term->name);
+                if (strpos($name_lower, 'stay') !== false || in_array($slug, ['hotel', 'guest-house']))
+                    $category_flag = 'stay';
+                elseif (strpos($name_lower, 'experience') !== false || strpos($name_lower, 'tour') !== false)
+                    $category_flag = 'experience';
+                elseif (in_array($slug, ['event', 'show']) || strpos($name_lower, 'event') !== false)
+                    $category_flag = 'event';
+                elseif (strpos($name_lower, 'service') !== false || in_array($slug, ['chauffeur', 'cook', 'barbershop', 'hairdresser', 'concierge', 'personal-assistant', 'babysitter', 'dogsitter']))
+                    $category_flag = 'service';
+            }
+        }
 
 ?>
         <div class="dashboard-header">
@@ -676,7 +706,7 @@ class Obenlo_Booking_Frontend_Dashboard
                             </select>
                         </div>
 
-                        <div style="margin-bottom:20px;">
+                        <div style="margin-bottom:20px;" id="generic_location_wrapper">
                             <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Location</label>
                             <input type="text" name="listing_location" value="<?php echo esc_attr($location); ?>" placeholder="e.g. Tulum, Mexico" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         </div>
@@ -686,6 +716,53 @@ class Obenlo_Booking_Frontend_Dashboard
                     <div style="margin-bottom:0;">
                         <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Description</label>
                         <textarea name="listing_content" rows="6" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($content); ?></textarea>
+                    </div>
+
+                    <!-- Event Specific Configuration -->
+                    <div id="event_config_wrapper" style="margin-top:20px; display:none; padding:20px; background:#f9f9f9; border-radius:12px; border:1px solid #eee;">
+                        <h4 style="margin-top:0; margin-bottom:15px; color:#333;">Event Schedule & Location</h4>
+                        
+                        <div style="margin-bottom:15px;">
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:700;">
+                                <input type="checkbox" name="event_is_fixed" value="yes" id="event_is_fixed_toggle" <?php checked($event_is_fixed, 'yes'); ?>>
+                                Specific Scheduled Time (e.g., Monday 8 April, 4pm-10pm)
+                            </label>
+                        </div>
+
+                        <div id="fixed_time_fields" style="display:<?php echo ($event_is_fixed === 'yes') ? 'block' : 'none'; ?>; margin-bottom:20px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;">
+                                <div>
+                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;">Event Date</label>
+                                    <input type="date" name="event_date" value="<?php echo esc_attr($event_date); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;">Start Time</label>
+                                    <input type="time" name="event_start_time" value="<?php echo esc_attr($event_start_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;">End Time</label>
+                                    <input type="time" name="event_end_time" value="<?php echo esc_attr($event_end_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Event Type</label>
+                            <select name="event_location_type" id="event_location_type_select" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
+                                <option value="virtual" <?php selected($event_location_type, 'virtual'); ?>>Virtual (Zoom, Google Meet, etc.)</option>
+                                <option value="in_person" <?php selected($event_location_type, 'in_person'); ?>>In-Person (Physical Address)</option>
+                            </select>
+                        </div>
+
+                        <div id="virtual_link_wrapper" style="display:<?php echo ($event_location_type === 'virtual') ? 'block' : 'none'; ?>;">
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Virtual Meeting Link</label>
+                            <input type="url" name="virtual_link" value="<?php echo esc_url($virtual_link); ?>" placeholder="https://zoom.us/j/..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        </div>
+
+                        <div id="in_person_address_wrapper" style="display:<?php echo ($event_location_type === 'in_person') ? 'block' : 'none'; ?>;">
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Event Address</label>
+                            <input type="text" name="listing_event_address" value="<?php echo esc_attr($location); ?>" placeholder="Enter physical address..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        </div>
                     </div>
                 </div>
 
@@ -743,83 +820,42 @@ class Obenlo_Booking_Frontend_Dashboard
                     </div>
                 </div>
 
-                <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const typeSelect = document.getElementById('smart_listing_type');
-                    const isChild = <?php echo $is_child ? 'true' : 'false'; ?>;
-                    const parentCategorySlug = "<?php echo $selected_type ? esc_js(get_term($selected_type)->slug) : ''; ?>";
-                    
-                    const pricingModel = document.getElementById('pricing_model');
-                    const capacityWrapper = document.getElementById('capacity_wrapper');
-                    const durationWrapper = document.getElementById('duration_wrapper');
-                    const slotsWrapper = document.getElementById('requires_slots_wrapper');
 
-                    function updateSmartFields() {
-                        let slug = '';
-                        if(isChild) {
-                            slug = parentCategorySlug;
-                        } else if(typeSelect && typeSelect.options[typeSelect.selectedIndex]) {
-                            slug = typeSelect.options[typeSelect.selectedIndex].getAttribute('data-slug');
-                        }
 
-                        if(!slug) return;
-
-                        // Default to show all, then hide based on logic
-                        capacityWrapper.style.display = 'block';
-                        durationWrapper.style.display = 'flex';
-                        slotsWrapper.style.display = 'block';
-
-                        if(['stay', 'hotel', 'guest-house'].includes(slug)) {
-                            pricingModel.value = 'per_night';
-                            durationWrapper.style.display = 'none';
-                            slotsWrapper.style.display = 'none';
-                        } 
-                        else if(['barbershop', 'hairdresser', 'service'].includes(slug)) {
-                            pricingModel.value = 'per_session';
-                            if(isChild) capacityWrapper.style.display = 'none'; // Services usually 1-on-1
-                        }
-                        else if(['tour', 'experience', 'event', 'show'].includes(slug)) {
-                            pricingModel.value = 'per_person';
-                            slotsWrapper.style.display = 'none'; // Usually single specific event time
-                        }
-                    }
-
-                    if(typeSelect) typeSelect.addEventListener('change', updateSmartFields);
-                    if(isChild) updateSmartFields();
-                });
-                </script>
-
-                <?php if (!$is_child): ?>
-                    <!-- Amenities -->
-                    <div class="form-section">
-                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Amenities</h4>
-                        <div id="amenities-container">
+                <?php 
+                $amenity_title = 'Amenities';
+                if (in_array($category_flag, ['experience', 'event', 'show'])) {
+                    $amenity_title = 'What\'s Included';
+                }
+                ?>
+                <!-- Amenities -->
+                <div class="form-section">
+                    <h4 id="amenities_heading" style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo esc_html($amenity_title); ?></h4>
+                    <div id="amenities-container">
+                        <?php
+        $current_amenities = wp_get_post_terms($listing_id, 'listing_amenity', array('fields' => 'names'));
+        if (is_wp_error($current_amenities))
+            $current_amenities = array();
+        if (!empty($current_amenities)):
+            foreach ($current_amenities as $amenity_name): ?>
+                                <div class="amenity-row" style="display:flex; gap:10px; margin-bottom:12px;">
+                                    <input type="text" name="listing_amenities_repeater[]" value="<?php echo esc_attr($amenity_name); ?>" placeholder="e.g. WiFi or Textbook" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                    <button type="button" class="remove-amenity-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
+                                </div>
                             <?php
-            $current_amenities = wp_get_post_terms($listing_id, 'listing_amenity', array('fields' => 'names'));
-            if (is_wp_error($current_amenities))
-                $current_amenities = array();
-            if (!empty($current_amenities)):
-                foreach ($current_amenities as $amenity_name): ?>
-                                    <div class="amenity-row" style="display:flex; gap:10px; margin-bottom:12px;">
-                                        <input type="text" name="listing_amenities_repeater[]" value="<?php echo esc_attr($amenity_name); ?>" placeholder="e.g. High Speed WiFi" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                        <button type="button" class="remove-amenity-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
-                                    </div>
-                                <?php
-                endforeach; ?>
-                            <?php
-            endif; ?>
-                        </div>
-                        <button type="button" id="add-amenity-btn" style="background:#f9f9f9; border:1px dashed #ccc; color:#666; width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:600; transition:all 0.2s;" onmouseover="this.style.borderColor='#e61e4d';this.style.color='#e61e4d'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">+ Add New Amenity</button>
-                        
-                        <template id="amenity-template">
-                            <div class="amenity-row" style="display:flex; gap:10px; margin-bottom:12px;">
-                                <input type="text" name="listing_amenities_repeater[]" value="" placeholder="e.g. High Speed WiFi" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                <button type="button" class="remove-amenity-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
-                            </div>
-                        </template>
-                    </div>
-                <?php
+            endforeach; ?>
+                        <?php
         endif; ?>
+                    </div>
+                    <button type="button" id="add-amenity-btn" style="background:#f9f9f9; border:1px dashed #ccc; color:#666; width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:600; transition:all 0.2s;" onmouseover="this.style.borderColor='#e61e4d';this.style.color='#e61e4d'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">+ Add New</button>
+                    
+                    <template id="amenity-template">
+                        <div class="amenity-row" style="display:flex; gap:10px; margin-bottom:12px;">
+                            <input type="text" name="listing_amenities_repeater[]" value="" placeholder="e.g. WiFi or Textbook" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                            <button type="button" class="remove-amenity-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
+                        </div>
+                    </template>
+                </div>
 
                 <?php if ($is_child): ?>
                     <!-- Addons -->
@@ -945,19 +981,25 @@ class Obenlo_Booking_Frontend_Dashboard
         // In a real WP environment, we'd enqueue this, but for the shortcode MVP this is clean enough.
         $types = get_terms(array('taxonomy' => 'listing_type', 'hide_empty' => false));
         $type_map = array();
+        $slug_map = array();
 
         if (!is_wp_error($types)) {
             foreach ($types as $type) {
                 // Very simple heuristic to map term IDs to normalized names
                 $name_lower = strtolower($type->name);
-                if (strpos($name_lower, 'stay') !== false)
+                $slug = $type->slug;
+                if (strpos($name_lower, 'stay') !== false || in_array($slug, ['hotel', 'guest-house']))
                     $type_map[$type->term_id] = 'stay';
                 elseif (strpos($name_lower, 'experience') !== false || strpos($name_lower, 'tour') !== false)
                     $type_map[$type->term_id] = 'experience';
-                elseif (strpos($name_lower, 'service') !== false)
+                elseif (in_array($slug, ['event', 'show']) || strpos($name_lower, 'event') !== false)
+                    $type_map[$type->term_id] = 'event';
+                elseif (strpos($name_lower, 'service') !== false || in_array($slug, ['chauffeur', 'cook', 'barbershop', 'hairdresser', 'concierge', 'personal-assistant', 'babysitter', 'dogsitter']))
                     $type_map[$type->term_id] = 'service';
                 else
                     $type_map[$type->term_id] = 'default';
+                
+                $slug_map[$type->term_id] = $slug;
             }
         }
 
@@ -966,7 +1008,8 @@ class Obenlo_Booking_Frontend_Dashboard
 ?>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var typeMap = <?php echo $type_map_json; ?>;
+            var typeMap = <?php echo json_encode($type_map); ?>;
+            var slugMap = <?php echo json_encode($slug_map); ?>;
             var isChild = <?php echo $is_child ? 'true' : 'false'; ?>;
             var initTypeId = '<?php echo esc_js($init_type_id); ?>';
             
@@ -976,30 +1019,68 @@ class Obenlo_Booking_Frontend_Dashboard
             
             var capInput = document.querySelector('input[name="listing_capacity"]');
             var capContainer = capInput ? capInput.closest('div') : null;
+            if(!capContainer) capContainer = document.getElementById('capacity_wrapper');
             var capLabel = capContainer ? capContainer.querySelector('label') : null;
+
+            var pricingModel = document.getElementById('pricing_model');
+            var durationWrapper = document.getElementById('duration_wrapper');
+            var slotsWrapper = document.getElementById('requires_slots_wrapper');
+            var eventConfigWrapper = document.getElementById('event_config_wrapper');
+            var genericLocationWrapper = document.getElementById('generic_location_wrapper');
             
             function updateFormLogic(typeId) {
                 var category = typeMap[typeId] || 'default';
+                var slug = slugMap[typeId] || '';
                 
+                // Reset defaults
+                if (capContainer) capContainer.style.display = 'block';
+                if (durationWrapper) durationWrapper.style.display = 'flex';
+                if (slotsWrapper) slotsWrapper.style.display = 'block';
+                if (eventConfigWrapper) eventConfigWrapper.style.display = 'none';
+                if (genericLocationWrapper) genericLocationWrapper.style.display = 'block';
+
+                var amenHeading = document.getElementById('amenities_heading');
                 if (category === 'stay') {
                     if (priceLabel) priceLabel.innerText = 'Price (Per Night)';
-                    if (capContainer) capContainer.style.display = 'block';
                     if (capLabel) capLabel.innerText = 'Capacity/Max Guests';
-                } else if (category === 'experience') {
-                    if (priceLabel) priceLabel.innerText = 'Price (Per Person/Ticket)';
-                    if (capContainer) capContainer.style.display = 'block';
-                    if (capLabel) capLabel.innerText = 'Max Tickets/Participants';
+                    if (pricingModel) pricingModel.value = 'per_night';
+                    if (durationWrapper) durationWrapper.style.display = 'none';
+                    if (slotsWrapper) slotsWrapper.style.display = 'none';
+                    if (amenHeading) amenHeading.innerText = 'Amenities';
+                } else if (category === 'event' || category === 'experience') {
+                    if (priceLabel) priceLabel.innerText = category === 'event' ? 'Price (Per Ticket)' : 'Price (Per Person/Ticket)';
+                    if (capLabel) capLabel.innerText = category === 'event' ? 'Total Tickets Available' : 'Max Tickets/Participants';
+                    if (pricingModel) pricingModel.value = 'per_person';
+                    if (slotsWrapper) slotsWrapper.style.display = 'none';
+                    if (eventConfigWrapper) eventConfigWrapper.style.display = 'block';
+                    if (genericLocationWrapper) genericLocationWrapper.style.display = 'none';
+                    if (amenHeading) amenHeading.innerText = 'What\'s Included';
                 } else if (category === 'service') {
-                    if (priceLabel) priceLabel.innerText = 'Price (Per Session)';
-                    // Services usually don't have a "capacity" per slot, it's just 1 appointment.
-                    if (capContainer) capContainer.style.display = 'none'; 
-                    // Ensure hidden input keeps its value or defaults to 1
-                    if (capInput && capInput.value === '') capInput.value = '1';
+                    if (priceLabel) priceLabel.innerText = 'Price (Per Hour/Session)';
+                    if (capLabel) capLabel.innerText = 'Max Clients per Slot';
+                    if (pricingModel) pricingModel.value = 'per_session';
+                    if (amenHeading) amenHeading.innerText = 'Amenities';
+                    // Special cases for services
+                    if(['babysitter', 'dogsitter', 'chauffeur'].includes(slug)) {
+                        if(pricingModel) pricingModel.value = 'per_hour';
+                    }
                 } else {
-                    // Default fallback
                     if (priceLabel) priceLabel.innerText = 'Price (Base)';
-                    if (capContainer) capContainer.style.display = 'block';
                     if (capLabel) capLabel.innerText = 'Capacity/Max Guests';
+                    if (amenHeading) amenHeading.innerText = 'Amenities';
+                }
+
+                // Call location toggles within footer JS context
+                updateEventLocationToggles();
+            }
+
+            function updateEventLocationToggles() {
+                var eventLocationSelect = document.getElementById('event_location_type_select');
+                var vLinkWrapper = document.getElementById('virtual_link_wrapper');
+                var inPersWrapper = document.getElementById('in_person_address_wrapper');
+                if(eventLocationSelect && vLinkWrapper && inPersWrapper) {
+                    vLinkWrapper.style.display = eventLocationSelect.value === 'virtual' ? 'block' : 'none';
+                    inPersWrapper.style.display = eventLocationSelect.value === 'in_person' ? 'block' : 'none';
                 }
             }
             
@@ -1064,6 +1145,25 @@ class Obenlo_Booking_Frontend_Dashboard
                     }
                 });
             }
+
+            // Event Configuration JS
+            var eventFixedToggle = document.getElementById('event_is_fixed_toggle');
+            var fixedTimeFields = document.getElementById('fixed_time_fields');
+            if(eventFixedToggle && fixedTimeFields) {
+                eventFixedToggle.addEventListener('change', function() {
+                    fixedTimeFields.style.display = this.checked ? 'block' : 'none';
+                });
+            }
+
+            var eventLocationSelect = document.getElementById('event_location_type_select');
+            var vLinkWrapper = document.getElementById('virtual_link_wrapper');
+            var inPersWrapper = document.getElementById('in_person_address_wrapper');
+            if(eventLocationSelect && vLinkWrapper && inPersWrapper) {
+                eventLocationSelect.addEventListener('change', function() {
+                    vLinkWrapper.style.display = this.value === 'virtual' ? 'block' : 'none';
+                    inPersWrapper.style.display = this.value === 'in_person' ? 'block' : 'none';
+                });
+            }
         });
         </script>
         <?php
@@ -1077,6 +1177,11 @@ class Obenlo_Booking_Frontend_Dashboard
         $store_location = get_user_meta($user_id, 'obenlo_store_location', true);
         $store_logo_id = get_user_meta($user_id, 'obenlo_store_logo', true);
         $store_banner_id = get_user_meta($user_id, 'obenlo_store_banner', true);
+        $store_tagline = get_user_meta($user_id, 'obenlo_store_tagline', true);
+        $store_video = get_user_meta($user_id, 'obenlo_store_video', true);
+        $social_insta = get_user_meta($user_id, 'obenlo_instagram', true);
+        $social_fb = get_user_meta($user_id, 'obenlo_facebook', true);
+        $store_specialties = get_user_meta($user_id, 'obenlo_specialties', true);
 
 ?>
         <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center;">
@@ -1109,9 +1214,37 @@ class Obenlo_Booking_Frontend_Dashboard
                         <input type="text" name="store_location" value="<?php echo esc_attr($store_location); ?>" placeholder="e.g. New York, NY" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                     </div>
 
-                    <div style="margin-bottom:0;">
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Tagline (Catchy Hook)</label>
+                        <input type="text" name="store_tagline" value="<?php echo esc_attr($store_tagline); ?>" placeholder="e.g. Luxury Haircare in the heart of Paris" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                    </div>
+
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Host Specialties</label>
+                        <input type="text" name="store_specialties" value="<?php echo esc_attr($store_specialties); ?>" placeholder="e.g. Organic, Pet Friendly, Multilingual" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <p style="font-size:0.8rem; color:#888; margin-top:5px;">Separate your specialties with commas.</p>
+                    </div>
+
+                    <div style="margin-bottom:20px;">
                         <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Description / Bio</label>
                         <textarea name="store_description" rows="5" placeholder="Tell guests about yourself or your hospitality business..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($store_desc); ?></textarea>
+                    </div>
+
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Featured Video (YouTube/Vimeo)</label>
+                        <input type="url" name="store_video" value="<?php echo esc_attr($store_video); ?>" placeholder="https://www.youtube.com/watch?v=..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <p style="font-size:0.8rem; color:#888; margin-top:5px;">Share a welcoming video with your future guests.</p>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Instagram Profile</label>
+                            <input type="text" name="social_insta" value="<?php echo esc_attr($social_insta); ?>" placeholder="@youraccount" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Facebook Page</label>
+                            <input type="text" name="social_fb" value="<?php echo esc_attr($social_fb); ?>" placeholder="facebook.com/yourpage" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        </div>
                     </div>
                 </div>
 
@@ -1205,8 +1338,29 @@ class Obenlo_Booking_Frontend_Dashboard
             if (isset($_POST['listing_capacity'])) {
                 update_post_meta($new_post_id, '_obenlo_capacity', sanitize_text_field($_POST['listing_capacity']));
             }
-            if (isset($_POST['listing_location'])) {
+            if (isset($_POST['listing_location']) && !empty($_POST['listing_location'])) {
                 update_post_meta($new_post_id, '_obenlo_location', sanitize_text_field($_POST['listing_location']));
+            }
+            if (isset($_POST['listing_event_address']) && !empty($_POST['listing_event_address'])) {
+                update_post_meta($new_post_id, '_obenlo_location', sanitize_text_field($_POST['listing_event_address']));
+            }
+            if (isset($_POST['virtual_link'])) {
+                update_post_meta($new_post_id, '_obenlo_virtual_link', esc_url_raw($_POST['virtual_link']));
+            }
+
+            // Fixed Event Scheduling
+            update_post_meta($new_post_id, '_obenlo_event_is_fixed', isset($_POST['event_is_fixed']) ? 'yes' : 'no');
+            if (isset($_POST['event_date'])) {
+                update_post_meta($new_post_id, '_obenlo_event_date', sanitize_text_field($_POST['event_date']));
+            }
+            if (isset($_POST['event_start_time'])) {
+                update_post_meta($new_post_id, '_obenlo_event_start_time', sanitize_text_field($_POST['event_start_time']));
+            }
+            if (isset($_POST['event_end_time'])) {
+                update_post_meta($new_post_id, '_obenlo_event_end_time', sanitize_text_field($_POST['event_end_time']));
+            }
+            if (isset($_POST['event_location_type'])) {
+                update_post_meta($new_post_id, '_obenlo_event_location_type', sanitize_text_field($_POST['event_location_type']));
             }
 
             // New Booking Meta Fields
@@ -1381,6 +1535,21 @@ class Obenlo_Booking_Frontend_Dashboard
         }
         if (isset($_POST['store_location'])) {
             update_user_meta($user_id, 'obenlo_store_location', sanitize_text_field($_POST['store_location']));
+        }
+        if (isset($_POST['store_tagline'])) {
+            update_user_meta($user_id, 'obenlo_store_tagline', sanitize_text_field($_POST['store_tagline']));
+        }
+        if (isset($_POST['store_video'])) {
+            update_user_meta($user_id, 'obenlo_store_video', esc_url_raw($_POST['store_video']));
+        }
+        if (isset($_POST['social_insta'])) {
+            update_user_meta($user_id, 'obenlo_instagram', sanitize_text_field($_POST['social_insta']));
+        }
+        if (isset($_POST['social_fb'])) {
+            update_user_meta($user_id, 'obenlo_facebook', sanitize_text_field($_POST['social_fb']));
+        }
+        if (isset($_POST['store_specialties'])) {
+            update_user_meta($user_id, 'obenlo_specialties', sanitize_text_field($_POST['store_specialties']));
         }
 
         // Process removals

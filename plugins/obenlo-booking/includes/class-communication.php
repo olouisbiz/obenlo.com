@@ -37,130 +37,10 @@ class Obenlo_Booking_Communication
         // Frontend Chat Widget
         add_action('wp_footer', array($this, 'render_frontend_chat_widget'));
 
-        // Telegram Webhook
-        add_action('rest_api_init', array($this, 'register_telegram_webhook'));
+
     }
 
-    public function register_telegram_webhook()
-    {
-        register_rest_route('obenlo/v1', '/telegram-webhook', array(
-            'methods' => 'POST',
-            'callback' => array($this, 'handle_telegram_webhook'),
-            'permission_callback' => '__return_true'
-        ));
-    }
 
-    public function handle_telegram_webhook(WP_REST_Request $request)
-    {
-        $body = $request->get_json_params();
-
-        // Log incoming webhook for debugging
-        error_log('Obenlo Telegram Webhook: ' . print_r($body, true));
-        // Ensure this is a message we care about
-        if (!isset($body['message']) || !isset($body['message']['reply_to_message'])) {
-            return new WP_REST_Response('Not a reply', 200);
-        }
-
-        $reply_text = isset($body['message']['text']) ? sanitize_textarea_field($body['message']['text']) : '';
-        $original_text = isset($body['message']['reply_to_message']['text']) ? $body['message']['reply_to_message']['text'] : '';
-
-        // Extract session ID from the original message (e.g. "Session: guest_ABCD")
-        if (preg_match('/Session:\s*([a-zA-Z0-9_]+)/', $original_text, $matches)) {
-            $session_id = $matches[1];
-
-            if ($reply_text && $session_id) {
-                // Insert message back into WordPress as a staff reply
-                $message_id = wp_insert_post(array(
-                    'post_type' => 'obenlo_message',
-                    'post_content' => $reply_text,
-                    'post_status' => 'publish',
-                    'post_author' => 1, // System/Admin user
-                    'post_title' => 'Telegram Agent Reply'
-                ));
-
-                if ($message_id) {
-                    update_post_meta($message_id, '_obenlo_chat_session', $session_id);
-                    update_post_meta($message_id, '_obenlo_is_staff_reply', '1');
-                    return new WP_REST_Response('Success', 200);
-                }
-            }
-        }
-
-        return new WP_REST_Response('Failed to parse', 200); // Always 200 to prevent Telegram from retrying failed parse
-    }
-
-    public static function sync_telegram_webhook()
-    {
-        $token = get_option('obenlo_telegram_bot_token');
-        if (!$token) {
-            return array('success' => false, 'message' => 'Missing Bot Token');
-        }
-
-        $webhook_url = rest_url('obenlo/v1/telegram-webhook');
-
-        // If local site, warn user
-        if (strpos($webhook_url, '.local') !== false) {
-            return array('success' => false, 'message' => 'Telegram cannot reach local .local sites. Please deploy to the live server or use a tunnel like ngrok.');
-        }
-
-        $api_url = "https://api.telegram.org/bot{$token}/setWebhook?url=" . urlencode($webhook_url);
-
-        $response = wp_remote_get($api_url);
-        if (is_wp_error($response)) {
-            return array('success' => false, 'message' => 'API Call Failed: ' . $response->get_error_message());
-        }
-
-        $body = json_decode(wp_remote_retrieve_body($response), true);
-        if (isset($body['ok']) && $body['ok']) {
-            return array('success' => true, 'message' => 'Webhook synced successfully! Telegram now knows where to send replies.');
-        }
-
-        return array('success' => false, 'message' => 'Telegram Error: ' . ($body['description'] ?? 'Unknown error'));
-    }
-
-    public static function send_test_telegram_message()
-    {
-        $bot_token = get_option('obenlo_telegram_bot_token');
-        $chat_ids = get_option('obenlo_telegram_chat_id');
-
-        if (!$bot_token || !$chat_ids) {
-            return array('success' => false, 'message' => 'Missing Token or Chat ID');
-        }
-
-        $chat_id_array = array_map('trim', explode(',', $chat_ids));
-        $results = array();
-
-        foreach ($chat_id_array as $chat_id) {
-            if (empty($chat_id))
-                continue;
-
-            $msg = "🔧 <b>Obenlo Connection Test</b>\nIf you see this, your Telegram connection is working! (v1.0.2)";
-            $api_url = "https://api.telegram.org/bot{$bot_token}/sendMessage";
-
-            $response = wp_remote_post($api_url, array(
-                'body' => array(
-                    'chat_id' => $chat_id,
-                    'text' => $msg,
-                    'parse_mode' => 'HTML'
-                )
-            ));
-
-            if (is_wp_error($response)) {
-                $results[] = "ID $chat_id: Failed (" . $response->get_error_message() . ")";
-            }
-            else {
-                $body = json_decode(wp_remote_retrieve_body($response), true);
-                if (isset($body['ok']) && $body['ok']) {
-                    $results[] = "ID $chat_id: Success!";
-                }
-                else {
-                    $results[] = "ID $chat_id: Error (" . ($body['description'] ?? 'Unknown') . ")";
-                }
-            }
-        }
-
-        return array('success' => true, 'message' => implode(' | ', $results));
-    }
 
     public function add_contact_button_to_listing($content)
     {
@@ -1132,7 +1012,7 @@ class Obenlo_Booking_Communication
             }
 
             function obenloFetchContacts() {
-                jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
+                jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', {
                     action: 'obenlo_fetch_chat_contacts'
                 }, function(res) {
                     let html = '';
@@ -1179,7 +1059,7 @@ class Obenlo_Booking_Communication
 
             function obenloFetchMessages() {
                 if (!obenloCurrentContact) return;
-                jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
+                jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', {
                     action: 'obenlo_fetch_chat_messages',
                     contact_id: obenloCurrentContact,
                     last_id: obenloLastMsgId

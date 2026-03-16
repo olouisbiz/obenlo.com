@@ -257,8 +257,6 @@ class Obenlo_Booking_Admin_Dashboard
     private function render_settings_tab()
     {
         $global_fee = get_option('obenlo_global_platform_fee', '10');
-        $telegram_bot_token = get_option('obenlo_telegram_bot_token', '');
-        $telegram_chat_id = get_option('obenlo_telegram_chat_id', '');
         if (isset($_GET['sync_status'])) {
             $color = ($_GET['sync_status'] === 'success') ? '#155724' : '#721c24';
             $bg = ($_GET['sync_status'] === 'success') ? '#d4edda' : '#f8d7da';
@@ -282,19 +280,7 @@ class Obenlo_Booking_Admin_Dashboard
                     <input type="number" name="global_fee" value="<?php echo esc_attr($global_fee); ?>" step="0.1" required style="width:100px; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:1.1em;"> <span style="font-size:1.2em; font-weight:600; margin-left:10px;">%</span>
                 </div>
 
-                    <h4 style="margin-top:0;">Telegram Live Chat Integration (v1.0.2)</h4>
-                    <p style="font-size:0.85em; color:#666; margin-bottom:15px;">Input your Bot Token and Agent Chat ID(s). Notifications will be sent to all IDs listed.</p>
-                    <input type="text" name="telegram_bot_token" value="<?php echo esc_attr($telegram_bot_token); ?>" placeholder="Bot Token" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:15px;">
-                    
-                    <label style="display:block; font-size:0.8em; font-weight:700; margin-bottom:5px;">Agent Chat ID(s)</label>
-                    <p style="font-size:0.75em; color:#888; margin-bottom:10px;">For multiple agents, separate IDs with commas (e.g., <code>12345, 67890</code>).</p>
-                    <input type="text" name="telegram_chat_id" value="<?php echo esc_attr($telegram_chat_id); ?>" placeholder="e.g. 1234567, 8901234" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:15px;">
-                    
-                    <div style="background:#f9f9f9; padding:20px; border-radius:12px; border:1px solid #eee; margin-top:10px;">
-                        <button type="submit" name="sync_telegram_webhook" value="1" style="background:#222; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700; font-size:1em; width:100%; margin-bottom:10px;">🔄 Sync Telegram Webhook</button>
-                        <button type="submit" name="test_telegram_connection" value="1" style="background:#fff; color:#222; border:1px solid #ddd; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700; font-size:1em; width:100%;">⚡ Send Test Message</button>
-                        <p style="font-size:0.8em; color:#666; margin:10px 0 0 0; text-align:center;">Use <b>Sync</b> to register the bot, and <b>Test</b> to verify the connection.</p>
-                    </div>
+
 
                     <div style="background:#fff3cd; padding:20px; border-radius:12px; border:1px solid #ffeeba; margin-top:20px;">
                         <h4 style="margin-top:0; color:#856404;">Emergency Database Repair</h4>
@@ -395,34 +381,7 @@ class Obenlo_Booking_Admin_Dashboard
             update_option('obenlo_global_platform_fee', sanitize_text_field($_POST['global_fee']));
         }
 
-        // Telegram Settings
-        if (isset($_POST['telegram_bot_token'])) {
-            update_option('obenlo_telegram_bot_token', sanitize_text_field($_POST['telegram_bot_token']));
-            error_log('Obenlo Settings: Updated bot token.');
-        }
-        if (isset($_POST['telegram_chat_id'])) {
-            update_option('obenlo_telegram_chat_id', sanitize_text_field($_POST['telegram_chat_id']));
-            error_log('Obenlo Settings: Updated chat ID(s).');
-        }
-        // Handle Webhook Sync Request
-        if (isset($_POST['sync_telegram_webhook'])) {
-            error_log('Obenlo Settings: Webhook sync requested.');
-            $sync_result = Obenlo_Booking_Communication::sync_telegram_webhook();
-            $redirect_url = add_query_arg(array(
-                'sync_status' => $sync_result['success'] ? 'success' : 'error',
-                'sync_msg' => urlencode($sync_result['message'])
-            ), $redirect_url);
-        }
 
-        // Handle Test Message Request
-        if (isset($_POST['test_telegram_connection'])) {
-            error_log('Obenlo Settings: Test message requested.');
-            $test_result = Obenlo_Booking_Communication::send_test_telegram_message();
-            $redirect_url = add_query_arg(array(
-                'test_status' => $test_result['success'] ? 'success' : 'error',
-                'test_msg' => urlencode($test_result['message'])
-            ), $redirect_url);
-        }
 
         error_log('Obenlo Settings: Redirecting to ' . $redirect_url);
         wp_safe_redirect($redirect_url);

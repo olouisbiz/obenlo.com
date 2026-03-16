@@ -69,7 +69,44 @@ get_header(); ?>
                     <span>&bull;</span>
                 <?php
     endif; ?>
-                <?php echo esc_html($type); ?> &bull; Hosted by <a href="<?php echo get_author_posts_url(get_the_author_meta('ID')); ?>" style="color:#e61e4d; font-weight:bold; text-decoration:none;"><?php the_author(); ?></a>
+                <?php 
+                $badge_icon = '🏢';
+                $display_category = $type;
+                
+                // Robust mapping to main categories
+                $cat_check = strtolower($type);
+                if (strpos($cat_check, 'stay') !== false || strpos($cat_check, 'hotel') !== false || strpos($cat_check, 'guest-house') !== false) {
+                    $badge_icon = '🏠';
+                    $display_category = 'Stay';
+                } elseif (strpos($cat_check, 'experience') !== false || strpos($cat_check, 'tour') !== false) {
+                    $badge_icon = '✨';
+                    $display_category = 'Experience';
+                } elseif (strpos($cat_check, 'service') !== false || in_array($cat_check, ['chauffeur', 'cook', 'barbershop', 'hairdresser', 'concierge', 'personal-assistant', 'babysitter', 'dogsitter', 'barber'])) {
+                    $badge_icon = '🛠️';
+                    $display_category = 'Service';
+                } elseif (strpos($cat_check, 'event') !== false || strpos($cat_check, 'show') !== false || strpos($cat_check, 'dj') !== false) {
+                    $badge_icon = '🎟️';
+                    $display_category = 'Event';
+                }
+
+                $event_location_type = get_post_meta($listing_id, '_obenlo_event_location_type', true);
+                $location_val = get_post_meta($listing_id, '_obenlo_location', true);
+                ?>
+                <span class="category-badge" style="background:#fef2f2; padding:4px 12px; border-radius:30px; font-weight:700; font-size:0.85rem; color:#e61e4d; margin-right:8px; border:1px solid #fee2e2;">
+                    <?php echo $badge_icon; ?> <?php echo esc_html($display_category); ?>
+                </span>
+                
+                <?php if(in_array($display_category, ['Event', 'Experience'])): ?>
+                    <?php if($event_location_type === 'in_person' && $location_val): ?>
+                        <span style="color: #666; font-size: 0.9rem; margin-right:8px;">📍 <?php echo esc_html($location_val); ?></span>
+                    <?php elseif($event_location_type === 'virtual'): ?>
+                        <span style="color: #4f46e5; font-size: 0.9rem; font-weight:bold; margin-right:8px;">🌐 Virtual Event</span>
+                    <?php endif; ?>
+                <?php elseif($location_val): ?>
+                    <span style="color: #666; font-size: 0.9rem; margin-right:8px;">📍 <?php echo esc_html($location_val); ?></span>
+                <?php endif; ?>
+
+                <span style="color:#888;">&bull;</span> Hosted by <a href="<?php echo get_author_posts_url(get_the_author_meta('ID')); ?>" style="color:#e61e4d; font-weight:bold; text-decoration:none; margin-left:5px;"><?php the_author(); ?></a>
             </div>
         </div>
 
@@ -165,7 +202,33 @@ get_header(); ?>
                     <div class="listing-featured-image" style="margin-bottom: 20px; border-radius: 12px; overflow: hidden;">
                         <?php the_post_thumbnail('large', array('style' => 'width: 100%; height: auto; display: block;')); ?>
                     </div>
-                <?php
+                <?php 
+                // Virtual Event Logic: Show join link if confirmed
+                $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
+                if($virtual_link && is_user_logged_in()):
+                    // Check if current user has a confirmed booking for this listing
+                    $has_confirmed = false;
+                    $user_bookings = get_posts(array(
+                        'post_type' => 'booking',
+                        'author' => get_current_user_id(),
+                        'meta_query' => array(
+                            array('key' => '_obenlo_listing_id', 'value' => $listing_id),
+                            array('key' => '_obenlo_booking_status', 'value' => ['confirmed', 'approved', 'completed'], 'compare' => 'IN')
+                        )
+                    ));
+                    if(!empty($user_bookings)) $has_confirmed = true;
+
+                    if($has_confirmed):
+                ?>
+                    <div class="virtual-event-notice" style="background:#eef2ff; border:1px solid #c7d2fe; padding:25px; border-radius:15px; margin-bottom:30px; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+                        <div>
+                            <h4 style="margin:0 0 5px 0; color:#3730a3;">You're booked for this virtual event!</h4>
+                            <p style="margin:0; font-size:0.9rem; color:#4338ca;">Use the link below to join the session at the scheduled time.</p>
+                        </div>
+                        <a href="<?php echo esc_url($virtual_link); ?>" target="_blank" class="btn-primary" style="background:#4f46e5; padding:12px 25px; border-radius:10px; font-weight:800; text-decoration:none; font-size:0.95rem; display:inline-block; white-space:nowrap;">Join Session 🌐</a>
+                    </div>
+                <?php endif; endif; ?>
+<?php
     endif; ?>
 
                 <!-- Tabbed Interface for Content -->
@@ -182,7 +245,7 @@ get_header(); ?>
 
                 <div id="tab-amenities" class="tab-content" style="display: none; margin-bottom: 30px;">
                     <?php if (!empty($amenity_terms) && !is_wp_error($amenity_terms)): ?>
-                        <h3>What this place offers</h3>
+                        <h3><?php echo (in_array($category, ['experience', 'event', 'show'])) ? 'What\'s Included' : 'What this place offers'; ?></h3>
                         <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top:20px;">
                             <?php foreach ($amenity_terms as $amenity): ?>
                                 <li style="display: flex; align-items: center; gap: 10px;">
@@ -477,6 +540,14 @@ get_header(); ?>
                             <span style="color: #666;"><?php echo esc_html($price_unit); ?></span>
                         </div>
 
+                        <?php 
+                        $event_is_fixed = get_post_meta($listing_id, '_obenlo_event_is_fixed', true);
+                        $event_date = get_post_meta($listing_id, '_obenlo_event_date', true);
+                        $event_start = get_post_meta($listing_id, '_obenlo_event_start_time', true);
+                        $event_end = get_post_meta($listing_id, '_obenlo_event_end_time', true);
+                        $event_location_type = get_post_meta($listing_id, '_obenlo_event_location_type', true) ?: 'virtual';
+                        ?>
+
                         <form class="booking-form" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
                             <input type="hidden" name="action" value="obenlo_submit_booking">
                             <input type="hidden" name="listing_id" value="<?php echo esc_attr($listing_id); ?>">
@@ -484,7 +555,32 @@ get_header(); ?>
                             <?php wp_nonce_field('obenlo_submit_booking_action', 'obenlo_booking_nonce'); ?>
 
                             <!-- ── Date / Time Inputs ── -->
-                            <?php if ($booking_mode === 'date_range'): ?>
+                            <?php if ($event_is_fixed === 'yes' && $event_date): ?>
+                                <div class="form-row" style="background:#fef2f2; border:1px solid #fee2e2; padding:15px; border-radius:10px; margin-bottom:15px;">
+                                    <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color:#991b1b;">Scheduled Time</label>
+                                    <div style="font-size:1.1rem; font-weight:800; color:#333;">
+                                        <?php 
+                                        $formatted_date = date_i18n('l j F', strtotime($event_date));
+                                        $start_display = !empty($event_start) ? date('g:i A', strtotime($event_start)) : '';
+                                        $end_display = !empty($event_end) ? date('g:i A', strtotime($event_end)) : '';
+                                        echo esc_html($formatted_date);
+                                        if(!empty($start_display)) echo " &bull; " . esc_html($start_display);
+                                        if(!empty($end_display)) echo " - " . esc_html($end_display);
+                                        ?>
+                                    </div>
+                                    <div style="margin-top:8px; font-size:0.9rem; color:#666; display:flex; align-items:center; gap:5px;">
+                                        <?php if($event_location_type === 'virtual'): ?>
+                                            <span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;">🌐 Virtual Event</span>
+                                        <?php else: 
+                                            $location = get_post_meta($listing_id, '_obenlo_location', true);
+                                            if($location): ?>
+                                                <span style="color:#e61e4d;">📍</span> <?php echo esc_html($location); ?>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <input type="hidden" name="start_date" value="<?php echo esc_attr($event_date . 'T' . ($event_start ?: '00:00')); ?>">
+                                </div>
+                            <?php elseif ($booking_mode === 'date_range'): ?>
                                 <div class="form-row">
                                     <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;"><?php echo esc_html($date_label); ?></label>
                                     <div style="display: flex; border: 1px solid #ccc; border-radius: 6px; overflow: hidden;">

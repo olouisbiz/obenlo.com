@@ -86,6 +86,14 @@ class Obenlo_Booking_Notifications
                 $msg .= "  " . ($confirmation_code ?: 'N/A') . "\n";
                 $msg .= "━━━━━━━━━━━━━━━━━━━━━━━\n\n";
                 $msg .= "Keep this code safe — the host will use it to verify your booking at check-in.\n\n";
+
+                $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
+                if ($virtual_link) {
+                    $msg .= "🌐 VIRTUAL CLASS/EVENT LINK:\n";
+                    $msg .= esc_url($virtual_link) . "\n\n";
+                    $msg .= "Please use this link to join the event at the scheduled time.\n\n";
+                }
+
                 $msg .= "Total: $$total\n";
                 $msg .= "View all your bookings: " . home_url('/trips');
                 self::send_to_user($guest_id, $subject, $msg);
@@ -137,7 +145,9 @@ class Obenlo_Booking_Notifications
                 }
                 else {
                     // Notify Admin
-                    self::send_to_admin("New Reply on Ticket: $ticket_title", "User " . get_userdata($author_id)->display_name . " has replied to ticket #$ticket_id.");
+                    $author = get_userdata($author_id);
+                    $author_name = $author ? $author->display_name : "User #$author_id";
+                    self::send_to_admin("New Reply on Ticket: $ticket_title", "$author_name has replied to ticket #$ticket_id.");
                 }
             }
         }
