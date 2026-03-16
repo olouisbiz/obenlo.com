@@ -1,11 +1,10 @@
-const CACHE_NAME = 'obenlo-v1';
-const OFFLINE_URL = 'offline'; // Will point to our offline page
+const CACHE_NAME = 'obenlo-v1.0.5';
+const OFFLINE_URL = '/';
 
 const ASSETS_TO_CACHE = [
   '/',
   '/wp-content/themes/obenlo/style.css',
-  '/wp-content/themes/obenlo/assets/images/logo-wordmark.png',
-  '/wp-content/themes/obenlo/assets/images/favicon-32x32.png'
+  '/wp-content/themes/obenlo/assets/images/logo-social-square.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -32,26 +31,27 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Stale-While-Revalidate Strategy for Automatic Updates
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match(OFFLINE_URL) || caches.match('/');
-      })
-    );
-    return;
-  }
+  if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((fetchResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.match(event.request).then((cachedResponse) => {
+        const fetchedResponse = fetch(event.request).then((networkResponse) => {
           // Only cache successful GET requests
-          if (event.request.method === 'GET' && fetchResponse.status === 200) {
-            cache.put(event.request, fetchResponse.clone());
+          if (networkResponse.status === 200) {
+            cache.put(event.request, networkResponse.clone());
           }
-          return fetchResponse;
+          return networkResponse;
+        }).catch(() => {
+          // If network fails and no cache, return offline fallback for navigation
+          if (event.request.mode === 'navigate') {
+            return caches.match(OFFLINE_URL);
+          }
         });
+
+        return cachedResponse || fetchedResponse;
       });
     })
   );
@@ -62,8 +62,8 @@ self.addEventListener('push', function (event) {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: data.icon || '/wp-content/themes/obenlo/assets/images/favicon-192x192.png',
-      badge: '/wp-content/themes/obenlo/assets/images/favicon-32x32.png',
+      icon: data.icon || '/wp-content/themes/obenlo/assets/images/logo-social-square.png',
+      badge: '/wp-content/themes/obenlo/assets/images/logo-social-square.png',
       vibrate: [100, 50, 100],
       data: {
         url: data.url || '/'

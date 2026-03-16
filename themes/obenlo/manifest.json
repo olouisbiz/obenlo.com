@@ -3,15 +3,29 @@
   "short_name": "Obenlo",
   "description": "Luxury travel and booking platform.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#e61e4d",
+  "categories": ["travel", "lifestyle", "productivity"],
   "icons": [
     {
       "src": "/wp-content/themes/obenlo/assets/images/logo-social-square.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Host Dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/logo-social-square.png", "sizes": "512x512" }]
+    },
+    {
+      "name": "My Account",
+      "url": "/account",
+      "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/logo-social-square.png", "sizes": "512x512" }]
     }
   ]
 }

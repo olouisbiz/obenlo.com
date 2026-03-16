@@ -463,13 +463,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if ('serviceWorker' in navigator && 'PushManager' in window) {
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/sw.js').then(function(registration) {
+            // Use a version query string to force update check when code changes
+            navigator.serviceWorker.register('/sw.js?v=<?php echo OBENLO_BOOKING_VERSION; ?>').then(function(registration) {
                 console.log('ServiceWorker registration successful with scope: ', registration.scope);
                 
+                // Detection for Service Worker updates
+                registration.onupdatefound = () => {
+                   const installingWorker = registration.installing;
+                   installingWorker.onstatechange = () => {
+                       if (installingWorker.state === 'installed') {
+                           if (navigator.serviceWorker.controller) {
+                               // New update available, reload to apply
+                               console.log('New content available; please refresh.');
+                               window.location.reload();
+                           }
+                       }
+                   };
+                };
+
                 // Prompt for push notifications if logged in
                 let currentUserId = <?php echo is_user_logged_in() ? get_current_user_id() : 0; ?>;
                 if (currentUserId > 0) {
-                    // Check if we haven't asked recently or if we must ask
                     obenloSubscribeToPush(registration);
                 }
             }, function(err) {
