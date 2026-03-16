@@ -48,6 +48,13 @@ class Obenlo_Booking_Payout_Manager {
             update_user_meta( $user_id, 'obenlo_payout_method', $method );
             update_user_meta( $user_id, 'obenlo_payout_details', $details );
             
+            // Notify Admin
+            $user = get_userdata($user_id);
+            Obenlo_Booking_Notifications::send_to_admin(
+                "Payout Settings Updated: " . $user->display_name,
+                "Host " . $user->display_name . " has updated their payout preferences to " . strtoupper($method) . ".\nHost Email: " . $user->user_email . "\nView in Admin Dashboard: " . home_url('/support-console/?tab=users')
+            );
+
             wp_send_json_success( array( 'message' => 'Payout preferences saved successfully.' ) );
         }
 

@@ -42,6 +42,13 @@ class Obenlo_Booking_Host_Verification {
             update_user_meta( $user_id, 'obenlo_verification_doc_id', $attachment_id );
             update_user_meta( $user_id, 'obenlo_host_verification_status', 'pending' );
 
+            // Notify Admin
+            $user = get_userdata($user_id);
+            Obenlo_Booking_Notifications::send_to_admin(
+                "New Verification Request: " . $user->display_name,
+                "A host has uploaded an ID document for verification.\nHost: " . $user->display_name . "\nView in Admin Dashboard: " . home_url('/support-console/?tab=verifications')
+            );
+
             wp_send_json_success( array( 'message' => 'Document uploaded successfully. Your verification is now pending.' ) );
         }
 
