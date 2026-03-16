@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
     <link rel="profile" href="https://gmpg.org/xfn/11">
     <link rel="icon" type="image/png" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
-    <link rel="manifest" href="/manifest.json?v=1.0.2">
+    <link rel="manifest" href="/manifest.json?v=1.0.3">
     <?php wp_head(); ?>
 </head>
 
