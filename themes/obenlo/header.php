@@ -31,7 +31,7 @@
     <meta property="twitter:image" content="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
 
     <!-- Site Verification Placeholders - Replace with your actual codes -->
-    <meta name="google-site-verification" content="YOUR_GOOGLE_VERIFICATION_CODE">
+    <meta name="google-site-verification" content="pTHwfkbZtkCHLS8aWdQ3MsKXKB8cIJxcNc2ZGmIBLEU">
     <meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE">
 
     <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
