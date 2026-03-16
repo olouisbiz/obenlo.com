@@ -11,6 +11,29 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Obenlo">
+    
+    <!-- SEO & Legitimacy Tags -->
+    <meta name="description" content="<?php echo esc_attr(get_bloginfo('description')); ?>">
+    <link rel="canonical" href="<?php echo esc_url(home_url(add_query_arg(array(), $wp->request))); ?>">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?php echo esc_url(home_url(add_query_arg(array(), $wp->request))); ?>">
+    <meta property="og:title" content="<?php wp_title('|', true, 'right'); bloginfo('name'); ?>">
+    <meta property="og:description" content="<?php echo esc_attr(get_bloginfo('description')); ?>">
+    <meta property="og:image" content="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<?php echo esc_url(home_url(add_query_arg(array(), $wp->request))); ?>">
+    <meta property="twitter:title" content="<?php wp_title('|', true, 'right'); bloginfo('name'); ?>">
+    <meta property="twitter:description" content="<?php echo esc_attr(get_bloginfo('description')); ?>">
+    <meta property="twitter:image" content="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
+
+    <!-- Site Verification Placeholders - Replace with your actual codes -->
+    <meta name="google-site-verification" content="YOUR_GOOGLE_VERIFICATION_CODE">
+    <meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE">
+
     <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
     <link rel="profile" href="https://gmpg.org/xfn/11">
     <link rel="icon" type="image/png" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">

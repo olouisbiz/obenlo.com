@@ -75,3 +75,30 @@ function obenlo_serve_sw()
     }
 }
 add_action('parse_request', 'obenlo_serve_sw', 1);
+
+/**
+ * Redirect /sitemap.xml to /wp-sitemap.xml
+ */
+function obenlo_sitemap_redirect()
+{
+    $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+    if (untrailingslashit($request_uri) === '/sitemap.xml') {
+        wp_redirect(home_url('/wp-sitemap.xml'), 301);
+        exit;
+    }
+}
+add_action('template_redirect', 'obenlo_sitemap_redirect');
+
+/**
+ * Add Security and Legitimacy Headers
+ */
+function obenlo_security_headers($headers)
+{
+    $headers['X-Content-Type-Options'] = 'nosniff';
+    $headers['X-Frame-Options'] = 'SAMEORIGIN';
+    $headers['X-XSS-Protection'] = '1; mode=block';
+    $headers['Referrer-Policy'] = 'no-referrer-when-downgrade';
+    $headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()';
+    return $headers;
+}
+add_filter('wp_headers', 'obenlo_security_headers');
