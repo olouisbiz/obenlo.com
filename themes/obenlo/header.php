@@ -11,9 +11,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Obenlo">
-    <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-square.png'); ?>">
+    <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/obenlo-logo-social-profile.svg'); ?>">
     <link rel="profile" href="https://gmpg.org/xfn/11">
-    <link rel="icon" type="image/png" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-square.png'); ?>">
+    <link rel="icon" type="image/svg+xml" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/obenlo-logo-social-profile.svg'); ?>">
     <link rel="manifest" href="<?php echo esc_url(get_template_directory_uri() . '/manifest.json?v=1.0.1'); ?>">
     <?php wp_head(); ?>
 </head>

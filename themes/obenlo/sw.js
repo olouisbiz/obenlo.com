@@ -4,7 +4,8 @@ const OFFLINE_URL = '/';
 const ASSETS_TO_CACHE = [
   '/',
   '/wp-content/themes/obenlo/style.css',
-  '/wp-content/themes/obenlo/assets/images/logo-social-square.png'
+  '/wp-content/themes/obenlo/assets/images/logo-wordmark.svg',
+  '/wp-content/themes/obenlo/assets/images/obenlo-logo-social-profile.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -62,8 +63,8 @@ self.addEventListener('push', function (event) {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: data.icon || '/wp-content/themes/obenlo/assets/images/logo-social-square.png',
-      badge: '/wp-content/themes/obenlo/assets/images/logo-social-square.png',
+      icon: data.icon || '/wp-content/themes/obenlo/assets/images/obenlo-logo-social-profile.svg',
+      badge: '/wp-content/themes/obenlo/assets/images/obenlo-logo-social-profile.svg',
       vibrate: [100, 50, 100],
       data: {
         url: data.url || '/'
