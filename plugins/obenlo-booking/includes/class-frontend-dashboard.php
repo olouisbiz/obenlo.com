@@ -18,6 +18,7 @@ class Obenlo_Booking_Frontend_Dashboard
         add_action('admin_post_obenlo_dashboard_save_storefront', array($this, 'handle_save_storefront'));
         add_action('admin_post_obenlo_dashboard_booking_action', array($this, 'handle_booking_action'));
         add_action('admin_post_obenlo_dashboard_save_availability', array($this, 'handle_save_availability'));
+        add_action('admin_post_obenlo_dashboard_delete_listing', array($this, 'handle_delete_listing'));
     }
 
     public function render_dashboard()
@@ -133,9 +134,72 @@ class Obenlo_Booking_Frontend_Dashboard
             <!-- Content Area -->
             <div class="dashboard-content">
                 <?php
-        // Flash Messages handled inside render methods or globally here
+        // Flash Messages & Errors
         if (isset($_GET['message']) && $_GET['message'] === 'saved') {
-            echo '<div class="badge badge-success" style="margin-bottom:30px; display:block; text-align:center;">Action completed successfully!</div>';
+            echo '<div class="badge badge-success" style="margin-bottom:30px; display:block; text-align:center; padding:15px; border-radius:12px; font-weight:700;">✓ Action completed successfully!</div>';
+        }
+
+        if (isset($_GET['obenlo_error'])) {
+            $error_code = sanitize_text_field($_GET['obenlo_error']);
+            $error_msg = 'An unexpected error occurred. Please try again.';
+            
+            switch($error_code) {
+                case 'demo_restricted':
+                    $error_msg = 'Saving is disabled in Demo Mode. Sign up to start building your own listings!';
+                    break;
+                case 'unauthorized':
+                    $error_msg = 'Unauthorized: You do not have permission to perform this action.';
+                    break;
+                case 'security_failed':
+                    $error_msg = 'Security check failed. Please refresh the page and try again.';
+                    break;
+                case 'invalid_booking':
+                    $error_msg = 'Invalid booking or listing reference.';
+                    break;
+                case 'invalid_data':
+                    $error_msg = 'Missing required information for this action.';
+                    break;
+                case 'invalid_listing':
+                    $error_msg = 'Invalid listing reference.';
+                    break;
+                case 'capacity_exceeded':
+                    $error_msg = 'Guest count exceeds capacity.';
+                    break;
+                case 'host_away':
+                    $error_msg = 'Selected dates are unavailable (Host vacation).';
+                    break;
+                case 'day_unavailable':
+                    $error_msg = 'Host is not available on this day.';
+                    break;
+                case 'time_unavailable':
+                    $error_msg = 'Selected time is outside operating hours.';
+                    break;
+                case 'already_booked':
+                    $error_msg = 'These dates/times are already booked.';
+                    break;
+                case 'booking_error':
+                    $error_msg = 'Error creating booking. Please try again.';
+                    break;
+                case 'invalid_payment':
+                    $error_msg = 'Invalid payment method selected.';
+                    break;
+            }
+            
+            echo '<div style="background:#fef2f2; color:#ef4444; border:1px solid #fee2e2; padding:15px 20px; border-radius:12px; margin-bottom:30px; font-weight:700; display:flex; align-items:center; gap:10px; border-left: 4px solid #ef4444;">';
+            echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px; height:20px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+            echo '<span>' . esc_html($error_msg) . '</span>';
+            echo '</div>';
+        }
+
+        // --- Demo Mode Banner ---
+        if ($user->user_login === 'demo') {
+            echo '<div style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 20px; border-radius: 16px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">';
+            echo '<span style="font-size: 1.5rem;">✨</span>';
+            echo '<div>';
+            echo '<h4 style="margin: 0; font-weight: 800;">Welcome to the Demo Profile!</h4>';
+            echo '<p style="margin: 5px 0 0; font-size: 0.9rem;">Feel free to explore all the features of the Obenlo dashboard. <strong>Note:</strong> You cannot save changes while in demo mode.</p>';
+            echo '</div>';
+            echo '</div>';
         }
 
         if ($action === 'overview') {
@@ -163,6 +227,9 @@ class Obenlo_Booking_Frontend_Dashboard
         elseif ($action === 'payouts') {
             $this->render_payout_tab();
         }
+        elseif ($action === 'verification') {
+            $this->render_verification_tab();
+        }
         elseif ($action === 'support') {
             $this->render_support_section();
         }
@@ -182,7 +249,7 @@ class Obenlo_Booking_Frontend_Dashboard
         $user_id = get_current_user_id();
 
         // Stats Calculation
-        $listings_count = count(get_posts(array('post_type' => 'listing', 'author' => $user_id, 'post_parent' => 0, 'posts_per_page' => -1)));
+        $listings_count = count(get_posts(array('post_type' => 'listing', 'author' => $user_id, 'post_parent' => 0, 'posts_per_page' => -1, 'suppress_filters' => false)));
 
         $bookings = get_posts(array(
             'post_type' => 'booking',
@@ -198,7 +265,7 @@ class Obenlo_Booking_Frontend_Dashboard
 
         $reviews = get_comments(array(
             'post_author__not_in' => array($user_id),
-            'post_id__in' => get_posts(array('post_type' => 'listing', 'author' => $user_id, 'fields' => 'ids', 'posts_per_page' => -1)),
+            'post_id__in' => get_posts(array('post_type' => 'listing', 'author' => $user_id, 'fields' => 'ids', 'posts_per_page' => -1, 'suppress_filters' => false)),
             'status' => 'approve',
             'parent' => 0
         ));
@@ -226,7 +293,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
                     <span class="badge <?php echo $status_class; ?>">Account Status: <?php echo esc_html($status_label); ?></span>
                     <?php if ($verification_status !== 'verified'): ?>
-                        <a href="<?php echo home_url('/host-onboarding'); ?>" style="font-size:0.85rem; color:#e61e4d; font-weight:700; text-decoration:none;">Complete Verification →</a>
+                        <a href="<?php echo home_url('/host-dashboard?action=verification'); ?>" style="font-size:0.85rem; color:#e61e4d; font-weight:700; text-decoration:none;">Complete Verification →</a>
                     <?php
         else: ?>
                         <a href="<?php echo home_url('/host-onboarding?step=3&force=1'); ?>" style="font-size:0.85rem; color:#666; font-weight:600; text-decoration:none;">Update Payouts</a>
@@ -276,6 +343,72 @@ class Obenlo_Booking_Frontend_Dashboard
         <?php
     }
 
+    private function render_verification_tab() {
+        $user_id = get_current_user_id();
+        $status = Obenlo_Booking_Host_Verification::get_status($user_id);
+        
+        echo '<div class="dashboard-header"><h2 class="dashboard-title">Identity Verification</h2></div>';
+        
+        if ($status === 'verified') {
+            echo '<div style="background:#dcfce7; color:#166534; padding:20px; border-radius:12px; font-weight:500;">✓ Your identity has been successfully verified. Thank you for building trust in the Obenlo community.</div>';
+            return;
+        }
+        
+        if ($status === 'pending') {
+            echo '<div style="background:#fef9c3; color:#854d0e; padding:20px; border-radius:12px; font-weight:500;">⏳ Your verification document is currently under review by our team. Approval usually takes 24-48 hours.</div>';
+            return;
+        }
+        
+        if ($status === 'rejected') {
+            echo '<div style="background:#fee2e2; color:#991b1b; padding:20px; border-radius:12px; margin-bottom:20px; font-weight:500;">⚠️ Your previous verification attempt was rejected. Please ensure the document is clear, legible, and a valid government-issued ID.</div>';
+        }
+        
+        echo '<div style="background:#fff; padding:30px; border-radius:16px; border:1px solid #ddd; max-width:600px;">';
+        echo '<h3 style="margin-top:0;">Upload Identification</h3>';
+        echo '<p style="color:#666; font-size:0.95em;">To keep our community safe, we require all hosts to upload a valid government-issued ID (Passport, Driver\'s License, or National ID Card) before accepting bookings.</p>';
+        echo '<div style="margin: 25px 0;">';
+        echo '<input type="file" id="id_document_input" accept="image/jpeg,image/png,application/pdf" style="display:block; width:100%; padding:15px; border:2px dashed #ddd; border-radius:8px; cursor:pointer;">';
+        echo '<small style="color:#888; display:block; margin-top:8px;">Max file size: 5MB. Formats: JPG, PNG, PDF</small>';
+        echo '</div>';
+        echo '<button id="submit_verification" class="btn-primary" style="width:100%; border:none; padding:15px; border-radius:10px; cursor:pointer;">Submit Document for Review</button>';
+        echo '</div>';
+        
+        echo "<script>
+        document.getElementById('submit_verification').addEventListener('click', function() {
+            const fileInput = document.getElementById('id_document_input');
+            if (!fileInput.files[0]) { alert('Please select a file to upload.'); return; }
+            
+            this.textContent = 'Uploading...';
+            this.style.opacity = '0.7';
+            this.disabled = true;
+
+            const formData = new FormData();
+            formData.append('action', 'obenlo_upload_id');
+            formData.append('security', '" . wp_create_nonce("obenlo_onboarding_nonce") . "');
+            formData.append('id_document', fileInput.files[0]);
+            
+            fetch('" . admin_url('admin-ajax.php') . "', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) { 
+                    window.location.reload(); 
+                } else { 
+                    alert(res.data || 'Upload failed. Please try again.'); 
+                    this.textContent = 'Submit Document for Review'; 
+                    this.style.opacity = '1';
+                    this.disabled = false;
+                }
+            })
+            .catch(err => {
+                alert('Connection error during upload.');
+                this.textContent = 'Submit Document for Review'; 
+                this.style.opacity = '1';
+                this.disabled = false;
+            });
+        });
+        </script>";
+    }
+
     private function render_listings_list()
     {
         $user_id = get_current_user_id();
@@ -284,6 +417,7 @@ class Obenlo_Booking_Frontend_Dashboard
             'author' => $user_id,
             'posts_per_page' => -1,
             'post_parent' => 0,
+            'suppress_filters' => false, // Ensure sandbox isolation is applied
         );
         $listings = get_posts($args);
 
@@ -318,7 +452,8 @@ class Obenlo_Booking_Frontend_Dashboard
                 $children = get_posts(array(
                     'post_type' => 'listing',
                     'post_parent' => $listing->ID,
-                    'posts_per_page' => -1
+                    'posts_per_page' => -1,
+                    'suppress_filters' => false,
                 ));
 ?>
                         <tr>
@@ -328,7 +463,7 @@ class Obenlo_Booking_Frontend_Dashboard
                                         <img src="<?php echo get_the_post_thumbnail_url($listing->ID, 'thumbnail'); ?>" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">
                                     <?php
                 endif; ?>
-                                    <span style="font-weight:700; color:#222;"><?php echo esc_html($listing->post_title); ?></span>
+                                    <span style="font-weight:700; color:#222;"><?php echo get_the_title($listing->ID); ?></span>
                                 </div>
                             </td>
                             <td><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
@@ -339,23 +474,37 @@ class Obenlo_Booking_Frontend_Dashboard
                                 <a href="?action=add&parent_id=<?php echo $listing->ID; ?>" style="display:block; font-size:0.75rem; color:#e61e4d; text-decoration:none;">+ Add unit</a>
                             </td>
                             <td>
-                                <div style="display:flex; gap:10px;">
+                                <div style="display:flex; gap:10px; align-items:center;">
                                     <a href="?action=edit&listing_id=<?php echo $listing->ID; ?>" style="color:#222; font-weight:700; text-decoration:none; font-size:0.85rem;">Edit</a>
-                                    <a href="<?php echo get_permalink($listing->ID); ?>" target="_blank" style="color:#e61e4d; font-weight:700; text-decoration:none; font-size:0.85rem;">View →</a>
+                                    <a href="<?php echo get_permalink($listing->ID); ?>" target="_blank" style="color:#1d9bf0; font-weight:700; text-decoration:none; font-size:0.85rem;">View</a>
+                                    <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="margin:0;" onsubmit="return confirm('Are you sure you want to delete this listing? This cannot be undone.');">
+                                        <input type="hidden" name="action" value="obenlo_dashboard_delete_listing">
+                                        <input type="hidden" name="listing_id" value="<?php echo $listing->ID; ?>">
+                                        <?php wp_nonce_field('obenlo_delete_listing_' . $listing->ID); ?>
+                                        <button type="submit" style="background:none; border:none; color:#e61e4d; font-weight:700; font-size:0.85rem; cursor:pointer; padding:0;">Delete</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
                         <?php if (!empty($children)): ?>
                             <?php foreach ($children as $child): ?>
                                 <tr style="background:#fafafa;">
-                                    <td style="padding-left:60px; font-size:0.85rem;">└─ <?php echo esc_html($child->post_title); ?></td>
+                                    <td style="padding-left:60px; font-size:0.85rem;">└─ <?php echo get_the_title($child->ID); ?></td>
                                     <td class="mobile-hide"></td>
                                     <td class="mobile-hide"></td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
                                     <td>
-                                        <a href="?action=edit&listing_id=<?php echo $child->ID; ?>" style="color:#666; font-size:0.8rem; text-decoration:none;">Edit Unit</a>
+                                        <div style="display:flex; gap:15px; align-items:center;">
+                                            <a href="?action=edit&listing_id=<?php echo $child->ID; ?>" style="color:#666; font-size:0.8rem; text-decoration:none;">Edit Unit</a>
+                                            <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="margin:0;" onsubmit="return confirm('Are you sure you want to delete this unit?');">
+                                                <input type="hidden" name="action" value="obenlo_dashboard_delete_listing">
+                                                <input type="hidden" name="listing_id" value="<?php echo $child->ID; ?>">
+                                                <?php wp_nonce_field('obenlo_delete_listing_' . $child->ID); ?>
+                                                <button type="submit" style="background:none; border:none; color:#999; font-size:0.8rem; cursor:pointer; padding:0;">Delete</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php
@@ -386,6 +535,7 @@ class Obenlo_Booking_Frontend_Dashboard
             'orderby' => 'date',
             'order' => 'DESC'
         );
+        $args['suppress_filters'] = false;
         $bookings = get_posts($args);
 
         if ($limit === -1): ?>
@@ -633,8 +783,10 @@ class Obenlo_Booking_Frontend_Dashboard
         if ($listing_id > 0) {
             $post = get_post($listing_id);
             if ($post && $post->post_author == get_current_user_id()) {
-                $title = $post->post_title;
-                $content = $post->post_content;
+                $title = get_the_title($listing_id);
+                // Use the same filter logic for content
+                $sandboxed_content = get_post_meta($listing_id, '_obenlo_sandboxed_content', true);
+                $content = $sandboxed_content ? $sandboxed_content : $post->post_content;
                 $parent_id = $post->post_parent;
                 $price = get_post_meta($listing_id, '_obenlo_price', true);
                 $capacity = get_post_meta($listing_id, '_obenlo_capacity', true);
@@ -693,7 +845,13 @@ class Obenlo_Booking_Frontend_Dashboard
         }
 
         $form_action = esc_url(admin_url('admin-post.php'));
-        $title_label = $is_child ? 'Unit / Session Name' : 'Listing Title';
+        
+        // Contextual Labels
+        $title_label = $is_child ? 'Unit / Session Name' : 'Business / Property Name';
+        $desc_label = $is_child ? 'About this Unit / Session' : 'About your Business / Property';
+        $media_label = $is_child ? 'Unit Specific Photos' : 'Primary Property Photos';
+        $media_hint = $is_child ? 'Upload up to 3 photos' : 'Upload up to 10 photos';
+        $media_limit = $is_child ? 3 : 10;
 
         // Derive category flag for dynamic headings
         $category_flag = 'default';
@@ -751,6 +909,46 @@ class Obenlo_Booking_Frontend_Dashboard
                         <input type="text" name="listing_title" value="<?php echo esc_attr($title); ?>" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; transition:border-color 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
                     </div>
 
+                    <?php if (current_user_can('administrator')): 
+                        $is_demo = get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes';
+                        $d_name = get_post_meta($listing_id, '_obenlo_demo_host_name', true);
+                        $d_bio = get_post_meta($listing_id, '_obenlo_demo_host_bio', true);
+                        $d_tag = get_post_meta($listing_id, '_obenlo_demo_host_tagline', true);
+                        $d_loc = get_post_meta($listing_id, '_obenlo_demo_host_location', true);
+                    ?>
+                        <div style="background: #f0fdf4; border: 1px solid #dcfce7; padding: 25px; border-radius: 16px; margin-bottom: 30px;">
+                            <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-weight:800; color:#166534; font-size:1.1rem;">
+                                <input type="checkbox" name="is_demo_listing" value="yes" id="is_demo_toggle" <?php checked($is_demo); ?> style="width:20px; height:20px;">
+                                Set as Demo Listing (Admin Only)
+                            </label>
+                            <p style="font-size:0.85rem; color:#166534; opacity:0.8; margin-top:5px; margin-left:32px;">Demo listings allow you to showcase potential host profiles to prospective users.</p>
+                            
+                            <div id="demo_fields_wrapper" style="display: <?php echo $is_demo ? 'block' : 'none'; ?>; margin-top: 20px; padding-top: 20px; border-top: 1px solid #dcfce7;">
+                                <div style="margin-bottom:15px;">
+                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#166534; margin-bottom:5px;">Demo Host Name</label>
+                                    <input type="text" name="demo_host_name" value="<?php echo esc_attr($d_name); ?>" placeholder="e.g. Jean Dupont" style="width:100%; padding:10px; border:1px solid #bbf7d0; border-radius:8px;">
+                                </div>
+                                <div style="margin-bottom:15px;">
+                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#166534; margin-bottom:5px;">Demo Host Tagline</label>
+                                    <input type="text" name="demo_host_tagline" value="<?php echo esc_attr($d_tag); ?>" placeholder="e.g. Master Chef from Marseille" style="width:100%; padding:10px; border:1px solid #bbf7d0; border-radius:8px;">
+                                </div>
+                                <div style="margin-bottom:15px;">
+                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#166534; margin-bottom:5px;">Demo Host Bio</label>
+                                    <textarea name="demo_host_bio" rows="3" style="width:100%; padding:10px; border:1px solid #bbf7d0; border-radius:8px;"><?php echo esc_textarea($d_bio); ?></textarea>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#166534; margin-bottom:5px;">Demo Host Location</label>
+                                    <input type="text" name="demo_host_location" value="<?php echo esc_attr($d_loc); ?>" placeholder="e.g. Marseille, France" style="width:100%; padding:10px; border:1px solid #bbf7d0; border-radius:8px;">
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                            document.getElementById('is_demo_toggle').addEventListener('change', function() {
+                                document.getElementById('demo_fields_wrapper').style.display = this.checked ? 'block' : 'none';
+                            });
+                        </script>
+                    <?php endif; ?>
+
                     <?php if (!$is_child): ?>
                         <div style="margin-bottom:20px;">
                             <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Category</label>
@@ -772,12 +970,11 @@ class Obenlo_Booking_Frontend_Dashboard
                             <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Location</label>
                             <input type="text" name="listing_location" value="<?php echo esc_attr($location); ?>" placeholder="e.g. Tulum, Mexico" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         </div>
-                    <?php
-        endif; ?>
+                    <?php endif; ?>
 
                     <div style="margin-bottom:0;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Description</label>
-                        <textarea name="listing_content" rows="6" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($content); ?></textarea>
+                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo $desc_label; ?></label>
+                        <textarea name="listing_content" rows="6" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;" placeholder="<?php echo $is_child ? 'Describe this specific unit, room, or session...' : 'Describe your overall business, property, or service group...'; ?>"><?php echo esc_textarea($content); ?></textarea>
                     </div>
 
                     <!-- Event Specific Configuration -->
@@ -829,58 +1026,71 @@ class Obenlo_Booking_Frontend_Dashboard
                 </div>
 
                 <!-- Pricing, Model & Capacity -->
-                <div class="form-section">
-                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Pricing & Booking Rules</h4>
-                    
-                    <div class="grid-row" style="margin-bottom:20px;">
-                        <div class="grid-col-1-2">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Base Price</label>
-                            <div style="position:relative;">
-                                <span style="position:absolute; left:12px; top:12px; color:#888;">$</span>
-                                <input type="number" step="0.01" name="listing_price" value="<?php echo esc_attr($price); ?>" required style="width:100%; padding:12px 12px 12px 30px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
+                <?php if ($is_child): ?>
+                    <div class="form-section">
+                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Pricing & Booking Rules</h4>
+                        
+                        <div class="grid-row" style="margin-bottom:20px;">
+                            <div class="grid-col-1-2">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Base Price</label>
+                                <div style="position:relative;">
+                                    <span style="position:absolute; left:12px; top:12px; color:#888;">$</span>
+                                    <input type="number" step="0.01" name="listing_price" value="<?php echo esc_attr($price); ?>" required style="width:100%; padding:12px 12px 12px 30px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
+                                </div>
                             </div>
-                        </div>
-                        <div id="pricing_model_wrapper" class="grid-col-1-2">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Pricing Model</label>
-                            <select name="pricing_model" id="pricing_model" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                <option value="per_night" <?php selected($pricing_model, 'per_night'); ?>>Per Night</option>
-                                <option value="per_day" <?php selected($pricing_model, 'per_day'); ?>>Per Day</option>
-                                <option value="per_hour" <?php selected($pricing_model, 'per_hour'); ?>>Per Hour</option>
-                                <option value="per_session" <?php selected($pricing_model, 'per_session'); ?>>Per Session / Appointment</option>
-                                <option value="per_person" <?php selected($pricing_model, 'per_person'); ?>>Per Person</option>
-                                <option value="flat_fee" <?php selected($pricing_model, 'flat_fee'); ?>>Flat Fee</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid-row" style="margin-bottom:20px;">
-                        <div id="capacity_wrapper" class="grid-col-1-2">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Max Capacity (Guests/Tickets)</label>
-                            <input type="number" name="listing_capacity" value="<?php echo esc_attr($capacity); ?>" placeholder="Leave blank if not applicable" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
-                        </div>
-                        <div id="duration_wrapper" class="grid-col-1-2" style="display:flex; gap:10px;">
-                            <div style="flex:1;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Duration</label>
-                                <input type="number" step="0.5" name="duration_val" value="<?php echo esc_attr($duration_val); ?>" placeholder="e.g. 1.5" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
-                            </div>
-                            <div style="flex:1;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Unit</label>
-                                <select name="duration_unit" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                    <option value="hours" <?php selected($duration_unit, 'hours'); ?>>Hours</option>
-                                    <option value="minutes" <?php selected($duration_unit, 'minutes'); ?>>Minutes</option>
+                            <div id="pricing_model_wrapper" class="grid-col-1-2">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Pricing Model</label>
+                                <select name="pricing_model" id="pricing_model" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
+                                    <option value="per_night" <?php selected($pricing_model, 'per_night'); ?>>Per Night</option>
+                                    <option value="per_day" <?php selected($pricing_model, 'per_day'); ?>>Per Day</option>
+                                    <option value="per_hour" <?php selected($pricing_model, 'per_hour'); ?>>Per Hour</option>
+                                    <option value="per_session" <?php selected($pricing_model, 'per_session'); ?>>Per Session / Appointment</option>
+                                    <option value="per_person" <?php selected($pricing_model, 'per_person'); ?>>Per Person</option>
+                                    <option value="flat_fee" <?php selected($pricing_model, 'flat_fee'); ?>>Flat Fee</option>
                                 </select>
                             </div>
                         </div>
-                    </div>
 
-                    <div id="requires_slots_wrapper" style="margin-top:10px;">
-                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                            <input type="checkbox" name="requires_slots" value="yes" <?php checked($requires_slots, 'yes'); ?> style="width:18px; height:18px;">
-                            <span style="font-weight:700; color:#444;">Requires Booking Time Slots</span>
-                        </label>
-                        <p style="font-size:0.85rem; color:#666; margin-top:5px; margin-left:28px;">Check this if you want the calendar to automatically show available time slots during your business hours (e.g. for Haircuts, Spa treatments).</p>
+                        <div class="grid-row" style="margin-bottom:20px;">
+                            <div id="capacity_wrapper" class="grid-col-1-2">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Max Capacity (Guests/Tickets)</label>
+                                <input type="number" name="listing_capacity" value="<?php echo esc_attr($capacity); ?>" placeholder="Leave blank if not applicable" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
+                            </div>
+                            <div id="duration_wrapper" class="grid-col-1-2" style="display:flex; gap:10px;">
+                                <div style="flex:1;">
+                                    <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Duration</label>
+                                    <input type="number" step="0.5" name="duration_val" value="<?php echo esc_attr($duration_val); ?>" placeholder="e.g. 1.5" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
+                                </div>
+                                <div style="flex:1;">
+                                    <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Unit</label>
+                                    <select name="duration_unit" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
+                                        <option value="hours" <?php selected($duration_unit, 'hours'); ?>>Hours</option>
+                                        <option value="minutes" <?php selected($duration_unit, 'minutes'); ?>>Minutes</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="requires_slots_wrapper" style="margin-top:10px;">
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                <input type="checkbox" name="requires_slots" value="yes" <?php checked($requires_slots, 'yes'); ?> style="width:18px; height:18px;">
+                                <span style="font-weight:700; color:#444;">Requires Booking Time Slots</span>
+                            </label>
+                            <p style="font-size:0.85rem; color:#666; margin-top:5px; margin-left:28px;">Check this if you want the calendar to automatically show available time slots during your business hours (e.g. for Haircuts, Spa treatments).</p>
+                        </div>
                     </div>
-                </div>
+                <?php else: ?>
+                    <div class="form-section" style="background:#f0f9ff; border:1px solid #bae6fd; padding:20px; border-radius:12px; margin-bottom:30px;">
+                        <div style="display:flex; gap:15px; align-items:center;">
+                            <div style="font-size:1.5rem;">ℹ️</div>
+                            <div>
+                                <h4 style="margin:0 0 5px 0; color:#0369a1;">Business Profile Mode</h4>
+                                <p style="margin:0; font-size:0.9rem; color:#0c4a6e;">This is your main profile. You will add bookable units, sessions, or events (with their own pricing) after saving this profile.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="listing_price" value="0">
+                <?php endif; ?>
 
 
 
@@ -951,18 +1161,14 @@ class Obenlo_Booking_Frontend_Dashboard
 
                 <!-- Media -->
                 <div class="form-section">
-                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Media & Photos</h4>
+                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo $media_label; ?></h4>
                     
                     <?php if ($listing_id > 0):
             $images = get_attached_media('image', $listing_id);
+            $curr_count = count($images);
             $thumb_id = get_post_thumbnail_id($listing_id);
-            if ($thumb_id && !isset($images[$thumb_id])) {
-                $thumb_post = get_post($thumb_id);
-                if ($thumb_post)
-                    $images[$thumb_id] = $thumb_post;
-            }
-
-            if (!empty($images)): ?>
+            // ... (rest of logic)
+?>
                             <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:15px; margin-bottom:20px;">
                                 <?php foreach ($images as $img_id => $img):
                     $img_url = wp_get_attachment_image_url($img_id, 'thumbnail');
@@ -972,26 +1178,21 @@ class Obenlo_Booking_Frontend_Dashboard
                                         <img src="<?php echo esc_url($img_url); ?>" style="width:100%; height:100%; object-fit:cover;">
                                         <?php if ($is_featured): ?>
                                             <div style="position:absolute; top:5px; left:5px; background:#e61e4d; color:#fff; font-size:8px; font-weight:800; padding:2px 6px; border-radius:20px;">COVER</div>
-                                        <?php
-                    endif; ?>
-                                        <label style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; text-align:center; padding:3px; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='rgba(230,30,77,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.6)'">
+                                        <?php endif; ?>
+                                        <label style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; text-align:center; padding:3px; cursor:pointer;">
                                             <input type="checkbox" name="delete_images[]" value="<?php echo esc_attr($img_id); ?>"> Remove
                                         </label>
                                     </div>
-                                <?php
-                endforeach; ?>
+                                <?php endforeach; ?>
                             </div>
-                        <?php
-            endif; ?>
-                    <?php
-        endif; ?>
+                        <?php endif; ?>
                     
                     <div style="background:#fcfcfc; border:2px dashed #eee; padding:30px; border-radius:15px; text-align:center;">
-                        <input type="file" name="listing_images[]" multiple accept="image/*" style="display:none;" id="listing_file_input">
+                        <input type="file" name="listing_images[]" multiple accept="image/*" style="display:none;" id="listing_file_input" data-limit="<?php echo $media_limit; ?>">
                         <label for="listing_file_input" style="cursor:pointer; color:#888;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px; height:40px; margin-bottom:10px; color:#ccc;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                             <div style="font-weight:700; color:#444;">Click to upload photos</div>
-                            <div style="font-size:0.8rem;">JPG, PNG up to 10 files</div>
+                            <div style="font-size:0.8rem; color:#e61e4d;"><?php echo $media_hint; ?></div>
                         </label>
                     </div>
                 </div>
@@ -1023,8 +1224,7 @@ class Obenlo_Booking_Frontend_Dashboard
                             </div>
                         </div>
                     </div>
-                <?php
-        endif; ?>
+                <?php endif; ?>
 
                 <div style="margin-top:40px; margin-bottom:100px;">
                     <button type="submit" class="btn-primary" style="padding:15px 40px; font-size:1.1rem; width:100%;">Save <?php echo($is_child ? 'Unit' : 'Listing'); ?> Now</button>
@@ -1355,41 +1555,63 @@ class Obenlo_Booking_Frontend_Dashboard
     public function handle_save_listing()
     {
         if (!isset($_POST['dashboard_listing_nonce']) || !wp_verify_nonce($_POST['dashboard_listing_nonce'], 'dashboard_save_listing')) {
-            wp_die('Security check failed');
+            $this->redirect_with_error('security_failed');
         }
 
         if (!is_user_logged_in() || !(current_user_can('host') || current_user_can('administrator'))) {
-            wp_die('Unauthorized');
+            $this->redirect_with_error('unauthorized');
+        }
+
+        $user = wp_get_current_user();
+        if ($user->user_login === 'demo') {
+            // Sandbox handles demo user transparently via filters
+        } else {
+            // Normal behavior
         }
 
         $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
         $title = sanitize_text_field($_POST['listing_title']);
         $content = wp_kses_post(wp_unslash($_POST['listing_content']));
-        $parent_id = isset($_POST['parent_id']) ? intval($_POST['parent_id']) : 0;
+        $parent_id = 0;
+        if (isset($_POST['parent_id'])) {
+            $parent_id = intval($_POST['parent_id']);
+        } elseif (isset($_GET['parent_id'])) {
+            $parent_id = intval($_GET['parent_id']);
+        }
 
         $post_data = array(
             'post_title' => $title,
             'post_content' => $content,
             'post_status' => 'publish',
             'post_type' => 'listing',
-            'post_author' => get_current_user_id()
+            'post_author' => get_current_user_id(),
+            'post_parent' => $parent_id
         );
 
-        if ($parent_id > 0) {
-            $post_data['post_parent'] = $parent_id;
-        }
 
         if ($listing_id > 0) {
             // Verify ownership
             $existing_post = get_post($listing_id);
             if ($existing_post->post_author != get_current_user_id() && !current_user_can('administrator')) {
-                wp_die('Unauthorized');
+                $this->redirect_with_error('unauthorized');
             }
-            $post_data['ID'] = $listing_id;
-            $new_post_id = wp_update_post($post_data);
+            
+            if ($user->user_login === 'demo') {
+                // For demo user, redirect Title/Content to sandboxed meta to avoid DB pollution
+                update_post_meta($listing_id, '_obenlo_sandboxed_title', $title);
+                update_post_meta($listing_id, '_obenlo_sandboxed_content', $content);
+                $new_post_id = $listing_id;
+            } else {
+                $post_data['ID'] = $listing_id;
+                $new_post_id = wp_update_post($post_data);
+            }
         }
         else {
             $new_post_id = wp_insert_post($post_data);
+            if ($new_post_id && !is_wp_error($new_post_id) && $user->user_login === 'demo') {
+                // Tag new listings with session ID to isolate them from other demo visitors
+                update_post_meta($new_post_id, '_obenlo_sandbox_session_id', Obenlo_Booking_Demo_Sandbox::get_session_id());
+            }
         }
 
         if ($new_post_id && !is_wp_error($new_post_id)) {
@@ -1408,6 +1630,29 @@ class Obenlo_Booking_Frontend_Dashboard
             }
             if (isset($_POST['virtual_link'])) {
                 update_post_meta($new_post_id, '_obenlo_virtual_link', esc_url_raw($_POST['virtual_link']));
+            }
+
+            // --- Demo Meta (Admin Only or Inherited) ---
+            if (current_user_can('administrator')) {
+                $is_demo = isset($_POST['is_demo_listing']) ? 'yes' : 'no';
+                update_post_meta($new_post_id, '_obenlo_is_demo', $is_demo);
+                if ($is_demo === 'yes') {
+                    update_post_meta($new_post_id, '_obenlo_demo_host_name', sanitize_text_field($_POST['demo_host_name']));
+                    update_post_meta($new_post_id, '_obenlo_demo_host_bio', sanitize_textarea_field($_POST['demo_host_bio']));
+                    update_post_meta($new_post_id, '_obenlo_demo_host_tagline', sanitize_text_field($_POST['demo_host_tagline']));
+                    update_post_meta($new_post_id, '_obenlo_demo_host_location', sanitize_text_field($_POST['demo_host_location']));
+                }
+            } elseif ($parent_id > 0) {
+                // Inherit from parent if parent is a demo
+                $parent_is_demo = get_post_meta($parent_id, '_obenlo_is_demo', true);
+                if ($parent_is_demo === 'yes') {
+                    update_post_meta($new_post_id, '_obenlo_is_demo', 'yes');
+                    // Sync metadata so child page displays it correctly
+                    update_post_meta($new_post_id, '_obenlo_demo_host_name', get_post_meta($parent_id, '_obenlo_demo_host_name', true));
+                    update_post_meta($new_post_id, '_obenlo_demo_host_bio', get_post_meta($parent_id, '_obenlo_demo_host_bio', true));
+                    update_post_meta($new_post_id, '_obenlo_demo_host_tagline', get_post_meta($parent_id, '_obenlo_demo_host_tagline', true));
+                    update_post_meta($new_post_id, '_obenlo_demo_host_location', get_post_meta($parent_id, '_obenlo_demo_host_location', true));
+                }
             }
 
             // Fixed Event Scheduling
@@ -1569,11 +1814,16 @@ class Obenlo_Booking_Frontend_Dashboard
     public function handle_save_storefront()
     {
         if (!isset($_POST['dashboard_storefront_nonce']) || !wp_verify_nonce($_POST['dashboard_storefront_nonce'], 'dashboard_save_storefront')) {
-            wp_die('Security check failed');
+            $this->redirect_with_error('security_failed');
         }
 
         if (!is_user_logged_in() || !(current_user_can('host') || current_user_can('administrator'))) {
-            wp_die('Unauthorized');
+            $this->redirect_with_error('unauthorized');
+        }
+
+        $user = wp_get_current_user();
+        if ($user->user_login === 'demo') {
+            // $this->redirect_with_error('demo_restricted');
         }
 
         $user_id = get_current_user_id();
@@ -1657,25 +1907,25 @@ class Obenlo_Booking_Frontend_Dashboard
     public function handle_booking_action()
     {
         if (!is_user_logged_in() || !(current_user_can('host') || current_user_can('administrator'))) {
-            wp_die('Unauthorized');
+            $this->redirect_with_error('unauthorized');
         }
 
         $booking_id = isset($_GET['booking_id']) ? intval($_GET['booking_id']) : 0;
         $do_action = isset($_GET['do_action']) ? sanitize_text_field($_GET['do_action']) : '';
 
         if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'booking_action_' . $booking_id)) {
-            wp_die('Security check failed');
+            $this->redirect_with_error('security_failed');
         }
 
         $booking = get_post($booking_id);
         if (!$booking || $booking->post_type !== 'booking') {
-            wp_die('Invalid booking');
+            $this->redirect_with_error('invalid_booking');
         }
 
         // Verify host owns this booking's listing
         $host_id = get_post_meta($booking_id, '_obenlo_host_id', true);
         if ($host_id != get_current_user_id() && !current_user_can('administrator')) {
-            wp_die('Unauthorized: Not your booking.');
+            $this->redirect_with_error('unauthorized');
         }
 
         if ($do_action === 'approve') {
@@ -2008,10 +2258,16 @@ class Obenlo_Booking_Frontend_Dashboard
     public function handle_save_availability()
     {
         if (!isset($_POST['availability_nonce']) || !wp_verify_nonce($_POST['availability_nonce'], 'save_availability')) {
-            wp_die('Security check failed.');
+            $this->redirect_with_error('security_failed');
         }
-        if (!is_user_logged_in())
-            wp_die('Unauthorized.');
+        if (!is_user_logged_in()) {
+            $this->redirect_with_error('unauthorized');
+        }
+
+        $user = wp_get_current_user();
+        if ($user->user_login === 'demo') {
+            // $this->redirect_with_error('demo_restricted');
+        }
 
         $user_id = get_current_user_id();
 
@@ -2043,6 +2299,56 @@ class Obenlo_Booking_Frontend_Dashboard
         update_user_meta($user_id, '_obenlo_vacation_blocks', $sanitized_vacations);
 
         wp_safe_redirect(add_query_arg(array('action' => 'availability', 'message' => 'saved'), home_url('/host-dashboard')));
+        exit;
+    }
+
+    /**
+     * Handle listing deletion from the dashboard
+     */
+    public function handle_delete_listing() {
+        if (!is_user_logged_in()) {
+            $this->redirect_with_error('unauthorized');
+        }
+
+        $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
+        if (!$listing_id) {
+            $this->redirect_with_error('invalid_listing');
+        }
+
+        // Security check
+        check_admin_referer('obenlo_delete_listing_' . $listing_id);
+
+        $post = get_post($listing_id);
+        if (!$post || ($post->post_author != get_current_user_id() && !current_user_can('administrator'))) {
+            $this->redirect_with_error('unauthorized');
+        }
+
+        // Delete children first if it's a parent
+        $children = get_posts(array(
+            'post_type' => 'listing',
+            'post_parent' => $listing_id,
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ));
+
+        foreach ($children as $child_id) {
+            wp_delete_post($child_id, true);
+        }
+
+        // Delete the listing
+        wp_delete_post($listing_id, true);
+
+        wp_safe_redirect(add_query_arg(array('action' => 'list', 'message' => 'deleted'), home_url('/host-dashboard')));
+        exit;
+    }
+
+    /**
+     * Redirect back to referer with a whitelisted error code.
+     */
+    private function redirect_with_error($error_code) {
+        $redirect_url = remove_query_arg(array('obenlo_error', 'message'), wp_get_referer());
+        $redirect_url = add_query_arg('obenlo_error', $error_code, $redirect_url);
+        wp_safe_redirect($redirect_url);
         exit;
     }
 }

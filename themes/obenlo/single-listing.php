@@ -10,6 +10,54 @@ get_header(); ?>
     the_post(); ?>
         
         <?php
+        $obenlo_error = isset($_GET['obenlo_error']) ? sanitize_text_field($_GET['obenlo_error']) : '';
+        if ($obenlo_error) {
+            $error_message = '';
+            switch ($obenlo_error) {
+                case 'security_failed':
+                    $error_message = 'Security check failed. Please refresh and try again.';
+                    break;
+                case 'invalid_data':
+                    $error_message = 'Missing required booking information.';
+                    break;
+                case 'invalid_listing':
+                    $error_message = 'Invalid listing reference.';
+                    break;
+                case 'capacity_exceeded':
+                    $error_message = 'Guest count exceeds this listing\'s capacity.';
+                    break;
+                case 'host_away':
+                    $error_message = 'The host is unavailable on these dates (Vacation Block).';
+                    break;
+                case 'day_unavailable':
+                    $error_message = 'The host does not accept bookings on this day.';
+                    break;
+                case 'time_unavailable':
+                    $error_message = 'The selected time is outside the host\'s operating hours.';
+                    break;
+                case 'already_booked':
+                    $error_message = 'These dates or times are already booked. Please try another slot.';
+                    break;
+                case 'booking_error':
+                    $error_message = 'There was an error processing your booking. Please try again.';
+                    break;
+                case 'invalid_payment':
+                    $error_message = 'Invalid payment method selected.';
+                    break;
+                case 'unauthorized':
+                    $error_message = 'Unauthorized: Please log in to perform this action.';
+                    break;
+            }
+            if ($error_message) {
+                echo '<div style="background:#fff1f2; border:1px solid #fda4af; color:#9f1239; padding:20px; border-radius:12px; margin-bottom:30px; font-weight:700; display:flex; align-items:center; gap:10px; box-shadow:0 4px 6px rgba(0,0,0,0.05);">';
+                echo '<svg style="width:24px; height:24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                echo esc_html($error_message);
+                echo '</div>';
+            }
+        }
+        ?>
+        
+        <?php
     $listing_id = get_the_ID();
     $parent_id = wp_get_post_parent_id($listing_id);
 
@@ -106,23 +154,70 @@ get_header(); ?>
                     <span style="color: #666; font-size: 0.9rem; margin-right:8px;">📍 <?php echo esc_html($location_val); ?></span>
                 <?php endif; ?>
 
-                <span style="color:#888;">&bull;</span> Hosted by <a href="<?php echo get_author_posts_url(get_the_author_meta('ID')); ?>" style="color:#e61e4d; font-weight:bold; text-decoration:none; margin-left:5px;"><?php the_author(); ?></a>
+                <?php 
+                $host_id = get_the_author_meta('ID');
+                $host_name = get_the_author();
+                $host_url = get_author_posts_url($host_id);
+                
+                $is_demo = get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes';
+                $parent_id = wp_get_post_parent_id($listing_id);
+                
+                // If it's a child and not explicitly marked demo, check the parent
+                if (!$is_demo && $parent_id > 0) {
+                    $is_demo = get_post_meta($parent_id, '_obenlo_is_demo', true) === 'yes';
+                }
+
+                if ($is_demo) {
+                    // Try current listing meta first, then parent if it's a child
+                    $demo_name = get_post_meta($listing_id, '_obenlo_demo_host_name', true);
+                    if (!$demo_name && $parent_id > 0) {
+                        $demo_name = get_post_meta($parent_id, '_obenlo_demo_host_name', true);
+                    }
+                    
+                    if ($demo_name) $host_name = $demo_name;
+                    // Point to the profile with the relevant ID for the demo override
+                    $host_url = add_query_arg('demo_id', ($parent_id > 0 ? $parent_id : $listing_id), $host_url);
+                }
+                ?>
+                <span style="color:#888;">&bull;</span> Hosted by <a href="<?php echo esc_url($host_url); ?>" style="color:#e61e4d; font-weight:bold; text-decoration:none; margin-left:5px;"><?php echo esc_html($host_name); ?></a>
             </div>
         </div>
 
         <?php
-    // Fetch up to 10 images from attached media
-    $images = get_attached_media('image', $listing_id);
+    // Merged Gallery Logic: Parent + Child images
     $image_urls = array();
-    if (has_post_thumbnail()) {
+    
+    // 1. Get images from current listing
+    $current_images = get_attached_media('image', $listing_id);
+    if (has_post_thumbnail($listing_id)) {
         $image_urls[] = get_the_post_thumbnail_url($listing_id, 'large');
     }
-    foreach ($images as $img) {
+    foreach ($current_images as $img) {
         $url = wp_get_attachment_image_url($img->ID, 'large');
-        if (!in_array($url, $image_urls) && count($image_urls) < 10) {
+        if (!in_array($url, $image_urls)) {
             $image_urls[] = $url;
         }
     }
+
+    // 2. If it's a child, add parent images
+    if ($parent_id > 0) {
+        $parent_images = get_attached_media('image', $parent_id);
+        if (has_post_thumbnail($parent_id)) {
+            $p_thumb = get_the_post_thumbnail_url($parent_id, 'large');
+            if (!in_array($p_thumb, $image_urls)) {
+                $image_urls[] = $p_thumb;
+            }
+        }
+        foreach ($parent_images as $img) {
+            $url = wp_get_attachment_image_url($img->ID, 'large');
+            if (!in_array($url, $image_urls)) {
+                $image_urls[] = $url;
+            }
+        }
+    }
+
+    // Cap at reasonable total for display (e.g., 20) but we usually show 5 in grid
+    $image_count_total = count($image_urls);
 ?>
         <?php if (!empty($image_urls)): ?>
             <div class="listing-gallery">
@@ -474,28 +569,40 @@ get_header(); ?>
     endif; ?>
             </div>
 
-            <div class="listing-sidebar">
+            <div class="listing-sidebar" style="position: sticky; top: 20px; height: fit-content; align-self: flex-start;">
                 <div class="booking-widget">
                     
-                    <?php if ($has_children): ?>
-                        <!-- Parent Listing with Children: Force Selection -->
-                        <h3 style="margin-top:0;">Select an option to book</h3>
-                        <p style="color:#666; font-size:0.9em; margin-bottom: 20px;">Please choose from the available options below to check dates and reserve.</p>
-                        
-                        <div class="child-options-list" style="display:flex; flex-direction:column; gap:10px;">
-                            <?php foreach ($children as $child):
-            $child_price = get_post_meta($child->ID, '_obenlo_price', true);
-?>
-                                <a href="<?php echo get_permalink($child->ID); ?>" style="display:block; padding:15px; border:1px solid #eee; border-radius:8px; text-decoration:none; color:#333; transition:0.2s; background:#f9f9f9;">
-                                    <div style="font-weight:bold; margin-bottom:5px;"><?php echo esc_html($child->post_title); ?></div>
-                                    <div style="font-size:0.9em; color:#e61e4d;">From $<?php echo esc_html($child_price); ?></div>
-                                </a>
-                            <?php
-        endforeach; ?>
-                        </div>
+                    <?php if ($parent_id == 0): ?>
+                        <!-- Parent Listing (Business Profile): Show Children, Hide Booking Form -->
+                        <h3 style="margin-top:0;">Available Options</h3>
+                        <?php if ($has_children): ?>
+                            <p style="color:#666; font-size:0.9em; margin-bottom: 20px;">Please choose an option below to see pricing and check availability.</p>
+                            <div class="child-options-list" style="display:flex; flex-direction:column; gap:12px;">
+                                <?php foreach ($children as $child):
+                                    $child_price = get_post_meta($child->ID, '_obenlo_price', true);
+                                    $child_img = get_the_post_thumbnail_url($child->ID, 'thumbnail');
+                                    ?>
+                                    <a href="<?php echo get_permalink($child->ID); ?>" style="display:flex; gap:12px; padding:12px; border:1px solid #eee; border-radius:12px; text-decoration:none; color:#333; transition:0.2s; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.03);">
+                                        <?php if ($child_img): ?>
+                                            <div style="width:60px; height:60px; border-radius:8px; background:url('<?php echo esc_url($child_img); ?>') center/cover;"></div>
+                                        <?php endif; ?>
+                                        <div style="flex:1;">
+                                            <div style="font-weight:bold; margin-bottom:2px;"><?php echo esc_html($child->post_title); ?></div>
+                                            <div style="font-size:0.9em; color:#e61e4d; font-weight:700;">From $<?php echo esc_html($child_price); ?></div>
+                                        </div>
+                                        <div style="align-self:center; color:#ccc;">&rsaquo;</div>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <p style="color:#666; font-style:italic;">No booking options available at this time.</p>
+                            <?php if (current_user_can('administrator') || get_current_user_id() == get_post_field('post_author', $listing_id)): ?>
+                                <a href="<?php echo home_url('/host-dashboard?action=add&parent_id=' . $listing_id); ?>" class="btn-primary" style="display:block; text-align:center; margin-top:15px; background:#333; color:white; padding:10px; border-radius:8px; text-decoration:none;">+ Add Unit/Session</a>
+                            <?php endif; ?>
+                        <?php endif; ?>
 
-                    <?php
-    else: ?>
+                    <?php else: ?>
+                        <!-- Child Listing: Show Booking Form -->
                         <?php
         $pricing_model = get_post_meta($listing_id, '_obenlo_pricing_model', true) ?: 'per_night';
         $duration_val = get_post_meta($listing_id, '_obenlo_duration_val', true);
@@ -681,11 +788,19 @@ get_header(); ?>
                                 <span>$<span id="live-total"><?php echo esc_html($price); ?></span></span>
                             </div>
 
-                            <button type="submit" class="reserve-btn">
-                                <?php echo in_array($booking_mode, ['event_datetime']) ? 'Buy Tickets' : 'Reserve'; ?>
+                            <button type="submit" class="reserve-btn" style="background:#e61e4d; color:white; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:1.1rem; border:none; cursor:pointer; transition:all 0.2s ease-in-out; box-shadow:0 4px 15px rgba(230,30,77,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(230,30,77,0.4)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(230,30,77,0.3)';">
+                                <?php echo in_array($booking_mode, ['event_datetime']) ? 'Buy Tickets' : 'Book Instantly'; ?>
                             </button>
                             <p style="text-align: center; font-size: 0.8em; color: #666; margin-top: 10px;">You won't be charged yet</p>
                         </form>
+
+                    <!-- Message Host CTA -->
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
+                        <button onclick="if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');} else { window.location.href='<?php echo esc_url(home_url('/login')); ?>'; }" style="background: transparent; border: 1px solid #222; color: #222; font-weight: bold; width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='transparent'">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            Contact Provider
+                        </button>
+                    </div>
 
                         <script>
                         document.addEventListener('DOMContentLoaded', function() {

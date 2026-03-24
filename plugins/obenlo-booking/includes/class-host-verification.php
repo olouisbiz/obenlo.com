@@ -60,7 +60,7 @@ class Obenlo_Booking_Host_Verification {
      */
     public function handle_admin_status_update() {
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( 'Unauthorized' );
+            obenlo_redirect_with_error('unauthorized');
         }
 
         $user_id = isset( $_POST['user_id'] ) ? intval( $_POST['user_id'] ) : 0;

@@ -89,7 +89,8 @@ class Obenlo_Booking_Reviews {
             'post_type' => 'listing',
             'author'    => $host_id,
             'fields'    => 'ids',
-            'posts_per_page' => -1
+            'posts_per_page' => -1,
+            'suppress_filters' => false,
         );
         $listing_ids = get_posts( $args );
 
@@ -127,7 +128,8 @@ class Obenlo_Booking_Reviews {
             'post_type' => 'listing',
             'author'    => $host_id,
             'fields'    => 'ids',
-            'posts_per_page' => -1
+            'posts_per_page' => -1,
+            'suppress_filters' => false,
         );
         $listing_ids = get_posts( $args );
 

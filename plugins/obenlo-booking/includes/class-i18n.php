@@ -198,6 +198,10 @@ class Obenlo_Booking_i18n {
                 "You're Offline" => 'Estás desconectado',
                 "It seems you've lost your connection. Don't worry, you can still browse some of your previously visited pages." => 'Parece que has perdido la conexión. No te preocupes, aún puedes navegar por algunas de las páginas que visitaste anteriormente.',
                 'Back to Home' => 'Volver al inicio',
+                'Cleaning' => 'Limpieza',
+                'Barber' => 'Barbero',
+                'Handyman' => 'Manitas',
+                'Freelance' => 'Independiente',
             ),
             'fr' => array(
                 'Obenlo your home' => 'Mettez votre logement sur Obenlo',
@@ -327,6 +331,10 @@ class Obenlo_Booking_i18n {
                 "You're Offline" => 'Vous êtes hors ligne',
                 "It seems you've lost your connection. Don't worry, you can still browse some of your previously visited pages." => 'Il semble que vous ayez perdu votre connexion. Ne vous inquiétez pas, vous pouvez toujours parcourir certaines des pages que vous avez visitées précédemment.',
                 'Back to Home' => 'Retour à l\'accueil',
+                'Cleaning' => 'Nettoyage',
+                'Barber' => 'Barbier',
+                'Handyman' => 'Bricoleur',
+                'Freelance' => 'Indépendant',
             )
         );
     }

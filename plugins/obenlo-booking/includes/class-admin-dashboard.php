@@ -19,6 +19,7 @@ class Obenlo_Booking_Admin_Dashboard
         add_action('admin_post_obenlo_save_settings', array($this, 'handle_save_settings'));
         add_action('admin_post_obenlo_save_payment_settings', array($this, 'handle_save_payment_settings'));
         add_action('admin_post_obenlo_update_user_fee', array($this, 'handle_update_user_fee'));
+        add_action('admin_post_obenlo_transfer_demo', array($this, 'handle_transfer_demo'));
     }
 
     public function render_dashboard()
@@ -59,6 +60,7 @@ class Obenlo_Booking_Admin_Dashboard
                     <a href="?tab=verifications" class="<?php echo $tab === 'verifications' ? 'active' : ''; ?>">Verifications</a>
                     <a href="?tab=bookings" class="<?php echo $tab === 'bookings' ? 'active' : ''; ?>">Bookings</a>
                     <a href="?tab=payments" class="<?php echo $tab === 'payments' ? 'active' : ''; ?>">Payments</a>
+                    <a href="?tab=demo_manager" class="<?php echo $tab === 'demo_manager' ? 'active' : ''; ?>">Demo Manager</a>
                     <a href="?tab=messaging" class="<?php echo $tab === 'messaging' ? 'active' : ''; ?>">Messaging</a>
                 <?php
         endif; ?>
@@ -102,6 +104,9 @@ class Obenlo_Booking_Admin_Dashboard
                 break;
             case 'messaging':
                 $this->render_messaging_oversight_tab();
+                break;
+            case 'demo_manager':
+                $this->render_demo_manager_tab();
                 break;
             case 'communication':
                 $this->render_communication_tab();
@@ -174,7 +179,8 @@ class Obenlo_Booking_Admin_Dashboard
         $listings = get_posts(array(
             'post_type' => 'listing',
             'posts_per_page' => -1,
-            'post_status' => array('publish', 'pending', 'draft')
+            'post_status' => array('publish', 'pending', 'draft'),
+            'suppress_filters' => false,
         ));
 
         echo '<h3>Manage All Listings</h3>';
@@ -369,7 +375,7 @@ class Obenlo_Booking_Admin_Dashboard
         error_log('Obenlo Settings: Request received.');
         if (!current_user_can('administrator')) {
             error_log('Obenlo Settings: Unauthorized access attempt.');
-            wp_die('Unauthorized');
+            obenlo_redirect_with_error('unauthorized');
         }
 
         check_admin_referer('save_settings', 'settings_nonce');
@@ -390,8 +396,9 @@ class Obenlo_Booking_Admin_Dashboard
 
     public function handle_save_payment_settings()
     {
-        if (!current_user_can('administrator'))
-            wp_die('Unauthorized');
+        if (!current_user_can('administrator')) {
+            obenlo_redirect_with_error('unauthorized');
+        }
         check_admin_referer('save_payment_settings', 'payment_settings_nonce');
 
         if (isset($_POST['payment_mode'])) {
@@ -416,8 +423,9 @@ class Obenlo_Booking_Admin_Dashboard
 
     public function handle_update_user_fee()
     {
-        if (!current_user_can('administrator'))
-            wp_die('Unauthorized');
+        if (!current_user_can('administrator')) {
+            obenlo_redirect_with_error('unauthorized');
+        }
 
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         check_admin_referer('update_user_fee_' . $user_id, 'fee_nonce');
@@ -493,8 +501,9 @@ class Obenlo_Booking_Admin_Dashboard
         echo '<div>';
         echo '<h4>Active Support Tickets</h4>';
         $tickets = get_posts(array(
-            'post_type' => 'ticket',
-            'posts_per_page' => 20,
+            'post_type' => 'support_ticket',
+            'posts_per_page' => -1,
+            'suppress_filters' => false,
             'meta_key' => '_obenlo_ticket_status',
             'orderby' => 'meta_value',
             'order' => 'ASC' // Open tickets first
@@ -715,61 +724,174 @@ class Obenlo_Booking_Admin_Dashboard
         <?php
     }
 
-    private function render_verifications_tab()
+    private function render_demo_manager_tab()
     {
-        if (!current_user_can('administrator'))
-            return;
-
-        $pending_users = get_users(array(
-            'meta_key' => 'obenlo_host_verification_status',
-            'meta_value' => 'pending',
-            'role__in' => array('host'),
-            'number' => -1
+        $demos = get_posts(array(
+            'post_type' => 'listing',
+            'posts_per_page' => -1,
+            'meta_key' => '_obenlo_is_demo',
+            'meta_value' => 'yes',
+            'post_status' => array('publish', 'pending', 'draft')
         ));
 
-        echo '<h3>Pending Host Verifications</h3>';
-
-        if (empty($pending_users)) {
-            echo '<p style="padding: 20px; background: #f9f9f9; border-radius: 8px;">No pending verifications at this time.</p>';
-            return;
-        }
-
+        echo '<h3>Demo Listing Manager</h3>';
+        echo '<p style="color:#666; margin-bottom:25px;">Create high-quality demo listings as an admin, then transfer them to new hosts to jumpstart their profile.</p>';
+        
         echo '<table class="admin-table">';
-        echo '<tr><th>Host</th><th>Email</th><th>ID Document</th><th>Requested Date</th><th>Actions</th></tr>';
+        echo '<tr><th>Preview Name</th><th>Demo Bio</th><th>Location</th><th>Actions</th></tr>';
+        
+        if (empty($demos)) {
+            echo '<tr><td colspan="4" style="padding:40px; text-align:center; color:#999;">No demo listings created. <a href="' . home_url('/host-dashboard?action=add') . '">Create one now</a></td></tr>';
+        } else {
+            foreach ($demos as $demo) {
+                $d_name = get_post_meta($demo->ID, '_obenlo_demo_host_name', true);
+                $d_bio = get_post_meta($demo->ID, '_obenlo_demo_host_bio', true);
+                $d_loc = get_post_meta($demo->ID, '_obenlo_demo_host_location', true);
 
-        foreach ($pending_users as $user) {
-            $doc_id = get_user_meta($user->ID, 'obenlo_verification_doc_id', true);
-            $doc_url = $doc_id ? wp_get_attachment_url($doc_id) : '#';
-
-            echo '<tr>';
-            echo '<td><strong>' . esc_html($user->display_name) . '</strong></td>';
-            echo '<td>' . esc_html($user->user_email) . '</td>';
-            echo '<td>';
-            if ($doc_id) {
-                echo '<a href="' . esc_url($doc_url) . '" target="_blank" style="display:inline-block; padding:5px 10px; background:#f0f0f1; border-radius:4px; text-decoration:none; font-size:0.85em; font-weight:600;">View Document</a>';
+                echo '<tr>';
+                echo '<td><strong>' . esc_html($d_name) . '</strong><br><small>' . esc_html($demo->post_title) . '</small></td>';
+                echo '<td style="max-width:300px; font-size:0.85rem;">' . wp_trim_words($d_bio, 15) . '</td>';
+                echo '<td>' . esc_html($d_loc) . '</td>';
+                echo '<td>';
+                echo '<div style="display:flex; gap:15px; align-items:center;">';
+                echo '<a href="' . get_permalink($demo->ID) . '" target="_blank" style="color:#e61e4d; font-weight:700;">View</a>';
+                
+                // Transfer Form
+                echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:flex; gap:5px; margin:0;" onsubmit="return confirm(\'Are you sure you want to transfer this demo to a real host? This will move all demo data to their profile.\')">';
+                echo '<input type="hidden" name="action" value="obenlo_transfer_demo">';
+                echo '<input type="hidden" name="listing_id" value="' . $demo->ID . '">';
+                wp_nonce_field('transfer_demo_' . $demo->ID, 'transfer_nonce');
+                
+                $users = get_users(array('role' => 'host', 'number' => 20));
+                echo '<select name="target_user_id" required style="font-size:0.8rem; padding:4px;">';
+                echo '<option value="">Select Host...</option>';
+                foreach($users as $user) {
+                    if ($user->user_login === 'demo') continue;
+                    echo '<option value="' . $user->ID . '">' . esc_html($user->display_name) . ' (' . esc_html($user->user_login) . ')</option>';
+                }
+                echo '</select>';
+                
+                echo '<button type="submit" style="background:#222; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:0.8em; font-weight:700;">Transfer</button>';
+                echo '</form>';
+                echo '</div>';
+                echo '</td>';
+                echo '</tr>';
             }
-            else {
-                echo '<span style="color:#999;">No File</span>';
-            }
-            echo '</td>';
-            echo '<td>' . esc_html($user->user_registered) . '</td>';
-            echo '<td>';
-            echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline-block; margin-right:10px;">';
-            echo '<input type="hidden" name="action" value="obenlo_update_host_status">';
-            echo '<input type="hidden" name="user_id" value="' . $user->ID . '">';
-            echo '<input type="hidden" name="status" value="verified">';
-            echo '<button type="submit" class="btn-approve" style="background:none; border:none; cursor:pointer; padding:0;">Approve</button>';
-            echo '</form>';
-
-            echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline-block;">';
-            echo '<input type="hidden" name="action" value="obenlo_update_host_status">';
-            echo '<input type="hidden" name="user_id" value="' . $user->ID . '">';
-            echo '<input type="hidden" name="status" value="rejected">';
-            echo '<button type="submit" class="btn-reject" style="background:none; border:none; cursor:pointer; padding:0;">Reject</button>';
-            echo '</form>';
-            echo '</td>';
-            echo '</tr>';
         }
+        echo '</table>';
+    }
+
+    public function handle_transfer_demo()
+    {
+        if (!current_user_can('administrator')) {
+            obenlo_redirect_with_error('unauthorized');
+        }
+        
+        $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
+        $user_id = isset($_POST['target_user_id']) ? intval($_POST['target_user_id']) : 0;
+        
+        check_admin_referer('transfer_demo_' . $listing_id, 'transfer_nonce');
+
+        if ($listing_id && $user_id) {
+            $listing = get_post($listing_id);
+            if ($listing && get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes') {
+                
+                // 1. Reassign Author
+                wp_update_post(array(
+                    'ID' => $listing_id,
+                    'post_author' => $user_id
+                ));
+
+                // 2. Migrate Meta to User
+                $d_name = get_post_meta($listing_id, '_obenlo_demo_host_name', true);
+                $d_bio = get_post_meta($listing_id, '_obenlo_demo_host_bio', true);
+                $d_loc = get_post_meta($listing_id, '_obenlo_demo_host_location', true);
+                $d_tag = get_post_meta($listing_id, '_obenlo_demo_host_tagline', true);
+
+                if ($d_name) update_user_meta($user_id, 'obenlo_store_name', $d_name);
+                if ($d_bio) update_user_meta($user_id, 'obenlo_store_description', $d_bio);
+                if ($d_loc) update_user_meta($user_id, 'obenlo_store_location', $d_loc);
+                if ($d_tag) update_user_meta($user_id, 'obenlo_store_tagline', $d_tag);
+
+                // 3. Clean up Demo flags
+                delete_post_meta($listing_id, '_obenlo_is_demo');
+                delete_post_meta($listing_id, '_obenlo_demo_host_name');
+                delete_post_meta($listing_id, '_obenlo_demo_host_bio');
+                delete_post_meta($listing_id, '_obenlo_demo_host_location');
+                delete_post_meta($listing_id, '_obenlo_demo_host_tagline');
+                
+                // Clear any restricted mode cache for the user if applicable
+                clean_user_cache($user_id);
+            }
+        }
+
+        wp_safe_redirect(add_query_arg('tab', 'demo_manager', wp_get_referer()));
+        exit;
+    }
+
+    private function render_verifications_tab()
+    {
+        echo '<h3>Host Verification Requests</h3>';
+        
+        $users = get_users(array(
+            'meta_key' => 'obenlo_host_verification_status',
+            'meta_value' => array('pending', 'verified', 'rejected'),
+            'meta_compare' => 'IN'
+        ));
+        
+        echo '<table class="admin-table">';
+        echo '<tr><th>Host</th><th>Status</th><th>Document</th><th>Actions</th></tr>';
+        
+        if (empty($users)) {
+            echo '<tr><td colspan="4" style="text-align:center; padding:30px;">No verification requests found.</td></tr>';
+        } else {
+            foreach ($users as $user) {
+                $status = get_user_meta($user->ID, 'obenlo_host_verification_status', true);
+                if (!$status) $status = 'pending';
+
+                $doc_id = get_user_meta($user->ID, 'obenlo_verification_doc_id', true);
+                $doc_url = $doc_id ? wp_get_attachment_url($doc_id) : '';
+                
+                $status_bg = '#fef9c3'; $status_color = '#854d0e';
+                if ($status === 'verified') { $status_bg = '#dcfce7'; $status_color = '#166534'; }
+                if ($status === 'rejected') { $status_bg = '#fee2e2'; $status_color = '#991b1b'; }
+
+                echo '<tr>';
+                echo '<td><strong>' . esc_html($user->display_name) . '</strong><br><small><a href="mailto:'.esc_attr($user->user_email).'" style="color:#666;">' . esc_html($user->user_email) . '</a></small></td>';
+                echo '<td><span style="background:'.$status_bg.'; color:'.$status_color.'; padding:4px 10px; border-radius:12px; font-weight:700; font-size:0.8rem; text-transform:uppercase;">' . esc_html($status) . '</span></td>';
+                
+                echo '<td>';
+                if ($doc_url) {
+                    echo '<a href="' . esc_url($doc_url) . '" target="_blank" style="color:#1d4ed8; font-weight:600; text-decoration:none;">📄 View Document</a>';
+                } else {
+                    echo '<span style="color:#999; font-style:italic;">No active document</span>';
+                }
+                echo '</td>';
+                
+                echo '<td>';
+                // Only show approve/reject for pending, but allow overriding if needed
+                if ($status === 'pending' || $status === 'rejected') {
+                    echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline-block; margin-right:10px;">';
+                    echo '<input type="hidden" name="action" value="obenlo_update_host_status">';
+                    echo '<input type="hidden" name="user_id" value="' . $user->ID . '">';
+                    echo '<input type="hidden" name="status" value="verified">';
+                    echo '<button type="submit" style="background:#10b981; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.8rem;">Approve</button>';
+                    echo '</form>';
+                }
+                if ($status === 'pending' || $status === 'verified') {
+                    echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline-block;">';
+                    echo '<input type="hidden" name="action" value="obenlo_update_host_status">';
+                    echo '<input type="hidden" name="user_id" value="' . $user->ID . '">';
+                    echo '<input type="hidden" name="status" value="rejected">';
+                    echo '<button type="submit" style="background:#ef4444; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.8rem;">Reject</button>';
+                    echo '</form>';
+                }
+                echo '</td>';
+                
+                echo '</tr>';
+            }
+        }
+        
         echo '</table>';
     }
 }

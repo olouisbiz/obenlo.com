@@ -26,18 +26,18 @@ class Obenlo_Booking_Virtual_Security
         $nonce = isset($_GET['_wpnonce']) ? $_GET['_wpnonce'] : '';
 
         if (!$booking_id || !wp_verify_nonce($nonce, 'join_event_' . $booking_id)) {
-            wp_die('Invalid access link or session expired.');
+            obenlo_redirect_with_error('security_failed');
         }
 
         $booking = get_post($booking_id);
         if (!$booking || $booking->post_type !== 'booking') {
-            wp_die('Booking not found.');
+            obenlo_redirect_with_error('invalid_booking');
         }
 
         // Verify status
         $status = get_post_meta($booking_id, '_obenlo_booking_status', true);
         if (!in_array($status, ['confirmed', 'approved', 'completed'])) {
-            wp_die('This booking is not yet confirmed or has been cancelled.');
+            obenlo_redirect_with_error('invalid_booking');
         }
 
         // Verify ownership
@@ -55,14 +55,14 @@ class Obenlo_Booking_Virtual_Security
         }
 
         if (!$is_owner && !current_user_can('administrator')) {
-            wp_die('Unauthorized: You do not have access to this event.');
+            obenlo_redirect_with_error('unauthorized');
         }
 
         $listing_id = get_post_meta($booking_id, '_obenlo_listing_id', true);
         $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
 
         if (!$virtual_link) {
-            wp_die('No virtual link found for this event. Please contact the host.');
+            obenlo_redirect_with_error('booking_error');
         }
 
         // Log the join event (optional)

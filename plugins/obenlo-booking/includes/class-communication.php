@@ -487,7 +487,7 @@ class Obenlo_Booking_Communication
     public function handle_submit_ticket()
     {
         if (!isset($_POST['ticket_nonce']) || !wp_verify_nonce($_POST['ticket_nonce'], 'submit_ticket')) {
-            wp_die('Security check failed');
+            obenlo_redirect_with_error('security_failed');
         }
 
         $user_id = get_current_user_id();
@@ -554,12 +554,13 @@ class Obenlo_Booking_Communication
      */
     public function handle_submit_ticket_reply()
     {
-        if (!is_user_logged_in())
-            wp_die('Please log in');
+        if (!is_user_logged_in()) {
+            obenlo_redirect_with_error('unauthorized');
+        }
 
         $ticket_id = isset($_POST['ticket_id']) ? intval($_POST['ticket_id']) : 0;
         if (!isset($_POST['reply_nonce']) || !wp_verify_nonce($_POST['reply_nonce'], 'submit_ticket_reply_' . $ticket_id)) {
-            wp_die('Security check failed');
+            obenlo_redirect_with_error('security_failed');
         }
 
         $ticket = get_post($ticket_id);
@@ -567,7 +568,7 @@ class Obenlo_Booking_Communication
 
         // Security: Author or Agent
         if ($ticket->post_author != $user_id && !current_user_can('manage_support')) {
-            wp_die('Unauthorized');
+            obenlo_redirect_with_error('unauthorized');
         }
 
         $content = wp_kses_post($_POST['reply_content']);
@@ -604,14 +605,14 @@ class Obenlo_Booking_Communication
     {
         $ticket_id = isset($_POST['ticket_id']) ? intval($_POST['ticket_id']) : 0;
         if (!isset($_POST['status_nonce']) || !wp_verify_nonce($_POST['status_nonce'], 'update_ticket_status_' . $ticket_id)) {
-            wp_die('Security check failed');
+            obenlo_redirect_with_error('security_failed');
         }
 
         $ticket = get_post($ticket_id);
         $user_id = get_current_user_id();
 
         if ($ticket->post_author != $user_id && !current_user_can('manage_support')) {
-            wp_die('Unauthorized');
+            obenlo_redirect_with_error('unauthorized');
         }
 
         $new_status = sanitize_text_field($_POST['new_status']);
@@ -627,11 +628,11 @@ class Obenlo_Booking_Communication
     public function handle_send_broadcast()
     {
         if (!current_user_can('administrator')) {
-            wp_die('Unauthorized');
+            obenlo_redirect_with_error('unauthorized');
         }
 
         if (!isset($_POST['broadcast_nonce']) || !wp_verify_nonce($_POST['broadcast_nonce'], 'send_broadcast')) {
-            wp_die('Security check failed');
+            obenlo_redirect_with_error('security_failed');
         }
 
         $title = sanitize_text_field($_POST['broadcast_title']);

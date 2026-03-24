@@ -161,7 +161,7 @@ class Obenlo_Booking_Payments
     public function handle_booking_submission()
     {
         if (!isset($_POST['obenlo_booking_nonce']) || !wp_verify_nonce($_POST['obenlo_booking_nonce'], 'obenlo_submit_booking_action')) {
-            wp_die('Security check failed');
+            obenlo_redirect_with_error('security_failed');
         }
 
         $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
@@ -171,12 +171,12 @@ class Obenlo_Booking_Payments
         $payment_method = isset($_POST['payment_method']) ? sanitize_text_field($_POST['payment_method']) : 'stripe';
 
         if (!$listing_id || !$start_date) {
-            wp_die('Missing required fields.');
+            obenlo_redirect_with_error('invalid_data');
         }
 
         $listing = get_post($listing_id);
         if (!$listing || $listing->post_type !== 'listing') {
-            wp_die('Invalid listing.');
+            obenlo_redirect_with_error('invalid_listing');
         }
 
         $host_id = $listing->post_author;
@@ -208,7 +208,7 @@ class Obenlo_Booking_Payments
                 $form_has_guests = true;
                 $capacity = get_post_meta($listing_id, '_obenlo_capacity', true);
                 if ($capacity && $guests > $capacity) {
-                    wp_die('Guest count exceeds capacity.');
+                    obenlo_redirect_with_error('capacity_exceeded');
                 }
                 $total_price = $price_per_unit * max(1, $guests);
             }
@@ -246,7 +246,7 @@ class Obenlo_Booking_Payments
                 $block_start = strtotime($block['start']);
                 $block_end = strtotime($block['end'] . ' 23:59:59'); // End of day
                 if ($booking_start_time <= $block_end && $booking_end_time >= $block_start) {
-                    wp_die('The selected dates are currently unavailable (Host is away).');
+                    obenlo_redirect_with_error('host_away');
                 }
             }
         }
@@ -271,10 +271,10 @@ class Obenlo_Booking_Payments
             if (is_array($business_hours) && isset($business_hours[$day_of_week])) {
                 $day_config = $business_hours[$day_of_week];
                 if ($day_config['active'] !== 'yes') {
-                    wp_die('The host does not accept bookings on ' . ucfirst($day_of_week) . 's.');
+                    obenlo_redirect_with_error('day_unavailable');
                 }
                 if ($time_of_day < $day_config['start'] || $time_of_day > $day_config['end']) {
-                    wp_die(sprintf('Booking time must be between %s and %s on %ss.', $day_config['start'], $day_config['end'], ucfirst($day_of_week)));
+                    obenlo_redirect_with_error('time_unavailable');
                 }
             }
         }
@@ -304,7 +304,7 @@ class Obenlo_Booking_Payments
                     $b_end_time = $b_end ? strtotime($b_end) : $b_start_time;
 
                     if ($booking_start_time < $b_end_time && $b_start_time < $booking_end_time) {
-                        wp_die('These dates are already booked.');
+                        obenlo_redirect_with_error('already_booked');
                     }
                 }
                 else {
@@ -315,7 +315,7 @@ class Obenlo_Booking_Payments
                         $proposed_end_time = $booking_start_time + ($duration_mins * 60);
 
                         if ($booking_start_time < $b_end_time && $proposed_end_time > $b_start_time) {
-                            wp_die('The selected time slot is already booked.');
+                            obenlo_redirect_with_error('already_booked');
                         }
                     }
                 }
@@ -333,7 +333,7 @@ class Obenlo_Booking_Payments
         $booking_id = wp_insert_post($booking_data);
 
         if (is_wp_error($booking_id)) {
-            wp_die('Error creating booking.');
+            obenlo_redirect_with_error('booking_error');
         }
 
         // Generate a unique confirmation code
@@ -374,7 +374,7 @@ class Obenlo_Booking_Payments
             $this->process_paypal_checkout($booking_id, $total_price, $listing->post_title);
         }
         else {
-            wp_die('Invalid payment method');
+            obenlo_redirect_with_error('invalid_payment');
         }
     }
 

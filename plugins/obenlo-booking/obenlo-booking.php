@@ -34,6 +34,8 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-i18n.php'; // i18n Localizatio
 require_once OBENLO_BOOKING_DIR . 'includes/class-live-chat-admin.php'; // Live Chat Backend
 require_once OBENLO_BOOKING_DIR . 'includes/class-push-notifications.php'; // Web Push Notifications
 require_once OBENLO_BOOKING_DIR . 'includes/class-virtual-security.php'; // Virtual Event Security
+require_once OBENLO_BOOKING_DIR . 'includes/class-demo-sandbox.php';   // Demo Sandbox
+require_once OBENLO_BOOKING_DIR . 'includes/class-admin-settings.php'; // Admin Settings
 
 // Initialize the plugin
 function obenlo_booking_init()
@@ -94,10 +96,33 @@ function obenlo_booking_init()
     $virtual_security = new Obenlo_Booking_Virtual_Security();
     $virtual_security->init();
 
+    $sandbox = new Obenlo_Booking_Demo_Sandbox();
+    $sandbox->init();
+
+    $admin_settings = new Obenlo_Booking_Admin_Settings();
+    $admin_settings->init();
+
     // Check if we need to run DB updates
     obenlo_booking_update_check();
 }
 add_action('plugins_loaded', 'obenlo_booking_init');
+
+/**
+ * Universal Obenlo Whitelabel Redirect
+ * Standardizes error handling to prevent users from seeing WordPress-branded screens.
+ */
+function obenlo_redirect_with_error($error_code) {
+    $redirect_url = remove_query_arg(array('obenlo_error', 'message'), wp_get_referer());
+    
+    // Default fallback if referer is missing or invalid
+    if (!$redirect_url) {
+        $redirect_url = home_url('/host-dashboard');
+    }
+
+    $redirect_url = add_query_arg('obenlo_error', $error_code, $redirect_url);
+    wp_safe_redirect($redirect_url);
+    exit;
+}
 
 // Routine to automatically create tables on live site if plugin is already active
 function obenlo_booking_update_check()
@@ -147,8 +172,9 @@ function obenlo_booking_install_tables()
 
 // Emergency manual trigger via admin-ajax
 add_action('wp_ajax_obenlo_force_install_db', function () {
-    if (!current_user_can('manage_options'))
-        wp_die('Unauthorized');
+    if (!current_user_can('manage_options')) {
+        obenlo_redirect_with_error('unauthorized');
+    }
     obenlo_booking_install_tables();
     update_site_option('obenlo_booking_db_version', OBENLO_BOOKING_VERSION);
     wp_send_json_success('Tables forcefully created!');
@@ -177,6 +203,31 @@ function obenlo_root_author_request($query_vars)
     return $query_vars;
 }
 add_filter('request', 'obenlo_root_author_request');
+
+/**
+ * Privacy: Hide demo listings from public archives and search.
+ * They remain accessible via direct URL.
+ */
+function obenlo_hide_demo_listings_from_public($query) {
+    if (!is_admin() && $query->is_main_query() && (is_archive() || is_search() || is_home() || is_post_type_archive('listing'))) {
+        $meta_query = $query->get('meta_query') ?: array();
+        $meta_query[] = array(
+            'relation' => 'OR',
+            array(
+                'key'     => '_obenlo_is_demo',
+                'value'   => 'yes',
+                'compare' => 'NOT EXISTS'
+            ),
+            array(
+                'key'     => '_obenlo_is_demo',
+                'value'   => 'no',
+                'compare' => '='
+            )
+        );
+        $query->set('meta_query', $meta_query);
+    }
+}
+add_action('pre_get_posts', 'obenlo_hide_demo_listings_from_public');
 
 // Change author link dynamically so get_author_posts_url returns root instead of /author/
 function obenlo_author_link($link, $author_id)
@@ -216,17 +267,29 @@ function obenlo_booking_activate()
         update_site_option('obenlo_booking_db_version', OBENLO_BOOKING_VERSION);
         error_log('Obenlo Activation: Custom tables created.');
 
+        $essential_pages = array(
+            'demo-access' => array(
+                'title' => 'Demo Access',
+                'content' => '', // Content is in the template file
+                'template' => 'page-demo-access.php'
+            )
+        );
+
         foreach ($essential_pages as $slug => $data) {
             error_log('Obenlo Activation: Checking page ' . $slug);
             $page_check = get_page_by_path($slug);
             if (!isset($page_check->ID)) {
-                wp_insert_post(array(
+                $page_id = wp_insert_post(array(
                     'post_title' => $data['title'],
                     'post_name' => $slug,
                     'post_content' => $data['content'],
                     'post_status' => 'publish',
                     'post_type' => 'page',
                 ));
+                
+                if ($page_id && !empty($data['template'])) {
+                    update_post_meta($page_id, '_wp_page_template', $data['template']);
+                }
                 error_log('Obenlo Activation: Created page ' . $slug);
             }
         }

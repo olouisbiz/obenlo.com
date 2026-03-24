@@ -22,11 +22,39 @@ if (!$curauth) {
 
 $user_id = $curauth->ID;
 
-// Meta Data
+// Meta Data (Standard)
 $store_name = get_user_meta($user_id, 'obenlo_store_name', true) ?: $curauth->display_name;
 $store_desc = get_user_meta($user_id, 'obenlo_store_description', true) ?: $curauth->description;
 $store_location = get_user_meta($user_id, 'obenlo_store_location', true);
 $store_tagline = get_user_meta($user_id, 'obenlo_store_tagline', true);
+
+// --- Demo Mode Overrides ---
+// If the author is an admin and we have a 'demo_id', use that listing's demo meta
+$demo_id = isset($_GET['demo_id']) ? intval($_GET['demo_id']) : 0;
+if ($demo_id && current_user_can('administrator', $user_id)) {
+    $parent_id = wp_get_post_parent_id($demo_id);
+    $is_demo = get_post_meta($demo_id, '_obenlo_is_demo', true) === 'yes';
+    
+    // Fallback to parent if child isn't explicitly demo but parent is
+    if (!$is_demo && $parent_id > 0) {
+        $is_demo = get_post_meta($parent_id, '_obenlo_is_demo', true) === 'yes';
+    }
+
+    if ($is_demo) {
+        $target_id = $demo_id;
+        // Check if we need to pull name/bio/etc from parent
+        $temp_name = get_post_meta($demo_id, '_obenlo_demo_host_name', true);
+        if (!$temp_name && $parent_id > 0) {
+            $target_id = $parent_id;
+        }
+
+        $store_name = get_post_meta($target_id, '_obenlo_demo_host_name', true) ?: $store_name;
+        $store_desc = get_post_meta($target_id, '_obenlo_demo_host_bio', true) ?: $store_desc;
+        $store_location = get_post_meta($target_id, '_obenlo_demo_host_location', true) ?: $store_location;
+        $store_tagline = get_post_meta($target_id, '_obenlo_demo_host_tagline', true) ?: $store_tagline;
+    }
+}
+
 $store_video = get_user_meta($user_id, 'obenlo_store_video', true);
 $insta = get_user_meta($user_id, 'obenlo_instagram', true);
 $fb = get_user_meta($user_id, 'obenlo_facebook', true);
@@ -296,7 +324,8 @@ $hosting_since = date('Y', strtotime($curauth->user_registered));
                 'post_type' => 'listing',
                 'author' => $user_id,
                 'post_parent' => 0,
-                'posts_per_page' => -1
+                'posts_per_page' => -1,
+                'suppress_filters' => false,
             ));
 
             if ($listings->have_posts()):

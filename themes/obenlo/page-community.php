@@ -85,9 +85,8 @@ get_header(); ?>
                 <?php esc_html_e( 'We regularly feature amazing stays, thrilling experiences, and top-rated hosts on our social channels. Tag us to be featured!', 'obenlo' ); ?>
             </p>
             <div style="display: flex; gap: 20px;">
-                <a href="#" style="display: inline-flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 50%; font-weight: bold;">Ig</a>
-                <a href="#" style="display: inline-flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #1877F2; color: #fff; text-decoration: none; border-radius: 50%; font-weight: bold;">Fb</a>
-                <a href="#" style="display: inline-flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #1DA1F2; color: #fff; text-decoration: none; border-radius: 50%; font-weight: bold;">Tw</a>
+                <a href="https://www.instagram.com/obenlobooking" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 50%; font-weight: bold;">Ig</a>
+                <a href="https://www.facebook.com/obenlobooking" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 45px; height: 45px; background: #1877F2; color: #fff; text-decoration: none; border-radius: 50%; font-weight: bold;">Fb</a>
             </div>
         </div>
     </section>
