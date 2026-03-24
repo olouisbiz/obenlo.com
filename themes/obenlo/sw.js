@@ -1,4 +1,4 @@
-const CACHE_NAME = 'obenlo-v1.0.8';
+const CACHE_NAME = 'obenlo-v1.0.9';
 const OFFLINE_URL = '/';
 
 const ASSETS_TO_CACHE = [
@@ -33,7 +33,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Stale-While-Revalidate Strategy for Automatic Updates
+// Strategy separation: Network First for HTML (dynamic pages with nonces), Stale-While-Revalidate for Assets
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   
@@ -42,20 +42,36 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Network-First Strategy for HTML Navigation (Fixes Stale WP Nonces)
+  if (event.request.mode === 'navigate' || (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'))) {
+    event.respondWith(
+      fetch(event.request).then((networkResponse) => {
+        return caches.open(CACHE_NAME).then((cache) => {
+          if (networkResponse.status === 200) {
+            cache.put(event.request, networkResponse.clone());
+          }
+          return networkResponse;
+        });
+      }).catch(() => {
+        return caches.match(event.request).then((cachedResponse) => {
+          return cachedResponse || caches.match(OFFLINE_URL);
+        });
+      })
+    );
+    return;
+  }
+
+  // Stale-While-Revalidate Strategy for Static Assets (Images, CSS, JS)
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.match(event.request).then((cachedResponse) => {
         const fetchedResponse = fetch(event.request).then((networkResponse) => {
-          // Only cache successful GET requests
           if (networkResponse.status === 200) {
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
         }).catch(() => {
-          // If network fails and no cache, return offline fallback for navigation
-          if (event.request.mode === 'navigate') {
-            return caches.match(OFFLINE_URL);
-          }
+          // Silent catch for offline asset loads
         });
 
         return cachedResponse || fetchedResponse;
