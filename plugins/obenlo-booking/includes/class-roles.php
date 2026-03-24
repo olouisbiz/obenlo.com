@@ -19,23 +19,9 @@ class Obenlo_Booking_Roles {
             if ( ! get_role( 'guest' ) || ! get_role( 'host' ) || ! get_role( 'support_agent' ) ) {
                 $this->add_roles();
             }
-
-            // Ensure demo user exists
-            $this->ensure_demo_user();
         }
     }
 
-    public function ensure_demo_user() {
-        if ( ! username_exists( 'demo' ) ) {
-            $user_id = wp_create_user( 'demo', 'demo123', 'demo@obenlo.com' );
-            if ( ! is_wp_error( $user_id ) ) {
-                $user = new WP_User( $user_id );
-                $user->set_role( 'host' );
-                update_user_meta( $user_id, 'obenlo_store_name', 'Demo Expert Host' );
-                update_user_meta( $user_id, 'obenlo_store_description', 'Welcome to my demo profile! As a host on Obenlo, I provide exceptional experiences.' );
-            }
-        }
-    }
 
     public function add_roles() {
         // Clone capabilities from standard subscriber for Guest role

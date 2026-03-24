@@ -19,7 +19,6 @@ class Obenlo_Booking_Admin_Dashboard
         add_action('admin_post_obenlo_save_settings', array($this, 'handle_save_settings'));
         add_action('admin_post_obenlo_save_payment_settings', array($this, 'handle_save_payment_settings'));
         add_action('admin_post_obenlo_update_user_fee', array($this, 'handle_update_user_fee'));
-        add_action('admin_post_obenlo_transfer_demo', array($this, 'handle_transfer_demo'));
     }
 
     public function render_dashboard()
@@ -60,7 +59,6 @@ class Obenlo_Booking_Admin_Dashboard
                     <a href="?tab=verifications" class="<?php echo $tab === 'verifications' ? 'active' : ''; ?>">Verifications</a>
                     <a href="?tab=bookings" class="<?php echo $tab === 'bookings' ? 'active' : ''; ?>">Bookings</a>
                     <a href="?tab=payments" class="<?php echo $tab === 'payments' ? 'active' : ''; ?>">Payments</a>
-                    <a href="?tab=demo_manager" class="<?php echo $tab === 'demo_manager' ? 'active' : ''; ?>">Demo Manager</a>
                     <a href="?tab=messaging" class="<?php echo $tab === 'messaging' ? 'active' : ''; ?>">Messaging</a>
                 <?php
         endif; ?>
@@ -104,9 +102,6 @@ class Obenlo_Booking_Admin_Dashboard
                 break;
             case 'messaging':
                 $this->render_messaging_oversight_tab();
-                break;
-            case 'demo_manager':
-                $this->render_demo_manager_tab();
                 break;
             case 'communication':
                 $this->render_communication_tab();

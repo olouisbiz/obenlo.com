@@ -144,9 +144,7 @@ class Obenlo_Booking_Frontend_Dashboard
             $error_msg = 'An unexpected error occurred. Please try again.';
             
             switch($error_code) {
-                case 'demo_restricted':
-                    $error_msg = 'Saving is disabled in Demo Mode. Sign up to start building your own listings!';
-                    break;
+
                 case 'unauthorized':
                     $error_msg = 'Unauthorized: You do not have permission to perform this action.';
                     break;
@@ -191,16 +189,6 @@ class Obenlo_Booking_Frontend_Dashboard
             echo '</div>';
         }
 
-        // --- Demo Mode Banner ---
-        if ($user->user_login === 'demo') {
-            echo '<div style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 20px; border-radius: 16px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">';
-            echo '<span style="font-size: 1.5rem;">✨</span>';
-            echo '<div>';
-            echo '<h4 style="margin: 0; font-weight: 800;">Welcome to the Demo Profile!</h4>';
-            echo '<p style="margin: 5px 0 0; font-size: 0.9rem;">Feel free to explore all the features of the Obenlo dashboard. <strong>Note:</strong> You cannot save changes while in demo mode.</p>';
-            echo '</div>';
-            echo '</div>';
-        }
 
         if ($action === 'overview') {
             $this->render_overview_tab();
@@ -909,45 +897,6 @@ class Obenlo_Booking_Frontend_Dashboard
                         <input type="text" name="listing_title" value="<?php echo esc_attr($title); ?>" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; transition:border-color 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
                     </div>
 
-                    <?php if (current_user_can('administrator')): 
-                        $is_demo = get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes';
-                        $d_name = get_post_meta($listing_id, '_obenlo_demo_host_name', true);
-                        $d_bio = get_post_meta($listing_id, '_obenlo_demo_host_bio', true);
-                        $d_tag = get_post_meta($listing_id, '_obenlo_demo_host_tagline', true);
-                        $d_loc = get_post_meta($listing_id, '_obenlo_demo_host_location', true);
-                    ?>
-                        <div style="background: #f0fdf4; border: 1px solid #dcfce7; padding: 25px; border-radius: 16px; margin-bottom: 30px;">
-                            <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-weight:800; color:#166534; font-size:1.1rem;">
-                                <input type="checkbox" name="is_demo_listing" value="yes" id="is_demo_toggle" <?php checked($is_demo); ?> style="width:20px; height:20px;">
-                                Set as Demo Listing (Admin Only)
-                            </label>
-                            <p style="font-size:0.85rem; color:#166534; opacity:0.8; margin-top:5px; margin-left:32px;">Demo listings allow you to showcase potential host profiles to prospective users.</p>
-                            
-                            <div id="demo_fields_wrapper" style="display: <?php echo $is_demo ? 'block' : 'none'; ?>; margin-top: 20px; padding-top: 20px; border-top: 1px solid #dcfce7;">
-                                <div style="margin-bottom:15px;">
-                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#166534; margin-bottom:5px;">Demo Host Name</label>
-                                    <input type="text" name="demo_host_name" value="<?php echo esc_attr($d_name); ?>" placeholder="e.g. Jean Dupont" style="width:100%; padding:10px; border:1px solid #bbf7d0; border-radius:8px;">
-                                </div>
-                                <div style="margin-bottom:15px;">
-                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#166534; margin-bottom:5px;">Demo Host Tagline</label>
-                                    <input type="text" name="demo_host_tagline" value="<?php echo esc_attr($d_tag); ?>" placeholder="e.g. Master Chef from Marseille" style="width:100%; padding:10px; border:1px solid #bbf7d0; border-radius:8px;">
-                                </div>
-                                <div style="margin-bottom:15px;">
-                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#166534; margin-bottom:5px;">Demo Host Bio</label>
-                                    <textarea name="demo_host_bio" rows="3" style="width:100%; padding:10px; border:1px solid #bbf7d0; border-radius:8px;"><?php echo esc_textarea($d_bio); ?></textarea>
-                                </div>
-                                <div>
-                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#166534; margin-bottom:5px;">Demo Host Location</label>
-                                    <input type="text" name="demo_host_location" value="<?php echo esc_attr($d_loc); ?>" placeholder="e.g. Marseille, France" style="width:100%; padding:10px; border:1px solid #bbf7d0; border-radius:8px;">
-                                </div>
-                            </div>
-                        </div>
-                        <script>
-                            document.getElementById('is_demo_toggle').addEventListener('change', function() {
-                                document.getElementById('demo_fields_wrapper').style.display = this.checked ? 'block' : 'none';
-                            });
-                        </script>
-                    <?php endif; ?>
 
                     <?php if (!$is_child): ?>
                         <div style="margin-bottom:20px;">
@@ -1563,11 +1512,6 @@ class Obenlo_Booking_Frontend_Dashboard
         }
 
         $user = wp_get_current_user();
-        if ($user->user_login === 'demo') {
-            // Sandbox handles demo user transparently via filters
-        } else {
-            // Normal behavior
-        }
 
         $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
         $title = sanitize_text_field($_POST['listing_title']);
@@ -1595,22 +1539,12 @@ class Obenlo_Booking_Frontend_Dashboard
             if ($existing_post->post_author != get_current_user_id() && !current_user_can('administrator')) {
                 $this->redirect_with_error('unauthorized');
             }
-            if ($user->user_login === 'demo') {
-                $session_id = get_post_meta($listing_id, '_obenlo_sandbox_session_id', true);
-                if (empty($session_id) || $session_id !== Obenlo_Booking_Demo_Sandbox::get_session_id()) {
-                    $this->redirect_with_error('demo_restricted');
-                }
-            }
 
             $post_data['ID'] = $listing_id;
             $new_post_id = wp_update_post($post_data);
         }
         else {
             $new_post_id = wp_insert_post($post_data);
-            if ($new_post_id && !is_wp_error($new_post_id) && $user->user_login === 'demo') {
-                // Tag new listings with session ID to isolate them from other demo visitors
-                update_post_meta($new_post_id, '_obenlo_sandbox_session_id', Obenlo_Booking_Demo_Sandbox::get_session_id());
-            }
         }
 
         if ($new_post_id && !is_wp_error($new_post_id)) {
@@ -1631,28 +1565,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 update_post_meta($new_post_id, '_obenlo_virtual_link', esc_url_raw($_POST['virtual_link']));
             }
 
-            // --- Demo Meta (Admin Only or Inherited) ---
-            if (current_user_can('administrator')) {
-                $is_demo = isset($_POST['is_demo_listing']) ? 'yes' : 'no';
-                update_post_meta($new_post_id, '_obenlo_is_demo', $is_demo);
-                if ($is_demo === 'yes') {
-                    update_post_meta($new_post_id, '_obenlo_demo_host_name', sanitize_text_field($_POST['demo_host_name']));
-                    update_post_meta($new_post_id, '_obenlo_demo_host_bio', sanitize_textarea_field($_POST['demo_host_bio']));
-                    update_post_meta($new_post_id, '_obenlo_demo_host_tagline', sanitize_text_field($_POST['demo_host_tagline']));
-                    update_post_meta($new_post_id, '_obenlo_demo_host_location', sanitize_text_field($_POST['demo_host_location']));
-                }
-            } elseif ($parent_id > 0) {
-                // Inherit from parent if parent is a demo
-                $parent_is_demo = get_post_meta($parent_id, '_obenlo_is_demo', true);
-                if ($parent_is_demo === 'yes') {
-                    update_post_meta($new_post_id, '_obenlo_is_demo', 'yes');
-                    // Sync metadata so child page displays it correctly
-                    update_post_meta($new_post_id, '_obenlo_demo_host_name', get_post_meta($parent_id, '_obenlo_demo_host_name', true));
-                    update_post_meta($new_post_id, '_obenlo_demo_host_bio', get_post_meta($parent_id, '_obenlo_demo_host_bio', true));
-                    update_post_meta($new_post_id, '_obenlo_demo_host_tagline', get_post_meta($parent_id, '_obenlo_demo_host_tagline', true));
-                    update_post_meta($new_post_id, '_obenlo_demo_host_location', get_post_meta($parent_id, '_obenlo_demo_host_location', true));
-                }
-            }
+
 
             // Fixed Event Scheduling
             update_post_meta($new_post_id, '_obenlo_event_is_fixed', isset($_POST['event_is_fixed']) ? 'yes' : 'no');
@@ -1821,10 +1734,6 @@ class Obenlo_Booking_Frontend_Dashboard
         }
 
         $user = wp_get_current_user();
-        if ($user->user_login === 'demo') {
-            // $this->redirect_with_error('demo_restricted');
-        }
-
         $user_id = get_current_user_id();
 
         // Save text meta
@@ -1835,12 +1744,10 @@ class Obenlo_Booking_Frontend_Dashboard
             // Sync user slug (nicename) with store name for clean URLs
             $new_slug = sanitize_title($store_name);
             if (!empty($new_slug)) {
-                if ($user->user_login !== 'demo') {
-                    wp_update_user(array(
-                        'ID' => $user_id,
-                        'user_nicename' => $new_slug
-                    ));
-                }
+                wp_update_user(array(
+                    'ID' => $user_id,
+                    'user_nicename' => $new_slug
+                ));
             }
         }
         if (isset($_POST['store_description'])) {
@@ -1868,25 +1775,17 @@ class Obenlo_Booking_Frontend_Dashboard
         // Process removals
         if (isset($_POST['remove_logo']) && $_POST['remove_logo'] == '1') {
             $old_logo = get_user_meta($user_id, 'obenlo_store_logo', true);
-            if ($old_logo && $user->user_login !== 'demo') {
+            if ($old_logo) {
                 wp_delete_attachment($old_logo, true);
             }
-            if ($user->user_login !== 'demo') {
-                delete_user_meta($user_id, 'obenlo_store_logo');
-            } else {
-                update_user_meta($user_id, 'obenlo_store_logo', '');
-            }
+            delete_user_meta($user_id, 'obenlo_store_logo');
         }
         if (isset($_POST['remove_banner']) && $_POST['remove_banner'] == '1') {
             $old_banner = get_user_meta($user_id, 'obenlo_store_banner', true);
-            if ($old_banner && $user->user_login !== 'demo') {
+            if ($old_banner) {
                 wp_delete_attachment($old_banner, true);
             }
-            if ($user->user_login !== 'demo') {
-                delete_user_meta($user_id, 'obenlo_store_banner');
-            } else {
-                update_user_meta($user_id, 'obenlo_store_banner', '');
-            }
+            delete_user_meta($user_id, 'obenlo_store_banner');
         }
 
         // Process new uploads
@@ -2334,13 +2233,7 @@ class Obenlo_Booking_Frontend_Dashboard
             $this->redirect_with_error('unauthorized');
         }
 
-        $user = wp_get_current_user();
-        if ($user->user_login === 'demo') {
-            $session_id = get_post_meta($listing_id, '_obenlo_sandbox_session_id', true);
-            if (empty($session_id) || $session_id !== Obenlo_Booking_Demo_Sandbox::get_session_id()) {
-                $this->redirect_with_error('demo_restricted');
-            }
-        }
+
 
         // Delete children first if it's a parent
         $children = get_posts(array(

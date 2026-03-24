@@ -158,26 +158,6 @@ get_header(); ?>
                 $host_id = get_the_author_meta('ID');
                 $host_name = get_the_author();
                 $host_url = get_author_posts_url($host_id);
-                
-                $is_demo = get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes';
-                $parent_id = wp_get_post_parent_id($listing_id);
-                
-                // If it's a child and not explicitly marked demo, check the parent
-                if (!$is_demo && $parent_id > 0) {
-                    $is_demo = get_post_meta($parent_id, '_obenlo_is_demo', true) === 'yes';
-                }
-
-                if ($is_demo) {
-                    // Try current listing meta first, then parent if it's a child
-                    $demo_name = get_post_meta($listing_id, '_obenlo_demo_host_name', true);
-                    if (!$demo_name && $parent_id > 0) {
-                        $demo_name = get_post_meta($parent_id, '_obenlo_demo_host_name', true);
-                    }
-                    
-                    if ($demo_name) $host_name = $demo_name;
-                    // Point to the profile with the relevant ID for the demo override
-                    $host_url = add_query_arg('demo_id', ($parent_id > 0 ? $parent_id : $listing_id), $host_url);
-                }
                 ?>
                 <span style="color:#888;">&bull;</span> Hosted by <a href="<?php echo esc_url($host_url); ?>" style="color:#e61e4d; font-weight:bold; text-decoration:none; margin-left:5px;"><?php echo esc_html($host_name); ?></a>
             </div>

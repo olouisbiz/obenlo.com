@@ -27,22 +27,19 @@ get_header();
                     </div>
                 <?php endif; ?>
 
-                <?php 
-                $autofill_user = (isset($_GET['autofill']) && $_GET['autofill'] === 'demo') ? 'demo' : '';
-                $autofill_pass = (isset($_GET['autofill']) && $_GET['autofill'] === 'demo') ? 'demo123' : '';
-                ?>
+
                 <form action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="POST">
                     <input type="hidden" name="action" value="obenlo_bespoke_login">
                     <?php wp_nonce_field( 'obenlo_login', 'login_nonce' ); ?>
                     
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: bold; color: #444;">Username or Email</label>
-                        <input type="text" name="log" value="<?php echo esc_attr($autofill_user); ?>" required style="width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem;">
+                        <input type="text" name="log" required style="width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem;">
                     </div>
 
                     <div style="margin-bottom: 25px;">
                         <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: bold; color: #444;">Password</label>
-                        <input type="password" name="pwd" value="<?php echo esc_attr($autofill_pass); ?>" required style="width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem;">
+                        <input type="password" name="pwd" required style="width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem;">
                         <div style="text-align: right; margin-top: 10px;">
                             <a href="<?php echo wp_lostpassword_url(); ?>" style="color: #e61e4d; font-size: 0.85rem; text-decoration: none;">Forgot password?</a>
                         </div>
