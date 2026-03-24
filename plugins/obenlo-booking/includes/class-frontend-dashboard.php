@@ -1595,16 +1595,15 @@ class Obenlo_Booking_Frontend_Dashboard
             if ($existing_post->post_author != get_current_user_id() && !current_user_can('administrator')) {
                 $this->redirect_with_error('unauthorized');
             }
-            
             if ($user->user_login === 'demo') {
-                // For demo user, redirect Title/Content to sandboxed meta to avoid DB pollution
-                update_post_meta($listing_id, '_obenlo_sandboxed_title', $title);
-                update_post_meta($listing_id, '_obenlo_sandboxed_content', $content);
-                $new_post_id = $listing_id;
-            } else {
-                $post_data['ID'] = $listing_id;
-                $new_post_id = wp_update_post($post_data);
+                $session_id = get_post_meta($listing_id, '_obenlo_sandbox_session_id', true);
+                if (empty($session_id) || $session_id !== Obenlo_Booking_Demo_Sandbox::get_session_id()) {
+                    $this->redirect_with_error('demo_restricted');
+                }
             }
+
+            $post_data['ID'] = $listing_id;
+            $new_post_id = wp_update_post($post_data);
         }
         else {
             $new_post_id = wp_insert_post($post_data);
@@ -1836,10 +1835,12 @@ class Obenlo_Booking_Frontend_Dashboard
             // Sync user slug (nicename) with store name for clean URLs
             $new_slug = sanitize_title($store_name);
             if (!empty($new_slug)) {
-                wp_update_user(array(
-                    'ID' => $user_id,
-                    'user_nicename' => $new_slug
-                ));
+                if ($user->user_login !== 'demo') {
+                    wp_update_user(array(
+                        'ID' => $user_id,
+                        'user_nicename' => $new_slug
+                    ));
+                }
             }
         }
         if (isset($_POST['store_description'])) {
@@ -1867,15 +1868,25 @@ class Obenlo_Booking_Frontend_Dashboard
         // Process removals
         if (isset($_POST['remove_logo']) && $_POST['remove_logo'] == '1') {
             $old_logo = get_user_meta($user_id, 'obenlo_store_logo', true);
-            if ($old_logo)
+            if ($old_logo && $user->user_login !== 'demo') {
                 wp_delete_attachment($old_logo, true);
-            delete_user_meta($user_id, 'obenlo_store_logo');
+            }
+            if ($user->user_login !== 'demo') {
+                delete_user_meta($user_id, 'obenlo_store_logo');
+            } else {
+                update_user_meta($user_id, 'obenlo_store_logo', '');
+            }
         }
         if (isset($_POST['remove_banner']) && $_POST['remove_banner'] == '1') {
             $old_banner = get_user_meta($user_id, 'obenlo_store_banner', true);
-            if ($old_banner)
+            if ($old_banner && $user->user_login !== 'demo') {
                 wp_delete_attachment($old_banner, true);
-            delete_user_meta($user_id, 'obenlo_store_banner');
+            }
+            if ($user->user_login !== 'demo') {
+                delete_user_meta($user_id, 'obenlo_store_banner');
+            } else {
+                update_user_meta($user_id, 'obenlo_store_banner', '');
+            }
         }
 
         // Process new uploads
@@ -2321,6 +2332,14 @@ class Obenlo_Booking_Frontend_Dashboard
         $post = get_post($listing_id);
         if (!$post || ($post->post_author != get_current_user_id() && !current_user_can('administrator'))) {
             $this->redirect_with_error('unauthorized');
+        }
+
+        $user = wp_get_current_user();
+        if ($user->user_login === 'demo') {
+            $session_id = get_post_meta($listing_id, '_obenlo_sandbox_session_id', true);
+            if (empty($session_id) || $session_id !== Obenlo_Booking_Demo_Sandbox::get_session_id()) {
+                $this->redirect_with_error('demo_restricted');
+            }
         }
 
         // Delete children first if it's a parent
