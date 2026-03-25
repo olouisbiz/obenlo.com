@@ -12,6 +12,10 @@ class Obenlo_Booking_Post_Types {
     public function init() {
         add_action( 'init', array( $this, 'register_custom_post_types' ) );
         add_action( 'init', array( $this, 'register_taxonomies' ) );
+        
+        // Demo Listing Configuration Meta Box
+        add_action( 'add_meta_boxes', array( $this, 'add_demo_meta_box' ) );
+        add_action( 'save_post_listing', array( $this, 'save_demo_meta_box' ) );
     }
 
     public function register_custom_post_types() {
@@ -237,6 +241,77 @@ class Obenlo_Booking_Post_Types {
                 $parent_id = isset( $parent_ids[ $parent_key ] ) ? $parent_ids[ $parent_key ] : 0;
                 wp_insert_term( $name, 'listing_type', array( 'parent' => $parent_id ) );
             }
+        }
+    }
+
+    public function add_demo_meta_box() {
+        add_meta_box(
+            'obenlo_demo_listing_meta',
+            __( 'Demo Listing Configuration', 'obenlo-booking' ),
+            array( $this, 'render_demo_meta_box' ),
+            'listing',
+            'side',
+            'default'
+        );
+    }
+
+    public function render_demo_meta_box( $post ) {
+        wp_nonce_field( 'obenlo_demo_meta_save', 'obenlo_demo_meta_nonce' );
+        
+        $is_demo = get_post_meta( $post->ID, '_obenlo_is_demo', true );
+        $d_name = get_post_meta( $post->ID, '_obenlo_demo_host_name', true );
+        $d_bio = get_post_meta( $post->ID, '_obenlo_demo_host_bio', true );
+        $d_loc = get_post_meta( $post->ID, '_obenlo_demo_host_location', true );
+        $d_tag = get_post_meta( $post->ID, '_obenlo_demo_host_tagline', true );
+
+        echo '<p>';
+        echo '<label><input type="checkbox" name="_obenlo_is_demo" value="yes" ' . checked( $is_demo, 'yes', false ) . '> <strong>Is this a Demo Listing?</strong></label>';
+        echo '</p>';
+        
+        echo '<div style="margin-top:10px; border-top:1px solid #ddd; padding-top:10px;">';
+        echo '<p><strong>Demo Host Details:</strong><br><small>Will be transferred to the real host later.</small></p>';
+        
+        echo '<p><label>Host Name:<br>';
+        echo '<input type="text" name="_obenlo_demo_host_name" value="' . esc_attr( $d_name ) . '" style="width:100%;">';
+        echo '</label></p>';
+
+        echo '<p><label>Host Tagline:<br>';
+        echo '<input type="text" name="_obenlo_demo_host_tagline" value="' . esc_attr( $d_tag ) . '" style="width:100%;">';
+        echo '</label></p>';
+
+        echo '<p><label>Host Location:<br>';
+        echo '<input type="text" name="_obenlo_demo_host_location" value="' . esc_attr( $d_loc ) . '" style="width:100%;">';
+        echo '</label></p>';
+
+        echo '<p><label>Host Bio:<br>';
+        echo '<textarea name="_obenlo_demo_host_bio" rows="4" style="width:100%;">' . esc_textarea( $d_bio ) . '</textarea>';
+        echo '</label></p>';
+        echo '</div>';
+    }
+
+    public function save_demo_meta_box( $post_id ) {
+        if ( ! isset( $_POST['obenlo_demo_meta_nonce'] ) || ! wp_verify_nonce( $_POST['obenlo_demo_meta_nonce'], 'obenlo_demo_meta_save' ) ) {
+            return;
+        }
+        if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+            return;
+        }
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            return;
+        }
+
+        if ( isset( $_POST['_obenlo_is_demo'] ) && $_POST['_obenlo_is_demo'] === 'yes' ) {
+            update_post_meta( $post_id, '_obenlo_is_demo', 'yes' );
+            update_post_meta( $post_id, '_obenlo_demo_host_name', sanitize_text_field( $_POST['_obenlo_demo_host_name'] ) );
+            update_post_meta( $post_id, '_obenlo_demo_host_tagline', sanitize_text_field( $_POST['_obenlo_demo_host_tagline'] ) );
+            update_post_meta( $post_id, '_obenlo_demo_host_location', sanitize_text_field( $_POST['_obenlo_demo_host_location'] ) );
+            update_post_meta( $post_id, '_obenlo_demo_host_bio', sanitize_textarea_field( wp_unslash( $_POST['_obenlo_demo_host_bio'] ) ) );
+        } else {
+            delete_post_meta( $post_id, '_obenlo_is_demo' );
+            delete_post_meta( $post_id, '_obenlo_demo_host_name' );
+            delete_post_meta( $post_id, '_obenlo_demo_host_tagline' );
+            delete_post_meta( $post_id, '_obenlo_demo_host_location' );
+            delete_post_meta( $post_id, '_obenlo_demo_host_bio' );
         }
     }
 }
