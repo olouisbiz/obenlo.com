@@ -22,24 +22,46 @@ if (!$curauth) {
 
 $user_id = $curauth->ID;
 
+// Demo Preview Overrides
+$demo_listing_id = isset($_GET['demo_listing_id']) ? intval($_GET['demo_listing_id']) : 0;
+$is_demo_preview = false;
+$demo_meta = [];
+
+if ($demo_listing_id && get_post_meta($demo_listing_id, '_obenlo_is_demo', true) === 'yes') {
+    $is_demo_preview = true;
+    $demo_meta = [
+        'name' => get_post_meta($demo_listing_id, '_obenlo_demo_host_name', true),
+        'bio' => get_post_meta($demo_listing_id, '_obenlo_demo_host_bio', true),
+        'location' => get_post_meta($demo_listing_id, '_obenlo_demo_host_location', true),
+        'tagline' => get_post_meta($demo_listing_id, '_obenlo_demo_host_tagline', true),
+        'insta' => get_post_meta($demo_listing_id, '_obenlo_demo_host_instagram', true),
+        'fb' => get_post_meta($demo_listing_id, '_obenlo_demo_host_facebook', true),
+    ];
+}
+
 // Meta Data (Standard)
-$store_name = get_user_meta($user_id, 'obenlo_store_name', true) ?: $curauth->display_name;
-$store_desc = get_user_meta($user_id, 'obenlo_store_description', true) ?: $curauth->description;
-$store_location = get_user_meta($user_id, 'obenlo_store_location', true);
-$store_tagline = get_user_meta($user_id, 'obenlo_store_tagline', true);
-
-
+$store_name = ($is_demo_preview && !empty($demo_meta['name'])) ? $demo_meta['name'] : (get_user_meta($user_id, 'obenlo_store_name', true) ?: $curauth->display_name);
+$store_desc = ($is_demo_preview && !empty($demo_meta['bio'])) ? $demo_meta['bio'] : (get_user_meta($user_id, 'obenlo_store_description', true) ?: $curauth->description);
+$store_location = ($is_demo_preview && !empty($demo_meta['location'])) ? $demo_meta['location'] : get_user_meta($user_id, 'obenlo_store_location', true);
+$store_tagline = ($is_demo_preview && !empty($demo_meta['tagline'])) ? $demo_meta['tagline'] : get_user_meta($user_id, 'obenlo_store_tagline', true);
 
 $store_video = get_user_meta($user_id, 'obenlo_store_video', true);
-$insta = get_user_meta($user_id, 'obenlo_instagram', true);
-$fb = get_user_meta($user_id, 'obenlo_facebook', true);
+$insta = ($is_demo_preview && !empty($demo_meta['insta'])) ? $demo_meta['insta'] : get_user_meta($user_id, 'obenlo_instagram', true);
+$fb = ($is_demo_preview && !empty($demo_meta['fb'])) ? $demo_meta['fb'] : get_user_meta($user_id, 'obenlo_facebook', true);
 $specialties = get_user_meta($user_id, 'obenlo_specialties', true);
 $business_hours = get_user_meta($user_id, '_obenlo_business_hours', true);
 $store_logo_id = get_user_meta($user_id, 'obenlo_store_logo', true);
 $store_banner_id = get_user_meta($user_id, 'obenlo_store_banner', true);
 
-$banner_url = $store_banner_id ? wp_get_attachment_image_url($store_banner_id, 'full') : 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000';
-$logo_url = $store_logo_id ? wp_get_attachment_image_url($store_logo_id, 'thumbnail') : get_avatar_url($user_id, ['size' => 150]);
+// Banner/Logo Overrides for Demo
+if ($is_demo_preview) {
+    // Premium Default Images
+    $banner_url = 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=2000';
+    $logo_url = 'https://images.unsplash.com/photo-1599305090598-fe179d501227?auto=format&fit=crop&q=80&w=200';
+} else {
+    $banner_url = $store_banner_id ? wp_get_attachment_image_url($store_banner_id, 'full') : 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000';
+    $logo_url = $store_logo_id ? wp_get_attachment_image_url($store_logo_id, 'thumbnail') : get_avatar_url($user_id, ['size' => 150]);
+}
 
 $host_avg_rating = 0;
 $host_review_count = 0;
@@ -48,7 +70,14 @@ if (class_exists('Obenlo_Booking_Reviews')) {
     $host_review_count = Obenlo_Booking_Reviews::get_host_review_count($user_id);
 }
 
+// In Demo Preview, simulate high ratings
+if ($is_demo_preview && $user_id === 1) { 
+    $host_avg_rating = 5.0;
+    $host_review_count = 12;
+}
+
 $hosting_since = date('Y', strtotime($curauth->user_registered));
+if ($is_demo_preview) $hosting_since = 2024;
 ?>
 
 <style>
@@ -295,13 +324,19 @@ $hosting_since = date('Y', strtotime($curauth->user_registered));
         <!-- Store Tab -->
         <div id="tab-store" class="tab-content active">
             <?php
-            $listings = new WP_Query(array(
+            $query_args = array(
                 'post_type' => 'listing',
                 'author' => $user_id,
                 'post_parent' => 0,
                 'posts_per_page' => -1,
                 'suppress_filters' => false,
-            ));
+            );
+
+            if ($is_demo_preview) {
+                $query_args['p'] = $demo_listing_id;
+            }
+
+            $listings = new WP_Query($query_args);
 
             if ($listings->have_posts()):
                 echo '<div class="premium-grid">';

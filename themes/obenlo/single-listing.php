@@ -158,6 +158,14 @@ get_header(); ?>
                 $host_id = get_the_author_meta('ID');
                 $host_name = get_the_author();
                 $host_url = get_author_posts_url($host_id);
+
+                // Demo Masking
+                $is_demo = (get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes');
+                if ($is_demo) {
+                    $demo_name = get_post_meta($listing_id, '_obenlo_demo_host_name', true);
+                    if ($demo_name) $host_name = $demo_name;
+                    $host_url = add_query_arg('demo_listing_id', $listing_id, $host_url);
+                }
                 ?>
                 <span style="color:#888;">&bull;</span> Hosted by <a href="<?php echo esc_url($host_url); ?>" style="color:#e61e4d; font-weight:bold; text-decoration:none; margin-left:5px;"><?php echo esc_html($host_name); ?></a>
             </div>

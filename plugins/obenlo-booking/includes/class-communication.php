@@ -446,6 +446,7 @@ class Obenlo_Booking_Communication
                         <option value="support">General Support</option>
                         <option value="dispute">Report an Issue / Dispute with Host</option>
                         <option value="account">Account / Billing Question</option>
+                        <option value="demo">Request a Demo of Obenlo</option>
                     </select>
                 </div>
 

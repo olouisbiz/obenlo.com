@@ -12,6 +12,7 @@ class Obenlo_Booking_Admin_Dashboard
 
     public function init()
     {
+        add_action('admin_menu', array($this, 'add_admin_menu'));
         add_shortcode('obenlo_admin_dashboard', array($this, 'render_dashboard'));
 
         // Handle Admin Actions
@@ -19,6 +20,27 @@ class Obenlo_Booking_Admin_Dashboard
         add_action('admin_post_obenlo_save_settings', array($this, 'handle_save_settings'));
         add_action('admin_post_obenlo_save_payment_settings', array($this, 'handle_save_payment_settings'));
         add_action('admin_post_obenlo_update_user_fee', array($this, 'handle_update_user_fee'));
+        add_action('admin_post_obenlo_transfer_demo', array($this, 'handle_transfer_demo'));
+    }
+
+    public function add_admin_menu()
+    {
+        add_menu_page(
+            'Obenlo Dash',
+            'Obenlo Dash',
+            'manage_options',
+            'obenlo-admin-dashboard',
+            array($this, 'render_dashboard_in_wp_admin'),
+            'dashicons-chart-area',
+            26
+        );
+    }
+
+    public function render_dashboard_in_wp_admin()
+    {
+        echo '<div class="wrap">';
+        echo $this->render_dashboard();
+        echo '</div>';
     }
 
     public function render_dashboard()
@@ -52,22 +74,24 @@ class Obenlo_Booking_Admin_Dashboard
             </style>
 
             <div class="admin-nav">
-                <?php if (current_user_can('administrator')): ?>
-                    <a href="?tab=overview" class="<?php echo $tab === 'overview' ? 'active' : ''; ?>">Overview</a>
-                    <a href="?tab=listings" class="<?php echo $tab === 'listings' ? 'active' : ''; ?>">Listings</a>
-                    <a href="?tab=users" class="<?php echo $tab === 'users' ? 'active' : ''; ?>">Users</a>
-                    <a href="?tab=verifications" class="<?php echo $tab === 'verifications' ? 'active' : ''; ?>">Verifications</a>
-                    <a href="?tab=bookings" class="<?php echo $tab === 'bookings' ? 'active' : ''; ?>">Bookings</a>
-                    <a href="?tab=payments" class="<?php echo $tab === 'payments' ? 'active' : ''; ?>">Payments</a>
-                    <a href="?tab=messaging" class="<?php echo $tab === 'messaging' ? 'active' : ''; ?>">Messaging</a>
+                <?php
+                $base_url = is_admin() ? '?page=obenlo-admin-dashboard&tab=' : '?tab=';
+                if (current_user_can('administrator')): ?>
+                    <a href="<?php echo $base_url; ?>overview" class="<?php echo $tab === 'overview' ? 'active' : ''; ?>">Overview</a>
+                    <a href="<?php echo $base_url; ?>listings" class="<?php echo $tab === 'listings' ? 'active' : ''; ?>">Listings</a>
+                    <a href="<?php echo $base_url; ?>users" class="<?php echo $tab === 'users' ? 'active' : ''; ?>">Users</a>
+                    <a href="<?php echo $base_url; ?>verifications" class="<?php echo $tab === 'verifications' ? 'active' : ''; ?>">Verifications</a>
+                    <a href="<?php echo $base_url; ?>bookings" class="<?php echo $tab === 'bookings' ? 'active' : ''; ?>">Bookings</a>
+                    <a href="<?php echo $base_url; ?>payments" class="<?php echo $tab === 'payments' ? 'active' : ''; ?>">Payments</a>
+                    <a href="<?php echo $base_url; ?>messaging" class="<?php echo $tab === 'messaging' ? 'active' : ''; ?>">Messaging</a>
                 <?php
         endif; ?>
-                <a href="?tab=communication" class="<?php echo $tab === 'communication' ? 'active' : ''; ?>">Support Tickets</a>
-                <a href="?tab=live_chat" class="<?php echo $tab === 'live_chat' ? 'active' : ''; ?>">Live Chat</a>
+                <a href="<?php echo $base_url; ?>communication" class="<?php echo $tab === 'communication' ? 'active' : ''; ?>">Support Tickets</a>
+                <a href="<?php echo $base_url; ?>live_chat" class="<?php echo $tab === 'live_chat' ? 'active' : ''; ?>">Live Chat</a>
                 <?php if (current_user_can('administrator')): ?>
-                    <a href="?tab=settings" class="<?php echo $tab === 'settings' ? 'active' : ''; ?>">Settings</a>
-                <?php
-        endif; ?>
+                    <a href="<?php echo $base_url; ?>settings" class="<?php echo $tab === 'settings' ? 'active' : ''; ?>">Settings</a>
+                    <a href="<?php echo $base_url; ?>demo_manager" class="<?php echo $tab === 'demo_manager' ? 'active' : ''; ?>">Demo Manager</a>
+                <?php endif; ?>
             </div>
 
             <?php if (in_array($tab, array('communication', 'bookings', 'verifications'))): ?>
@@ -111,6 +135,9 @@ class Obenlo_Booking_Admin_Dashboard
                 break;
             case 'settings':
                 $this->render_settings_tab();
+                break;
+            case 'demo_manager':
+                $this->render_demo_manager_tab();
                 break;
             default:
                 $this->render_overview_tab();
@@ -729,14 +756,19 @@ class Obenlo_Booking_Admin_Dashboard
             'post_status' => array('publish', 'pending', 'draft')
         ));
 
-        echo '<h3>Demo Listing Manager</h3>';
-        echo '<p style="color:#666; margin-bottom:25px;">Create high-quality demo listings as an admin, then transfer them to new hosts to jumpstart their profile.</p>';
+        echo '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">';
+        echo '<div>';
+        echo '<h3 style="margin-bottom:5px;">Demo Listing Manager</h3>';
+        echo '<p style="color:#666; margin:0;">Create high-quality demo listings as an admin, then transfer them to new hosts to jumpstart their profile.</p>';
+        echo '</div>';
+        echo '<a href="' . esc_url(home_url('/host-dashboard?action=add&demo=1')) . '" style="background:#e61e4d; color:#fff; text-decoration:none; padding:10px 20px; border-radius:8px; font-weight:bold;">+ Create Demo Listing</a>';
+        echo '</div>';
         
         echo '<table class="admin-table">';
         echo '<tr><th>Preview Name</th><th>Demo Bio</th><th>Location</th><th>Actions</th></tr>';
         
         if (empty($demos)) {
-            echo '<tr><td colspan="4" style="padding:40px; text-align:center; color:#999;">No demo listings created. <a href="' . home_url('/host-dashboard?action=add') . '">Create one now</a></td></tr>';
+            echo '<tr><td colspan="4" style="padding:40px; text-align:center; color:#999;">No demo listings created. <a href="' . esc_url(home_url('/host-dashboard?action=add&demo=1')) . '" style="color:#e61e4d; font-weight:bold;">Create one now</a></td></tr>';
         } else {
             foreach ($demos as $demo) {
                 $d_name = get_post_meta($demo->ID, '_obenlo_demo_host_name', true);
@@ -749,7 +781,8 @@ class Obenlo_Booking_Admin_Dashboard
                 echo '<td>' . esc_html($d_loc) . '</td>';
                 echo '<td>';
                 echo '<div style="display:flex; gap:15px; align-items:center;">';
-                echo '<a href="' . get_permalink($demo->ID) . '" target="_blank" style="color:#e61e4d; font-weight:700;">View</a>';
+                echo '<a href="' . get_permalink($demo->ID) . '" target="_blank" style="color:#333; font-weight:600; text-decoration:none;">View</a>';
+                echo '<a href="' . esc_url(home_url("/host-dashboard?action=edit&listing_id={$demo->ID}&demo=1")) . '" style="color:#e61e4d; font-weight:700; text-decoration:none;">Edit Setup</a>';
                 
                 // Transfer Form
                 echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:flex; gap:5px; margin:0;" onsubmit="return confirm(\'Are you sure you want to transfer this demo to a real host? This will move all demo data to their profile.\')">';
@@ -802,11 +835,15 @@ class Obenlo_Booking_Admin_Dashboard
                 $d_bio = get_post_meta($listing_id, '_obenlo_demo_host_bio', true);
                 $d_loc = get_post_meta($listing_id, '_obenlo_demo_host_location', true);
                 $d_tag = get_post_meta($listing_id, '_obenlo_demo_host_tagline', true);
+                $d_insta = get_post_meta($listing_id, '_obenlo_demo_host_instagram', true);
+                $d_fb = get_post_meta($listing_id, '_obenlo_demo_host_facebook', true);
 
                 if ($d_name) update_user_meta($user_id, 'obenlo_store_name', $d_name);
                 if ($d_bio) update_user_meta($user_id, 'obenlo_store_description', $d_bio);
                 if ($d_loc) update_user_meta($user_id, 'obenlo_store_location', $d_loc);
                 if ($d_tag) update_user_meta($user_id, 'obenlo_store_tagline', $d_tag);
+                if ($d_insta) update_user_meta($user_id, 'obenlo_instagram', $d_insta);
+                if ($d_fb) update_user_meta($user_id, 'obenlo_facebook', $d_fb);
 
                 // 3. Clean up Demo flags
                 delete_post_meta($listing_id, '_obenlo_is_demo');
@@ -814,6 +851,8 @@ class Obenlo_Booking_Admin_Dashboard
                 delete_post_meta($listing_id, '_obenlo_demo_host_bio');
                 delete_post_meta($listing_id, '_obenlo_demo_host_location');
                 delete_post_meta($listing_id, '_obenlo_demo_host_tagline');
+                delete_post_meta($listing_id, '_obenlo_demo_host_instagram');
+                delete_post_meta($listing_id, '_obenlo_demo_host_facebook');
                 
                 // Clear any restricted mode cache for the user if applicable
                 clean_user_cache($user_id);

@@ -884,8 +884,48 @@ class Obenlo_Booking_Frontend_Dashboard
                 <?php if ($is_child): ?>
                     <input type="hidden" name="parent_id" value="<?php echo esc_attr($parent_id > 0 ? $parent_id : filter_input(INPUT_GET, 'parent_id', FILTER_SANITIZE_NUMBER_INT)); ?>">
                     <input type="hidden" name="listing_type" value="<?php echo esc_attr($selected_type); ?>">
-                <?php
-        endif; ?>
+                <?php endif; ?>
+                
+                <?php 
+                $is_demo_edit = ($listing_id > 0 && get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes');
+                $is_demo_create = (isset($_GET['demo']) && $_GET['demo'] == '1');
+                if (($is_demo_edit || $is_demo_create) && current_user_can('administrator')): ?>
+                    <input type="hidden" name="is_demo" value="1">
+                    <div style="background:#fff1f3; color:#e61e4d; padding:20px; border-radius:12px; margin-bottom:30px; border:1px solid #fecdd3;">
+                        <h4 style="margin-top:0; margin-bottom:10px; color:#e61e4d;">🛠️ Demo Listing Configuration</h4>
+                        <p style="margin-top:0; margin-bottom:20px; font-size:0.9rem;">You are configuring a Demo Listing. Specify the simulated Host details below.</p>
+                        
+                        <div class="grid-row" style="display:flex; gap:15px; margin-bottom:15px;">
+                            <div style="flex:1;">
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Host Name</label>
+                                <input type="text" name="_obenlo_demo_host_name" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_name', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Host Tagline</label>
+                                <input type="text" name="_obenlo_demo_host_tagline" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_tagline', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
+                            </div>
+                        </div>
+                        <div class="grid-row" style="display:flex; gap:15px; margin-bottom:15px;">
+                            <div style="flex:1;">
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Instagram (e.g. @obenlo)</label>
+                                <input type="text" name="_obenlo_demo_host_instagram" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_instagram', true)); ?>" placeholder="@username" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Facebook URL</label>
+                                <input type="text" name="_obenlo_demo_host_facebook" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_facebook', true)); ?>" placeholder="https://facebook.com/..." style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Host Location</label>
+                            <input type="text" name="_obenlo_demo_host_location" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_location', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Host Bio</label>
+                            <textarea name="_obenlo_demo_host_bio" rows="3" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;"><?php echo esc_textarea(get_post_meta($listing_id, '_obenlo_demo_host_bio', true)); ?></textarea>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <?php wp_nonce_field('dashboard_save_listing', 'dashboard_listing_nonce'); ?>
 
                 <!-- Basic Information -->
@@ -1251,17 +1291,42 @@ class Obenlo_Booking_Frontend_Dashboard
                 if (genericLocationWrapper) genericLocationWrapper.style.display = 'block';
 
                 var amenHeading = document.getElementById('amenities_heading');
+
+                // Reset Pricing Model Options
+                if (pricingModel) {
+                    Array.from(pricingModel.options).forEach(opt => {
+                        opt.hidden = false;
+                        opt.disabled = false;
+                    });
+                }
+
                 if (category === 'stay') {
                     if (priceLabel) priceLabel.innerText = 'Price (Per Night)';
                     if (capLabel) capLabel.innerText = 'Capacity/Max Guests';
-                    if (pricingModel) pricingModel.value = 'per_night';
+                    if (pricingModel) {
+                        pricingModel.value = 'per_night';
+                        Array.from(pricingModel.options).forEach(opt => {
+                            if (!['per_night', 'per_day', 'flat_fee'].includes(opt.value)) {
+                                opt.hidden = true;
+                                opt.disabled = true;
+                            }
+                        });
+                    }
                     if (durationWrapper) durationWrapper.style.display = 'none';
                     if (slotsWrapper) slotsWrapper.style.display = 'none';
                     if (amenHeading) amenHeading.innerText = 'Amenities';
                 } else if (category === 'event' || category === 'experience') {
                     if (priceLabel) priceLabel.innerText = category === 'event' ? 'Price (Per Ticket)' : 'Price (Per Person/Ticket)';
                     if (capLabel) capLabel.innerText = category === 'event' ? 'Total Tickets Available' : 'Max Tickets/Participants';
-                    if (pricingModel) pricingModel.value = 'per_person';
+                    if (pricingModel) {
+                        pricingModel.value = 'per_person';
+                        Array.from(pricingModel.options).forEach(opt => {
+                            if (!['per_person', 'flat_fee'].includes(opt.value)) {
+                                opt.hidden = true;
+                                opt.disabled = true;
+                            }
+                        });
+                    }
                     if (slotsWrapper) slotsWrapper.style.display = 'none';
                     if (eventConfigWrapper) eventConfigWrapper.style.display = 'block';
                     if (genericLocationWrapper) genericLocationWrapper.style.display = 'none';
@@ -1269,12 +1334,20 @@ class Obenlo_Booking_Frontend_Dashboard
                 } else if (category === 'service') {
                     if (priceLabel) priceLabel.innerText = 'Price (Per Hour/Session)';
                     if (capLabel) capLabel.innerText = 'Max Clients per Slot';
-                    if (pricingModel) pricingModel.value = 'per_session';
-                    if (amenHeading) amenHeading.innerText = 'Amenities';
-                    // Special cases for services
-                    if(['babysitter', 'dogsitter', 'chauffeur'].includes(slug)) {
-                        if(pricingModel) pricingModel.value = 'per_hour';
+                    if (pricingModel) {
+                        pricingModel.value = 'per_session';
+                        Array.from(pricingModel.options).forEach(opt => {
+                            if (!['per_session', 'per_hour', 'flat_fee'].includes(opt.value)) {
+                                opt.hidden = true;
+                                opt.disabled = true;
+                            }
+                        });
+                        // Special cases for services
+                        if(['babysitter', 'dogsitter', 'chauffeur'].includes(slug)) {
+                            pricingModel.value = 'per_hour';
+                        }
                     }
+                    if (amenHeading) amenHeading.innerText = 'Amenities';
                 } else {
                     if (priceLabel) priceLabel.innerText = 'Price (Base)';
                     if (capLabel) capLabel.innerText = 'Capacity/Max Guests';
@@ -1595,6 +1668,30 @@ class Obenlo_Booking_Frontend_Dashboard
 
             $req_slots = isset($_POST['requires_slots']) && $_POST['requires_slots'] === 'yes' ? 'yes' : 'no';
             update_post_meta($new_post_id, '_obenlo_requires_slots', $req_slots);
+
+            // Demo Configuration
+            if (isset($_POST['is_demo']) && $_POST['is_demo'] === '1' && current_user_can('administrator')) {
+                update_post_meta($new_post_id, '_obenlo_is_demo', 'yes');
+                
+                if (isset($_POST['_obenlo_demo_host_name'])) {
+                    update_post_meta($new_post_id, '_obenlo_demo_host_name', sanitize_text_field($_POST['_obenlo_demo_host_name']));
+                }
+                if (isset($_POST['_obenlo_demo_host_bio'])) {
+                    update_post_meta($new_post_id, '_obenlo_demo_host_bio', sanitize_textarea_field(wp_unslash($_POST['_obenlo_demo_host_bio'])));
+                }
+                if (isset($_POST['_obenlo_demo_host_location'])) {
+                    update_post_meta($new_post_id, '_obenlo_demo_host_location', sanitize_text_field($_POST['_obenlo_demo_host_location']));
+                }
+                if (isset($_POST['_obenlo_demo_host_tagline'])) {
+                    update_post_meta($new_post_id, '_obenlo_demo_host_tagline', sanitize_text_field($_POST['_obenlo_demo_host_tagline']));
+                }
+                if (isset($_POST['_obenlo_demo_host_instagram'])) {
+                    update_post_meta($new_post_id, '_obenlo_demo_host_instagram', sanitize_text_field($_POST['_obenlo_demo_host_instagram']));
+                }
+                if (isset($_POST['_obenlo_demo_host_facebook'])) {
+                    update_post_meta($new_post_id, '_obenlo_demo_host_facebook', esc_url_raw($_POST['_obenlo_demo_host_facebook']));
+                }
+            }
 
             // Policies (Parent Only)
             if ($parent_id == 0) {
