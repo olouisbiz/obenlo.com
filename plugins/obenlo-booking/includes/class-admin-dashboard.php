@@ -86,7 +86,6 @@ class Obenlo_Booking_Admin_Dashboard
                 <?php
         endif; ?>
                 <a href="<?php echo $base_url; ?>communication" class="<?php echo $tab === 'communication' ? 'active' : ''; ?>">Support Tickets</a>
-                <a href="<?php echo $base_url; ?>live_chat" class="<?php echo $tab === 'live_chat' ? 'active' : ''; ?>">Live Chat</a>
                 <?php if (current_user_can('administrator')): ?>
                     <a href="<?php echo $base_url; ?>settings" class="<?php echo $tab === 'settings' ? 'active' : ''; ?>">Settings</a>
                     <a href="<?php echo $base_url; ?>demo_manager" class="<?php echo $tab === 'demo_manager' ? 'active' : ''; ?>">Demo Manager</a>
@@ -128,9 +127,6 @@ class Obenlo_Booking_Admin_Dashboard
                 break;
             case 'communication':
                 $this->render_communication_tab();
-                break;
-            case 'live_chat':
-                $this->render_live_chat_tab();
                 break;
             case 'settings':
                 $this->render_settings_tab();
