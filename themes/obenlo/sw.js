@@ -1,4 +1,4 @@
-const CACHE_NAME = 'obenlo-v1.1.0';
+const CACHE_NAME = 'obenlo-v1.1.1';
 const OFFLINE_URL = '/';
 
 const ASSETS_TO_CACHE = [
