@@ -51,7 +51,18 @@ class Obenlo_Booking_Badges {
             );
         }
 
-        // 4. Super Host (Example of another badge)
+        // 4. Fast Responder
+        if ( self::is_fast_responder( $user_id ) ) {
+            $badges[] = array(
+                'id'    => 'fast_responder',
+                'label' => 'Fast Responder',
+                'icon'  => '⚡',
+                'color' => '#3b82f6',
+                'desc'  => 'Typically responds within an hour'
+            );
+        }
+
+        // 5. Super Host
         if ( self::is_super_host( $user_id ) ) {
             $badges[] = array(
                 'id'    => 'super_host',
@@ -63,6 +74,53 @@ class Obenlo_Booking_Badges {
         }
 
         return $badges;
+    }
+
+    /**
+     * Render badges as HTML
+     * 
+     * @param int $user_id
+     * @param string $context 'storefront', 'directory', or 'mini'
+     * @return string
+     */
+    public static function render_badges_html($user_id, $context = 'storefront') {
+        $badges = self::get_host_badges($user_id);
+        if (empty($badges)) {
+            // Default "New Host" badge if no others
+            return '<div class="obenlo-badges-container" style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:10px;">
+                        <span style="background:#f3f4f6; color:#6b7280; padding:6px 15px; border-radius:50px; font-weight:800; font-size:0.75rem;">NEW HOST</span>
+                    </div>';
+        }
+
+        $html = '<div class="obenlo-badges-container" style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:10px;">';
+        
+        foreach ($badges as $badge) {
+            if ($context === 'storefront') {
+                // Premium full badges for the storefront glass card
+                $bg_color = $badge['id'] === 'verified' ? '#fef2f2' : ($badge['id'] === 'highly_rated' ? '#fff7ed' : ($badge['id'] === 'super_host' ? '#fff1f2' : '#f0fdf4'));
+                
+                $html .= sprintf(
+                    '<span class="obenlo-badge-item" title="%s" style="background:%s; color:%s; padding:6px 15px; border-radius:50px; font-weight:800; font-size:0.75rem; display:flex; align-items:center; gap:6px; border:1px solid rgba(0,0,0,0.03);">%s %s</span>',
+                    esc_attr($badge['desc']),
+                    esc_attr($bg_color),
+                    esc_attr($badge['color']),
+                    $badge['icon'],
+                    esc_html(strtoupper($badge['label']))
+                );
+            } elseif ($context === 'directory') {
+                // Compact style for cards in the directory
+                $html .= sprintf(
+                    '<span class="host-stat" title="%s" style="color:%s; font-weight:700; font-size:0.8rem; display:inline-flex; align-items:center; gap:4px;">%s %s</span>',
+                    esc_attr($badge['desc']),
+                    esc_attr($badge['color']),
+                    $badge['icon'],
+                    esc_html(strtoupper($badge['label']))
+                );
+            }
+        }
+        
+        $html .= '</div>';
+        return $html;
     }
 
     /**
@@ -87,6 +145,20 @@ class Obenlo_Booking_Badges {
         ) );
 
         return count( $bookings ) >= 5; // Badge for 5+ completed bookings
+    }
+
+    /**
+     * Fast Responder Logic
+     */
+    private static function is_fast_responder( $user_id ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'obenlo_chat_messages';
+        
+        // Simple check: has the host sent at least 3 messages?
+        // This is a placeholder for more complex "avg response time" logic
+        $count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE sender_id = %d", $user_id ) );
+        
+        return $count >= 3;
     }
 
     /**

@@ -16,7 +16,6 @@ class Obenlo_Booking_Admin_Dashboard
         add_shortcode('obenlo_admin_dashboard', array($this, 'render_dashboard'));
 
         // Handle Admin Actions
-        add_action('admin_post_obenlo_admin_action', array($this, 'handle_admin_action'));
         add_action('admin_post_obenlo_save_settings', array($this, 'handle_save_settings'));
         add_action('admin_post_obenlo_save_payment_settings', array($this, 'handle_save_payment_settings'));
         add_action('admin_post_obenlo_update_user_fee', array($this, 'handle_update_user_fee'));
@@ -189,10 +188,63 @@ class Obenlo_Booking_Admin_Dashboard
             </div>
         </div>
 
-        <h3>Recent Activity</h3>
-
-        <h3>Recent Activity</h3>
-        <p>Site-wide overview of recent platform events will go here.</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <div>
+                <h3>Recent Platform Events</h3>
+                <div style="background:#fff; border:1px solid #eee; border-radius:12px; padding:20px;">
+                    <?php
+                    $recent_events = get_posts(array(
+                        'post_type' => array('booking', 'listing', 'ticket'),
+                        'posts_per_page' => 10,
+                        'orderby' => 'date',
+                        'order' => 'DESC'
+                    ));
+                    if (empty($recent_events)): ?>
+                        <p style="color:#999;">No recent activity found.</p>
+                    <?php else: ?>
+                        <ul style="list-style:none; padding:0; margin:0;">
+                        <?php foreach($recent_events as $event): 
+                            $icon = '📅';
+                            $label = 'Booking';
+                            if($event->post_type === 'listing') { $icon = '🏠'; $label = 'New Listing'; }
+                            if($event->post_type === 'ticket') { $icon = '✉️'; $label = 'Support Ticket'; }
+                        ?>
+                            <li style="padding:12px 0; border-bottom:1px solid #f9f9f9; display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <span style="margin-right:10px;"><?php echo $icon; ?></span>
+                                    <strong><?php echo esc_html($label); ?>:</strong> <?php echo esc_html($event->post_title); ?>
+                                </div>
+                                <span style="font-size:0.8rem; color:#aaa;"><?php echo human_time_diff(get_the_time('U', $event->ID), current_time('timestamp')) . ' ago'; ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div>
+                <h3>New User Registrations</h3>
+                <div style="background:#fff; border:1px solid #eee; border-radius:12px; padding:20px;">
+                    <?php
+                    $recent_users = get_users(array(
+                        'orderby' => 'registered',
+                        'order' => 'DESC',
+                        'number' => 10
+                    ));
+                    ?>
+                    <ul style="list-style:none; padding:0; margin:0;">
+                    <?php foreach($recent_users as $user): ?>
+                        <li style="padding:12px 0; border-bottom:1px solid #f9f9f9; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <strong style="color:#222;"><?php echo esc_html($user->display_name); ?></strong>
+                                <span class="badge" style="background:#eee; color:#666; margin-left:8px;"><?php echo ucfirst($user->roles[0]); ?></span>
+                            </div>
+                            <span style="font-size:0.8rem; color:#aaa;"><?php echo date('M j, H:i', strtotime($user->user_registered)); ?></span>
+                        </li>
+                    <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+        </div>
         <?php
     }
 
@@ -285,6 +337,12 @@ class Obenlo_Booking_Admin_Dashboard
     private function render_settings_tab()
     {
         $global_fee = get_option('obenlo_global_platform_fee', '10');
+        $info_email = get_option('obenlo_info_email', 'info@obenlo.com');
+        $admin_email = get_option('obenlo_admin_email', 'admin@obenlo.com');
+        $from_name = get_option('obenlo_mail_from_name', 'Obenlo');
+        $ga4_id = get_option('obenlo_google_analytics_id', '');
+        $pixel_id = get_option('obenlo_meta_pixel_id', '');
+
         if (isset($_GET['sync_status'])) {
             $color = ($_GET['sync_status'] === 'success') ? '#155724' : '#721c24';
             $bg = ($_GET['sync_status'] === 'success') ? '#d4edda' : '#f8d7da';
@@ -302,42 +360,70 @@ class Obenlo_Booking_Admin_Dashboard
                 <input type="hidden" name="action" value="obenlo_save_settings">
                 <?php wp_nonce_field('save_settings', 'settings_nonce'); ?>
 
-                <div style="margin-bottom:25px;">
-                    <label style="display:block; font-weight:700; margin-bottom:10px;">Global Platform Fee (%)</label>
-                    <p style="font-size:0.9em; color:#666; margin-bottom:15px;">The default percentage taken from each completed booking total.</p>
-                    <input type="number" name="global_fee" value="<?php echo esc_attr($global_fee); ?>" step="0.1" required style="width:100px; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:1.1em;"> <span style="font-size:1.2em; font-weight:600; margin-left:10px;">%</span>
-                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px;">
+                    <div>
+                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px;">Platform Configuration</h4>
+                        <div style="margin-bottom:25px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Global Platform Fee (%)</label>
+                            <p style="font-size:0.8em; color:#666; margin-bottom:10px;">Default percentage taken from each booking.</p>
+                            <input type="number" name="global_fee" value="<?php echo esc_attr($global_fee); ?>" step="0.1" required style="width:100px; padding:10px; border:1px solid #ddd; border-radius:8px;"> <span style="font-weight:600;">%</span>
+                        </div>
 
+                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px; margin-top:40px;">Email & Notifications</h4>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Public From Name</label>
+                            <input type="text" name="mail_from_name" value="<?php echo esc_attr($from_name); ?>" placeholder="Obenlo" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">System Reply-To Email</label>
+                            <input type="email" name="info_email" value="<?php echo esc_attr($info_email); ?>" placeholder="info@obenlo.com" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Internal Admin Notifications</label>
+                            <input type="email" name="admin_email" value="<?php echo esc_attr($admin_email); ?>" placeholder="admin@obenlo.com" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                    </div>
 
+                    <div>
+                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px;">Tracking & Analytics</h4>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Google Analytics 4 ID</label>
+                            <input type="text" name="ga4_id" value="<?php echo esc_attr($ga4_id); ?>" placeholder="G-XXXXXXXXXX" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Meta (Facebook) Pixel ID</label>
+                            <input type="text" name="pixel_id" value="<?php echo esc_attr($pixel_id); ?>" placeholder="1234567890" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
 
-                    <div style="background:#fff3cd; padding:20px; border-radius:12px; border:1px solid #ffeeba; margin-top:20px;">
-                        <h4 style="margin-top:0; color:#856404;">Emergency Database Repair</h4>
-                        <p style="font-size:0.85em; color:#856404; margin-bottom:15px;">If Chat or Push Notification tables fail to install on a live site update, click below to forcefully reinstall them.</p>
-                        <button type="button" id="force-install-db" style="background:#dc3545; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700; font-size:1em; width:100%;">⚙️ Force Install Database Tables</button>
-                        <script>
-                        document.getElementById('force-install-db').addEventListener('click', function() {
-                            if(!confirm('This will attempt to run the database table creation scripts. Continue?')) return;
-                            const btn = this;
-                            btn.textContent = 'Installing...';
-                            const formData = new FormData();
-                            formData.append('action', 'obenlo_force_install_db');
-                            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-                                method: 'POST', body: formData
-                            }).then(r => r.json()).then(res => {
-                                alert(res.data);
-                                btn.textContent = '⚙️ Force Install Database Tables';
-                            }).catch(err => {
-                                alert('Error installing tables. Check console.');
-                                console.error(err);
-                                btn.textContent = '⚙️ Force Install Database Tables';
+                        <div style="background:#fff3cd; padding:20px; border-radius:12px; border:1px solid #ffeeba; margin-top:40px;">
+                            <h4 style="margin-top:0; color:#856404;">Emergency Tools</h4>
+                            <p style="font-size:0.85em; color:#856404; margin-bottom:15px;">Use these only if the database fails during an update.</p>
+                            <button type="button" id="force-install-db" style="background:#dc3545; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700; font-size:1em; width:100%;">⚙️ Reinstall Database Tables</button>
+                            <script>
+                            document.getElementById('force-install-db').addEventListener('click', function() {
+                                if(!confirm('This will attempt to run the database table creation scripts. Continue?')) return;
+                                const btn = this;
+                                btn.textContent = 'Installing...';
+                                const formData = new FormData();
+                                formData.append('action', 'obenlo_force_install_db');
+                                fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                                    method: 'POST', body: formData
+                                }).then(r => r.json()).then(res => {
+                                    alert(res.data);
+                                    btn.textContent = '⚙️ Reinstall Database Tables';
+                                }).catch(err => {
+                                    alert('Error installing tables. Check console.');
+                                    console.error(err);
+                                    btn.textContent = '⚙️ Reinstall Database Tables';
+                                });
                             });
-                        });
-                        </script>
+                            </script>
+                        </div>
                     </div>
                 </div>
 
-                <div style="margin-top:30px; border-top:2px solid #eee; padding-top:20px;">
-                    <button type="submit" name="save_obenlo_settings" value="1" style="background:#e61e4d; color:#fff; border:none; padding:15px 40px; border-radius:12px; cursor:pointer; font-weight:800; font-size:1.1em; width:100%; box-shadow:0 4px 10px rgba(230,30,77,0.2);">Save All Settings</button>
+                <div style="margin-top:40px; border-top:2px solid #eee; padding-top:20px;">
+                    <button type="submit" name="save_obenlo_settings" value="1" style="background:#e61e4d; color:#fff; border:none; padding:15px 40px; border-radius:12px; cursor:pointer; font-weight:800; font-size:1.1em; width:100%; box-shadow:0 4px 10px rgba(230,30,77,0.2);">Save All Site Settings</button>
                 </div>
             </form>
         </div>
@@ -407,6 +493,21 @@ class Obenlo_Booking_Admin_Dashboard
 
         if (isset($_POST['global_fee'])) {
             update_option('obenlo_global_platform_fee', sanitize_text_field($_POST['global_fee']));
+        }
+        if (isset($_POST['info_email'])) {
+            update_option('obenlo_info_email', sanitize_email($_POST['info_email']));
+        }
+        if (isset($_POST['admin_email'])) {
+            update_option('obenlo_admin_email', sanitize_email($_POST['admin_email']));
+        }
+        if (isset($_POST['mail_from_name'])) {
+            update_option('obenlo_mail_from_name', sanitize_text_field($_POST['mail_from_name']));
+        }
+        if (isset($_POST['ga4_id'])) {
+            update_option('obenlo_google_analytics_id', sanitize_text_field($_POST['ga4_id']));
+        }
+        if (isset($_POST['pixel_id'])) {
+            update_option('obenlo_meta_pixel_id', sanitize_text_field($_POST['pixel_id']));
         }
 
 
@@ -523,7 +624,7 @@ class Obenlo_Booking_Admin_Dashboard
         echo '<div>';
         echo '<h4>Active Support Tickets</h4>';
         $tickets = get_posts(array(
-            'post_type' => 'support_ticket',
+            'post_type' => 'ticket',
             'posts_per_page' => -1,
             'suppress_filters' => false,
             'meta_key' => '_obenlo_ticket_status',
@@ -563,10 +664,13 @@ class Obenlo_Booking_Admin_Dashboard
 
     private function render_messaging_oversight_tab()
     {
+        echo '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">';
         echo '<h3>Platform Messaging Oversight</h3>';
-        echo '<p>Monitored conversations between platform users.</p>';
+        echo '<div style="background:#fff4f4; border:1px solid #ffcccc; padding:5px 15px; border-radius:30px; font-size:0.8rem; color:#e61e4d; font-weight:700;">Admin View Mode</div>';
+        echo '</div>';
+        echo '<p style="color:#666; margin-bottom:30px;">Monitor all conversations between platform users for quality control and dispute resolution.</p>';
 
-        echo do_shortcode('[obenlo_messages_page]');
+        echo do_shortcode('[obenlo_messages_page oversight="1"]');
     }
 
     private function render_live_chat_tab()
