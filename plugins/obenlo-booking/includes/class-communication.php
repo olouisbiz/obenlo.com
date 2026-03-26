@@ -55,23 +55,35 @@ class Obenlo_Booking_Communication
             wp_send_json_error(array('message' => 'Please enter a valid email address.'));
         }
 
-        $to        = 'info@obenlo.com';
-        $site_name = get_bloginfo('name');
+        $to      = 'info@obenlo.com';
+        $subject = 'Contact Form: Message from ' . $name;
 
-        $subject  = '[' . $site_name . '] Contact Form: Message from ' . $name;
-        $body     = "You have received a new message via the Contact Us form.\n\n";
-        $body    .= "Name: " . $name . "\n";
-        $body    .= "Email: " . $email . "\n";
-        $body    .= "\nMessage:\n" . $message . "\n\n";
-        $body    .= "---\nSimply reply to this email to respond directly to " . $name . " (" . $email . ").";
+        $body_html = '
+        <p style="margin:0 0 16px 0;">You have received a new message via the <strong>Contact Us</strong> form.</p>
+        <table style="width:100%; border-collapse:collapse; font-size:14px;">
+            <tr>
+                <td style="padding:10px 14px; background:#f9f9f9; border-radius:8px 8px 0 0; border-bottom:1px solid #eee; font-weight:700; width:120px;">Name</td>
+                <td style="padding:10px 14px; background:#f9f9f9; border-radius:8px 8px 0 0; border-bottom:1px solid #eee;">' . esc_html($name) . '</td>
+            </tr>
+            <tr>
+                <td style="padding:10px 14px; border-bottom:1px solid #eee; font-weight:700;">Email</td>
+                <td style="padding:10px 14px; border-bottom:1px solid #eee;"><a href="mailto:' . esc_attr($email) . '" style="color:#e61e4d;">' . esc_html($email) . '</a></td>
+            </tr>
+            <tr>
+                <td style="padding:10px 14px; border-radius:0 0 8px 8px; font-weight:700; vertical-align:top;">Message</td>
+                <td style="padding:10px 14px; border-radius:0 0 8px 8px;">' . nl2br(esc_html($message)) . '</td>
+            </tr>
+        </table>
+        <p style="margin:24px 0 0 0; font-size:0.85rem; color:#888;">Simply reply to this email — your reply goes directly to ' . esc_html($name) . '\'s inbox.</p>';
 
+        $html    = Obenlo_Booking_Notifications::wrap_template($subject, $body_html);
         $headers = array(
-            'Content-Type: text/plain; charset=UTF-8',
-            'From: ' . $site_name . ' <info@obenlo.com>',
+            'Content-Type: text/html; charset=UTF-8',
+            'From: Obenlo <info@obenlo.com>',
             'Reply-To: ' . $name . ' <' . $email . '>',
         );
 
-        $sent = wp_mail($to, $subject, $body, $headers);
+        $sent = wp_mail($to, $subject, $html, $headers);
 
         if ($sent) {
             wp_send_json_success(array('message' => "Your message has been sent. We'll get back to you soon!"));
