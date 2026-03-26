@@ -12,24 +12,40 @@ if (!$curauth || !is_a($curauth, 'WP_User')) {
     if ($author_name) $curauth = get_user_by('slug', $author_name);
 }
 
-if (!$curauth) {
-    global $wp_query;
-    $wp_query->set_404();
-    status_header(404);
-    get_template_part(404);
-    exit;
-}
-
-$user_id = $curauth->ID;
+$user_id = $curauth ? $curauth->ID : 0;
 
 // Demo Preview Overrides
 $demo_listing_id = get_query_var('demo_listing_id') ?: (isset($_GET['demo_listing_id']) ? intval($_GET['demo_listing_id']) : 0);
 $demo_mode_param = get_query_var('demo_listing_mode') ?: (isset($_GET['demo_mode']) ? 1 : 0);
+$demo_host_slug = get_query_var('demo_host_name');
 $is_demo_preview = false;
 $demo_meta = [];
 
-// If no specific ID but demo mode is on, try to find the "primary" demo for this host
-if (!$demo_listing_id && $demo_mode_param) {
+// If no specific ID but demo host slug is provided
+if (!$demo_listing_id && $demo_host_slug) {
+    // Attempt to find a listing where the demo host name matches the slug
+    $demo_post = get_posts(array(
+        'post_type' => 'listing',
+        'meta_query' => array(
+            array('key' => '_obenlo_is_demo', 'value' => 'yes'),
+        ),
+        'posts_per_page' => 20, // Check multiple
+        'post_parent' => 0
+    ));
+    
+    if ($demo_post) {
+        foreach($demo_post as $p) {
+            $h_name = get_post_meta($p->ID, '_obenlo_demo_host_name', true);
+            if (sanitize_title($h_name) === $demo_host_slug) {
+                $demo_listing_id = $p->ID;
+                break;
+            }
+        }
+    }
+}
+
+// If still no ID but demo mode is on for a user
+if (!$demo_listing_id && $demo_mode_param && $user_id) {
     // Search for demo listings authored by this user
     $demo_post = get_posts(array(
         'post_type' => 'listing',
@@ -39,19 +55,6 @@ if (!$demo_listing_id && $demo_mode_param) {
         'posts_per_page' => 1,
         'post_parent' => 0
     ));
-    
-    if (!$demo_post) {
-        // Search by author name as a fallback in host name field
-        $demo_post = get_posts(array(
-            'post_type' => 'listing',
-            'meta_query' => array(
-                array('key' => '_obenlo_is_demo', 'value' => 'yes'),
-                array('key' => '_obenlo_demo_host_name', 'value' => $curauth->display_name, 'compare' => 'LIKE')
-            ),
-            'posts_per_page' => 1,
-            'post_parent' => 0
-        ));
-    }
     
     if ($demo_post) {
         $demo_listing_id = $demo_post[0]->ID;
