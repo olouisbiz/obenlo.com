@@ -434,7 +434,7 @@ class Obenlo_Booking_Communication
                             if (c.is_oversight_pair) {
                                 onclick += ', ' + c.pair_a + ', ' + c.pair_b;
                             }
-                            onclick += ')';
+                            onclick += '\')';
                             
                             html += '<div class="obenlo-center-contact-item ' + act + '" onclick="' + onclick + '">';
                             html += '<div style="display:flex; justify-content:space-between; margin-bottom:5px;">';
