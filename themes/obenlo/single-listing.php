@@ -174,8 +174,12 @@ get_header(); ?>
                 
                 if ($is_demo) {
                     $demo_name = get_post_meta($source_id, '_obenlo_demo_host_name', true);
-                    if ($demo_name) $host_name = $demo_name;
-                    $host_url = trailingslashit($host_url) . 'demo/';
+                    if ($demo_name) {
+                        $host_name = $demo_name;
+                        $host_url = home_url('/demo/' . sanitize_title($demo_name) . '/');
+                    } else {
+                        $host_url = trailingslashit($host_url) . 'demo/';
+                    }
                 }
                 ?>
                 <span style="color:#888;">&bull;</span> Hosted by <a href="<?php echo esc_url($host_url); ?>" style="color:#e61e4d; font-weight:bold; text-decoration:none; margin-left:5px;"><?php echo esc_html($host_name); ?></a>

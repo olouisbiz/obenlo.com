@@ -75,8 +75,8 @@ if ($demo_listing_id && get_post_meta($demo_listing_id, '_obenlo_is_demo', true)
 }
 
 // Meta Data (Standard)
-$store_name = ($is_demo_preview && !empty($demo_meta['name'])) ? $demo_meta['name'] : (get_user_meta($user_id, 'obenlo_store_name', true) ?: $curauth->display_name);
-$store_desc = ($is_demo_preview && !empty($demo_meta['bio'])) ? $demo_meta['bio'] : (get_user_meta($user_id, 'obenlo_store_description', true) ?: $curauth->description);
+$store_name = ($is_demo_preview && !empty($demo_meta['name'])) ? $demo_meta['name'] : (get_user_meta($user_id, 'obenlo_store_name', true) ?: ($curauth ? $curauth->display_name : 'Obe Louis'));
+$store_desc = ($is_demo_preview && !empty($demo_meta['bio'])) ? $demo_meta['bio'] : (get_user_meta($user_id, 'obenlo_store_description', true) ?: ($curauth ? $curauth->description : 'High-end host on Obenlo.'));
 $store_location = ($is_demo_preview && !empty($demo_meta['location'])) ? $demo_meta['location'] : get_user_meta($user_id, 'obenlo_store_location', true);
 $store_tagline = ($is_demo_preview && !empty($demo_meta['tagline'])) ? $demo_meta['tagline'] : get_user_meta($user_id, 'obenlo_store_tagline', true);
 
@@ -106,12 +106,12 @@ if (class_exists('Obenlo_Booking_Reviews')) {
 }
 
 // In Demo Preview, simulate high ratings
-if ($is_demo_preview && $user_id === 1) { 
+if ($is_demo_preview && ($user_id === 1 || $user_id === 0)) { 
     $host_avg_rating = 5.0;
     $host_review_count = 12;
 }
 
-$hosting_since = date('Y', strtotime($curauth->user_registered));
+$hosting_since = ($curauth && !empty($curauth->user_registered)) ? date('Y', strtotime($curauth->user_registered)) : '2024';
 if ($is_demo_preview) $hosting_since = 2024;
 ?>
 
