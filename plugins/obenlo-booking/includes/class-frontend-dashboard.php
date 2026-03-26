@@ -19,6 +19,32 @@ class Obenlo_Booking_Frontend_Dashboard
         add_action('admin_post_obenlo_dashboard_booking_action', array($this, 'handle_booking_action'));
         add_action('admin_post_obenlo_dashboard_save_availability', array($this, 'handle_save_availability'));
         add_action('admin_post_obenlo_dashboard_delete_listing', array($this, 'handle_delete_listing'));
+        add_action('init', array($this, 'handle_global_location_fix'));
+    }
+
+    public function handle_global_location_fix() {
+        if (isset($_GET['obenlo_fix_locations']) && $_GET['obenlo_fix_locations'] === '1' && current_user_can('administrator')) {
+            $child_listings = get_posts(array(
+                'post_type' => 'listing',
+                'post_parent__not_in' => array(0),
+                'posts_per_page' => -1,
+                'post_status' => 'any'
+            ));
+
+            $count = 0;
+            foreach ($child_listings as $child) {
+                $parent_id = $child->post_parent;
+                $current_location = get_post_meta($child->ID, '_obenlo_location', true);
+                if (empty($current_location)) {
+                    $parent_location = get_post_meta($parent_id, '_obenlo_location', true);
+                    if ($parent_location) {
+                        update_post_meta($child->ID, '_obenlo_location', $parent_location);
+                        $count++;
+                    }
+                }
+            }
+            wp_die("Success: Updated $count child listings with parent locations. <a href='" . home_url('/host-dashboard') . "'>Return to Dashboard</a>");
+        }
     }
 
     public function render_dashboard()
@@ -1630,9 +1656,14 @@ class Obenlo_Booking_Frontend_Dashboard
             }
             if (isset($_POST['listing_location']) && !empty($_POST['listing_location'])) {
                 update_post_meta($new_post_id, '_obenlo_location', sanitize_text_field($_POST['listing_location']));
-            }
-            if (isset($_POST['listing_event_address']) && !empty($_POST['listing_event_address'])) {
+            } elseif (isset($_POST['listing_event_address']) && !empty($_POST['listing_event_address'])) {
                 update_post_meta($new_post_id, '_obenlo_location', sanitize_text_field($_POST['listing_event_address']));
+            } elseif ($parent_id > 0) {
+                // Inherit from parent if no specific address is provided for the child
+                $parent_location = get_post_meta($parent_id, '_obenlo_location', true);
+                if ($parent_location) {
+                    update_post_meta($new_post_id, '_obenlo_location', $parent_location);
+                }
             }
             if (isset($_POST['virtual_link'])) {
                 update_post_meta($new_post_id, '_obenlo_virtual_link', esc_url_raw($_POST['virtual_link']));
