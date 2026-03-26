@@ -356,10 +356,10 @@ class Obenlo_Booking_Communication
 
         ob_start();
 ?>
-        <div class="obenlo-message-center" style="display:grid; grid-template-columns: 320px 1fr; gap:0; height:750px; background:#fff; border:1px solid #eee; border-radius:20px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <div class="obenlo-message-center">
             <!-- Threads Sidebar -->
-            <div class="message-threads" style="border-right:1px solid #f0f0f0; background:#fcfcfc; display:flex; flex-direction:column;">
-                <div style="padding:25px 20px; border-bottom:1px solid #f0f0f0; font-weight:800; background:#fff; font-size:1.1rem; color:#222; display:flex; justify-content:space-between; align-items:center;">
+            <div class="message-threads" id="obenlo-threads-sidebar">
+                <div class="sidebar-header">
                     Inbox
                 </div>
                 <div id="obenlo-center-contacts" style="flex-grow:1; overflow-y:auto;">
@@ -368,10 +368,13 @@ class Obenlo_Booking_Communication
             </div>
 
             <!-- Chat Window -->
-            <div class="message-chat" style="display:flex; flex-direction:column; background:#fff;">
-                <div id="obenlo-center-header" style="padding:20px 30px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:15px; background:#fff; z-index:10; display:none;">
-                    <div id="obenlo-center-avatar" style="width:40px; height:40px; background:#f0f0f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#888;"></div>
-                    <div>
+            <div class="message-chat" id="obenlo-chat-window">
+                <div id="obenlo-center-header" style="padding:15px 25px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:15px; background:#fff; z-index:10; display:none;">
+                    <button onclick="obenloCloseChat()" class="mobile-back-btn" style="display:none; background:none; border:none; padding:10px; cursor:pointer; color:#e61e4d;">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <div id="obenlo-center-avatar" style="width:40px; height:40px; background:#f0f0f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#888; flex-shrink:0;"></div>
+                    <div style="flex-grow:1;">
                         <div id="obenlo-center-title" style="font-weight:800; font-size:1.1rem; color:#222;"></div>
                         <div style="font-size:0.75rem; color:#10b981; font-weight:600;">Active Now</div>
                     </div>
@@ -402,12 +405,24 @@ class Obenlo_Booking_Communication
         </div>
 
         <style>
+            .obenlo-message-center { display:grid; grid-template-columns: 320px 1fr; gap:0; height:750px; background:#fff; border:1px solid #eee; border-radius:20px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+            .message-threads { border-right:1px solid #f0f0f0; background:#fcfcfc; display:flex; flex-direction:column; }
+            .sidebar-header { padding:25px 20px; border-bottom:1px solid #f0f0f0; font-weight:800; background:#fff; font-size:1.1rem; color:#222; }
+            .message-chat { display:flex; flex-direction:column; background:#fff; position:relative; }
             .obenlo-center-contact-item { padding:20px; border-bottom:1px solid #f5f5f5; cursor:pointer; transition:all 0.2s; display:block; }
             .obenlo-center-contact-item:hover { background:#fff; }
             .obenlo-center-contact-item.active { background:#fff; border-left:4px solid #e61e4d; }
-            .obenlo-center-msg { max-width:75%; padding:14px 20px; margin-bottom:12px; font-size:0.95rem; line-height:1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); word-wrap: break-word; }
-            .obenlo-center-msg.sent { background:#e61e4d; color:white; border-radius:15px 15px 2px 15px; margin-left:auto; }
-            .obenlo-center-msg.received { background:#fff; color:#333; border-radius:15px 15px 15px 2px; margin-right:auto; border:1px solid #eee; }
+            .obenlo-center-msg { max-width:85%; padding:14px 20px; margin-bottom:12px; font-size:0.95rem; line-height:1.6; box-shadow: 0 2px 5px rgba(0,0,0,0.02); word-wrap: break-word; }
+            .obenlo-center-msg.sent { background:#e61e4d; color:white; border-radius:20px 20px 2px 20px; margin-left:auto; }
+            .obenlo-center-msg.received { background:#fff; color:#333; border-radius:20px 20px 20px 2px; margin-right:auto; border:1px solid #eee; }
+            
+            @media (max-width: 900px) {
+                .obenlo-message-center { grid-template-columns: 1fr; height: 600px; border-radius: 0; border: none; }
+                .message-threads.mobile-hide { display: none; }
+                .message-chat { display: none; }
+                .message-chat.mobile-show { display: flex; position: absolute; inset: 0; z-index: 100; }
+                .mobile-back-btn { display: block !important; }
+            }
         </style>
 
         <script>
@@ -461,6 +476,12 @@ class Obenlo_Booking_Communication
                 document.getElementById('obenlo-center-header').style.display = 'flex';
                 document.getElementById('obenlo-center-room').style.display = 'flex';
                 
+                // Mobile visibility toggle
+                if (window.innerWidth <= 900) {
+                    document.getElementById('obenlo-threads-sidebar').classList.add('mobile-hide');
+                    document.getElementById('obenlo-chat-window').classList.add('mobile-show');
+                }
+
                 // Hide input area for oversight mode (read-only monitoring)
                 document.getElementById('obenlo-center-input-area').style.display = obenloIsOversight ? 'none' : 'block';
                 
@@ -524,6 +545,13 @@ class Obenlo_Booking_Communication
                         obenloCenterFetchContacts(); // update last message in sidebar
                     }
                 });
+            }
+
+            function obenloCloseChat() {
+                document.getElementById('obenlo-threads-sidebar').classList.remove('mobile-hide');
+                document.getElementById('obenlo-chat-window').classList.remove('mobile-show');
+                if (obenloCenterInterval) clearInterval(obenloCenterInterval);
+                obenloCenterContact = '';
             }
 
             // Init

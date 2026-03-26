@@ -271,10 +271,14 @@ if ($is_demo_preview) $hosting_since = 2024;
     .card-price { position: absolute; bottom: 15px; right: 15px; background: var(--primary-color); color: white; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 1.1rem; }
 
     @media (max-width: 992px) {
-        .hero-container { grid-template-columns: 1fr; gap: 40px; padding-top: 60px; }
-        .hero-text h1 { font-size: 3rem; text-align: center; }
-        .hero-tagline { text-align: center; }
-        .host-glass-card { margin-bottom: 40px; }
+        .premium-hero { height: auto; min-height: 450px; padding: 100px 0 60px; }
+        .hero-container { grid-template-columns: 1fr; gap: 80px; padding: 0 24px; }
+        .hero-text h1 { font-size: 2.8rem; text-align: center; }
+        .hero-tagline { text-align: center; font-size: 1.2rem; }
+        .host-glass-card { margin-top: 0; padding: 30px 20px; }
+        .host-logo-large { margin-top: -80px; width: 120px; height: 120px; }
+        .premium-stats { flex-direction: column; gap: 20px; margin-top: 20px; padding: 20px; }
+        .stat-item { padding: 0 !important; border: none !important; }
     }
 </style>
 
