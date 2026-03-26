@@ -118,7 +118,7 @@
 
         </div>
 
-        <div class="header-search-nav">
+        <div class="header-search-nav mobile-hide">
             <form role="search" method="get" class="smart-search-bar" action="<?php echo esc_url(home_url('/')); ?>">
                 <input type="text" name="s" class="search-input" placeholder="Search listings, categories, locations or hosts..." value="<?php echo get_search_query(); ?>">
                 <button type="submit" class="search-icon-btn">
@@ -127,7 +127,7 @@
             </form>
         </div>
 
-        <div class="header-language-switcher" id="headerLangSwitcher" style="position: relative; margin-right: 15px;">
+        <div class="header-language-switcher mobile-hide" id="headerLangSwitcher" style="position: relative; margin-right: 15px;">
             <button class="lang-dropdown-btn" onclick="document.getElementById('headerLangSwitcher').classList.toggle('active')" style="background:none; border:none; cursor:pointer; padding:8px; border-radius:20px; display:flex; align-items:center; gap:5px; transition:background 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">
                 <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display:block;fill:none;height:16px;width:16px;stroke:currentColor;stroke-width:2;overflow:visible"><circle cx="16" cy="16" r="14"></circle><ellipse cx="16" cy="16" rx="6" ry="14"></ellipse><path d="M2 16h28"></path></svg>
             </button>
