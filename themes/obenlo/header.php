@@ -118,7 +118,7 @@
 
         </div>
 
-        <div class="header-search-nav mobile-hide">
+        <div class="header-search-nav">
             <form role="search" method="get" class="smart-search-bar" action="<?php echo esc_url(home_url('/')); ?>">
                 <input type="text" name="s" class="search-input" placeholder="Search listings, categories, locations or hosts..." value="<?php echo get_search_query(); ?>">
                 <button type="submit" class="search-icon-btn">

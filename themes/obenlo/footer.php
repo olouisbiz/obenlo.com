@@ -441,29 +441,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-<!-- Mobile Bottom Navigation -->
-<nav class="mobile-bottom-nav">
-    <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="bottom-nav-item <?php echo ( is_front_page() && !isset($_GET['s']) ) ? 'active' : ''; ?>">
-        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor"><path d="M16 3l12 10v15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V13L16 3z"></path></svg>
-        <span>Explore</span>
-    </a>
-    <a href="<?php echo esc_url( home_url( '/?s=' ) ); ?>" class="bottom-nav-item <?php echo ( isset($_GET['s']) ) ? 'active' : ''; ?>" onclick="if(window.innerWidth < 768) { event.preventDefault(); document.querySelector('.search-input').focus(); window.scrollTo(0,0); }">
-        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor"><circle cx="13" cy="13" r="10"></circle><path d="m21 21 9 9"></path></svg>
-        <span>Search</span>
-    </a>
-    <a href="<?php echo esc_url( home_url( '/messages' ) ); ?>" class="bottom-nav-item <?php echo ( is_page('messages') ) ? 'active' : ''; ?>">
-        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor"><path d="M2 16a14 14 0 1 0 28 0 14 14 0 1 0-28 0zM2 16h28M16 2v28"></path><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" fill="none" transform="scale(0.8) translate(6, 6)"></path></svg>
-        <span>Inbox</span>
-    </a>
-    <a href="<?php echo esc_url( home_url( '/wishlists' ) ); ?>" class="bottom-nav-item <?php echo ( is_page('wishlists') ) ? 'active' : ''; ?>">
-        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor"><path d="M16 28c7-4.733 14-10 14-17a6.993 6.993 0 0 0-12.001-4.723L16 8.543l-1.999-2.266A6.993 6.993 0 0 0 2 11c0 7 7 12.267 14 17z"></path></svg>
-        <span>Wishlists</span>
-    </a>
-    <a href="<?php echo esc_url( is_user_logged_in() ? home_url( '/account' ) : home_url( '/login' ) ); ?>" class="bottom-nav-item <?php echo ( is_page('account') || is_page('login') ) ? 'active' : ''; ?>">
-        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor"><path d="M16 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm-9 15c0-4.97 4.03-9 9-9s9 4.03 9 9"></path></svg>
-        <span><?php echo is_user_logged_in() ? 'Profile' : 'Log in'; ?></span>
-    </a>
-</nav>
 
 <?php wp_footer(); ?>
 </body>
