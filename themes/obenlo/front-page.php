@@ -17,71 +17,8 @@ get_header(); ?>
         </div>
     </section>
 
-    <!-- How It Works Section -->
-    <section class="how-it-works" style="margin-bottom: 80px;">
-        <h2 style="font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 50px;"><?php esc_html_e( 'How Obenlo Works', 'obenlo' ); ?></h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
-            <!-- For Providers -->
-            <div style="background: #fff; border: 1px solid #eaeaea; border-radius: 24px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 25px; color: #e61e4d;"><?php esc_html_e( 'For Providers', 'obenlo' ); ?></h3>
-                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 20px;">
-                    <li style="display: flex; align-items: flex-start; gap: 15px;">
-                        <span style="background: #fff1f3; color: #e61e4d; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">1</span>
-                        <div><strong><?php esc_html_e( 'Create your service:', 'obenlo' ); ?></strong> <span style="color: #666;"><?php esc_html_e( 'Set your price, availability, and description in minutes.', 'obenlo' ); ?></span></div>
-                    </li>
-                    <li style="display: flex; align-items: flex-start; gap: 15px;">
-                        <span style="background: #fff1f3; color: #e61e4d; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">2</span>
-                        <div><strong><?php esc_html_e( 'Get booked:', 'obenlo' ); ?></strong> <span style="color: #666;"><?php esc_html_e( 'Customers browse and book you instantly based on your calendar.', 'obenlo' ); ?></span></div>
-                    </li>
-                    <li style="display: flex; align-items: flex-start; gap: 15px;">
-                        <span style="background: #fff1f3; color: #e61e4d; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">3</span>
-                        <div><strong><?php esc_html_e( 'Get paid:', 'obenlo' ); ?></strong> <span style="color: #666;"><?php esc_html_e( 'Secure payouts sent straight to your bank account without the hassle.', 'obenlo' ); ?></span></div>
-                    </li>
-                </ul>
-            </div>
-            <!-- For Customers -->
-            <div style="background: #fff; border: 1px solid #eaeaea; border-radius: 24px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 25px; color: #3b82f6;"><?php esc_html_e( 'For Customers', 'obenlo' ); ?></h3>
-                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 20px;">
-                    <li style="display: flex; align-items: flex-start; gap: 15px;">
-                        <span style="background: #eff6ff; color: #3b82f6; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">1</span>
-                        <div><strong><?php esc_html_e( 'Find a service:', 'obenlo' ); ?></strong> <span style="color: #666;"><?php esc_html_e( 'Browse trusted local professionals and unique stays.', 'obenlo' ); ?></span></div>
-                    </li>
-                    <li style="display: flex; align-items: flex-start; gap: 15px;">
-                        <span style="background: #eff6ff; color: #3b82f6; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">2</span>
-                        <div><strong><?php esc_html_e( 'Book instantly:', 'obenlo' ); ?></strong> <span style="color: #666;"><?php esc_html_e( 'Choose a time that works for you with zero back-and-forth.', 'obenlo' ); ?></span></div>
-                    </li>
-                    <li style="display: flex; align-items: flex-start; gap: 15px;">
-                        <span style="background: #eff6ff; color: #3b82f6; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">3</span>
-                        <div><strong><?php esc_html_e( 'Pay securely:', 'obenlo' ); ?></strong> <span style="color: #666;"><?php esc_html_e( 'Checkout safely on our platform with immediate confirmation.', 'obenlo' ); ?></span></div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- Benefits Section -->
-    <section class="benefits" style="margin-bottom: 80px; text-align: center;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px;">
-            <div style="padding: 20px;">
-                <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;"><?php esc_html_e( 'More clients', 'obenlo' ); ?></h4>
-                <p style="color: #666; font-size: 0.95rem;"><?php esc_html_e( 'Reach thousands of customers looking for exactly what you offer.', 'obenlo' ); ?></p>
-            </div>
-            <div style="padding: 20px;">
-                <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;"><?php esc_html_e( 'Less scheduling hassle', 'obenlo' ); ?></h4>
-                <p style="color: #666; font-size: 0.95rem;"><?php esc_html_e( 'Our automated calendar means no more messaging to find a time.', 'obenlo' ); ?></p>
-            </div>
-            <div style="padding: 20px;">
-                <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;"><?php esc_html_e( 'Trust & Safety', 'obenlo' ); ?></h4>
-                <p style="color: #666; font-size: 0.95rem;"><?php esc_html_e( 'Reviews, verified profiles, and secure checkouts protect everyone.', 'obenlo' ); ?></p>
-            </div>
-        </div>
-    </section>
-
-    <div id="services-explore" style="padding-top: 20px;"></div>
-
     <!-- Category Filter Bar -->
-    <div class="category-filters" style="display: flex; gap: 30px; justify-content: flex-start; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; border-bottom: 1px solid #ebebeb; -webkit-overflow-scrolling: touch; white-space: nowrap;">
+    <div class="category-filters" style="display: flex; gap: 40px; justify-content: center; margin-bottom: 40px; overflow-x: auto; padding: 20px 0; border-bottom: 1px solid #ebebeb; -webkit-overflow-scrolling: touch; white-space: nowrap;">
         
         <?php
         $current_cat = '';
@@ -132,6 +69,10 @@ get_header(); ?>
         }
         ?>
     </div>
+
+    <div id="services-explore" style="padding-top: 20px;"></div>
+
+    <!-- Categories Explore Section -->
 
     <!-- Explore Categories -->
     <section style="margin-bottom: 60px; margin-top: 10px; text-align: center;">
