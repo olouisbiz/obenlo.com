@@ -959,7 +959,7 @@ class Obenlo_Booking_Frontend_Dashboard
                     <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Basic Information</h4>
                     
                     <div style="margin-bottom:20px;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo $title_label; ?></label>
+                        <label id="listing_title_label" style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo $title_label; ?></label>
                         <input type="text" name="listing_title" value="<?php echo esc_attr($title); ?>" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; transition:border-color 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
                     </div>
 
@@ -1047,7 +1047,7 @@ class Obenlo_Booking_Frontend_Dashboard
                         
                         <div class="grid-row" style="margin-bottom:20px;">
                             <div class="grid-col-1-2">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Base Price</label>
+                                <label id="listing_price_label" style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Base Price</label>
                                 <div style="position:relative;">
                                     <span style="position:absolute; left:12px; top:12px; color:#888;">$</span>
                                     <input type="number" step="0.01" name="listing_price" value="<?php echo esc_attr($price); ?>" required style="width:100%; padding:12px 12px 12px 30px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
@@ -1291,8 +1291,7 @@ class Obenlo_Booking_Frontend_Dashboard
             var initTypeId = '<?php echo esc_js($init_type_id); ?>';
             
             var typeSelect = document.querySelector('select[name="listing_type"]');
-            var priceInput = document.querySelector('input[name="listing_price"]');
-            var priceLabel = priceInput ? priceInput.closest('div').parentElement.querySelector('label') : null;
+            var priceLabel = document.getElementById('listing_price_label');
             
             var capInput = document.querySelector('input[name="listing_capacity"]');
             var capContainer = capInput ? capInput.closest('div') : null;
