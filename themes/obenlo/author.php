@@ -281,7 +281,7 @@ if ($is_demo_preview) $hosting_since = 2024;
                 </p>
                 <?php echo Obenlo_Booking_Badges::render_badges_html($user_id, 'storefront'); ?>
 
-                <button onclick="if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $user_id; ?>, '<?php echo esc_js($store_name); ?>', '<?php echo esc_url($logo_url); ?>');} else { window.location.href='<?php echo esc_url(home_url('/login')); ?>'; }"
+                <button onclick="<?php if(is_user_logged_in()): ?>if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $user_id; ?>, '<?php echo esc_js($store_name); ?>', '<?php echo esc_url($logo_url); ?>');} <?php else: ?>window.obenloOpenGuestContact(<?php echo $user_id; ?>, '<?php echo esc_js($store_name); ?>', '<?php echo esc_url($logo_url); ?>');<?php endif; ?>"
                         style="margin-top: 25px; background: #e61e4d; color: #fff; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(230,30,77,0.3);">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     Contact Host
