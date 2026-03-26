@@ -160,9 +160,20 @@ get_header(); ?>
                 $host_url = get_author_posts_url($host_id);
 
                 // Demo Masking
+                global $post;
                 $is_demo = (get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes');
+                $source_id = $listing_id;
+                
+                if (!$is_demo && !empty($post->post_parent)) {
+                    $parent_is_demo = (get_post_meta($post->post_parent, '_obenlo_is_demo', true) === 'yes');
+                    if ($parent_is_demo) {
+                        $is_demo = true;
+                        $source_id = $post->post_parent;
+                    }
+                }
+                
                 if ($is_demo) {
-                    $demo_name = get_post_meta($listing_id, '_obenlo_demo_host_name', true);
+                    $demo_name = get_post_meta($source_id, '_obenlo_demo_host_name', true);
                     if ($demo_name) $host_name = $demo_name;
                     $host_url = trailingslashit($host_url) . 'demo/';
                 }
