@@ -197,12 +197,17 @@ add_filter('request', 'obenlo_root_author_request');
 // Register demo_listing_id query var
 add_filter('query_vars', function($vars) {
     $vars[] = 'demo_listing_id';
+    $vars[] = 'demo_listing_mode';
     return $vars;
 });
 
-// Add rewrite rule for host demo pages: /host-slug/demo/ID
+// Add rewrite rule for host demo pages: /host-slug/demo/
 add_action('init', function() {
     add_rewrite_rule('^([^/]+)/demo/([0-9]+)/?$', 'index.php?author_name=$matches[1]&demo_listing_id=$matches[2]', 'top');
+    add_rewrite_rule('^([^/]+)/demo/?$', 'index.php?author_name=$matches[1]&demo_listing_mode=1', 'top');
+    
+    // Also support /demo/host-slug/ format if desired
+    add_rewrite_rule('^demo/([^/]+)/?$', 'index.php?author_name=$matches[1]&demo_listing_mode=1', 'top');
 });
 
 // Change author link dynamically so get_author_posts_url returns root instead of /author/

@@ -24,11 +24,38 @@ $user_id = $curauth->ID;
 
 // Demo Preview Overrides
 $demo_listing_id = get_query_var('demo_listing_id') ?: (isset($_GET['demo_listing_id']) ? intval($_GET['demo_listing_id']) : 0);
+$demo_mode_param = get_query_var('demo_listing_mode') ?: (isset($_GET['demo_mode']) ? 1 : 0);
 $is_demo_preview = false;
 $demo_meta = [];
 
+// If no specific ID but demo mode is on, try to find the "primary" demo for this host
+if (!$demo_listing_id && $demo_mode_param) {
+    $primary_demo = get_posts(array(
+        'post_type' => 'listing',
+        'meta_query' => array(
+            array('key' => '_obenlo_is_demo', 'value' => 'yes'),
+            array('key' => '_obenlo_demo_host_name', 'value' => $curauth->display_name, 'compare' => 'LIKE')
+        ),
+        'posts_per_page' => 1
+    ));
+    if (!$primary_demo) {
+        // Fallback to author match
+        $primary_demo = get_posts(array(
+            'post_type' => 'listing',
+            'author' => $user_id,
+            'meta_key' => '_obenlo_is_demo',
+            'meta_value' => 'yes',
+            'posts_per_page' => 1
+        ));
+    }
+    if ($primary_demo) {
+        $demo_listing_id = $primary_demo[0]->ID;
+    }
+}
+
 if ($demo_listing_id && get_post_meta($demo_listing_id, '_obenlo_is_demo', true) === 'yes') {
     $is_demo_preview = true;
+    $demo_host_name = get_post_meta($demo_listing_id, '_obenlo_demo_host_name', true);
     $demo_meta = [
         'name' => get_post_meta($demo_listing_id, '_obenlo_demo_host_name', true),
         'bio' => get_post_meta($demo_listing_id, '_obenlo_demo_host_bio', true),
@@ -339,13 +366,24 @@ if ($is_demo_preview) $hosting_since = 2024;
             );
 
             if ($is_demo_preview) {
-                // Show all demo listings for this host (Parent and Child)
+                // Show all demo listings for this host (based on host name if available, else author)
+                $demo_host_name = get_post_meta($demo_listing_id, '_obenlo_demo_host_name', true);
+                
                 $query_args['meta_query'] = array(
                     array(
                         'key' => '_obenlo_is_demo',
                         'value' => 'yes'
                     )
                 );
+                
+                if ($demo_host_name) {
+                    $query_args['meta_query'][] = array(
+                        'key' => '_obenlo_demo_host_name',
+                        'value' => $demo_host_name
+                    );
+                    unset($query_args['author']); // Match by name, not by WP author ID
+                }
+                
                 unset($query_args['post_parent']);
             } else {
                 // Filter out demo listings from standard view
