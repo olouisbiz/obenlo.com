@@ -35,6 +35,13 @@ class Obenlo_Booking_Communication
         add_action('wp_ajax_obenlo_submit_contact_form', array($this, 'handle_contact_form'));
         add_action('wp_ajax_nopriv_obenlo_submit_contact_form', array($this, 'handle_contact_form'));
 
+        // Guest Contact Host (no login required)
+        add_action('wp_ajax_nopriv_obenlo_guest_contact_host', array($this, 'handle_guest_contact_host'));
+        add_action('wp_ajax_obenlo_guest_contact_host', array($this, 'handle_guest_contact_host'));
+
+        // Guest contact modal injected for non-logged-in users
+        add_action('wp_footer', array($this, 'render_guest_contact_modal'));
+
     }
 
     public function handle_contact_form()
@@ -94,6 +101,174 @@ class Obenlo_Booking_Communication
 
 
 
+    public function handle_guest_contact_host()
+    {
+        if (!isset($_POST['guest_contact_nonce']) || !wp_verify_nonce($_POST['guest_contact_nonce'], 'obenlo_guest_contact_nonce')) {
+            wp_send_json_error(array('message' => 'Security check failed.'));
+        }
+
+        $visitor_name    = sanitize_text_field($_POST['visitor_name'] ?? '');
+        $visitor_email   = sanitize_email($_POST['visitor_email'] ?? '');
+        $visitor_message = sanitize_textarea_field($_POST['visitor_message'] ?? '');
+        $host_id         = intval($_POST['host_id'] ?? 0);
+        $listing_id      = intval($_POST['listing_id'] ?? 0);
+
+        if (empty($visitor_name) || empty($visitor_email) || empty($visitor_message) || !$host_id) {
+            wp_send_json_error(array('message' => 'Please fill in all fields.'));
+        }
+
+        if (!is_email($visitor_email)) {
+            wp_send_json_error(array('message' => 'Please enter a valid email address.'));
+        }
+
+        $host = get_userdata($host_id);
+        if (!$host) {
+            wp_send_json_error(array('message' => 'Host not found.'));
+        }
+
+        $listing_title = $listing_id ? get_the_title($listing_id) : 'a listing';
+        $subject       = 'A visitor wants to contact you about: ' . $listing_title;
+
+        $body_html = '
+        <p style="margin:0 0 16px 0;">A visitor has reached out about your listing <strong>' . esc_html($listing_title) . '</strong>.</p>
+        <table style="width:100%; border-collapse:collapse; font-size:14px; margin-bottom:20px;">
+            <tr>
+                <td style="padding:10px 14px; background:#f9f9f9; border-radius:8px 8px 0 0; border-bottom:1px solid #eee; font-weight:700; width:120px;">Name</td>
+                <td style="padding:10px 14px; background:#f9f9f9; border-bottom:1px solid #eee;">' . esc_html($visitor_name) . '</td>
+            </tr>
+            <tr>
+                <td style="padding:10px 14px; border-bottom:1px solid #eee; font-weight:700;">Email</td>
+                <td style="padding:10px 14px; border-bottom:1px solid #eee;"><a href="mailto:' . esc_attr($visitor_email) . '" style="color:#e61e4d;">' . esc_html($visitor_email) . '</a></td>
+            </tr>
+            <tr>
+                <td style="padding:10px 14px; border-radius:0 0 8px 8px; font-weight:700; vertical-align:top;">Message</td>
+                <td style="padding:10px 14px; border-radius:0 0 8px 8px;">' . nl2br(esc_html($visitor_message)) . '</td>
+            </tr>
+        </table>
+        <p style="margin:0; font-size:0.85rem; color:#888;">Simply reply to this email to respond directly to ' . esc_html($visitor_name) . '.</p>';
+
+        $html    = Obenlo_Booking_Notifications::wrap_template($subject, $body_html);
+        $headers = array(
+            'Content-Type: text/html; charset=UTF-8',
+            'From: Obenlo <info@obenlo.com>',
+            'Reply-To: ' . $visitor_name . ' <' . $visitor_email . '>',
+            'Cc: info@obenlo.com',
+        );
+
+        $sent = wp_mail($host->user_email, $subject, $html, $headers);
+
+        if ($sent) {
+            wp_send_json_success(array('message' => 'Your message has been sent to the host! They\'ll reply to your email shortly.'));
+        } else {
+            wp_send_json_error(array('message' => 'Failed to send. Please try again.'));
+        }
+    }
+
+    public function render_guest_contact_modal()
+    {
+        if (is_user_logged_in()) return; // Only needed for guests
+        ?>
+        <div id="obenlo-guest-contact-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+            <div style="background:#fff; width:100%; max-width:480px; border-radius:20px; padding:32px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); font-family:'Inter',sans-serif;">
+                <button onclick="document.getElementById('obenlo-guest-contact-modal').style.display='none';" style="position:absolute; top:16px; right:20px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#999; line-height:1;">&times;</button>
+
+                <div style="display:flex; align-items:center; gap:14px; margin-bottom:20px;">
+                    <div id="gcm-avatar-wrap" style="flex-shrink:0;"></div>
+                    <div>
+                        <div id="gcm-host-name" style="font-weight:900; font-size:1.1rem; color:#111;"></div>
+                        <div style="font-size:0.85rem; color:#666; margin-top:2px; display:flex; align-items:center; gap:6px;">
+                            <span style="width:7px; height:7px; background:#10b981; border-radius:50%; display:inline-block;"></span>
+                            Usually responds within an hour
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin:0 0 6px 0; font-size:1.1rem; font-weight:800; color:#111;">Send a message</h3>
+                <p style="margin:0 0 20px 0; color:#666; font-size:0.9rem;">No account needed — the host will reply directly to your email.</p>
+
+                <form id="obenlo-guest-contact-form">
+                    <input type="hidden" name="action" value="obenlo_guest_contact_host">
+                    <input type="hidden" name="host_id" id="gcm-host-id" value="">
+                    <input type="hidden" name="listing_id" id="gcm-listing-id" value="<?php echo esc_attr(get_queried_object_id()); ?>">
+                    <input type="hidden" name="guest_contact_nonce" value="<?php echo wp_create_nonce('obenlo_guest_contact_nonce'); ?>">
+
+                    <div style="margin-bottom:14px;">
+                        <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px; color:#333;">Your Name *</label>
+                        <input type="text" name="visitor_name" required placeholder="Jane Smith" style="width:100%; padding:11px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:0.95rem; outline:none; box-sizing:border-box; transition:border 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
+                    </div>
+                    <div style="margin-bottom:14px;">
+                        <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px; color:#333;">Your Email *</label>
+                        <input type="email" name="visitor_email" required placeholder="jane@example.com" style="width:100%; padding:11px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:0.95rem; outline:none; box-sizing:border-box; transition:border 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px; color:#333;">Your Message *</label>
+                        <textarea name="visitor_message" required rows="4" placeholder="Hi, I'm interested in booking your listing..." style="width:100%; padding:11px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:0.95rem; outline:none; resize:vertical; box-sizing:border-box; transition:border 0.2s; font-family:inherit;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'"></textarea>
+                    </div>
+
+                    <button type="submit" id="gcm-submit-btn" style="width:100%; background:#e61e4d; color:#fff; border:none; padding:14px; border-radius:12px; font-weight:800; font-size:1rem; cursor:pointer; transition:all 0.3s;">
+                        Send Message
+                    </button>
+                    <div id="gcm-response" style="margin-top:14px; font-size:0.9rem; font-weight:700; text-align:center; display:none;"></div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+        window.obenloOpenGuestContact = function(hostId, hostName, hostAvatar) {
+            document.getElementById('gcm-host-id').value = hostId;
+            document.getElementById('gcm-host-name').innerText = 'Message ' + hostName;
+            var avatarWrap = document.getElementById('gcm-avatar-wrap');
+            avatarWrap.innerHTML = hostAvatar
+                ? '<img src="' + hostAvatar + '" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,0.1);">'
+                : '';
+            document.getElementById('obenlo-guest-contact-modal').style.display = 'flex';
+            document.getElementById('gcm-response').style.display = 'none';
+            document.getElementById('obenlo-guest-contact-form').reset();
+            document.getElementById('gcm-host-id').value = hostId;
+        };
+
+        document.getElementById('obenlo-guest-contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var btn = document.getElementById('gcm-submit-btn');
+            var resp = document.getElementById('gcm-response');
+            btn.innerText = 'Sending...';
+            btn.disabled = true;
+            resp.style.display = 'none';
+
+            var formData = new FormData(this);
+            fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: formData })
+                .then(function(r){ return r.json(); })
+                .then(function(data) {
+                    btn.innerText = 'Send Message';
+                    btn.disabled = false;
+                    resp.style.display = 'block';
+                    if (data.success) {
+                        resp.style.color = '#10b981';
+                        resp.innerText = data.data.message;
+                        document.getElementById('obenlo-guest-contact-form').reset();
+                        setTimeout(function(){ document.getElementById('obenlo-guest-contact-modal').style.display='none'; }, 3500);
+                    } else {
+                        resp.style.color = '#e61e4d';
+                        resp.innerText = data.data.message || 'Error. Please try again.';
+                    }
+                })
+                .catch(function() {
+                    btn.innerText = 'Send Message';
+                    btn.disabled = false;
+                    resp.style.display = 'block';
+                    resp.style.color = '#e61e4d';
+                    resp.innerText = 'Network error. Please try again.';
+                });
+        });
+
+        // Close on backdrop click
+        document.getElementById('obenlo-guest-contact-modal').addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+        </script>
+        <?php
+    }
+
     public function add_contact_button_to_listing($content)
     {
         if (is_singular('listing') && is_main_query()) {
@@ -107,6 +282,14 @@ class Obenlo_Booking_Communication
             if ($host_id != get_current_user_id()) {
                 $host_name   = get_the_author_meta('display_name', $host_id);
                 $host_avatar = get_avatar_url($host_id);
+                $logged_in   = is_user_logged_in();
+
+                // Button action: logged-in → chat window; guest → email form modal
+                if ($logged_in) {
+                    $onclick = "if(window.obenloStartChatWith){window.obenloStartChatWith($host_id, '" . esc_js($host_name) . "', '" . esc_url($host_avatar) . "');}";
+                } else {
+                    $onclick = "window.obenloOpenGuestContact($host_id, '" . esc_js($host_name) . "', '" . esc_url($host_avatar) . "');";
+                }
 
                 $button = '
                 <div style="margin:40px 0; padding:30px; border-radius:24px; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.6); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border:1px solid rgba(0,0,0,0.05); box-shadow: 0 15px 35px rgba(0,0,0,0.03); font-family: \'Inter\', sans-serif;">
@@ -120,7 +303,7 @@ class Obenlo_Booking_Communication
                             </div>
                         </div>
                     </div>
-                    <a href="javascript:void(0);" onclick="if(window.obenloStartChatWith){window.obenloStartChatWith(' . $host_id . ', \'' . esc_js($host_name) . '\', \'' . esc_url($host_avatar) . '\');} else { window.location.href=\'' . esc_url(home_url('/login')) . '\'; }" style="background:#e61e4d; color:white; padding:14px 32px; border-radius:16px; text-decoration:none; font-weight:800; font-size:1rem; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display:inline-flex; align-items:center; gap:10px; box-shadow: 0 8px 20px rgba(230,30,77,0.25);" onmouseover="this.style.transform=\'scale(1.05) translateY(-2px)\';this.style.background=\'#000\';this.style.boxShadow=\'0 12px 25px rgba(0,0,0,0.2)\'" onmouseout="this.style.transform=\'scale(1)\';this.style.background=\'#e61e4d\';this.style.boxShadow=\'0 8px 20px rgba(230,30,77,0.25)\'">
+                    <a href="javascript:void(0);" onclick="' . esc_attr($onclick) . '" style="background:#e61e4d; color:white; padding:14px 32px; border-radius:16px; text-decoration:none; font-weight:800; font-size:1rem; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display:inline-flex; align-items:center; gap:10px; box-shadow: 0 8px 20px rgba(230,30,77,0.25);" onmouseover="this.style.transform=\'scale(1.05) translateY(-2px)\';this.style.background=\'#000\';this.style.boxShadow=\'0 12px 25px rgba(0,0,0,0.2)\'" onmouseout="this.style.transform=\'scale(1)\';this.style.background=\'#e61e4d\';this.style.boxShadow=\'0 8px 20px rgba(230,30,77,0.25)\'">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:18px; height:18px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                         Contact Host
                     </a>
