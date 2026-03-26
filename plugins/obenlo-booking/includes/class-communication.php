@@ -55,8 +55,8 @@ class Obenlo_Booking_Communication
             wp_send_json_error(array('message' => 'Please enter a valid email address.'));
         }
 
-        $admin_email = get_option('admin_email');
-        $site_name   = get_bloginfo('name');
+        $to        = 'info@obenlo.com';
+        $site_name = get_bloginfo('name');
 
         $subject  = '[' . $site_name . '] Contact Form: Message from ' . $name;
         $body     = "You have received a new message via the Contact Us form.\n\n";
@@ -67,10 +67,11 @@ class Obenlo_Booking_Communication
 
         $headers = array(
             'Content-Type: text/plain; charset=UTF-8',
+            'From: ' . $site_name . ' <info@obenlo.com>',
             'Reply-To: ' . $name . ' <' . $email . '>',
         );
 
-        $sent = wp_mail($admin_email, $subject, $body, $headers);
+        $sent = wp_mail($to, $subject, $body, $headers);
 
         if ($sent) {
             wp_send_json_success(array('message' => "Your message has been sent. We'll get back to you soon!"));
