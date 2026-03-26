@@ -424,6 +424,7 @@ class Obenlo_Booking_Communication
             function obenloCenterFetchContacts() {
                 jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
                     action: 'obenlo_fetch_chat_contacts',
+                    nonce: '<?php echo wp_create_nonce("obenlo_chat_nonce"); ?>',
                     oversight: obenloIsOversight ? 1 : 0
                 }, function(res) {
                     let html = '';
@@ -1160,8 +1161,6 @@ class Obenlo_Booking_Communication
         check_ajax_referer('obenlo_chat_nonce', 'nonce');
         $user_id = get_current_user_id();
         $is_oversight = (isset($_GET['oversight']) && $_GET['oversight'] == '1' && current_user_can('manage_options'));
-        
-        error_log("Obenlo Messaging: Fetching contacts for user $user_id (Oversight: " . ($is_oversight ? 'Y' : 'N') . ")");
 
         if (!$user_id) {
             wp_send_json_error('Not logged in');
