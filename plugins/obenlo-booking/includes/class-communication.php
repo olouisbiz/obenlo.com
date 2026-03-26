@@ -31,7 +31,53 @@ class Obenlo_Booking_Communication
         // Render chat window logic in footer (needed for obenloStartChatWith)
         add_action('wp_footer', array($this, 'render_frontend_chat_widget'));
 
+        // Contact Us form (available to all visitors)
+        add_action('wp_ajax_obenlo_submit_contact_form', array($this, 'handle_contact_form'));
+        add_action('wp_ajax_nopriv_obenlo_submit_contact_form', array($this, 'handle_contact_form'));
 
+    }
+
+    public function handle_contact_form()
+    {
+        if (!isset($_POST['contact_nonce']) || !wp_verify_nonce($_POST['contact_nonce'], 'obenlo_contact_nonce')) {
+            wp_send_json_error(array('message' => 'Security check failed.'));
+        }
+
+        $name    = sanitize_text_field($_POST['contact_name'] ?? '');
+        $email   = sanitize_email($_POST['contact_email'] ?? '');
+        $message = sanitize_textarea_field($_POST['contact_message'] ?? '');
+
+        if (empty($name) || empty($email) || empty($message)) {
+            wp_send_json_error(array('message' => 'Please fill in all fields.'));
+        }
+
+        if (!is_email($email)) {
+            wp_send_json_error(array('message' => 'Please enter a valid email address.'));
+        }
+
+        $to        = 'info@obenlo.com';
+        $site_name = get_bloginfo('name');
+
+        $subject  = '[' . $site_name . '] Contact Form: Message from ' . $name;
+        $body     = "You have received a new message via the Contact Us form.\n\n";
+        $body    .= "Name: " . $name . "\n";
+        $body    .= "Email: " . $email . "\n";
+        $body    .= "\nMessage:\n" . $message . "\n\n";
+        $body    .= "---\nSimply reply to this email to respond directly to " . $name . " (" . $email . ").";
+
+        $headers = array(
+            'Content-Type: text/plain; charset=UTF-8',
+            'From: ' . $site_name . ' <info@obenlo.com>',
+            'Reply-To: ' . $name . ' <' . $email . '>',
+        );
+
+        $sent = wp_mail($to, $subject, $body, $headers);
+
+        if ($sent) {
+            wp_send_json_success(array('message' => "Your message has been sent. We'll get back to you soon!"));
+        } else {
+            wp_send_json_error(array('message' => 'Failed to send your message. Please try again.'));
+        }
     }
 
 
