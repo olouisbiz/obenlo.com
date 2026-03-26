@@ -415,7 +415,7 @@ class Obenlo_Booking_Communication
         </style>
 
         <script>
-            let obenloCenterContact = <?php echo $pre_selected_contact; ?>;
+            let obenloCenterContact = '<?php echo esc_js($pre_selected_contact); ?>';
             let obenloCenterLastId = 0;
             let obenloCenterInterval = null;
             let obenloCenterUserId = <?php echo $current_user_id; ?>;
