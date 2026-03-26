@@ -424,6 +424,7 @@ class Obenlo_Booking_Communication
             function obenloCenterFetchContacts() {
                 jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
                     action: 'obenlo_fetch_chat_contacts',
+                    nonce: '<?php echo wp_create_nonce("obenlo_chat_nonce"); ?>',
                     oversight: obenloIsOversight ? 1 : 0
                 }, function(res) {
                     let html = '';
@@ -446,8 +447,12 @@ class Obenlo_Booking_Communication
                         });
                     } else {
                         html = '<div style="padding:40px 20px; text-align:center; color:#999;">No messages yet.</div>';
+                        if (!res.success) console.error("Messaging Error:", res);
                     }
                     document.getElementById('obenlo-center-contacts').innerHTML = html;
+                }).fail(function(xhr, status, error) {
+                    document.getElementById('obenlo-center-contacts').innerHTML = '<div style="padding:40px 20px; text-align:center; color:red;">Error loading contacts. Check console.</div>';
+                    console.error("AJAX Fail:", status, error, xhr.responseText);
                 });
             }
 
@@ -1136,7 +1141,7 @@ class Obenlo_Booking_Communication
                 'id' => $msg->id,
                 'sender_id' => $msg->sender_id,
                 'message' => wp_kses_post($msg->message),
-                'time' => gmdate('H:i', strtotime($msg->created_at) + (get_option('gmt_offset') * HOUR_IN_SECONDS))
+                'time' => gmdate('H:i', strtotime($msg->created_at) + (get_option('gmt_offset') * 3600))
             );
 
             // Mark as read if received by current user
@@ -1190,7 +1195,7 @@ class Obenlo_Booking_Communication
                     'contact_id' => $row->receiver_id ?: 'guest_' . md5($row->guest_email),
                     'contact_name' => $name_a . ' & ' . $name_b,
                     'last_message' => $last_msg ? wp_trim_words($last_msg->message, 8) : '',
-                    'last_message_time' => $last_msg ? gmdate('M j, H:i', strtotime($last_msg->created_at) + (get_option('gmt_offset') * HOUR_IN_SECONDS)) : '',
+                    'last_message_time' => $last_msg ? gmdate('M j, H:i', strtotime($last_msg->created_at) + (get_option('gmt_offset') * 3600)) : '',
                     'unread_count' => 0,
                     'is_oversight_pair' => true,
                     'pair_a' => $row->sender_id,
@@ -1254,7 +1259,7 @@ class Obenlo_Booking_Communication
                     'contact_name' => $contact_name,
                     'contact_avatar' => $contact_avatar,
                     'last_message' => $last_msg ? wp_trim_words($last_msg->message, 8) : '',
-                    'last_message_time' => $last_msg ? gmdate('M j, H:i', strtotime($last_msg->created_at) + (get_option('gmt_offset') * HOUR_IN_SECONDS)) : '',
+                    'last_message_time' => $last_msg ? gmdate('M j, H:i', strtotime($last_msg->created_at) + (get_option('gmt_offset') * 3600)) : '',
                     'unread_count' => intval($unread_count),
                     'guest_email' => $row->guest_email
                 );
