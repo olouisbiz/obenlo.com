@@ -604,6 +604,17 @@ get_header(); ?>
                             <?php endif; ?>
                         <?php endif; ?>
 
+                        <!-- Contact Host Button (Harmonized) -->
+                        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
+                            <button onclick="<?php if(is_user_logged_in()): ?>if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');} <?php else: ?>window.obenloOpenGuestContact(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');<?php endif; ?>"
+                                    style="width: 100%; background: #e61e4d; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(230,30,77,0.3);"
+                                    onmouseover="this.style.background='#000'; this.style.transform='translateY(-2px)';"
+                                    onmouseout="this.style.background='#e61e4d'; this.style.transform='translateY(0)';"
+                            >
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                Contact Host
+                            </button>
+                        </div>
                     <?php else: ?>
                         <!-- Child Listing: Show Booking Form -->
                         <?php
@@ -796,6 +807,18 @@ get_header(); ?>
                             </button>
                             <p style="text-align: center; font-size: 0.8em; color: #666; margin-top: 10px;">You won't be charged yet</p>
                         </form>
+
+                        <!-- Contact Host Button (Harmonized) -->
+                        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+                            <button onclick="<?php if(is_user_logged_in()): ?>if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');} <?php else: ?>window.obenloOpenGuestContact(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');<?php endif; ?>"
+                                    style="width: 100%; background: #e61e4d; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(230,30,77,0.2);"
+                                    onmouseover="this.style.background='#000'; this.style.transform='translateY(-1px)';"
+                                    onmouseout="this.style.background='#e61e4d'; this.style.transform='translateY(0)';"
+                            >
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                Contact Host
+                            </button>
+                        </div>
 
 
                         <script>
