@@ -30,26 +30,31 @@ $demo_meta = [];
 
 // If no specific ID but demo mode is on, try to find the "primary" demo for this host
 if (!$demo_listing_id && $demo_mode_param) {
-    $primary_demo = get_posts(array(
+    // Search for demo listings authored by this user
+    $demo_post = get_posts(array(
         'post_type' => 'listing',
-        'meta_query' => array(
-            array('key' => '_obenlo_is_demo', 'value' => 'yes'),
-            array('key' => '_obenlo_demo_host_name', 'value' => $curauth->display_name, 'compare' => 'LIKE')
-        ),
-        'posts_per_page' => 1
+        'author' => $user_id,
+        'meta_key' => '_obenlo_is_demo',
+        'meta_value' => 'yes',
+        'posts_per_page' => 1,
+        'post_parent' => 0
     ));
-    if (!$primary_demo) {
-        // Fallback to author match
-        $primary_demo = get_posts(array(
+    
+    if (!$demo_post) {
+        // Search by author name as a fallback in host name field
+        $demo_post = get_posts(array(
             'post_type' => 'listing',
-            'author' => $user_id,
-            'meta_key' => '_obenlo_is_demo',
-            'meta_value' => 'yes',
-            'posts_per_page' => 1
+            'meta_query' => array(
+                array('key' => '_obenlo_is_demo', 'value' => 'yes'),
+                array('key' => '_obenlo_demo_host_name', 'value' => $curauth->display_name, 'compare' => 'LIKE')
+            ),
+            'posts_per_page' => 1,
+            'post_parent' => 0
         ));
     }
-    if ($primary_demo) {
-        $demo_listing_id = $primary_demo[0]->ID;
+    
+    if ($demo_post) {
+        $demo_listing_id = $demo_post[0]->ID;
     }
 }
 
@@ -369,22 +374,40 @@ if ($is_demo_preview) $hosting_since = 2024;
                 // Show all demo listings for this host (based on host name if available, else author)
                 $demo_host_name = get_post_meta($demo_listing_id, '_obenlo_demo_host_name', true);
                 
-                $query_args['meta_query'] = array(
-                    array(
-                        'key' => '_obenlo_is_demo',
-                        'value' => 'yes'
-                    )
-                );
-                
                 if ($demo_host_name) {
-                    $query_args['meta_query'][] = array(
-                        'key' => '_obenlo_demo_host_name',
-                        'value' => $demo_host_name
+                    // Find all listings associated with this demo host name
+                    $demo_listings = get_posts(array(
+                        'post_type' => 'listing',
+                        'meta_query' => array(
+                            array('key' => '_obenlo_demo_host_name', 'value' => $demo_host_name)
+                        ),
+                        'fields' => 'ids',
+                        'posts_per_page' => -1
+                    ));
+                    
+                    // Also find children of these demo parents
+                    if (!empty($demo_listings)) {
+                        $children = get_posts(array(
+                            'post_type' => 'listing',
+                            'post_parent__in' => $demo_listings,
+                            'fields' => 'ids',
+                            'posts_per_page' => -1
+                        ));
+                        $demo_listings = array_merge($demo_listings, $children);
+                    }
+                    
+                    if (!empty($demo_listings)) {
+                        unset($query_args['author']);
+                        $query_args['post__in'] = array_unique($demo_listings);
+                        unset($query_args['post_parent']); // Show children too if they are bookable
+                    }
+                } else {
+                    // Fallback to author match if no name set
+                    $query_args['meta_query'] = array(
+                        array('key' => '_obenlo_is_demo', 'value' => 'yes')
                     );
-                    unset($query_args['author']); // Match by name, not by WP author ID
+                    unset($query_args['post_parent']);
                 }
-                
-                unset($query_args['post_parent']);
             } else {
                 // Filter out demo listings from standard view
                 $query_args['meta_query'] = array(
