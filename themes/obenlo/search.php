@@ -35,8 +35,14 @@ if ( taxonomy_exists( 'listing_type' ) ) {
 $location_args = array(
     'post_type'  => 'listing',
     'meta_query' => array(
+        'relation' => 'OR',
         array(
             'key'     => '_listing_location',
+            'value'   => $clean_query,
+            'compare' => 'LIKE'
+        ),
+        array(
+            'key'     => '_obenlo_location',
             'value'   => $clean_query,
             'compare' => 'LIKE'
         )

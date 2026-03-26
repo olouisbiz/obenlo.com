@@ -782,13 +782,6 @@ get_header(); ?>
                             <p style="text-align: center; font-size: 0.8em; color: #666; margin-top: 10px;">You won't be charged yet</p>
                         </form>
 
-                    <!-- Message Host CTA -->
-                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
-                        <button onclick="if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');} else { window.location.href='<?php echo esc_url(home_url('/login')); ?>'; }" style="background: transparent; border: 1px solid #222; color: #222; font-weight: bold; width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='transparent'">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            Contact Provider
-                        </button>
-                    </div>
 
                         <script>
                         document.addEventListener('DOMContentLoaded', function() {

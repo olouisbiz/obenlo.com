@@ -9,7 +9,7 @@
                 <li><a href="<?php echo home_url('/support'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Help Center', 'obenlo'); ?></a></li>
                 <li><a href="<?php echo home_url('/how-it-works'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('How Obenlo works', 'obenlo'); ?></a></li>
                 <li><a href="<?php echo home_url('/faq'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('FAQ', 'obenlo'); ?></a></li>
-                <li><a href="#" class="trigger-contact-modal" style="color: inherit; text-decoration: none;">Contact Us</a></li>
+                <li><a href="<?php echo home_url('/support'); ?>" style="color: inherit; text-decoration: none;">Contact Us</a></li>
             </ul>
         </div>
 
