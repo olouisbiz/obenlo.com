@@ -26,7 +26,7 @@ class Obenlo_Booking_Communication
         add_action('wp_ajax_obenlo_fetch_chat_contacts', array($this, 'handle_fetch_chat_contacts'));
 
         // Add Contact Host button to listings
-        add_filter('the_content', array($this, 'add_contact_button_to_listing'));
+        // add_filter('the_content', array($this, 'add_contact_button_to_listing'));
 
         // Render chat window logic in footer (needed for obenloStartChatWith)
         add_action('wp_footer', array($this, 'render_frontend_chat_widget'));
@@ -310,8 +310,12 @@ class Obenlo_Booking_Communication
             $host_id     = get_post_field('post_author', $host_source);
 
             if ($host_id != get_current_user_id()) {
-                $host_name   = get_the_author_meta('display_name', $host_id);
-                $host_avatar = get_avatar_url($host_id);
+                $is_demo     = (get_post_meta($host_source, '_obenlo_is_demo', true) === 'yes');
+                $demo_name   = get_post_meta($host_source, '_obenlo_demo_host_name', true);
+                $demo_avatar = 'https://images.unsplash.com/photo-1599305090598-fe179d501227?auto=format&fit=crop&q=80&w=200';
+                
+                $host_name   = ($is_demo && $demo_name) ? $demo_name : get_the_author_meta('display_name', $host_id);
+                $host_avatar = ($is_demo) ? $demo_avatar : get_avatar_url($host_id);
                 $logged_in   = is_user_logged_in();
 
                 // Button action: logged-in → chat window; guest → email form modal
@@ -322,21 +326,13 @@ class Obenlo_Booking_Communication
                 }
 
                 $button = '
-                <div style="margin:40px 0; padding:30px; border-radius:24px; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.6); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border:1px solid rgba(0,0,0,0.05); box-shadow: 0 15px 35px rgba(0,0,0,0.03); font-family: \'Inter\', sans-serif;">
-                    <div style="display:flex; align-items:center; gap:20px;">
-                        <img src="' . esc_url($host_avatar) . '" style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:3px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
-                        <div>
-                            <div style="font-weight:900; color:#111; font-size:1.15rem; letter-spacing:-0.02em;">Hosted by ' . esc_html($host_name) . '</div>
-                            <div style="font-size:0.9rem; color:#666; margin-top:4px; display:flex; align-items:center; gap:6px;">
-                                <span style="width:8px; height:8px; background:#10b981; border-radius:50%; display:inline-block;"></span>
-                                Usually responds within an hour
-                            </div>
-                        </div>
-                    </div>
-                    <a href="javascript:void(0);" onclick="' . esc_attr($onclick) . '" style="background:#e61e4d; color:white; padding:14px 32px; border-radius:16px; text-decoration:none; font-weight:800; font-size:1rem; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display:inline-flex; align-items:center; gap:10px; box-shadow: 0 8px 20px rgba(230,30,77,0.25);" onmouseover="this.style.transform=\'scale(1.05) translateY(-2px)\';this.style.background=\'#000\';this.style.boxShadow=\'0 12px 25px rgba(0,0,0,0.2)\'" onmouseout="this.style.transform=\'scale(1)\';this.style.background=\'#e61e4d\';this.style.boxShadow=\'0 8px 20px rgba(230,30,77,0.25)\'">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:18px; height:18px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <div class="contact-host-section" style="margin:40px 0; padding:30px; border-radius:32px; background:#fff; border:1px solid #eee; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.03);">
+                    <div style="font-weight:800; color:#111; font-size:1.4rem; margin-bottom:15px;">Enjoyed this listing?</div>
+                    <p style="color:#666; margin-bottom:25px; font-size:1rem;">Contact <strong>' . esc_html($host_name) . '</strong> directly for any questions.</p>
+                    <button onclick="' . esc_attr($onclick) . '" style="background:#e61e4d; color:white; border:none; padding:15px 35px; border-radius:12px; font-weight:800; font-size:1.1rem; cursor:pointer; display:inline-flex; align-items:center; gap:10px; transition:all 0.3s ease; box-shadow:0 4px 15px rgba(230,30,77,0.3);" onmouseover="this.style.transform=\'scale(1.05)\';this.style.background=\'#000\';" onmouseout="this.style.transform=\'scale(1)\';this.style.background=\'#e61e4d\';">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                         Contact Host
-                    </a>
+                    </button>
                 </div>';
                 $content .= $button;
             }
@@ -520,7 +516,8 @@ class Obenlo_Booking_Communication
                 jQuery.post('<?php echo admin_url('admin-ajax.php'); ?>', {
                     action: 'obenlo_send_chat_message',
                     receiver_id: obenloCenterContact,
-                    message: txt
+                    message: txt,
+                    nonce: '<?php echo wp_create_nonce("obenlo_chat_nonce"); ?>'
                 }, function(res) {
                     if (res.success) {
                         obenloCenterFetchMessages();

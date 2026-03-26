@@ -211,7 +211,7 @@ add_action('init', function() {
     add_rewrite_rule('^demo/([^/]+)/?$', 'index.php?demo_host_name=$matches[1]', 'top');
     
     // Force Flush once to activate
-    flush_rewrite_rules(); 
+    // flush_rewrite_rules(); 
 });
 
 // Force author template for demo host URLs
