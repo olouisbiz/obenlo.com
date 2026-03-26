@@ -23,7 +23,7 @@ if (!$curauth) {
 $user_id = $curauth->ID;
 
 // Demo Preview Overrides
-$demo_listing_id = isset($_GET['demo_listing_id']) ? intval($_GET['demo_listing_id']) : 0;
+$demo_listing_id = get_query_var('demo_listing_id') ?: (isset($_GET['demo_listing_id']) ? intval($_GET['demo_listing_id']) : 0);
 $is_demo_preview = false;
 $demo_meta = [];
 
@@ -339,7 +339,22 @@ if ($is_demo_preview) $hosting_since = 2024;
             );
 
             if ($is_demo_preview) {
-                $query_args['p'] = $demo_listing_id;
+                // Show all demo listings for this host (Parent and Child)
+                $query_args['meta_query'] = array(
+                    array(
+                        'key' => '_obenlo_is_demo',
+                        'value' => 'yes'
+                    )
+                );
+                unset($query_args['post_parent']);
+            } else {
+                // Filter out demo listings from standard view
+                $query_args['meta_query'] = array(
+                    array(
+                        'key' => '_obenlo_is_demo',
+                        'compare' => 'NOT EXISTS'
+                    )
+                );
             }
 
             $listings = new WP_Query($query_args);
