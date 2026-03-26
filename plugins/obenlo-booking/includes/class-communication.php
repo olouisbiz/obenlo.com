@@ -170,6 +170,23 @@ class Obenlo_Booking_Communication
 
         error_log("Obenlo Debug: wp_mail result: " . ($sent ? 'TRUE' : 'FALSE'));
 
+        // Also record in internal platform messages for monitoring
+        global $wpdb;
+        $table = $wpdb->prefix . 'obenlo_chat_messages';
+        $wpdb->insert(
+            $table,
+            array(
+                'sender_id' => 0,
+                'receiver_id' => $host_id,
+                'guest_name' => $visitor_name,
+                'guest_email' => $visitor_email,
+                'message' => "[Guest Inquiry about: $listing_title]\n\n" . $visitor_message,
+                'created_at' => current_time('mysql'),
+                'is_read' => 0
+            ),
+            array('%d', '%d', '%s', '%s', '%s', '%s', '%d')
+        );
+
         if ($sent) {
             wp_send_json_success(array('message' => 'Your message has been sent to the host! They\'ll reply to your email shortly.'));
         } else {
@@ -339,7 +356,7 @@ class Obenlo_Booking_Communication
 
         $current_user_id = get_current_user_id();
         $is_oversight = ($atts['oversight'] === '1' && current_user_can('manage_options'));
-        $pre_selected_contact = isset($_GET['recipient_id']) ? intval($_GET['recipient_id']) : 0;
+        $pre_selected_contact = isset($_GET['recipient_id']) ? sanitize_text_field($_GET['recipient_id']) : '';
 
         ob_start();
 ?>
@@ -413,7 +430,7 @@ class Obenlo_Booking_Communication
                     if (res.success && res.data.length > 0) {
                         res.data.forEach(function(c) {
                             let act = (c.contact_id == obenloCenterContact) ? 'active' : '';
-                            let onclick = 'obenloCenterOpenRoom(' + c.contact_id + ', \'' + c.contact_name.replace(/'/g, "\\'") + '\'';
+                            let onclick = 'obenloCenterOpenRoom(\'' + c.contact_id + '\', \'' + c.contact_name.replace(/'/g, "\\'") + '\'';
                             if (c.is_oversight_pair) {
                                 onclick += ', ' + c.pair_a + ', ' + c.pair_b;
                             }
@@ -509,7 +526,7 @@ class Obenlo_Booking_Communication
 
             // Init
             obenloCenterFetchContacts();
-            if (obenloCenterContact > 0) {
+            if (obenloCenterContact !== '') {
                 // Fetch user info for pre-selected contact to open room
                 obenloCenterOpenRoom(obenloCenterContact, 'Conversation'); // Ideally we fetch the name, but this suffices to open the UI
             }
@@ -963,47 +980,85 @@ class Obenlo_Booking_Communication
     {
         check_ajax_referer('obenlo_chat_nonce', 'nonce');
         $sender_id = get_current_user_id();
-        $receiver_id = isset($_POST['receiver_id']) ? intval($_POST['receiver_id']) : 0;
+        $receiver_id_input = isset($_POST['receiver_id']) ? sanitize_text_field($_POST['receiver_id']) : '0';
         $message = isset($_POST['message']) ? sanitize_textarea_field(wp_unslash($_POST['message'])) : '';
 
-        if (!$sender_id || !$receiver_id || empty($message)) {
+        if (!$sender_id || empty($message)) {
             wp_send_json_error('Invalid request');
         }
 
         global $wpdb;
         $table = $wpdb->prefix . 'obenlo_chat_messages';
 
+        $receiver_id = 0;
+        $guest_email = '';
+        $guest_name = '';
+
+        if (strpos($receiver_id_input, 'guest_') === 0) {
+            // Replying to a guest
+            $guest_info = $wpdb->get_row($wpdb->prepare("
+                SELECT guest_email, guest_name FROM $table 
+                WHERE (sender_id = 0 OR receiver_id = 0) AND (sender_id = %d OR receiver_id = %d)
+                AND MD5(guest_email) = %s
+                LIMIT 1
+            ", $sender_id, $sender_id, str_replace('guest_', '', $receiver_id_input)));
+            
+            if (!$guest_info) {
+                wp_send_json_error('Guest not found');
+            }
+            $receiver_id = 0;
+            $guest_email = $guest_info->guest_email;
+            $guest_name = $guest_info->guest_name;
+        } else {
+            $receiver_id = intval($receiver_id_input);
+        }
+
         $inserted = $wpdb->insert(
             $table,
             array(
             'sender_id' => $sender_id,
             'receiver_id' => $receiver_id,
+            'guest_name' => $guest_name,
+            'guest_email' => $guest_email,
             'message' => $message,
             'created_at' => current_time('mysql'),
             'is_read' => 0
         ),
-            array('%d', '%d', '%s', '%s', '%d')
+            array('%d', '%d', '%s', '%s', '%s', '%s', '%d')
         );
 
         if ($inserted) {
             $msg_id = $wpdb->insert_id;
 
-            // Trigger Push Notification
-            if (class_exists('Obenlo_Booking_Push_Notifications')) {
+            // If it's a guest, send them an email reply
+            if ($guest_email) {
                 $sender_info = get_userdata($sender_id);
-                $sender_name = $sender_info ? $sender_info->display_name : 'Someone';
-                Obenlo_Booking_Push_Notifications::send_push(
-                    $receiver_id,
-                    "New message from $sender_name",
-                    wp_trim_words($message, 15, '...'),
-                    home_url('/messages')
-                );
+                $sender_name = $sender_info ? $sender_info->display_name : 'Obenlo Host';
+                $subject = "New message from $sender_name on Obenlo";
+                $body = "Hi $guest_name,<br><br>$sender_name has responded to your inquiry:<br><br>\"$message\"<br><br>You can reply directly to this email to continue the conversation.";
+                
+                $html = Obenlo_Booking_Notifications::wrap_template($subject, $body);
+                $headers = array('Content-Type: text/html; charset=UTF-8', 'From: Obenlo <info@obenlo.com>');
+                
+                wp_mail($guest_email, $subject, $html, $headers);
+            } else {
+                // Trigger Push Notification for registered user
+                if (class_exists('Obenlo_Booking_Push_Notifications')) {
+                    $sender_info = get_userdata($sender_id);
+                    $sender_name = $sender_info ? $sender_info->display_name : 'Someone';
+                    Obenlo_Booking_Push_Notifications::send_push(
+                        $receiver_id,
+                        "New message from $sender_name",
+                        wp_trim_words($message, 15, '...'),
+                        home_url('/messages')
+                    );
+                }
             }
 
             wp_send_json_success(array(
                 'id' => $msg_id,
                 'sender_id' => $sender_id,
-                'receiver_id' => $receiver_id,
+                'receiver_id' => $receiver_id_input,
                 'message' => wp_kses_post($message),
                 'time' => current_time('H:i')
             ));
@@ -1019,33 +1074,58 @@ class Obenlo_Booking_Communication
     {
         check_ajax_referer('obenlo_chat_nonce', 'nonce');
         $user_id = get_current_user_id();
-        $contact_id = isset($_GET['contact_id']) ? intval($_GET['contact_id']) : 0;
+        $contact_id = isset($_GET['contact_id']) ? sanitize_text_field($_GET['contact_id']) : '0';
         $last_id = isset($_GET['last_id']) ? intval($_GET['last_id']) : 0;
         $is_oversight = (isset($_GET['oversight']) && $_GET['oversight'] == '1' && current_user_can('manage_options'));
 
         global $wpdb;
         $table = $wpdb->prefix . 'obenlo_chat_messages';
 
-        if ($is_oversight) {
-            // In oversight mode, fetch messages between ANY two users (sender/receiver or receiver/sender)
+        if (strpos($contact_id, 'guest_') === 0) {
+            // It's a guest thread. We need to find the email.
+            $guest_info = $wpdb->get_row($wpdb->prepare("
+                SELECT guest_email FROM $table 
+                WHERE (sender_id = 0 OR receiver_id = 0) AND (sender_id = %d OR receiver_id = %d)
+                AND MD5(guest_email) = %s
+                LIMIT 1
+            ", $user_id, $user_id, str_replace('guest_', '', $contact_id)));
+            
+            if (!$guest_info) {
+                wp_send_json_error('Guest thread not found');
+            }
+            $guest_email = $guest_info->guest_email;
+
             $query = $wpdb->prepare("
                 SELECT * FROM $table 
-                WHERE ((sender_id = %d AND receiver_id = %d) 
-                   OR (sender_id = %d AND receiver_id = %d))
-                  AND id > %d
-                ORDER BY id ASC
-                LIMIT 500
-            ", $user_id, $contact_id, $contact_id, $user_id, $last_id);
-            // Note: $user_id here is actually the first person in the conversation pair passed from the frontend
-        } else {
-            $query = $wpdb->prepare("
-                SELECT * FROM $table 
-                WHERE ((sender_id = %d AND receiver_id = %d) 
-                   OR (sender_id = %d AND receiver_id = %d))
+                WHERE ( (sender_id = %d AND receiver_id = 0 AND guest_email = %s) 
+                     OR (sender_id = 0 AND receiver_id = %d AND guest_email = %s) )
                   AND id > %d
                 ORDER BY id ASC
                 LIMIT 100
-            ", $user_id, $contact_id, $contact_id, $user_id, $last_id);
+            ", $user_id, $guest_email, $user_id, $guest_email, $last_id);
+        } else {
+            $contact_id_int = intval($contact_id);
+            if ($is_oversight) {
+                // In oversight mode, fetch messages between ANY two users (sender/receiver or receiver/sender)
+                // Note: user_id here is actually the first person in the conversation pair passed from the frontend
+                $query = $wpdb->prepare("
+                    SELECT * FROM $table 
+                    WHERE ((sender_id = %d AND receiver_id = %d) 
+                       OR (sender_id = %d AND receiver_id = %d))
+                      AND id > %d
+                    ORDER BY id ASC
+                    LIMIT 500
+                ", $user_id, $contact_id_int, $contact_id_int, $user_id, $last_id);
+            } else {
+                $query = $wpdb->prepare("
+                    SELECT * FROM $table 
+                    WHERE ((sender_id = %d AND receiver_id = %d) 
+                       OR (sender_id = %d AND receiver_id = %d))
+                      AND id > %d
+                    ORDER BY id ASC
+                    LIMIT 100
+                ", $user_id, $contact_id_int, $contact_id_int, $user_id, $last_id);
+            }
         }
 
         $messages = $wpdb->get_results($query);
@@ -1087,88 +1167,100 @@ class Obenlo_Booking_Communication
         if ($is_oversight) {
             // Oversight: Get ALL unique conversation pairs on the site
             $query = "
-                SELECT DISTINCT 
-                    LEAST(sender_id, receiver_id) as user_a, 
-                    GREATEST(sender_id, receiver_id) as user_b 
+                SELECT 
+                    sender_id, receiver_id, guest_name, guest_email, MAX(id) as max_id
                 FROM $table 
-                ORDER BY id DESC 
+                GROUP BY sender_id, receiver_id, guest_email
+                ORDER BY max_id DESC 
                 LIMIT 50
             ";
             $results = $wpdb->get_results($query);
             $contacts = array();
 
             foreach ($results as $row) {
-                $user_a = get_userdata($row->user_a);
-                $user_b = get_userdata($row->user_b);
+                $user_a = $row->sender_id ? get_userdata($row->sender_id) : null;
+                $user_b = $row->receiver_id ? get_userdata($row->receiver_id) : null;
                 
-                if ($user_a && $user_b) {
-                    $last_msg_query = $wpdb->prepare("
-                        SELECT message, created_at FROM $table 
-                        WHERE (sender_id = %d AND receiver_id = %d) OR (sender_id = %d AND receiver_id = %d)
-                        ORDER BY id DESC LIMIT 1
-                    ", $row->user_a, $row->user_b, $row->user_b, $row->user_a);
-                    $last_msg = $wpdb->get_row($last_msg_query);
+                $name_a = $user_a ? $user_a->display_name : ($row->guest_name ?: 'Guest');
+                $name_b = $user_b ? $user_b->display_name : 'Guest';
 
-                    $contacts[] = array(
-                        'contact_id' => $row->user_b, // In oversight mode, we'll use user_b as the 'contact' and pass user_a as current_user in JS if needed, but for simplicity we'll just show the pair
-                        'contact_name' => $user_a->display_name . ' & ' . $user_b->display_name,
-                        'last_message' => $last_msg ? wp_trim_words($last_msg->message, 8) : '',
-                        'last_message_time' => $last_msg ? gmdate('M j, H:i', strtotime($last_msg->created_at) + (get_option('gmt_offset') * HOUR_IN_SECONDS)) : '',
-                        'unread_count' => 0,
-                        'is_oversight_pair' => true,
-                        'pair_a' => $row->user_a,
-                        'pair_b' => $row->user_b
-                    );
-                }
+                $last_msg = $wpdb->get_row($wpdb->prepare("SELECT message, created_at FROM $table WHERE id = %d", $row->max_id));
+
+                $contacts[] = array(
+                    'contact_id' => $row->receiver_id ?: 'guest_' . md5($row->guest_email),
+                    'contact_name' => $name_a . ' & ' . $name_b,
+                    'last_message' => $last_msg ? wp_trim_words($last_msg->message, 8) : '',
+                    'last_message_time' => $last_msg ? gmdate('M j, H:i', strtotime($last_msg->created_at) + (get_option('gmt_offset') * HOUR_IN_SECONDS)) : '',
+                    'unread_count' => 0,
+                    'is_oversight_pair' => true,
+                    'pair_a' => $row->sender_id,
+                    'pair_b' => $row->receiver_id,
+                    'guest_email' => $row->guest_email
+                );
             }
             wp_send_json_success($contacts);
-        }
+        } else {
+            // Standard user view: Get all unique contacts including guests (grouped by email)
+            $query = $wpdb->prepare("
+                SELECT 
+                    CASE WHEN sender_id = %d THEN receiver_id ELSE sender_id END as contact_id,
+                    guest_name,
+                    guest_email,
+                    MAX(id) as max_id
+                FROM $table 
+                WHERE sender_id = %d OR receiver_id = %d
+                GROUP BY contact_id, guest_email
+                ORDER BY max_id DESC
+                LIMIT 50
+            ", $user_id, $user_id, $user_id);
+            
+            $results = $wpdb->get_results($query);
+            $contacts = array();
 
-        // Standard user view: Get all unique contacts the user has chatted with
-        $query = $wpdb->prepare("
-            SELECT DISTINCT
-                CASE WHEN sender_id = %d THEN receiver_id ELSE sender_id END as contact_id
-            FROM $table
-            WHERE sender_id = %d OR receiver_id = %d
-        ", $user_id, $user_id, $user_id);
+            foreach ($results as $row) {
+                // Determine display name
+                $contact_name = '';
+                $contact_avatar = '';
 
-        $results = $wpdb->get_results($query);
-        $contacts = array();
+                if ($row->contact_id > 0) {
+                    $contact_user = get_userdata($row->contact_id);
+                    if (!$contact_user) continue;
+                    $contact_name = $contact_user->display_name;
+                    $contact_avatar = get_avatar_url($row->contact_id);
+                } else {
+                    $contact_name = $row->guest_name ?: 'Guest';
+                    // For guests, we use a special ID to differentiate threads in the frontend
+                    $row->contact_id = 'guest_' . md5($row->guest_email);
+                }
 
-        foreach ($results as $row) {
-            $contact_user = get_userdata($row->contact_id);
-            if ($contact_user) {
-                // Get last message info
-                $last_msg_query = $wpdb->prepare("
-                    SELECT message, is_read, sender_id, created_at 
-                    FROM $table 
-                    WHERE (sender_id = %d AND receiver_id = %d) OR (sender_id = %d AND receiver_id = %d)
-                    ORDER BY id DESC LIMIT 1
-                ", $user_id, $row->contact_id, $row->contact_id, $user_id);
-
-                $last_msg = $wpdb->get_row($last_msg_query);
+                $last_msg = $wpdb->get_row($wpdb->prepare("SELECT message, created_at FROM $table WHERE id = %d", $row->max_id));
 
                 // Check unread count
-                $unread_query = $wpdb->prepare("
-                    SELECT COUNT(*) 
-                    FROM $table 
-                    WHERE receiver_id = %d AND sender_id = %d AND is_read = 0
-                ", $user_id, $row->contact_id);
-
+                if (is_numeric($row->contact_id)) {
+                    $unread_query = $wpdb->prepare("
+                        SELECT COUNT(*) FROM $table 
+                        WHERE receiver_id = %d AND sender_id = %d AND is_read = 0
+                    ", $user_id, $row->contact_id);
+                } else {
+                    $unread_query = $wpdb->prepare("
+                        SELECT COUNT(*) FROM $table 
+                        WHERE receiver_id = %d AND guest_email = %s AND is_read = 0
+                    ", $user_id, $row->guest_email);
+                }
                 $unread_count = $wpdb->get_var($unread_query);
 
                 $contacts[] = array(
                     'contact_id' => $row->contact_id,
-                    'contact_name' => $contact_user->display_name,
+                    'contact_name' => $contact_name,
+                    'contact_avatar' => $contact_avatar,
                     'last_message' => $last_msg ? wp_trim_words($last_msg->message, 8) : '',
                     'last_message_time' => $last_msg ? gmdate('M j, H:i', strtotime($last_msg->created_at) + (get_option('gmt_offset') * HOUR_IN_SECONDS)) : '',
-                    'unread_count' => intval($unread_count)
+                    'unread_count' => intval($unread_count),
+                    'guest_email' => $row->guest_email
                 );
             }
+            wp_send_json_success($contacts);
         }
-
-        // Sort contacts by latest message time theoretically, but simplify for now
-        wp_send_json_success($contacts);
     }
 
     /**
@@ -1292,7 +1384,7 @@ class Obenlo_Booking_Communication
                     if (res.success && res.data.length > 0) {
                         res.data.forEach(function(c) {
                             let unread = c.unread_count > 0 ? '<span class="obenlo-badge">' + c.unread_count + '</span>' : '';
-                            html += '<div class="obenlo-chat-contact-item" onclick="obenloOpenRoom(' + c.contact_id + ', \'' + c.contact_name.replace(/'/g, "\\'") + '\', \'' + (c.contact_avatar || '') + '\')">';
+                            html += '<div class="obenlo-chat-contact-item" onclick="obenloOpenRoom(\'' + c.contact_id + '\', \'' + c.contact_name.replace(/'/g, "\\'") + '\', \'' + (c.contact_avatar || '') + '\')">';
                             if (c.contact_avatar) {
                                 html += '<img src="' + c.contact_avatar + '" style="width:40px;height:40px;border-radius:50%;margin-right:15px;object-fit:cover;">';
                             } else {
