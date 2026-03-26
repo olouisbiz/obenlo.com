@@ -516,9 +516,9 @@ class Obenlo_Booking_Frontend_Dashboard
                         <?php if (!empty($children)): ?>
                             <?php foreach ($children as $child): ?>
                                 <tr style="background:#fafafa;">
-                                    <td style="padding-left:40px; font-size:0.85rem; color:#666;">└─ <?php echo get_the_title($child->ID); ?></td>
+                                    <td data-label="Listing" style="padding-left:30px; font-size:0.85rem; color:#666;">└─ <?php echo get_the_title($child->ID); ?></td>
                                     <td class="mobile-hide"></td>
-                                    <td><span class="badge badge-success" style="opacity:0.6; font-size:0.7rem;"><?php echo ucfirst($child->post_status); ?></span></td>
+                                    <td data-label="Status"><span class="badge badge-success" style="opacity:0.6; font-size:0.7rem;"><?php echo ucfirst($child->post_status); ?></span></td>
                                     <td class="mobile-hide"></td>
                                     <td data-label="Actions">
                                         <div style="display:flex; gap:12px; align-items:center;">

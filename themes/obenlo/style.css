@@ -405,9 +405,7 @@ body {
         margin-bottom: 30px;
     }
 
-    .mobile-hide {
-        display: none !important;
-    }
+
 
     /* Responsive Grid Utilities */
     .grid-row {
@@ -455,10 +453,11 @@ body {
         content: attr(data-label);
         font-weight: 700;
         color: #888;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         text-transform: uppercase;
         margin-right: 15px;
         text-align: left;
+        min-width: 80px;
     }
     .admin-table td:last-child {
         border-bottom: none !important;
@@ -466,6 +465,10 @@ body {
         justify-content: center !important;
     }
     .admin-table td:last-child:before {
+        display: none !important;
+    }
+
+    .mobile-hide {
         display: none !important;
     }
 
