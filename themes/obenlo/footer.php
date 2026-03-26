@@ -9,7 +9,7 @@
                 <li><a href="<?php echo home_url('/support'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Help Center', 'obenlo'); ?></a></li>
                 <li><a href="<?php echo home_url('/how-it-works'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('How Obenlo works', 'obenlo'); ?></a></li>
                 <li><a href="<?php echo home_url('/faq'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('FAQ', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/support'); ?>" style="color: inherit; text-decoration: none;">Contact Us</a></li>
+                <li><a href="#" class="trigger-contact-modal" style="color: inherit; text-decoration: none;">Contact Us</a></li>
             </ul>
         </div>
 
@@ -166,115 +166,6 @@
 
     });
 </script>
-
-<!-- Contact Us Modal -->
-<div id="obenlo-contact-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; align-items: center; justify-content: center;">
-    <div style="background: #fff; width: 100%; max-width: 500px; border-radius: 16px; padding: 30px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
-        <button id="close-contact-modal" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
-        <h2 style="margin-bottom: 10px; font-size: 1.5rem;">Contact Us</h2>
-        <p style="color: #666; margin-bottom: 20px;">Have a question? Send us a message and we'll get back to you shortly.</p>
-        
-        <form id="contact-us-form">
-            <input type="hidden" name="action" value="obenlo_submit_contact_form">
-            <input type="hidden" name="contact_nonce" value="<?php echo wp_create_nonce('obenlo_contact_nonce'); ?>">
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Your Name</label>
-                <input type="text" name="contact_name" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
-            </div>
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Your Email</label>
-                <input type="email" name="contact_email" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Message</label>
-                <textarea name="contact_message" required rows="4" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: vertical;"></textarea>
-            </div>
-            
-            <button type="submit" style="background: #e61e4d; color: #fff; font-weight: bold; padding: 14px 24px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1rem;">
-                Send Message
-            </button>
-            <div id="contact-form-response" style="margin-top: 15px; font-weight: bold; text-align: center; display: none;"></div>
-        </form>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('obenlo-contact-modal');
-    const triggers = document.querySelectorAll('.trigger-contact-modal');
-    const closeBtn = document.getElementById('close-contact-modal');
-    const form = document.getElementById('contact-us-form');
-    const responseDiv = document.getElementById('contact-form-response');
-
-    if(modal && triggers.length > 0) {
-        triggers.forEach(trigger => {
-            trigger.addEventListener('click', function(e) {
-                e.preventDefault();
-                modal.style.display = 'flex';
-            });
-        });
-
-        closeBtn.addEventListener('click', function() {
-            modal.style.display = 'none';
-            responseDiv.style.display = 'none';
-            form.reset();
-        });
-
-        window.addEventListener('click', function(e) {
-            if (e.target == modal) {
-                modal.style.display = 'none';
-                responseDiv.style.display = 'none';
-                form.reset();
-            }
-        });
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const submitBtn = form.querySelector('button[type="submit"]');
-            submitBtn.innerText = 'Sending...';
-            submitBtn.disabled = true;
-            responseDiv.style.display = 'none';
-
-            const formData = new FormData(form);
-
-            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                submitBtn.innerText = 'Send Message';
-                submitBtn.disabled = false;
-                responseDiv.style.display = 'block';
-                
-                if (data.success) {
-                    responseDiv.style.color = 'green';
-                    responseDiv.innerText = data.data.message || 'Message sent successfully!';
-                    form.reset();
-                    setTimeout(() => {
-                        modal.style.display = 'none';
-                        responseDiv.style.display = 'none';
-                    }, 3000);
-                } else {
-                    responseDiv.style.color = 'red';
-                    responseDiv.innerText = data.data.message || 'Error sending message. Please try again.';
-                }
-            })
-            .catch(error => {
-                submitBtn.innerText = 'Send Message';
-                submitBtn.disabled = false;
-                responseDiv.style.display = 'block';
-                responseDiv.style.color = 'red';
-                responseDiv.innerText = 'Network error. Please try again later.';
-            });
-        });
-    }
-});
-</script>
-
 
 <!-- Contact Us Modal -->
 <div id="obenlo-contact-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; align-items: center; justify-content: center;">
