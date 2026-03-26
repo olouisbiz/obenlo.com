@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-define('OBENLO_BOOKING_VERSION', '1.0.5');
+define('OBENLO_BOOKING_VERSION', '1.0.6');
 define('OBENLO_BOOKING_DIR', plugin_dir_path(__FILE__));
 define('OBENLO_BOOKING_URL', plugin_dir_url(__FILE__));
 
@@ -131,6 +131,8 @@ function obenlo_booking_install_tables()
         id bigint(20) NOT NULL AUTO_INCREMENT,
         sender_id bigint(20) NOT NULL,
         receiver_id bigint(20) NOT NULL,
+        guest_name varchar(255) DEFAULT NULL,
+        guest_email varchar(255) DEFAULT NULL,
         message text NOT NULL,
         created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
         is_read tinyint(1) DEFAULT 0 NOT NULL,
