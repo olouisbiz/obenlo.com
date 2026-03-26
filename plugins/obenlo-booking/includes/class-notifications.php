@@ -10,30 +10,26 @@ if (!defined('ABSPATH')) {
 class Obenlo_Booking_Notifications
 {
 
-    private static $info_email = 'info@obenlo.com';
-    private static $admin_email = 'admin@obenlo.com';
-
     public function init()
     {
-        // Set custom sender hooks
         add_filter('wp_mail_from', array($this, 'set_mail_from'));
         add_filter('wp_mail_from_name', array($this, 'set_mail_from_name'));
     }
 
     /**
-     * Set the 'From' email address to info@obenlo.com for all outgoing mail
+     * Get the 'From' email address from settings
      */
     public function set_mail_from($email)
     {
-        return self::$info_email;
+        return get_option('obenlo_info_email', 'info@obenlo.com');
     }
 
     /**
-     * Set the 'From' name to Obenlo
+     * Get the 'From' name from settings
      */
     public function set_mail_from_name($name)
     {
-        return 'Obenlo';
+        return get_option('obenlo_mail_from_name', 'Obenlo');
     }
 
     /**
@@ -41,7 +37,8 @@ class Obenlo_Booking_Notifications
      */
     public static function send_to_admin($subject, $message)
     {
-        wp_mail(self::$admin_email, $subject, $message);
+        $admin_email = get_option('obenlo_admin_email', 'admin@obenlo.com');
+        wp_mail($admin_email, $subject, $message);
     }
 
     /**

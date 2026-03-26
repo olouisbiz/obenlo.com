@@ -279,11 +279,7 @@ if ($is_demo_preview) $hosting_since = 2024;
                         📍 <?php echo esc_html($store_location); ?>
                     <?php endif; ?>
                 </p>
-                <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:10px;">
-                    <span style="background:#fef2f2; color:#e61e4d; padding:6px 15px; border-radius:50px; font-weight:800; font-size:0.75rem;">VERIFIED HOST</span>
-                    <span style="background:#eff6ff; color:#3b82f6; padding:6px 15px; border-radius:50px; font-weight:800; font-size:0.75rem;">FAST RESPONDER</span>
-                    <span style="background:#f0fdf4; color:#22c55e; padding:6px 15px; border-radius:50px; font-weight:800; font-size:0.75rem;">TOP RATED</span>
-                </div>
+                <?php echo Obenlo_Booking_Badges::render_badges_html($user_id, 'storefront'); ?>
 
                 <?php if($specialties): ?>
                     <div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">

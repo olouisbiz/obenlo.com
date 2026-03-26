@@ -31,10 +31,8 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-payout-manager.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-badges.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-wishlist.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-i18n.php'; // i18n Localization
-require_once OBENLO_BOOKING_DIR . 'includes/class-live-chat-admin.php'; // Live Chat Backend
 require_once OBENLO_BOOKING_DIR . 'includes/class-push-notifications.php'; // Web Push Notifications
 require_once OBENLO_BOOKING_DIR . 'includes/class-virtual-security.php'; // Virtual Event Security
-require_once OBENLO_BOOKING_DIR . 'includes/class-admin-settings.php'; // Admin Settings
 
 // Initialize the plugin
 function obenlo_booking_init()
@@ -86,17 +84,11 @@ function obenlo_booking_init()
     $i18n = new Obenlo_Booking_i18n();
     $i18n->init();
 
-    $live_chat_admin = new Obenlo_Booking_Live_Chat_Admin();
-    $live_chat_admin->init();
-
     $push_notifications = new Obenlo_Booking_Push_Notifications();
     $push_notifications->init();
 
     $virtual_security = new Obenlo_Booking_Virtual_Security();
     $virtual_security->init();
-
-    $admin_settings = new Obenlo_Booking_Admin_Settings();
-    $admin_settings->init();
 
     // Check if we need to run DB updates
     obenlo_booking_update_check();
@@ -256,3 +248,25 @@ function obenlo_force_listings_archive_template($template)
     return $template;
 }
 add_filter('template_include', 'obenlo_force_listings_archive_template', 99);
+
+// Force /hosts page to load the Host Directory template
+add_action('init', function() {
+    add_rewrite_rule('^hosts/?$', 'index.php?obenlo_hosts=1', 'top');
+});
+
+add_filter('query_vars', function($vars) {
+    $vars[] = 'obenlo_hosts';
+    return $vars;
+});
+
+function obenlo_force_hosts_directory_template($template)
+{
+    if (get_query_var('obenlo_hosts') || is_page('hosts')) {
+        $hosts_template = locate_template('page-hosts.php');
+        if ($hosts_template) {
+            return $hosts_template;
+        }
+    }
+    return $template;
+}
+add_filter('template_include', 'obenlo_force_hosts_directory_template', 99);

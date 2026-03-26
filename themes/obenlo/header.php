@@ -73,16 +73,19 @@
     <link rel="manifest" href="/manifest.json?v=1.0.3">
     <?php wp_head(); ?>
 
-    <!-- Google Analytics 4 (GA4) Boilerplate -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <?php if ($ga_id): ?>
+    <!-- Google Analytics 4 (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo esc_attr($ga_id); ?>"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
+      gtag('config', '<?php echo esc_js($ga_id); ?>');
     </script>
+    <?php endif; ?>
     
-    <!-- Meta Pixel Code Boilerplate -->
+    <?php if ($meta_pixel_id): ?>
+    <!-- Meta Pixel Code -->
     <script>
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -92,13 +95,14 @@
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '123456789012345');
+    fbq('init', '<?php echo esc_js($meta_pixel_id); ?>');
     fbq('track', 'PageView');
     </script>
     <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=123456789012345&ev=PageView&noscript=1"
+    src="https://www.facebook.com/tr?id=<?php echo esc_attr($meta_pixel_id); ?>&ev=PageView&noscript=1"
     /></noscript>
     <!-- End Meta Pixel Code -->
+    <?php endif; ?>
 </head>
 
 <body <?php body_class(); ?>>

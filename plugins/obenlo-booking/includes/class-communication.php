@@ -77,13 +77,18 @@ class Obenlo_Booking_Communication
         return $content;
     }
 
-    public function render_messages_center()
+    public function render_messages_center($atts)
     {
+        $atts = shortcode_atts(array(
+            'oversight' => '0',
+        ), $atts);
+
         if (!is_user_logged_in()) {
             return '<p>Please log in to see messages.</p>';
         }
 
         $current_user_id = get_current_user_id();
+        $is_oversight = ($atts['oversight'] === '1' && current_user_can('manage_options'));
         $pre_selected_contact = isset($_GET['recipient_id']) ? intval($_GET['recipient_id']) : 0;
 
         ob_start();
@@ -147,16 +152,24 @@ class Obenlo_Booking_Communication
             let obenloCenterLastId = 0;
             let obenloCenterInterval = null;
             let obenloCenterUserId = <?php echo $current_user_id; ?>;
+            let obenloIsOversight = <?php echo $is_oversight ? 'true' : 'false'; ?>;
 
             function obenloCenterFetchContacts() {
                 jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
-                    action: 'obenlo_fetch_chat_contacts'
+                    action: 'obenlo_fetch_chat_contacts',
+                    oversight: obenloIsOversight ? 1 : 0
                 }, function(res) {
                     let html = '';
                     if (res.success && res.data.length > 0) {
                         res.data.forEach(function(c) {
                             let act = (c.contact_id == obenloCenterContact) ? 'active' : '';
-                            html += '<div class="obenlo-center-contact-item ' + act + '" onclick="obenloCenterOpenRoom(' + c.contact_id + ', \'' + c.contact_name.replace(/'/g, "\\'") + '\')">';
+                            let onclick = 'obenloCenterOpenRoom(' + c.contact_id + ', \'' + c.contact_name.replace(/'/g, "\\'") + '\'';
+                            if (c.is_oversight_pair) {
+                                onclick += ', ' + c.pair_a + ', ' + c.pair_b;
+                            }
+                            onclick += ')';
+                            
+                            html += '<div class="obenlo-center-contact-item ' + act + '" onclick="' + onclick + '">';
                             html += '<div style="display:flex; justify-content:space-between; margin-bottom:5px;">';
                             html += '<strong style="font-size:1rem; color:' + (act ? '#e61e4d' : '#222') + ';">' + c.contact_name + '</strong>';
                             html += '<span style="font-size:0.7rem; color:#aaa;">' + c.last_message_time + '</span>';
@@ -171,12 +184,17 @@ class Obenlo_Booking_Communication
                 });
             }
 
-            function obenloCenterOpenRoom(contactId, contactName) {
+            function obenloCenterOpenRoom(contactId, contactName, pairA, pairB) {
                 obenloCenterContact = contactId;
+                if (obenloIsOversight && pairA) {
+                    obenloCenterUserId = pairA;
+                }
                 document.getElementById('obenlo-center-empty').style.display = 'none';
                 document.getElementById('obenlo-center-header').style.display = 'flex';
                 document.getElementById('obenlo-center-room').style.display = 'flex';
-                document.getElementById('obenlo-center-input-area').style.display = 'block';
+                
+                // Hide input area for oversight mode (read-only monitoring)
+                document.getElementById('obenlo-center-input-area').style.display = obenloIsOversight ? 'none' : 'block';
                 
                 document.getElementById('obenlo-center-title').innerText = contactName;
                 document.getElementById('obenlo-center-avatar').innerText = contactName.charAt(0).toUpperCase();
@@ -196,7 +214,8 @@ class Obenlo_Booking_Communication
                 jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
                     action: 'obenlo_fetch_chat_messages',
                     contact_id: obenloCenterContact,
-                    last_id: obenloCenterLastId
+                    last_id: obenloCenterLastId,
+                    oversight: obenloIsOversight ? 1 : 0
                 }, function(res) {
                     if (res.success && res.data.length > 0) {
                         let room = document.getElementById('obenlo-center-room');
@@ -829,22 +848,32 @@ class Obenlo_Booking_Communication
         $user_id = get_current_user_id();
         $contact_id = isset($_GET['contact_id']) ? intval($_GET['contact_id']) : 0;
         $last_id = isset($_GET['last_id']) ? intval($_GET['last_id']) : 0;
-
-        if (!$user_id || !$contact_id) {
-            wp_send_json_error('Invalid request');
-        }
+        $is_oversight = (isset($_GET['oversight']) && $_GET['oversight'] == '1' && current_user_can('manage_options'));
 
         global $wpdb;
         $table = $wpdb->prefix . 'obenlo_chat_messages';
 
-        $query = $wpdb->prepare("
-            SELECT * FROM $table 
-            WHERE ((sender_id = %d AND receiver_id = %d) 
-               OR (sender_id = %d AND receiver_id = %d))
-              AND id > %d
-            ORDER BY id ASC
-            LIMIT 100
-        ", $user_id, $contact_id, $contact_id, $user_id, $last_id);
+        if ($is_oversight) {
+            // In oversight mode, fetch messages between ANY two users (sender/receiver or receiver/sender)
+            $query = $wpdb->prepare("
+                SELECT * FROM $table 
+                WHERE ((sender_id = %d AND receiver_id = %d) 
+                   OR (sender_id = %d AND receiver_id = %d))
+                  AND id > %d
+                ORDER BY id ASC
+                LIMIT 500
+            ", $user_id, $contact_id, $contact_id, $user_id, $last_id);
+            // Note: $user_id here is actually the first person in the conversation pair passed from the frontend
+        } else {
+            $query = $wpdb->prepare("
+                SELECT * FROM $table 
+                WHERE ((sender_id = %d AND receiver_id = %d) 
+                   OR (sender_id = %d AND receiver_id = %d))
+                  AND id > %d
+                ORDER BY id ASC
+                LIMIT 100
+            ", $user_id, $contact_id, $contact_id, $user_id, $last_id);
+        }
 
         $messages = $wpdb->get_results($query);
         $data = array();
@@ -872,6 +901,8 @@ class Obenlo_Booking_Communication
     public function handle_fetch_chat_contacts()
     {
         $user_id = get_current_user_id();
+        $is_oversight = (isset($_GET['oversight']) && $_GET['oversight'] == '1' && current_user_can('manage_options'));
+
         if (!$user_id) {
             wp_send_json_error('Not logged in');
         }
@@ -879,7 +910,47 @@ class Obenlo_Booking_Communication
         global $wpdb;
         $table = $wpdb->prefix . 'obenlo_chat_messages';
 
-        // Get all unique contacts the user has chatted with
+        if ($is_oversight) {
+            // Oversight: Get ALL unique conversation pairs on the site
+            $query = "
+                SELECT DISTINCT 
+                    LEAST(sender_id, receiver_id) as user_a, 
+                    GREATEST(sender_id, receiver_id) as user_b 
+                FROM $table 
+                ORDER BY id DESC 
+                LIMIT 50
+            ";
+            $results = $wpdb->get_results($query);
+            $contacts = array();
+
+            foreach ($results as $row) {
+                $user_a = get_userdata($row->user_a);
+                $user_b = get_userdata($row->user_b);
+                
+                if ($user_a && $user_b) {
+                    $last_msg_query = $wpdb->prepare("
+                        SELECT message, created_at FROM $table 
+                        WHERE (sender_id = %d AND receiver_id = %d) OR (sender_id = %d AND receiver_id = %d)
+                        ORDER BY id DESC LIMIT 1
+                    ", $row->user_a, $row->user_b, $row->user_b, $row->user_a);
+                    $last_msg = $wpdb->get_row($last_msg_query);
+
+                    $contacts[] = array(
+                        'contact_id' => $row->user_b, // In oversight mode, we'll use user_b as the 'contact' and pass user_a as current_user in JS if needed, but for simplicity we'll just show the pair
+                        'contact_name' => $user_a->display_name . ' & ' . $user_b->display_name,
+                        'last_message' => $last_msg ? wp_trim_words($last_msg->message, 8) : '',
+                        'last_message_time' => $last_msg ? gmdate('M j, H:i', strtotime($last_msg->created_at) + (get_option('gmt_offset') * HOUR_IN_SECONDS)) : '',
+                        'unread_count' => 0,
+                        'is_oversight_pair' => true,
+                        'pair_a' => $row->user_a,
+                        'pair_b' => $row->user_b
+                    );
+                }
+            }
+            wp_send_json_success($contacts);
+        }
+
+        // Standard user view: Get all unique contacts the user has chatted with
         $query = $wpdb->prepare("
             SELECT DISTINCT
                 CASE WHEN sender_id = %d THEN receiver_id ELSE sender_id END as contact_id
