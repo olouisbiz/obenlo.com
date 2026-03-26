@@ -23,19 +23,19 @@ if ( $status === 'verified' && ! isset( $_GET['force'] ) ) {
 
 <div class="onboarding-wrapper" style="max-width: 800px; margin: 40px auto; padding: 25px; background: #fff; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;">
     
-    <div class="onboarding-header" style="text-align: center; margin-bottom: 50px;">
-        <h1 style="font-size: 2.5rem; margin-bottom: 10px; color: #222;"><?php esc_html_e( 'Host Onboarding', 'obenlo' ); ?></h1>
-        <p style="color: #666; font-size: 1.1rem;"><?php esc_html_e( 'Complete these steps to start hosting on Obenlo.', 'obenlo' ); ?></p>
+    <div class="onboarding-header" style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: clamp(1.8rem, 5vw, 2.5rem); margin-bottom: 10px; color: #222;"><?php esc_html_e( 'Host Onboarding', 'obenlo' ); ?></h1>
+        <p style="color: #666; font-size: clamp(1rem, 3vw, 1.1rem);"><?php esc_html_e( 'Complete these steps to start hosting on Obenlo.', 'obenlo' ); ?></p>
         
         <!-- Progress Bar -->
-        <div class="progress-container" style="display: flex; justify-content: space-between; margin-top: 40px; position: relative; max-width: 300px; margin-left: auto; margin-right: auto;">
+        <div class="progress-container" style="display: flex; justify-content: space-between; margin-top: 30px; position: relative; max-width: 280px; margin-left: auto; margin-right: auto;">
             <div style="position: absolute; top: 15px; left: 0; width: 100%; height: 2px; background: #eee; z-index: 1;"></div>
             <div style="position: absolute; top: 15px; left: 0; width: <?php echo ($current_step - 1) * 100; ?>%; height: 2px; background: #e61e4d; z-index: 2; transition: width 0.3s;"></div>
             
-            <div class="step-dot <?php echo $current_step >= 1 ? 'active' : ''; ?>" style="z-index: 3; background: <?php echo $current_step >= 1 ? '#e61e4d' : '#fff'; ?>; border: 2px solid <?php echo $current_step >= 1 ? '#e61e4d' : '#eee'; ?>; color: <?php echo $current_step >= 1 ? '#fff' : '#999'; ?>; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">1</div>
-            <div class="step-dot <?php echo $current_step >= 2 ? 'active' : ''; ?>" style="z-index: 3; background: <?php echo $current_step >= 2 ? '#e61e4d' : '#fff'; ?>; border: 2px solid <?php echo $current_step >= 2 ? '#e61e4d' : '#eee'; ?>; color: <?php echo $current_step >= 2 ? '#fff' : '#999'; ?>; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">2</div>
+            <div class="step-dot <?php echo $current_step >= 1 ? 'active' : ''; ?>" style="z-index: 3; background: <?php echo $current_step >= 1 ? '#e61e4d' : '#fff'; ?>; border: 2px solid <?php echo $current_step >= 1 ? '#e61e4d' : '#eee'; ?>; color: <?php echo $current_step >= 1 ? '#fff' : '#999'; ?>; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">1</div>
+            <div class="step-dot <?php echo $current_step >= 2 ? 'active' : ''; ?>" style="z-index: 3; background: <?php echo $current_step >= 2 ? '#e61e4d' : '#fff'; ?>; border: 2px solid <?php echo $current_step >= 2 ? '#e61e4d' : '#eee'; ?>; color: <?php echo $current_step >= 2 ? '#fff' : '#999'; ?>; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">2</div>
         </div>
-        <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; font-weight: 600; color: #717171; max-width: 340px; margin-left: auto; margin-right: auto;">
+        <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.8rem; font-weight: 700; color: #717171; max-width: 320px; margin-left: auto; margin-right: auto;">
             <span style="<?php echo $current_step == 1 ? 'color: #e61e4d;' : ''; ?>"><?php esc_html_e( 'Basic Info', 'obenlo' ); ?></span>
             <span style="<?php echo $current_step == 2 ? 'color: #e61e4d;' : ''; ?>"><?php esc_html_e( 'Payouts', 'obenlo' ); ?></span>
         </div>
@@ -83,8 +83,8 @@ if ( $status === 'verified' && ! isset( $_GET['force'] ) ) {
                     <input type="text" id="payout_detail_input" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
                 </div>
 
-                <div style="margin-top: 50px; text-align: right;">
-                    <button id="save-onboarding" style="padding: 15px 40px; background: #e61e4d; color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1rem;"><?php esc_html_e( 'Finish & Go to Dashboard', 'obenlo' ); ?></button>
+                <div style="margin-top: 40px;">
+                    <button id="save-onboarding" style="width: 100%; padding: 18px; background: #e61e4d; color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(230,30,77,0.3);"><?php esc_html_e( 'Finish & Go to Dashboard', 'obenlo' ); ?></button>
                 </div>
             </div>
         <?php endif; ?>

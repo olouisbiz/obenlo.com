@@ -169,19 +169,19 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
                         if ( in_array( $status, ['declined', 'cancelled'] ) )               { $status_color = '#ef4444'; $status_bg = '#fef2f2'; }
                         if ( $status === 'pending_payment' )                                  { $status_color = '#f97316'; $status_bg = '#fff7ed'; }
                     ?>
-                        <div style="background: #fff; border: 1px solid #eee; border-radius: 20px; overflow: hidden; display: flex; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                        <div class="trip-card" style="background: #fff; border: 1px solid #eee; border-radius: 20px; overflow: hidden; display: flex; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: transform 0.2s;">
                             
                             <?php if ( $thumb_url ) : ?>
-                                <div style="width: 200px; flex-shrink: 0; background: url('<?php echo esc_url($thumb_url); ?>') center/cover; min-height: 160px; border-right: 1px solid #eee;"></div>
+                                <div class="trip-card-thumb" style="width: 200px; flex-shrink: 0; background: url('<?php echo esc_url($thumb_url); ?>') center/cover; min-height: 160px; border-right: 1px solid #eee;"></div>
                             <?php endif; ?>
 
-                            <div style="padding: 25px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
-                                    <div>
-                                        <div style="margin-bottom: 6px;">
+                            <div style="padding: 25px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+                                    <div style="min-width: 0; flex: 1;">
+                                        <div style="margin-bottom: 8px;">
                                             <span style="background: <?php echo $status_bg; ?>; color: <?php echo $status_color; ?>; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; padding: 4px 10px; border-radius: 20px;"><?php echo esc_html( ucwords( str_replace('_', ' ', $status) ) ); ?></span>
                                         </div>
-                                        <h3 style="margin: 6px 0 4px 0; font-size: 1.2rem; font-weight: 800; color: #222;">
+                                        <h3 style="margin: 6px 0 4px 0; font-size: 1.2rem; font-weight: 800; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                             <a href="<?php echo esc_url($listing_url); ?>" style="color: inherit; text-decoration: none;"><?php echo esc_html($listing_title); ?></a>
                                         </h3>
                                         <div style="color: #888; font-size: 0.88rem; margin-top: 4px;">
@@ -190,46 +190,50 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
                                             <?php if ($guests) : ?>&nbsp;&bull;&nbsp;<?php echo esc_html($guests); ?> guest(s)<?php endif; ?>
                                         </div>
                                     </div>
-                                    <div style="text-align: right; flex-shrink: 0;">
-                                        <div style="font-size: 1.3rem; font-weight: 800; color: #222;">$<?php echo number_format(floatval($total), 2); ?></div>
-                                        <div style="font-size: 0.8rem; color: #888; margin-top: 2px;">Total paid</div>
-                                        
-                                        <?php 
-                                        $host_id = get_post_meta($booking->ID, '_obenlo_host_id', true);
-                                        if ($host_id) : 
-                                            $host_user = get_userdata($host_id);
-                                            if ($host_user) :
-                                                $host_name = $host_user->display_name;
-                                                $host_avatar = get_avatar_url($host_id);
-                                        ?>
-                                            <button onclick="if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url($host_avatar); ?>');} else { window.location.href='<?php echo esc_url(home_url('/login')); ?>'; }"
-                                                    style="margin-top: 15px; background: #e61e4d; color: #fff; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(230,30,77,0.3);">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 14px; height: 14px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                                Message Host
-                                            </button>
-                                        <?php endif; endif; ?>
+                                    <div style="text-align: right; flex-shrink: 0; width: 100%;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 10px;">
+                                            <div style="text-align: left;">
+                                                <div style="font-size: 1.3rem; font-weight: 800; color: #222;">$<?php echo number_format(floatval($total), 2); ?></div>
+                                                <div style="font-size: 0.8rem; color: #888; margin-top: 2px;">Total paid</div>
+                                            </div>
+                                            
+                                            <?php 
+                                            $host_id = get_post_meta($booking->ID, '_obenlo_host_id', true);
+                                            if ($host_id) : 
+                                                $host_user = get_userdata($host_id);
+                                                if ($host_user) :
+                                                    $host_name = $host_user->display_name;
+                                                    $host_avatar = get_avatar_url($host_id);
+                                            ?>
+                                                <button onclick="if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url($host_avatar); ?>');} else { window.location.href='<?php echo esc_url(home_url('/login')); ?>'; }"
+                                                        style="background: #e61e4d; color: #fff; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(230,30,77,0.3);">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 14px; height: 14px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                                    Message Host
+                                                </button>
+                                            <?php endif; endif; ?>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <?php if ( $conf_code ) : ?>
-                                    <div style="margin-top: 20px; padding: 12px 18px; background: #fafafa; border: 1px solid #eee; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
-                                        <div>
-                                            <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #e61e4d; margin-bottom: 2px;">🎫 Confirmation Code</div>
-                                            <div style="font-size: 1.4rem; font-weight: 900; font-family: monospace; letter-spacing: 2px; color: #222;"><?php echo esc_html($conf_code); ?></div>
+                                    <div style="margin-top: 20px; padding: 15px; background: #fafafa; border: 1px solid #eee; border-radius: 12px; display: flex; flex-direction: column; gap: 12px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #e61e4d; margin-bottom: 2px;">🎫 Confirmation Code</div>
+                                                <div style="font-size: 1.4rem; font-weight: 900; font-family: monospace; letter-spacing: 2px; color: #222;"><?php echo esc_html($conf_code); ?></div>
+                                            </div>
+                                            <button onclick="navigator.clipboard.writeText('<?php echo esc_js($conf_code); ?>').then(()=>this.innerText='Copied!')" style="background: #fff; color: #e61e4d; border: 1px solid #e61e4d; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.75rem;">Copy</button>
                                         </div>
-                                        <div style="display:flex; gap:10px;">
-                                            <?php 
-                                            $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
-                                            if ($virtual_link && in_array($status, ['confirmed', 'approved', 'completed'])) : 
-                                                $secure_url = Obenlo_Booking_Virtual_Security::get_secure_join_url($booking->ID);
-                                            ?>
-                                                <a href="<?php echo esc_url($secure_url); ?>" target="_blank" style="background: #222; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#000'" onmouseout="this.style.background='#222'">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;"><path d="M15 10l5 5-5 5"></path><path d="M4 4v7a4 4 0 0 0 4 4h12"></path></svg>
-                                                    Join Event
-                                                </a>
-                                            <?php endif; ?>
-                                            <button onclick="navigator.clipboard.writeText('<?php echo esc_js($conf_code); ?>').then(()=>this.innerText='Copied!')" style="background: transparent; color: #e61e4d; border: 2px solid #e61e4d; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;" onmouseover="this.style.background='#e61e4d';this.style.color='#fff';" onmouseout="this.style.background='transparent';this.style.color='#e61e4d';">Copy Code</button>
-                                        </div>
+                                        <?php 
+                                        $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
+                                        if ($virtual_link && in_array($status, ['confirmed', 'approved', 'completed'])) : 
+                                            $secure_url = Obenlo_Booking_Virtual_Security::get_secure_join_url($booking->ID);
+                                        ?>
+                                            <a href="<?php echo esc_url($secure_url); ?>" target="_blank" style="background: #222; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.85rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1;">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;"><path d="M15 10l5 5-5 5"></path><path d="M4 4v7a4 4 0 0 0 4 4h12"></path></svg>
+                                                Join Event
+                                            </a>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endif; ?>
                             </div>

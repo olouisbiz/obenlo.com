@@ -5,10 +5,10 @@
 
 get_header(); ?>
 
-<div class="static-page-header" style="background: #222; padding: 80px 20px; text-align: center; color: #fff;">
-    <h1 style="font-size: 3rem; margin-bottom: 20px;"><?php esc_html_e( 'How can we help?', 'obenlo' ); ?></h1>
+<div class="static-page-header" style="background: #222; padding: clamp(40px, 10vw, 80px) 20px; text-align: center; color: #fff;">
+    <h1 style="font-size: clamp(1.8rem, 6vw, 3rem); margin-bottom: 20px;"><?php esc_html_e( 'How can we help?', 'obenlo' ); ?></h1>
     <div style="max-width: 600px; margin: 0 auto; position: relative;">
-        <input type="text" placeholder="<?php esc_attr_e( 'Search for help...', 'obenlo' ); ?>" style="width: 100%; padding: 18px 25px; border-radius: 50px; border: none; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        <input type="text" placeholder="<?php esc_attr_e( 'Search for help...', 'obenlo' ); ?>" style="width: 100%; padding: 15px 25px; border-radius: 50px; border: none; font-size: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2); outline: none;">
     </div>
 </div>
 
@@ -35,9 +35,9 @@ get_header(); ?>
         </div>
     </div>
 
-    <div id="ticket-section" style="background: #fcfcfc; border: 1px solid #eee; border-radius: 20px; padding: 60px; margin-bottom: 40px;">
-        <h2 style="margin-bottom: 15px; text-align: center;"><?php esc_html_e( 'Submit a Support Ticket', 'obenlo' ); ?></h2>
-        <p style="color: #666; text-align: center; margin-bottom: 30px;"><?php esc_html_e( 'Need more help? Open a secure support ticket below and our team will assist you.', 'obenlo' ); ?></p>
+    <div id="ticket-section" style="background: #fcfcfc; border: 1px solid #eee; border-radius: 24px; padding: clamp(30px, 8vw, 60px); margin-bottom: 40px;">
+        <h2 style="margin-bottom: 15px; text-align: center; font-size: clamp(1.4rem, 4vw, 2rem);"><?php esc_html_e( 'Submit a Support Ticket', 'obenlo' ); ?></h2>
+        <p style="color: #666; text-align: center; margin-bottom: 30px; font-size: 0.95rem;"><?php esc_html_e( 'Need more help? Open a secure support ticket below and our team will assist you.', 'obenlo' ); ?></p>
         <?php echo do_shortcode('[obenlo_support_page]'); ?>
     </div>
 

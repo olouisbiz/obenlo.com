@@ -100,13 +100,28 @@ class Obenlo_Booking_Frontend_Dashboard
                 
                 @media (max-width: 900px) {
                     .obenlo-dashboard-container { flex-direction: column; }
-                    .dashboard-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #eee; padding: 10px 15px; overflow-x: auto; overflow-y: hidden; flex-direction: row; flex-wrap: nowrap; gap: 10px; -webkit-overflow-scrolling: touch; }
+                    .dashboard-sidebar { 
+                        width: 100%; 
+                        border-right: none; 
+                        border-bottom: 1px solid #eee; 
+                        padding: 10px 15px; 
+                        overflow-x: auto; 
+                        overflow-y: hidden; 
+                        flex-direction: row; 
+                        flex-wrap: nowrap; 
+                        gap: 10px; 
+                        -webkit-overflow-scrolling: touch;
+                        scrollbar-width: none;
+                    }
                     .dashboard-sidebar::-webkit-scrollbar { display: none; }
-                    .sidebar-link { padding: 10px 15px; flex-shrink: 0; white-space: nowrap; }
-                    .sidebar-link span { display: inline; font-size: 0.9em; }
-                    .dashboard-content { padding: 25px 15px; overflow-x: hidden; width: 100%; box-sizing: border-box; }
+                    .dashboard-sidebar a { 
+                        padding: 8px 15px; 
+                        font-size: 0.85rem; 
+                        white-space: nowrap;
+                        flex-shrink: 0;
+                    }
+                    .dashboard-content { padding: 20px 15px; overflow-x: hidden; width: 100%; box-sizing: border-box; }
                     .stats-grid { grid-template-columns: 1fr; gap: 15px; }
-                    .admin-table { display: block; overflow-x: auto; white-space: nowrap; width: 100%; }
                 }
             </style>
 
@@ -471,23 +486,22 @@ class Obenlo_Booking_Frontend_Dashboard
                 ));
 ?>
                         <tr>
-                            <td>
+                            <td data-label="Listing">
                                 <div style="display:flex; align-items:center; gap:15px;">
                                     <?php if (has_post_thumbnail($listing->ID)): ?>
-                                        <img src="<?php echo get_the_post_thumbnail_url($listing->ID, 'thumbnail'); ?>" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">
-                                    <?php
-                endif; ?>
-                                    <span style="font-weight:700; color:#222;"><?php echo get_the_title($listing->ID); ?></span>
+                                        <img src="<?php echo get_the_post_thumbnail_url($listing->ID, 'thumbnail'); ?>" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
+                                    <?php endif; ?>
+                                    <span style="font-weight:700; color:#222; text-align: left;"><?php echo get_the_title($listing->ID); ?></span>
                                 </div>
                             </td>
-                            <td><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
+                            <td data-label="Category"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
                             <td class="mobile-hide"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
-                            <td><span class="badge badge-success"><?php echo ucfirst($listing->post_status); ?></span></td>
+                            <td data-label="Status"><span class="badge badge-success"><?php echo ucfirst($listing->post_status); ?></span></td>
                             <td class="mobile-hide">
                                 <span style="font-weight:600; color:#444;"><?php echo count($children); ?> units</span>
                                 <a href="?action=add&parent_id=<?php echo $listing->ID; ?>" style="display:block; font-size:0.75rem; color:#e61e4d; text-decoration:none;">+ Add unit</a>
                             </td>
-                            <td>
+                            <td data-label="Actions">
                                 <div style="display:flex; gap:10px; align-items:center;">
                                     <a href="?action=edit&listing_id=<?php echo $listing->ID; ?>" style="color:#222; font-weight:700; text-decoration:none; font-size:0.85rem;">Edit</a>
                                     <a href="<?php echo get_permalink($listing->ID); ?>" target="_blank" style="color:#1d9bf0; font-weight:700; text-decoration:none; font-size:0.85rem;">View</a>
@@ -615,17 +629,17 @@ class Obenlo_Booking_Frontend_Dashboard
                     $status_badge = 'badge-warning';
 ?>
                         <tr>
-                            <td><span style="font-family:monospace; color:#888;">#<?php echo $booking->ID; ?></span></td>
-                            <td><strong><?php echo esc_html($listing_title); ?></strong></td>
-                            <td>
+                            <td data-label="Booking ID"><span style="font-family:monospace; color:#888;">#<?php echo $booking->ID; ?></span></td>
+                            <td data-label="Listing"><strong><?php echo esc_html($listing_title); ?></strong></td>
+                            <td data-label="Details">
                                 <div><?php echo esc_html($start_date); ?><?php echo $end_date ? ' → ' . esc_html($end_date) : ''; ?></div>
                                 <div style="font-size:0.75rem; color:#888;"><?php echo esc_html($guests); ?> guests</div>
                             </td>
-                             <td>
-                                <div style="display:flex; align-items:center; gap:10px;">
+                             <td data-label="Guest">
+                                <div style="display:flex; align-items:center; gap:10px; justify-content: flex-end;">
                                     <strong><?php echo esc_html($guest_info); ?></strong>
                                     <?php if ($guest_user) : ?>
-                                        <button onclick="window.obenloStartChatWith(<?php echo $guest_user->ID; ?>, '<?php echo esc_js($guest_user->display_name); ?>', '<?php echo esc_url(get_avatar_url($guest_user->ID)); ?>')" style="padding:5px; border:1px solid #eee; background:#f9f9f9; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;" title="Message Guest" onmouseover="this.style.background='#fff';this.style.borderColor='#e61e4d';this.style.color='#e61e4d';" onmouseout="this.style.background='#f9f9f9';this.style.borderColor='#eee';this.style.color='inherit';">
+                                        <button onclick="window.obenloStartChatWith(<?php echo $guest_user->ID; ?>, '<?php echo esc_js($guest_user->display_name); ?>', '<?php echo esc_url(get_avatar_url($guest_user->ID)); ?>')" style="padding:5px; border:1px solid #eee; background:#f9f9f9; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;" title="Message Guest">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                                         </button>
                                     <?php endif; ?>
@@ -634,10 +648,10 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <div class="guest-id-val" style="font-size:0.75rem; color:#888; font-family:monospace; margin-top:2px;">ID: <?php echo esc_html($guest_id); ?></div>
                                 <?php endif; ?>
                             </td>
-                            <td><span style="font-weight:700; color:#222;">$<?php echo number_format(floatval($total), 2); ?></span></td>
-                            <td><span class="badge <?php echo $status_badge; ?>"><?php echo esc_html(str_replace('_', ' ', $status)); ?></span></td>
-                            <?php if ($limit === -1): ?>
-                            <td>
+                            <td data-label="Total"><span style="font-weight:700; color:#222;">$<?php echo number_format(floatval($total), 2); ?></span></td>
+                            <td data-label="Status"><span class="badge <?php echo $status_badge; ?>"><?php echo esc_html(str_replace('_', ' ', $status)); ?></span></td>
+                             <?php if ($limit === -1): ?>
+                            <td data-label="Conf. Code">
                                 <?php if ($conf_code): ?>
                                     <code class="conf-code-val" style="background:#f9f9f9; border:1px solid #eee; padding:4px 8px; border-radius:6px; font-family:monospace; font-weight:700; color:#e61e4d; font-size:0.85rem;"><?php echo esc_html($conf_code); ?></code>
                                 <?php else: ?>
@@ -921,7 +935,7 @@ class Obenlo_Booking_Frontend_Dashboard
                         <h4 style="margin-top:0; margin-bottom:10px; color:#e61e4d;">🛠️ Demo Listing Configuration</h4>
                         <p style="margin-top:0; margin-bottom:20px; font-size:0.9rem;">You are configuring a Demo Listing. Specify the simulated Host details below.</p>
                         
-                        <div class="grid-row" style="display:flex; gap:15px; margin-bottom:15px;">
+                        <div class="grid-row" style="margin-bottom:15px;">
                             <div style="flex:1;">
                                 <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Host Name</label>
                                 <input type="text" name="_obenlo_demo_host_name" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_name', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
@@ -931,7 +945,7 @@ class Obenlo_Booking_Frontend_Dashboard
                                 <input type="text" name="_obenlo_demo_host_tagline" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_tagline', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
                             </div>
                         </div>
-                        <div class="grid-row" style="display:flex; gap:15px; margin-bottom:15px;">
+                        <div class="grid-row" style="margin-bottom:15px;">
                             <div style="flex:1;">
                                 <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Instagram (e.g. @obenlo)</label>
                                 <input type="text" name="_obenlo_demo_host_instagram" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_instagram', true)); ?>" placeholder="@username" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
