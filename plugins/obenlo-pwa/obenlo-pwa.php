@@ -19,7 +19,7 @@ class Obenlo_PWA
     {
         add_action('wp_head', array($this, 'inject_meta_tags'), 1);
         add_action('parse_request', array($this, 'serve_pwa_assets'), 1);
-        add_action('wp_footer', array($this, 'inject_pwa_script'), 100);
+        add_action('wp_head', array($this, 'inject_pwa_script'), 2);
     }
 
     /**
@@ -47,6 +47,9 @@ class Obenlo_PWA
         $path = parse_url($request_uri, PHP_URL_PATH);
 
         if ($path === '/sw.js' || $path === '/manifest.json') {
+            header('Access-Control-Allow-Origin: *');
+            header('X-Content-Type-Options: nosniff');
+            
             if ($path === '/sw.js') {
                 header('Content-Type: application/javascript; charset=utf-8');
                 $file = OBENLO_PWA_DIR . 'assets/sw.js';
@@ -60,9 +63,9 @@ class Obenlo_PWA
                 exit;
             }
 
-            header('Cache-Control: no-cache, no-store, must-revalidate');
+            header('Cache-Control: private, no-cache, no-store, must-revalidate, max-age=0');
             header('Pragma: no-cache');
-            header('Expires: 0');
+            header('Expires: Thu, 01 Jan 1970 00:00:01 GMT');
 
             if (file_exists($file)) {
                 readfile($file);
@@ -99,21 +102,19 @@ class Obenlo_PWA
 
         <script>
         (function() {
-            console.log('Obenlo PWA: Loader script started [v3]');
+            console.log('Obenlo PWA: Loader v4.0.0');
             
-            // Immediate Debug Box for troubleshooting
-            if (window.location.search.includes('debug_pwa=1') || window.location.search.includes('debug=1')) {
+            // Immediate Debug Box
+            if (window.location.search.includes('debug=1')) {
                 const debugDiv = document.createElement('div');
-                debugDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;padding:10px;font-size:10px;z-index:2147483647;font-family:monospace;border-bottom:2px solid #0f0;';
+                debugDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;padding:12px;font-size:11px;z-index:2147483647;font-family:monospace;border-bottom:2px solid #0f0;line-height:1.4;';
                 debugDiv.id = 'pwa-debug-status';
-                debugDiv.innerHTML = '<b>OBENLO PWA DEBUG v3</b><br>';
-                document.documentElement.appendChild(debugDiv); // Append to html to be super early
+                debugDiv.innerHTML = '<b>OBENLO PWA DEBUG v4.0.0</b><br>';
+                document.documentElement.appendChild(debugDiv);
                 
                 window.updateObenloDebug = (msg) => {
                     debugDiv.innerHTML += '<div>> ' + msg + '</div>';
                 };
-                window.updateObenloDebug('Screen: ' + window.innerWidth + 'x' + window.innerHeight);
-                window.updateObenloDebug('Protocol: ' + location.protocol);
             }
         })();
 

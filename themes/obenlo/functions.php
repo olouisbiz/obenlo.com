@@ -77,3 +77,165 @@ function obenlo_security_headers($headers)
     return $headers;
 }
 add_filter('wp_headers', 'obenlo_security_headers');
+
+/**
+ * --- OBENLO PWA INTEGRATION (Theme-based) ---
+ */
+class Obenlo_PWA_Theme
+{
+    public function init()
+    {
+        add_action('wp_head', array($this, 'inject_pwa_meta'), 1);
+        add_action('wp_head', array($this, 'inject_pwa_script'), 2);
+        add_action('template_redirect', array($this, 'serve_pwa_assets'), 1);
+    }
+
+    public function inject_pwa_meta()
+    {
+        ?>
+        <meta name="theme-color" content="#e61e4d">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Obenlo">
+        <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile-192.png'); ?>">
+        <link rel="manifest" href="<?php echo home_url('/?obenlo_pwa=manifest'); ?>">
+        <?php
+    }
+
+    public function serve_pwa_assets()
+    {
+        if (isset($_GET['obenlo_pwa'])) {
+            $asset = $_GET['obenlo_pwa'];
+            $file = '';
+            
+            header('Access-Control-Allow-Origin: *');
+            header('X-Content-Type-Options: nosniff');
+            header('Cache-Control: private, no-cache, no-store, must-revalidate, max-age=0');
+            header('Pragma: no-cache');
+            header('Expires: Thu, 01 Jan 1970 00:00:01 GMT');
+
+            if ($asset === 'sw') {
+                header('Content-Type: application/javascript; charset=utf-8');
+                header('Service-Worker-Allowed: /');
+                $file = get_template_directory() . '/assets/pwa/sw.js';
+            } elseif ($asset === 'manifest') {
+                header('Content-Type: application/manifest+json; charset=utf-8');
+                $file = get_template_directory() . '/assets/pwa/manifest.json';
+                if (file_exists($file)) {
+                    $manifest = file_get_contents($file);
+                    $manifest = str_replace('/wp-content/', home_url('/wp-content/'), $manifest);
+                    echo $manifest;
+                    exit;
+                }
+            }
+
+            if ($file && file_exists($file)) {
+                readfile($file);
+                exit;
+            }
+        }
+    }
+
+    public function inject_pwa_script()
+    {
+?>
+        <!-- Obenlo PWA Loader [Theme Interface] -->
+        <div id="obenlo-pwa-prompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:94%; max-width:420px; background:#fff; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.2); z-index:9999999; padding:20px; font-family:'Inter', sans-serif; align-items:center; gap:15px; border:1px solid rgba(0,0,0,0.05);">
+            <div style="width:60px; height:60px; background:#fff; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                <img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo-social-profile-192.png" style="width:40px; height:40px; border-radius:8px;">
+            </div>
+            <div style="flex-grow:1;">
+                <h4 style="margin:0 0 4px 0; font-size:17px; color:#1a1a1b; font-weight:800;">Obenlo: Better as an App</h4>
+                <p style="margin:0; font-size:13px; color:#5e5e62; line-height:1.4;" id="pwa-prompt-desc">Install for a faster experience and instant notifications.</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button id="pwa-install-btn" style="background:#e61e4d; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer;">Install</button>
+                <button id="pwa-dismiss-btn" style="background:transparent; color:#999; border:none; padding:4px; font-size:12px; cursor:pointer;">Later</button>
+            </div>
+        </div>
+
+        <script>
+        (function() {
+            // Diagnostic Box (Visible with ?debug=1)
+            if (window.location.search.includes('debug=1')) {
+                const debugDiv = document.createElement('div');
+                debugDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;padding:12px;font-size:11px;z-index:2147483647;font-family:monospace;border-bottom:2px solid #0f0;line-height:1.4;';
+                debugDiv.id = 'pwa-debug';
+                debugDiv.innerHTML = '<b>OBENLO THEME-PWA DEBUG v5.0</b><br>';
+                document.documentElement.appendChild(debugDiv);
+                window.updateObenloDebug = (msg) => { debugDiv.innerHTML += '<div>> ' + msg + '</div>'; };
+            }
+        })();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            let deferredPrompt;
+            const promptUI = document.getElementById('obenlo-pwa-prompt');
+            const installBtn = document.getElementById('pwa-install-btn');
+            const dismissBtn = document.getElementById('pwa-dismiss-btn');
+            const debugLog = window.updateObenloDebug || (() => {});
+
+            if (window.location.search.includes('reset_pwa=1')) {
+                localStorage.removeItem('obenlo_pwa_dismissed');
+                debugLog('PWA Flag Cleared');
+            }
+
+            if (localStorage.getItem('obenlo_pwa_dismissed') === 'true') return;
+
+            const isIos = () => /iphone|ipad|ipod/.test( window.navigator.userAgent.toLowerCase() );
+            const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+            if (isStandalone()) {
+                debugLog('Already Standalone');
+                return;
+            }
+
+            if (isIos()) {
+                debugLog('iOS Detected');
+                setTimeout(() => {
+                    document.getElementById('pwa-prompt-desc').innerHTML = 'Tap Share -> "Add to Home Screen"';
+                    installBtn.style.display = 'none';
+                    promptUI.style.setProperty('display', 'flex', 'important');
+                }, 5000);
+            } else {
+                debugLog('Waiting for beforeinstallprompt...');
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    debugLog('EVENT: beforeinstallprompt [OK]');
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    setTimeout(() => { promptUI.style.setProperty('display', 'flex', 'important'); }, 3000);
+                });
+
+                installBtn.addEventListener('click', async () => {
+                    promptUI.style.display = 'none';
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        debugLog('User Outcome: ' + outcome);
+                        deferredPrompt = null;
+                        if (outcome === 'accepted') {
+                             if ('Notification' in window) Notification.requestPermission();
+                        }
+                    }
+                });
+            }
+
+            dismissBtn.addEventListener('click', () => {
+                promptUI.style.display = 'none';
+                localStorage.setItem('obenlo_pwa_dismissed', 'true');
+            });
+
+            if ('serviceWorker' in navigator) {
+                // Register via the template_redirect URL with scope=/ to ensure full coverage
+                navigator.serviceWorker.register('/?obenlo_pwa=sw', { scope: '/' })
+                    .then(reg => debugLog('SW Registered. Scope: ' + reg.scope))
+                    .catch(err => debugLog('SW Failed: ' + err.message));
+            }
+        });
+        </script>
+<?php
+    }
+}
+
+$obenlo_pwa_theme = new Obenlo_PWA_Theme();
+$obenlo_pwa_theme->init();
