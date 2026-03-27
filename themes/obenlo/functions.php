@@ -85,6 +85,12 @@ class Obenlo_PWA_Theme
 {
     public function init()
     {
+        // Setup default VAPID keys for PWA Push if not yet configured
+        if (!get_option('obenlo_pwa_public_key')) {
+            update_option('obenlo_pwa_public_key', 'BC_z_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_LA');
+            update_option('obenlo_pwa_private_key', 'Pr_vAtE_KEy_hErE_nOt_fOr_pUbL_c_v_Ew_001');
+        }
+
         add_action('wp_head', array($this, 'inject_pwa_meta'), 1);
         add_action('wp_head', array($this, 'inject_pwa_script'), 2);
         add_action('template_redirect', array($this, 'serve_pwa_assets'), 1);
@@ -205,6 +211,7 @@ class Obenlo_PWA_Theme
                 const swVersion = '<?php echo filemtime(get_template_directory() . "/assets/pwa/sw.js"); ?>';
                 navigator.serviceWorker.register('/?obenlo_pwa=sw&v=' + swVersion, { scope: '/' })
                     .then(reg => {
+                        console.log('Obenlo PWA: Service Worker Registered');
                         reg.onupdatefound = () => {
                             const installingWorker = reg.installing;
                             installingWorker.onstatechange = () => {
@@ -213,10 +220,44 @@ class Obenlo_PWA_Theme
                                 }
                             };
                         };
+
+                        // PWA Push Subscription Logic
+                        if ('pushManager' in reg && window.is_user_logged_in) {
+                            reg.pushManager.getSubscription().then(sub => {
+                                if (!sub) {
+                                    const publicKey = '<?php echo get_option("obenlo_pwa_public_key", "BH6e0t9m6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6"); ?>';
+                                    if (publicKey.length > 20) {
+                                        const convertedKey = urlBase64ToUint8Array(publicKey);
+                                        reg.pushManager.subscribe({
+                                            userVisibleOnly: true,
+                                            applicationServerKey: convertedKey
+                                        }).then(newSub => {
+                                            saveSubscription(newSub);
+                                        }).catch(err => console.log('Push Subscribe Failed:', err));
+                                    }
+                                }
+                            });
+                        }
                     });
+            }
+
+            function urlBase64ToUint8Array(base64String) {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+                const rawData = window.atob(base64);
+                return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+            }
+
+            function saveSubscription(subscription) {
+                fetch('<?php echo admin_url("admin-ajax.php"); ?>?action=obenlo_save_pwa_subscription&nonce=<?php echo wp_create_nonce("obenlo_chat_nonce"); ?>', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(subscription)
+                });
             }
         });
         </script>
+        <script>window.is_user_logged_in = <?php echo is_user_logged_in() ? 'true' : 'false'; ?>;</script>
 <?php
     }
 }

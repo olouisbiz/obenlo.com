@@ -365,4 +365,56 @@ class Obenlo_Booking_Notifications
             ));
         }
     }
+
+    /**
+     * Send PWA Push Notification to a user via WebPush
+     */
+    public static function send_push_notification($user_id, $title, $body, $url = '')
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'obenlo_pwa_subscriptions';
+        $subs = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table WHERE user_id = %d", $user_id));
+
+        if (empty($subs)) return;
+
+        $public_key = get_option('obenlo_pwa_public_key');
+        $private_key = get_option('obenlo_pwa_private_key');
+
+        if (!$public_key || !$private_key) return; // Keys not configured
+
+        $auth = array(
+            'VAPID' => array(
+                'subject' => 'mailto:info@obenlo.com',
+                'publicKey' => $public_key,
+                'privateKey' => $private_key,
+            ),
+        );
+
+        try {
+            $webPush = new \Minishlink\WebPush\WebPush($auth);
+            $payload = json_encode(array(
+                'title' => $title,
+                'body' => $body,
+                'url' => $url ?: home_url('/messages'),
+                'icon' => get_template_directory_uri() . '/assets/images/logo-social-profile-192.png'
+            ));
+
+            foreach ($subs as $sub) {
+                $subscription = \Minishlink\WebPush\Subscription::create(array(
+                    'endpoint' => $sub->endpoint,
+                    'publicKey' => $sub->p256dh,
+                    'authToken' => $sub->auth,
+                ));
+                $webPush->queueNotification($subscription, $payload);
+            }
+
+            foreach ($webPush->flush() as $report) {
+                if (!$report->isSuccess() && $report->isSubscriptionExpired()) {
+                    $wpdb->delete($table, array('endpoint' => $report->getEndpoint()));
+                }
+            }
+        } catch (\Exception $e) {
+            error_log('Obenlo PWA Push Error: ' . $e->getMessage());
+        }
+    }
 }

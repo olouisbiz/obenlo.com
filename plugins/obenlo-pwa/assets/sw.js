@@ -59,7 +59,7 @@ self.addEventListener('fetch', (event) => {
 
 // Push Notification Support
 self.addEventListener('push', (event) => {
-  let data = { title: 'Obenlo', body: 'You have a new update!' };
+  let data = { title: 'Obenlo', body: 'You have a new update!', url: '/messages' };
   if (event.data) {
     try {
       data = event.data.json();
@@ -73,18 +73,39 @@ self.addEventListener('push', (event) => {
     icon: '/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png',
     badge: '/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png',
     vibrate: [100, 50, 100],
-    data: { url: data.url || '/' }
+    data: { url: data.url || '/messages' },
+    actions: [
+      { action: 'open', title: 'View Now' }
+    ]
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title, options)
+    self.registration.showNotification(data.title || 'Obenlo', options)
   );
 });
 
 // Notification Click
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
+  const notification = event.notification;
+  const url = notification.data ? notification.data.url : '/messages';
+
+  notification.close();
+
+  if (event.action === 'close') return;
+
   event.waitUntil(
-    clients.openWindow(event.notification.data.url)
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // Check if there is already a window/tab open with the target URL
+      for (var i = 0; i < windowClients.length; i++) {
+        var client = windowClients[i];
+        if (client.url === url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // If no window/tab is open, open a new one
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
+    })
   );
 });
