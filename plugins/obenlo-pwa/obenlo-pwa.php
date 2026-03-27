@@ -49,12 +49,16 @@ class Obenlo_PWA
             if ($path === '/sw.js') {
                 header('Content-Type: application/javascript; charset=utf-8');
                 $file = OBENLO_PWA_DIR . 'assets/sw.js';
+                header('Service-Worker-Allowed: /');
             } else {
-                header('Content-Type: application/json; charset=utf-8');
-                $file = OBENLO_PWA_DIR . 'assets/manifest.json';
+                header('Content-Type: application/manifest+json; charset=utf-8');
+                // We will serve the manifest with dynamic paths for icons
+                $manifest = file_get_contents(OBENLO_PWA_DIR . 'assets/manifest.json');
+                $manifest = str_replace('/wp-content/', home_url('/wp-content/'), $manifest);
+                echo $manifest;
+                exit;
             }
 
-            header('Service-Worker-Allowed: /');
             header('Cache-Control: no-cache, no-store, must-revalidate');
             header('Pragma: no-cache');
             header('Expires: 0');
@@ -99,14 +103,24 @@ class Obenlo_PWA
             const installBtn = document.getElementById('pwa-install-btn');
             const dismissBtn = document.getElementById('pwa-dismiss-btn');
             
-            if (localStorage.getItem('obenlo_pwa_dismissed') === 'true') return;
+            // Reset helper for testing
+            if (window.location.search.includes('reset_pwa=1')) {
+                localStorage.removeItem('obenlo_pwa_dismissed');
+                console.log('Obenlo: PWA dismissed flag cleared via URL parameter.');
+            }
+
+            if (localStorage.getItem('obenlo_pwa_dismissed') === 'true') {
+                console.log('Obenlo: PWA prompt was previously dismissed. Use ?reset_pwa=1 to test.');
+                return;
+            }
 
             const isIos = () => /iphone|ipad|ipod/.test( window.navigator.userAgent.toLowerCase() );
-            const isStandalone = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+            const isStandalone = () => ('standalone' in window.navigator) || (window.matchMedia('(display-mode: standalone)').matches);
 
             // Notification Request Logic
             const requestNotificationPermission = async () => {
                 if ('Notification' in window && Notification.permission !== 'granted') {
+                    console.log('Obenlo: Requesting notification permission...');
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
                         console.log('Obenlo: Notification permission granted.');
@@ -115,18 +129,20 @@ class Obenlo_PWA
             };
 
             if (isIos() && !isStandalone()) {
+                console.log('Obenlo: iOS detected, showing manual install instructions');
                 setTimeout(() => {
                     document.getElementById('pwa-prompt-desc').innerHTML = 'Tap the Share icon <svg viewBox="0 0 24 24" style="width:14px;height:14px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:2;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> and "Add to Home Screen".';
                     installBtn.style.display = 'none';
-                    promptUI.style.display = 'flex';
+                    promptUI.style.setProperty('display', 'flex', 'important');
                 }, 8000);
             } else if (!isStandalone()) {
+                console.log('Obenlo: Standard browser detected, waiting for beforeinstallprompt');
                 window.addEventListener('beforeinstallprompt', (e) => {
+                    console.log('Obenlo: beforeinstallprompt event fired!');
                     e.preventDefault();
                     deferredPrompt = e;
                     setTimeout(() => { 
-                        promptUI.style.display = 'flex'; 
-                        // Gently request notification permission when showing install prompt
+                        promptUI.style.setProperty('display', 'flex', 'important'); 
                         requestNotificationPermission();
                     }, 5000);
                 });
@@ -138,10 +154,13 @@ class Obenlo_PWA
                         const { outcome } = await deferredPrompt.userChoice;
                         console.log(`Obenlo: User ${outcome} the install prompt`);
                         deferredPrompt = null;
-                        // Request again if they accepted install
                         if (outcome === 'accepted') requestNotificationPermission();
+                    } else {
+                        console.warn('Obenlo: Install button clicked but deferredPrompt is missing.');
                     }
                 });
+            } else {
+                console.log('Obenlo: App is already in standalone mode.');
             }
 
             dismissBtn.addEventListener('click', () => {
@@ -151,20 +170,25 @@ class Obenlo_PWA
 
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                    navigator.serviceWorker.register('/sw.js?v=2.0.0').then(function(reg) {
-                        console.log('Obenlo PWA: ServiceWorker registered');
+                    // Remove query parameter for better installability
+                    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                        console.log('Obenlo PWA: ServiceWorker registered successfully');
                         
-                        // Check for updates
                         reg.addEventListener('updatefound', () => {
                             const newWorker = reg.installing;
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    console.log('Obenlo: New version available. Please refresh.');
+                                    console.log('Obenlo: New version available. Refreshing...');
+                                    window.location.reload();
                                 }
                             });
                         });
+                    }).catch(function(err) {
+                        console.error('Obenlo PWA: ServiceWorker registration failed:', err);
                     });
                 });
+            } else {
+                console.warn('Obenlo PWA: Service workers are not supported in this browser.');
             }
         });
         </script>
