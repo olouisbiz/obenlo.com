@@ -85,6 +85,12 @@ class Obenlo_PWA_Theme
 {
     public function init()
     {
+        // Setup default VAPID keys for PWA Push if not yet configured
+        if (!get_option('obenlo_pwa_public_key')) {
+            update_option('obenlo_pwa_public_key', 'BC_z_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_LA');
+            update_option('obenlo_pwa_private_key', 'Pr_vAtE_KEy_hErE_nOt_fOr_pUbL_c_v_Ew_001');
+        }
+
         add_action('wp_head', array($this, 'inject_pwa_meta'), 1);
         add_action('wp_head', array($this, 'inject_pwa_script'), 2);
         add_action('template_redirect', array($this, 'serve_pwa_assets'), 1);
@@ -156,51 +162,27 @@ class Obenlo_PWA_Theme
         </div>
 
         <script>
-        (function() {
-            // Diagnostic Box (Visible with ?debug=1)
-            if (window.location.search.includes('debug=1')) {
-                const debugDiv = document.createElement('div');
-                debugDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;padding:12px;font-size:11px;z-index:2147483647;font-family:monospace;border-bottom:2px solid #0f0;line-height:1.4;';
-                debugDiv.id = 'pwa-debug';
-                debugDiv.innerHTML = '<b>OBENLO THEME-PWA DEBUG v5.0</b><br>';
-                document.documentElement.appendChild(debugDiv);
-                window.updateObenloDebug = (msg) => { debugDiv.innerHTML += '<div>> ' + msg + '</div>'; };
-            }
-        })();
-
         document.addEventListener('DOMContentLoaded', function() {
             let deferredPrompt;
             const promptUI = document.getElementById('obenlo-pwa-prompt');
             const installBtn = document.getElementById('pwa-install-btn');
             const dismissBtn = document.getElementById('pwa-dismiss-btn');
-            const debugLog = window.updateObenloDebug || (() => {});
-
-            if (window.location.search.includes('reset_pwa=1')) {
-                localStorage.removeItem('obenlo_pwa_dismissed');
-                debugLog('PWA Flag Cleared');
-            }
 
             if (localStorage.getItem('obenlo_pwa_dismissed') === 'true') return;
 
             const isIos = () => /iphone|ipad|ipod/.test( window.navigator.userAgent.toLowerCase() );
             const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-            if (isStandalone()) {
-                debugLog('Already Standalone');
-                return;
-            }
+            if (isStandalone()) return;
 
             if (isIos()) {
-                debugLog('iOS Detected');
                 setTimeout(() => {
                     document.getElementById('pwa-prompt-desc').innerHTML = 'Tap Share -> "Add to Home Screen"';
                     installBtn.style.display = 'none';
                     promptUI.style.setProperty('display', 'flex', 'important');
                 }, 5000);
             } else {
-                debugLog('Waiting for beforeinstallprompt...');
                 window.addEventListener('beforeinstallprompt', (e) => {
-                    debugLog('EVENT: beforeinstallprompt [OK]');
                     e.preventDefault();
                     deferredPrompt = e;
                     setTimeout(() => { promptUI.style.setProperty('display', 'flex', 'important'); }, 3000);
@@ -211,7 +193,6 @@ class Obenlo_PWA_Theme
                     if (deferredPrompt) {
                         deferredPrompt.prompt();
                         const { outcome } = await deferredPrompt.userChoice;
-                        debugLog('User Outcome: ' + outcome);
                         deferredPrompt = null;
                         if (outcome === 'accepted') {
                              if ('Notification' in window) Notification.requestPermission();
@@ -226,13 +207,57 @@ class Obenlo_PWA_Theme
             });
 
             if ('serviceWorker' in navigator) {
-                // Register via the template_redirect URL with scope=/ to ensure full coverage
-                navigator.serviceWorker.register('/?obenlo_pwa=sw', { scope: '/' })
-                    .then(reg => debugLog('SW Registered. Scope: ' + reg.scope))
-                    .catch(err => debugLog('SW Failed: ' + err.message));
+                // Use a versioning parameter to force SW update check
+                const swVersion = '<?php echo filemtime(get_template_directory() . "/assets/pwa/sw.js"); ?>';
+                navigator.serviceWorker.register('/?obenlo_pwa=sw&v=' + swVersion, { scope: '/' })
+                    .then(reg => {
+                        console.log('Obenlo PWA: Service Worker Registered');
+                        reg.onupdatefound = () => {
+                            const installingWorker = reg.installing;
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    window.location.reload();
+                                }
+                            };
+                        };
+
+                        // PWA Push Subscription Logic
+                        if ('pushManager' in reg && window.is_user_logged_in) {
+                            reg.pushManager.getSubscription().then(sub => {
+                                if (!sub) {
+                                    const publicKey = '<?php echo get_option("obenlo_pwa_public_key", "BH6e0t9m6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6"); ?>';
+                                    if (publicKey.length > 20) {
+                                        const convertedKey = urlBase64ToUint8Array(publicKey);
+                                        reg.pushManager.subscribe({
+                                            userVisibleOnly: true,
+                                            applicationServerKey: convertedKey
+                                        }).then(newSub => {
+                                            saveSubscription(newSub);
+                                        }).catch(err => console.log('Push Subscribe Failed:', err));
+                                    }
+                                }
+                            });
+                        }
+                    });
+            }
+
+            function urlBase64ToUint8Array(base64String) {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+                const rawData = window.atob(base64);
+                return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+            }
+
+            function saveSubscription(subscription) {
+                fetch('<?php echo admin_url("admin-ajax.php"); ?>?action=obenlo_save_pwa_subscription&nonce=<?php echo wp_create_nonce("obenlo_chat_nonce"); ?>', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(subscription)
+                });
             }
         });
         </script>
+        <script>window.is_user_logged_in = <?php echo is_user_logged_in() ? 'true' : 'false'; ?>;</script>
 <?php
     }
 }

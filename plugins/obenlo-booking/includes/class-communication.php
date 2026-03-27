@@ -42,6 +42,43 @@ class Obenlo_Booking_Communication
         // Guest contact modal injected for non-logged-in users
         add_action('wp_footer', array($this, 'render_guest_contact_modal'));
 
+        // Save PWA Push Subscription
+        add_action('wp_ajax_obenlo_save_pwa_subscription', array($this, 'handle_save_pwa_subscription'));
+    }
+
+    public function handle_save_pwa_subscription()
+    {
+        check_ajax_referer('obenlo_chat_nonce', 'nonce');
+        $user_id = get_current_user_id();
+        if (!$user_id) wp_send_json_error('Not logged in');
+
+        $subscription = json_decode(file_get_contents('php://input'), true);
+        if (!$subscription || !isset($subscription['endpoint'])) {
+            wp_send_json_error('Invalid subscription data');
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'obenlo_pwa_subscriptions';
+
+        // Extract keys safely
+        $p256dh = $subscription['keys']['p256dh'] ?? '';
+        $auth   = $subscription['keys']['auth'] ?? '';
+
+        // Check if exists
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE endpoint = %s", $subscription['endpoint']));
+
+        if ($exists) {
+            $wpdb->update($table, array('user_id' => $user_id, 'p256dh' => $p256dh, 'auth' => $auth), array('id' => $exists));
+        } else {
+            $wpdb->insert($table, array(
+                'user_id' => $user_id,
+                'endpoint' => $subscription['endpoint'],
+                'p256dh'   => $p256dh,
+                'auth'     => $auth
+            ));
+        }
+
+        wp_send_json_success('Subscription saved');
     }
 
     public function handle_contact_form()
@@ -188,6 +225,13 @@ class Obenlo_Booking_Communication
         );
 
         if ($sent) {
+            // Trigger PWA Push to host
+            Obenlo_Booking_Notifications::send_push_notification(
+                $host_id, 
+                "New Inquiry from $visitor_name", 
+                wp_trim_words($visitor_message, 15),
+                home_url('/host-dashboard?action=messages&recipient_id=guest_' . md5($visitor_email))
+            );
             wp_send_json_success(array('message' => 'Your message has been sent to the host! They\'ll reply to your email shortly.'));
         } else {
             wp_send_json_error(array('message' => 'Failed to send. Please try again.'));
@@ -1069,7 +1113,22 @@ class Obenlo_Booking_Communication
                 
                 $html = Obenlo_Booking_Notifications::wrap_template($subject, $body);
                 $headers = array('Content-Type: text/html; charset=UTF-8', 'From: Obenlo <info@obenlo.com>');
+                wp_mail($guest_email, $subject, $html, $headers);
+            } else {
+                // Notifying a registered user
+                $sender_info = get_userdata($sender_id);
+                $sender_name = $sender_info ? $sender_info->display_name : 'Someone';
                 
+                // Email
+                Obenlo_Booking_Notifications::notify_message_event($msg_id, $receiver_id);
+                
+                // PWA Push
+                Obenlo_Booking_Notifications::send_push_notification(
+                    $receiver_id,
+                    "New Message from $sender_name",
+                    wp_trim_words($message, 15),
+                    home_url('/host-dashboard?action=messages')
+                );
             }
             
             wp_send_json_success(array(

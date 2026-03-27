@@ -10,9 +10,14 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-define('OBENLO_BOOKING_VERSION', '1.0.8');
+define('OBENLO_BOOKING_VERSION', '1.0.9');
 define('OBENLO_BOOKING_DIR', plugin_dir_path(__FILE__));
 define('OBENLO_BOOKING_URL', plugin_dir_url(__FILE__));
+
+// Load Composer Autoloader (for WebPush)
+if (file_exists(OBENLO_BOOKING_DIR . 'vendor/autoload.php')) {
+    require_once OBENLO_BOOKING_DIR . 'vendor/autoload.php';
+}
 
 // Include necessary classes
 require_once OBENLO_BOOKING_DIR . 'includes/class-post-types.php';
@@ -138,11 +143,24 @@ function obenlo_booking_install_tables()
         KEY receiver_id (receiver_id)
     ) $charset_collate;";
 
+    $table_subs = $wpdb->prefix . 'obenlo_pwa_subscriptions';
+    $sql_subs = "CREATE TABLE $table_subs (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        user_id bigint(20) NOT NULL,
+        endpoint text NOT NULL,
+        p256dh text NOT NULL,
+        auth text NOT NULL,
+        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        PRIMARY KEY  (id),
+        KEY user_id (user_id)
+    ) $charset_collate;";
+
 
     if (!function_exists('dbDelta')) {
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     }
     dbDelta($sql_chat);
+    dbDelta($sql_subs);
 }
 
 // Emergency manual trigger via admin-ajax
