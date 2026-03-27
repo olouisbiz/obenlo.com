@@ -55,10 +55,14 @@ self.addEventListener('fetch', (event) => {
 
 // Push Notification Support
 self.addEventListener('push', (event) => {
-  let data = { title: 'Obenlo', body: 'You have a new update!' };
+  let data = { title: 'Obenlo', body: 'New notification from Obenlo' };
+
   if (event.data) {
     try {
-      data = event.data.json();
+      const payload = event.data.json();
+      data.title = payload.title || data.title;
+      data.body = payload.body || data.body;
+      data.url = payload.url || '/';
     } catch (e) {
       data.body = event.data.text();
     }
@@ -69,7 +73,9 @@ self.addEventListener('push', (event) => {
     icon: '/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png',
     badge: '/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png',
     vibrate: [100, 50, 100],
-    data: { url: data.url || '/' }
+    data: { url: data.url || '/' },
+    tag: 'obenlo-notification', // Replace previous notification
+    renotify: true
   };
 
   event.waitUntil(
@@ -80,7 +86,21 @@ self.addEventListener('push', (event) => {
 // Notification Click
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const targetUrl = event.notification.data.url || '/';
+  
   event.waitUntil(
-    clients.openWindow(event.notification.data.url)
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // If a window is already open at the target URL, focus it
+      for (var i = 0; i < windowClients.length; i++) {
+        var client = windowClients[i];
+        if (client.url === targetUrl && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Otherwise, open a new window
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
   );
 });
