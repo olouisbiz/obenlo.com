@@ -432,8 +432,8 @@ class Obenlo_Booking_Communication
                     <p style="font-size:0.95rem; margin-top:8px;">Choose a contact from the left to start a conversation.</p>
                 </div>
 
-                <div id="obenlo-center-room" style="flex-grow:1; padding:30px; overflow-y:auto; background:#ffffff; display:none; flex-direction:column; border-bottom:1px solid #f0f0f0;">
-                    <!-- Messages will appear here -->
+                <div id="obenlo-center-room" style="flex:1 1 auto; min-height:300px; padding:30px; overflow-y:auto; background:#ffffff; display:none; flex-direction:column; border-bottom:1px solid #f0f0f0; position:relative;">
+                    <div id="obenlo-room-debug" style="position:absolute; top:5px; right:10px; font-size:10px; color:#eee; pointer-events:none;"></div>
                 </div>
 
                 <div id="obenlo-center-input-area" style="padding:15px; border-top:1px solid #f0f0f0; background:#fff; display:none;">
@@ -544,41 +544,54 @@ class Obenlo_Booking_Communication
 
             function obenloCenterFetchMessages() {
                 if (!obenloCenterContact) return;
-                jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
-                    action: 'obenlo_fetch_chat_messages',
-                    contact_id: obenloCenterContact,
-                    last_id: obenloCenterLastId,
-                    oversight: obenloIsOversight ? 1 : 0
-                }, function(res) {
-                    let room = document.getElementById('obenlo-center-room');
-                    if (res.success) {
-                        if (res.data.length > 0) {
-                            // Hide "No messages" placeholder if it exists
-                            let empty = room.querySelector('.no-messages-placeholder');
-                            if (empty) empty.remove();
-                            
-                            let isScrolledToBottom = room.scrollHeight - room.clientHeight <= room.scrollTop + 30;
+                let room = document.getElementById('obenlo-center-room');
+                let debug = document.getElementById('obenlo-room-debug');
+                
+                jQuery.ajax({
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {
+                        action: 'obenlo_fetch_chat_messages',
+                        contact_id: obenloCenterContact,
+                        last_id: obenloCenterLastId,
+                        oversight: obenloIsOversight ? 1 : 0
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            debug.innerText = 'Last ID: ' + obenloCenterLastId + ' | Got: ' + res.data.length;
+                            if (res.data.length > 0) {
+                                let empty = room.querySelector('.no-messages-placeholder');
+                                if (empty) empty.remove();
+                                
+                                let isScrolledToBottom = room.scrollHeight - room.clientHeight <= room.scrollTop + 30;
 
-                            res.data.forEach(function(msg) {
-                                if (msg.id > obenloCenterLastId) {
-                                    let type = (msg.sender_id == obenloCenterUserId) ? 'sent' : 'received';
-                                    let html = '<div class="obenlo-center-msg ' + type + '" data-msg-id="' + msg.id + '">';
-                                    html += msg.message;
-                                    html += '<div style="font-size:0.7rem; opacity:0.6; margin-top:6px; text-align:' + (type === 'sent' ? 'right' : 'left') + ';">' + msg.time + '</div>';
-                                    html += '</div>';
-                                    room.insertAdjacentHTML('beforeend', html);
-                                    obenloCenterLastId = msg.id;
+                                res.data.forEach(function(msg) {
+                                    let msgId = parseInt(msg.id);
+                                    if (msgId > obenloCenterLastId) {
+                                        let type = (msg.sender_id == obenloCenterUserId) ? 'sent' : 'received';
+                                        let html = '<div class="obenlo-center-msg ' + type + '" data-msg-id="' + msgId + '">';
+                                        html += msg.message;
+                                        html += '<div style="font-size:0.7rem; opacity:0.6; margin-top:6px; text-align:' + (type === 'sent' ? 'right' : 'left') + ';">' + msg.time + '</div>';
+                                        html += '</div>';
+                                        room.insertAdjacentHTML('beforeend', html);
+                                        obenloCenterLastId = msgId;
+                                    }
+                                });
+                                
+                                if (isScrolledToBottom || obenloCenterLastId === parseInt(res.data[res.data.length-1].id)) {
+                                    room.scrollTop = room.scrollHeight;
                                 }
-                            });
-                            
-                            if (isScrolledToBottom) {
-                                room.scrollTop = room.scrollHeight;
+                            } else if (obenloCenterLastId === 0 && !room.querySelector('.no-messages-placeholder')) {
+                                room.innerHTML = '<div class="no-messages-placeholder" style="text-align:center; padding:50px; color:#aaa; font-style:italic;">No messages found in this conversation yet.</div>';
+                                room.appendChild(debug); // keep debug
                             }
-                        } else if (obenloCenterLastId === 0 && !room.querySelector('.no-messages-placeholder')) {
-                            room.innerHTML = '<div class="no-messages-placeholder" style="text-align:center; padding:50px; color:#aaa; font-style:italic;">No messages found in this conversation yet.</div>';
+                        } else {
+                            debug.innerText = 'Server Error: ' + (res.data || 'Unknown');
                         }
-                    } else if (obenloCenterLastId === 0) {
-                        room.innerHTML = '<div style="text-align:center; padding:50px; color:#e61e4d;">Error loading messages. Please refresh.</div>';
+                    },
+                    error: function(xhr, status, error) {
+                        debug.innerText = 'AJAX Error: ' + status + ' ' + error;
                     }
                 });
             }
