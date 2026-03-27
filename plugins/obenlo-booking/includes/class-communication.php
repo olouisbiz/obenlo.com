@@ -432,15 +432,14 @@ class Obenlo_Booking_Communication
                     <p style="font-size:0.95rem; margin-top:8px;">Choose a contact from the left to start a conversation.</p>
                 </div>
 
-                <div id="obenlo-center-room" style="flex-grow:1; padding:30px; overflow-y:auto; background:#fafafa; display:none; flex-direction:column;">
+                <div id="obenlo-center-room" style="flex-grow:1; padding:30px; overflow-y:auto; background:#ffffff; display:none; flex-direction:column; border-bottom:1px solid #f0f0f0;">
+                    <div style="text-align:center; padding:50px; color:#aaa;">Initializing conversation...</div>
                 </div>
 
-                <div id="obenlo-center-input-area" style="padding:25px 30px; border-top:1px solid #f0f0f0; background:#fff; display:none;">
-                    <div style="display:flex; gap:15px; align-items:center; width:100%;">
-                        <div style="flex-grow:1; position:relative;">
-                            <input type="text" id="obenlo-center-input" placeholder="Type your message here..." style="width:100%; padding:15px 25px; border:1px solid #eee; border-radius:30px; background:#f9f9f9; outline:none; transition:all 0.2s;" onkeypress="if(event.keyCode===13) obenloCenterSendMessage()">
-                        </div>
-                        <button onclick="obenloCenterSendMessage()" style="background:#e61e4d; color:white; border:none; width:50px; height:50px; border-radius:50%; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; box-shadow: 0 4px 10px rgba(230,30,77,0.2);">
+                <div id="obenlo-center-input-area" style="padding:15px; border-top:1px solid #f0f0f0; background:#fff; display:none;">
+                    <div style="display:flex; gap:10px; align-items:center; box-sizing:border-box;">
+                        <input type="text" id="obenlo-center-input" placeholder="Type your message here..." style="flex-grow:1; padding:12px 20px; border:1px solid #eee; border-radius:30px; background:#f9f9f9; outline:none; font-size:1rem;" onkeypress="if(event.keyCode===13) obenloCenterSendMessage()">
+                        <button onclick="obenloCenterSendMessage()" style="background:#e61e4d; color:white; border:none; width:45px; height:45px; border-radius:50%; flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(230,30,77,0.2);">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:20px; height:20px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </button>
                     </div>
@@ -449,10 +448,11 @@ class Obenlo_Booking_Communication
         </div>
 
         <style>
-            .obenlo-message-center { display:grid; grid-template-columns: 320px 1fr; gap:0; height:750px; background:#fff; border:1px solid #eee; border-radius:20px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-            .message-threads { border-right:1px solid #f0f0f0; background:#fcfcfc; display:flex; flex-direction:column; }
+            .obenlo-message-center { display:grid; grid-template-columns: 320px 1fr; gap:0; height:750px; background:#fff; border:1px solid #eee; border-radius:20px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+            .obenlo-message-center * { box-sizing: border-box; }
+            .message-threads { border-right:1px solid #f0f0f0; background:#fcfcfc; display:flex; flex-direction:column; overflow: hidden; }
             .sidebar-header { padding:25px 20px; border-bottom:1px solid #f0f0f0; font-weight:800; background:#fff; font-size:1.1rem; color:#222; }
-            .message-chat { display:flex; flex-direction:column; background:#fff; position:relative; min-height: 100%; }
+            .message-chat { display:flex; flex-direction:column; background:#fff; position:relative; overflow: hidden; height: 100%; }
             .obenlo-center-contact-item { padding:20px; border-bottom:1px solid #f5f5f5; cursor:pointer; transition:all 0.2s; display:block; }
             .obenlo-center-contact-item:hover { background:#fff; }
             .obenlo-center-contact-item.active { background:#fff; border-left:4px solid #e61e4d; }
@@ -463,8 +463,8 @@ class Obenlo_Booking_Communication
             @media (max-width: 900px) {
                 .obenlo-message-center { grid-template-columns: 1fr; height: 600px; border-radius: 0; border: none; }
                 .message-threads.mobile-hide { display: none; }
-                .message-chat { display: none; }
-                .message-chat.mobile-show { display: flex; position: absolute; inset: 0; z-index: 100; }
+                #obenlo-center-chat-window { display: none; }
+                #obenlo-center-chat-window.mobile-show { display: flex; position: absolute; inset: 0; z-index: 100; }
                 .mobile-back-btn { display: block !important; }
             }
         </style>
@@ -550,24 +550,31 @@ class Obenlo_Booking_Communication
                     last_id: obenloCenterLastId,
                     oversight: obenloIsOversight ? 1 : 0
                 }, function(res) {
-                    if (res.success && res.data.length > 0) {
-                        let room = document.getElementById('obenlo-center-room');
-                        let isScrolledToBottom = room.scrollHeight - room.clientHeight <= room.scrollTop + 20;
+                    let room = document.getElementById('obenlo-center-room');
+                    if (res.success) {
+                        if (res.data.length > 0) {
+                            if (obenloCenterLastId === 0) room.innerHTML = ''; // clear initial msg
+                            let isScrolledToBottom = room.scrollHeight - room.clientHeight <= room.scrollTop + 20;
 
-                        res.data.forEach(function(msg) {
-                            if (msg.id > obenloCenterLastId) {
-                                let type = (msg.sender_id == obenloCenterUserId) ? 'sent' : 'received';
-                                let html = '<div class="obenlo-center-msg ' + type + '">';
-                                html += msg.message;
-                                html += '<div style="font-size:0.7rem; opacity:0.6; margin-top:6px; text-align:' + (type === 'sent' ? 'right' : 'left') + ';">' + msg.time + '</div>';
-                                html += '</div>';
-                                room.insertAdjacentHTML('beforeend', html);
-                                obenloCenterLastId = msg.id;
+                            res.data.forEach(function(msg) {
+                                if (msg.id > obenloCenterLastId) {
+                                    let type = (msg.sender_id == obenloCenterUserId) ? 'sent' : 'received';
+                                    let html = '<div class="obenlo-center-msg ' + type + '">';
+                                    html += msg.message;
+                                    html += '<div style="font-size:0.7rem; opacity:0.6; margin-top:6px; text-align:' + (type === 'sent' ? 'right' : 'left') + ';">' + msg.time + '</div>';
+                                    html += '</div>';
+                                    room.insertAdjacentHTML('beforeend', html);
+                                    obenloCenterLastId = msg.id;
+                                }
+                            });
+                            if (isScrolledToBottom) {
+                                room.scrollTop = room.scrollHeight;
                             }
-                        });
-                        if (isScrolledToBottom) {
-                            room.scrollTop = room.scrollHeight;
+                        } else if (obenloCenterLastId === 0) {
+                            room.innerHTML = '<div style="text-align:center; padding:50px; color:#aaa; font-style:italic;">No messages in this conversation yet.</div>';
                         }
+                    } else {
+                        room.innerHTML = '<div style="text-align:center; padding:50px; color:#e61e4d;">Error loading messages: ' + (res.data || 'Unknown error') + '</div>';
                     }
                 });
             }
