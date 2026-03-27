@@ -156,51 +156,27 @@ class Obenlo_PWA_Theme
         </div>
 
         <script>
-        (function() {
-            // Diagnostic Box (Visible with ?debug=1)
-            if (window.location.search.includes('debug=1')) {
-                const debugDiv = document.createElement('div');
-                debugDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;padding:12px;font-size:11px;z-index:2147483647;font-family:monospace;border-bottom:2px solid #0f0;line-height:1.4;';
-                debugDiv.id = 'pwa-debug';
-                debugDiv.innerHTML = '<b>OBENLO THEME-PWA DEBUG v5.0</b><br>';
-                document.documentElement.appendChild(debugDiv);
-                window.updateObenloDebug = (msg) => { debugDiv.innerHTML += '<div>> ' + msg + '</div>'; };
-            }
-        })();
-
         document.addEventListener('DOMContentLoaded', function() {
             let deferredPrompt;
             const promptUI = document.getElementById('obenlo-pwa-prompt');
             const installBtn = document.getElementById('pwa-install-btn');
             const dismissBtn = document.getElementById('pwa-dismiss-btn');
-            const debugLog = window.updateObenloDebug || (() => {});
-
-            if (window.location.search.includes('reset_pwa=1')) {
-                localStorage.removeItem('obenlo_pwa_dismissed');
-                debugLog('PWA Flag Cleared');
-            }
 
             if (localStorage.getItem('obenlo_pwa_dismissed') === 'true') return;
 
             const isIos = () => /iphone|ipad|ipod/.test( window.navigator.userAgent.toLowerCase() );
             const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-            if (isStandalone()) {
-                debugLog('Already Standalone');
-                return;
-            }
+            if (isStandalone()) return;
 
             if (isIos()) {
-                debugLog('iOS Detected');
                 setTimeout(() => {
                     document.getElementById('pwa-prompt-desc').innerHTML = 'Tap Share -> "Add to Home Screen"';
                     installBtn.style.display = 'none';
                     promptUI.style.setProperty('display', 'flex', 'important');
                 }, 5000);
             } else {
-                debugLog('Waiting for beforeinstallprompt...');
                 window.addEventListener('beforeinstallprompt', (e) => {
-                    debugLog('EVENT: beforeinstallprompt [OK]');
                     e.preventDefault();
                     deferredPrompt = e;
                     setTimeout(() => { promptUI.style.setProperty('display', 'flex', 'important'); }, 3000);
@@ -211,7 +187,6 @@ class Obenlo_PWA_Theme
                     if (deferredPrompt) {
                         deferredPrompt.prompt();
                         const { outcome } = await deferredPrompt.userChoice;
-                        debugLog('User Outcome: ' + outcome);
                         deferredPrompt = null;
                         if (outcome === 'accepted') {
                              if ('Notification' in window) Notification.requestPermission();
@@ -226,10 +201,19 @@ class Obenlo_PWA_Theme
             });
 
             if ('serviceWorker' in navigator) {
-                // Register via the template_redirect URL with scope=/ to ensure full coverage
-                navigator.serviceWorker.register('/?obenlo_pwa=sw', { scope: '/' })
-                    .then(reg => debugLog('SW Registered. Scope: ' + reg.scope))
-                    .catch(err => debugLog('SW Failed: ' + err.message));
+                // Use a versioning parameter to force SW update check
+                const swVersion = '<?php echo filemtime(get_template_directory() . "/assets/pwa/sw.js"); ?>';
+                navigator.serviceWorker.register('/?obenlo_pwa=sw&v=' + swVersion, { scope: '/' })
+                    .then(reg => {
+                        reg.onupdatefound = () => {
+                            const installingWorker = reg.installing;
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    window.location.reload();
+                                }
+                            };
+                        };
+                    });
             }
         });
         </script>

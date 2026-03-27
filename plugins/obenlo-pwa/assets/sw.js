@@ -1,18 +1,21 @@
-const CACHE_NAME = 'obenlo-pwa-cache-v2';
+const CACHE_NAME = 'obenlo-cache-v2.1.0';
 const ASSETS_TO_CACHE = [
   '/',
-  '/wp-content/themes/obenlo/assets/css/style.css',
-  '/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png'
+  '/?utm_source=pwa',
+  '/wp-content/themes/obenlo/style.css',
+  '/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png',
+  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
 ];
 
 // Install Event
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      console.log('Obenlo PWA: Caching core assets');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  self.skipWaiting();
+  self.skipWaiting(); // Force new service worker to become active
 });
 
 // Activate Event
@@ -20,15 +23,16 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('Obenlo PWA: Clearing old cache');
+            return caches.delete(cache);
           }
         })
       );
     })
   );
-  self.clients.claim();
+  return self.clients.claim(); // Take control of all clients immediately
 });
 
 // Fetch Event - Network First for HTML, Cache First for Assets
