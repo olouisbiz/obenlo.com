@@ -991,3 +991,163 @@ body {
         opacity: 1;
     }
 }
+
+/* Mobile Bottom Navigation */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    z-index: 9999;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
+}
+
+.mobile-bottom-nav .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #717171;
+    font-size: 11px;
+    font-weight: 600;
+    gap: 4px;
+    flex: 1;
+    transition: all 0.2s ease;
+}
+
+.mobile-bottom-nav .nav-item svg {
+    width: 26px;
+    height: 26px;
+    stroke: #717171;
+}
+
+.mobile-bottom-nav .nav-item.active {
+    color: #e61e4d;
+}
+
+.mobile-bottom-nav .nav-item.active svg {
+    stroke: #e61e4d;
+}
+
+@media (max-width: 768px) {
+    .mobile-bottom-nav {
+        display: flex;
+    }
+    body {
+        padding-bottom: 80px; /* Account for bottom nav */
+    }
+
+    /* Refine Header Search on Mobile */
+    .smart-search-bar {
+        border-radius: 20px !important;
+        padding: 5px 15px !important;
+        margin: 0 10px;
+    }
+    
+    .search-btn {
+        display: none !important;
+    }
+    
+    .search-input {
+        width: 100% !important;
+        font-size: 16px !important;
+    }
+
+    /* Listing Cards Polish */
+    .listing-card {
+        border-radius: 20px !important;
+        overflow: hidden;
+        border: 1px solid #f0f0f0 !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04) !important;
+    }
+
+    /* Improved Touch Targets */
+    input, select, textarea, .cta-button, .reserve-btn {
+        border-radius: 12px !important;
+        min-height: 48px !important;
+    }
+
+    /* Bottom Sheet Style Modals for Mobile */
+    #obenlo-success-modal .modal-content {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 24px 24px 0 0 !important;
+        padding: 30px 20px 50px 20px !important;
+        transform: translateY(100%);
+    }
+
+    #obenlo-success-modal.active .modal-content {
+        transform: translateY(0);
+    }
+    
+    /* Gallery & Tabs Refinements */
+    .gallery-grid {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto !important;
+        height: 280px !important;
+        gap: 0 !important;
+        border-radius: 0 !important;
+        margin-left: -20px;
+        margin-right: -20px;
+    }
+    .gallery-grid > div:not(:first-child) {
+        display: none !important;
+    }
+    
+    .listing-tabs {
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        padding-bottom: 5px !important;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .listing-tabs::-webkit-scrollbar { display: none; }
+    
+    .listing-layout {
+        flex-direction: column !important;
+        gap: 20px !important;
+    }
+    .listing-main-content, .listing-sidebar {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    /* Ensure tables stack into card view by default in the dashboard */
+    .dashboard-table, .admin-table {
+        display: block !important;
+    }
+    .dashboard-table thead, .admin-table thead { display: none !important; }
+    .dashboard-table tr, .admin-table tr { 
+        display: block !important; 
+        border: 1px solid #eee !important;
+        border-radius: 16px !important;
+        margin-bottom: 20px !important;
+        padding: 15px !important;
+    }
+    .dashboard-table td, .admin-table td {
+        display: flex !important;
+        justify-content: space-between !important;
+        border: none !important;
+        padding: 8px 0 !important;
+    }
+    .dashboard-table td::before, .admin-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #888;
+        font-size: 0.75rem;
+    }
+}
