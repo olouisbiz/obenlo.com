@@ -79,21 +79,19 @@ function obenlo_security_headers($headers)
 add_filter('wp_headers', 'obenlo_security_headers');
 
 /**
- * --- OBENLO PWA INTEGRATION (Theme-based) ---
+ * --- OBENLO PWA CORE (Theme-based) ---
+ * Provides standalone PWA manifestation and Push Notification support.
  */
-class Obenlo_PWA_Theme
+class Obenlo_PWA_Core
 {
     public function init()
     {
-        // Setup default VAPID keys for PWA Push if not yet configured
-        if (!get_option('obenlo_pwa_public_key')) {
-            update_option('obenlo_pwa_public_key', 'BC_z_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_Lz_LA');
-            update_option('obenlo_pwa_private_key', 'Pr_vAtE_KEy_hErE_nOt_fOr_pUbL_c_v_Ew_001');
-        }
-
         add_action('wp_head', array($this, 'inject_pwa_meta'), 1);
         add_action('wp_head', array($this, 'inject_pwa_script'), 2);
         add_action('template_redirect', array($this, 'serve_pwa_assets'), 1);
+
+        // AJAX for PWA subscriptions (Same action name for compatibility)
+        add_action('wp_ajax_obenlo_save_pwa_subscription', array($this, 'handle_save_subscription'));
     }
 
     public function inject_pwa_meta()
@@ -130,6 +128,7 @@ class Obenlo_PWA_Theme
                 $file = get_template_directory() . '/assets/pwa/manifest.json';
                 if (file_exists($file)) {
                     $manifest = file_get_contents($file);
+                    // Dynamically map icons and start_url if needed
                     $manifest = str_replace('/wp-content/', home_url('/wp-content/'), $manifest);
                     echo $manifest;
                     exit;
@@ -145,19 +144,18 @@ class Obenlo_PWA_Theme
 
     public function inject_pwa_script()
     {
-?>
-        <!-- Obenlo PWA Loader [Theme Interface] -->
-        <div id="obenlo-pwa-prompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:94%; max-width:420px; background:#fff; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.2); z-index:9999999; padding:20px; font-family:'Inter', sans-serif; align-items:center; gap:15px; border:1px solid rgba(0,0,0,0.05);">
+        ?>
+        <div id="obenlo-pwa-prompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:94%; max-width:420px; background:#fff; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.2); z-index:10000; padding:20px; font-family:'Inter', sans-serif; align-items:center; gap:15px; border:1px solid rgba(0,0,0,0.05);">
             <div style="width:60px; height:60px; background:#fff; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                <img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo-social-profile-192.png" style="width:40px; height:40px; border-radius:8px;">
+                <img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo-social-profile.png" style="width:40px; height:40px; border-radius:8px;">
             </div>
             <div style="flex-grow:1;">
-                <h4 style="margin:0 0 4px 0; font-size:17px; color:#1a1a1b; font-weight:800;">Obenlo: Better as an App</h4>
-                <p style="margin:0; font-size:13px; color:#5e5e62; line-height:1.4;" id="pwa-prompt-desc">Install for a faster experience and instant notifications.</p>
+                <h4 style="margin:0 0 4px 0; font-size:17px; color:#1a1a1b; font-weight:800;">Obenlo: Better with the App</h4>
+                <p style="margin:0; font-size:13px; color:#5e5e62; line-height:1.4;" id="pwa-prompt-desc">Install for a faster experience & instant notifications.</p>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <button id="pwa-install-btn" style="background:#e61e4d; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer;">Install</button>
-                <button id="pwa-dismiss-btn" style="background:transparent; color:#999; border:none; padding:4px; font-size:12px; cursor:pointer;">Later</button>
+                <button id="pwa-dismiss-btn" style="background:transparent; color:#999; border:none; padding:4px; font-size:12px; cursor:pointer; font-weight:600;">Maybe later</button>
             </div>
         </div>
 
@@ -175,17 +173,59 @@ class Obenlo_PWA_Theme
 
             if (isStandalone()) return;
 
+            const requestNotificationPermission = async () => {
+                if ('Notification' in window && Notification.permission !== 'granted') {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') subscribeUserToPush();
+                } else if (Notification.permission === 'granted') {
+                    subscribeUserToPush();
+                }
+            };
+
+            const urlBase64ToUint8Array = (base64String) => {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+                const rawData = window.atob(base64);
+                return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+            };
+
+            const subscribeUserToPush = async () => {
+                try {
+                    const registration = await navigator.serviceWorker.ready;
+                    const publicKey = '<?php echo esc_js(get_option("obenlo_pwa_public_key")); ?>';
+                    if (!publicKey || publicKey.length < 20) return;
+
+                    const subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(publicKey)
+                    });
+
+                    await fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            action: 'obenlo_save_pwa_subscription',
+                            subscription: JSON.stringify(subscription)
+                        })
+                    });
+                    console.log('Obenlo: Push Subscription saved');
+                } catch (err) { console.error('Push Subscribe Failed:', err); }
+            };
+
             if (isIos()) {
                 setTimeout(() => {
-                    document.getElementById('pwa-prompt-desc').innerHTML = 'Tap Share -> "Add to Home Screen"';
+                    document.getElementById('pwa-prompt-desc').innerHTML = 'Tap the Share icon and "Add to Home Screen".';
                     installBtn.style.display = 'none';
                     promptUI.style.setProperty('display', 'flex', 'important');
-                }, 5000);
+                }, 8000);
             } else {
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     deferredPrompt = e;
-                    setTimeout(() => { promptUI.style.setProperty('display', 'flex', 'important'); }, 3000);
+                    setTimeout(() => { 
+                        promptUI.style.setProperty('display', 'flex', 'important'); 
+                        requestNotificationPermission();
+                    }, 3000);
                 });
 
                 installBtn.addEventListener('click', async () => {
@@ -194,9 +234,7 @@ class Obenlo_PWA_Theme
                         deferredPrompt.prompt();
                         const { outcome } = await deferredPrompt.userChoice;
                         deferredPrompt = null;
-                        if (outcome === 'accepted') {
-                             if ('Notification' in window) Notification.requestPermission();
-                        }
+                        if (outcome === 'accepted') requestNotificationPermission();
                     }
                 });
             }
@@ -207,60 +245,83 @@ class Obenlo_PWA_Theme
             });
 
             if ('serviceWorker' in navigator) {
-                // Use a versioning parameter to force SW update check
-                const swVersion = '<?php echo filemtime(get_template_directory() . "/assets/pwa/sw.js"); ?>';
-                navigator.serviceWorker.register('/?obenlo_pwa=sw&v=' + swVersion, { scope: '/' })
-                    .then(reg => {
-                        console.log('Obenlo PWA: Service Worker Registered');
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/?obenlo_pwa=sw', { scope: '/' }).then(reg => {
+                        console.log('Obenlo PWA: Service Worker Active');
                         reg.onupdatefound = () => {
-                            const installingWorker = reg.installing;
-                            installingWorker.onstatechange = () => {
-                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            const newWorker = reg.installing;
+                            newWorker.onstatechange = () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                                     window.location.reload();
                                 }
                             };
                         };
-
-                        // PWA Push Subscription Logic
-                        if ('pushManager' in reg && window.is_user_logged_in) {
-                            reg.pushManager.getSubscription().then(sub => {
-                                if (!sub) {
-                                    const publicKey = '<?php echo get_option("obenlo_pwa_public_key", "BH6e0t9m6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6t6"); ?>';
-                                    if (publicKey.length > 20) {
-                                        const convertedKey = urlBase64ToUint8Array(publicKey);
-                                        reg.pushManager.subscribe({
-                                            userVisibleOnly: true,
-                                            applicationServerKey: convertedKey
-                                        }).then(newSub => {
-                                            saveSubscription(newSub);
-                                        }).catch(err => console.log('Push Subscribe Failed:', err));
-                                    }
-                                }
-                            });
-                        }
                     });
-            }
-
-            function urlBase64ToUint8Array(base64String) {
-                const padding = '='.repeat((4 - base64String.length % 4) % 4);
-                const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-                const rawData = window.atob(base64);
-                return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
-            }
-
-            function saveSubscription(subscription) {
-                fetch('<?php echo admin_url("admin-ajax.php"); ?>?action=obenlo_save_pwa_subscription&nonce=<?php echo wp_create_nonce("obenlo_chat_nonce"); ?>', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(subscription)
                 });
             }
         });
         </script>
-        <script>window.is_user_logged_in = <?php echo is_user_logged_in() ? 'true' : 'false'; ?>;</script>
-<?php
+        <?php
+    }
+
+    public function handle_save_subscription()
+    {
+        $user_id = get_current_user_id();
+        $sub_data = isset($_POST['subscription']) ? json_decode(stripslashes($_POST['subscription']), true) : null;
+
+        if (!$user_id || !$sub_data) {
+            wp_send_json_error('Incomplete data');
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'obenlo_pwa_subscriptions';
+        
+        $endpoint = $sub_data['endpoint'] ?? '';
+        $keys = $sub_data['keys'] ?? array();
+        $p256dh = $keys['p256dh'] ?? '';
+        $auth = $keys['auth'] ?? '';
+
+        if (!$endpoint || !$p256dh || !$auth) {
+            wp_send_json_error('Incomplete keys');
+        }
+
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE endpoint = %s AND user_id = %d", $endpoint, $user_id));
+        if ($exists) {
+            wp_send_json_success('Already subscribed');
+        }
+
+        $wpdb->insert($table, array(
+            'user_id' => $user_id,
+            'endpoint' => $endpoint,
+            'p256dh' => $p256dh,
+            'auth' => $auth
+        ));
+
+        wp_send_json_success('Subscription saved');
+    }
+
+    public static function generate_keys()
+    {
+        if (get_option('obenlo_pwa_public_key') && strlen(get_option('obenlo_pwa_public_key')) > 20) {
+            return;
+        }
+
+        $autoload = WP_PLUGIN_DIR . '/obenlo-booking/vendor/autoload.php';
+        if (file_exists($autoload)) {
+            require_once $autoload;
+            try {
+                $keys = \Minishlink\WebPush\VAPID::createVapidKeys();
+                update_option('obenlo_pwa_public_key', $keys['publicKey']);
+                update_option('obenlo_pwa_private_key', $keys['privateKey']);
+            } catch (\Exception $e) {
+                error_log('Obenlo PWA: VAPID Error: ' . $e->getMessage());
+            }
+        }
     }
 }
 
-$obenlo_pwa_theme = new Obenlo_PWA_Theme();
-$obenlo_pwa_theme->init();
+$obenlo_pwa_core = new Obenlo_PWA_Core();
+$obenlo_pwa_core->init();
+
+// Ensure keys exist
+add_action('init', array('Obenlo_PWA_Core', 'generate_keys'), 10);
