@@ -6,19 +6,19 @@
 get_header();
 ?>
 
-<div class="obenlo-auth-container" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; background: #f9f9f9;">
-    <div class="auth-card" style="background: #fff; width: 100%; max-width: 450px; border-radius: 24px; box-shadow: 0 12px 40px rgba(0,0,0,0.08); overflow: hidden; position: relative;">
+<div class="obenlo-auth-container" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; background: #f9f9f9;">
+    <div class="auth-card" style="background: #fff; width: 100%; max-width: 450px; border-radius: 24px; box-shadow: 0 12px 40px rgba(0,0,0,0.08); overflow: hidden; position: relative; margin: 20px 0;">
         
         <!-- Toggle Tabs -->
         <div class="auth-tabs" style="display: flex; border-bottom: 1px solid #eee;">
-            <button onclick="toggleAuth('login')" id="tab-login" style="flex: 1; padding: 20px; border: none; background: #fff; font-weight: bold; cursor: pointer; color: #e61e4d; border-bottom: 3px solid #e61e4d; transition: all 0.3s;">Log In</button>
-            <button onclick="toggleAuth('signup')" id="tab-signup" style="flex: 1; padding: 20px; border: none; background: #fff; font-weight: bold; cursor: pointer; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s;">Sign Up</button>
+            <button onclick="toggleAuth('login')" id="tab-login" style="flex: 1; padding: 20px; border: none; background: #fff; font-weight: bold; cursor: pointer; color: #e61e4d; border-bottom: 3px solid #e61e4d; transition: all 0.3s; font-size: 1.1rem;">Log In</button>
+            <button onclick="toggleAuth('signup')" id="tab-signup" style="flex: 1; padding: 20px; border: none; background: #fff; font-weight: bold; cursor: pointer; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s; font-size: 1.1rem;">Sign Up</button>
         </div>
 
-        <div style="padding: 40px;">
+        <div class="auth-form-body" style="padding: clamp(25px, 5vw, 40px);">
             <!-- Login Form -->
             <div id="form-login" class="auth-form">
-                <h2 style="margin-bottom: 10px; font-size: 1.8rem;">Welcome back</h2>
+                <h2 style="margin-bottom: 10px; font-size: clamp(1.5rem, 5vw, 1.8rem);">Welcome back</h2>
                 <p style="color: #666; margin-bottom: 30px; font-size: 0.95rem;">Log in to manage your bookings and listings.</p>
 
                 <?php if ( isset($_GET['login_error']) ) : ?>
@@ -78,14 +78,14 @@ get_header();
                     
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: bold; color: #444;">I want to be a:</label>
-                        <div style="display: flex; gap: 20px;">
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 8px; flex: 1;">
+                        <div class="role-selection" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px; border: 1px solid #ddd; border-radius: 12px; flex: 1; min-width: 140px;">
                                 <input type="radio" name="user_role" value="guest" checked>
-                                <span>Guest</span>
+                                <span style="font-weight: 600;">Guest</span>
                             </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 8px; flex: 1;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px; border: 1px solid #ddd; border-radius: 12px; flex: 1; min-width: 140px;">
                                 <input type="radio" name="user_role" value="host">
-                                <span>Host</span>
+                                <span style="font-weight: 600;">Host</span>
                             </label>
                         </div>
                     </div>
