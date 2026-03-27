@@ -2,10 +2,12 @@
   "name": "Obenlo",
   "short_name": "Obenlo",
   "description": "Book stays, experiences, and services locally.",
-  "start_url": "/",
+  "start_url": "/?utm_source=pwa",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#e61e4d",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "business", "lifestyle"],
   "icons": [
     {
       "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png",
@@ -17,6 +19,18 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Host Dashboard",
+      "url": "/account/dashboard/",
+      "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Bookings",
+      "url": "/account/bookings/",
+      "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png", "sizes": "192x192" }]
     }
   ]
 }
