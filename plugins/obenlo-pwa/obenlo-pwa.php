@@ -98,16 +98,38 @@ class Obenlo_PWA
         </div>
 
         <script>
+        (function() {
+            console.log('Obenlo PWA: Loader script started [v3]');
+            
+            // Immediate Debug Box for troubleshooting
+            if (window.location.search.includes('debug_pwa=1') || window.location.search.includes('debug=1')) {
+                const debugDiv = document.createElement('div');
+                debugDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;padding:10px;font-size:10px;z-index:2147483647;font-family:monospace;border-bottom:2px solid #0f0;';
+                debugDiv.id = 'pwa-debug-status';
+                debugDiv.innerHTML = '<b>OBENLO PWA DEBUG v3</b><br>';
+                document.documentElement.appendChild(debugDiv); // Append to html to be super early
+                
+                window.updateObenloDebug = (msg) => {
+                    debugDiv.innerHTML += '<div>> ' + msg + '</div>';
+                };
+                window.updateObenloDebug('Screen: ' + window.innerWidth + 'x' + window.innerHeight);
+                window.updateObenloDebug('Protocol: ' + location.protocol);
+            }
+        })();
+
         document.addEventListener('DOMContentLoaded', function() {
             let deferredPrompt;
             const promptUI = document.getElementById('obenlo-pwa-prompt');
             const installBtn = document.getElementById('pwa-install-btn');
             const dismissBtn = document.getElementById('pwa-dismiss-btn');
-            
-            // Reset helper for testing
+            const debugLog = window.updateObenloDebug || (() => {});
+
+            debugLog('DOM Content Loaded');
+
+            // Reset helper
             if (window.location.search.includes('reset_pwa=1')) {
                 localStorage.removeItem('obenlo_pwa_dismissed');
-                console.log('Obenlo: PWA dismissed flag cleared via URL parameter.');
+                debugLog('PWA Reset flag cleared');
             }
 
             if (localStorage.getItem('obenlo_pwa_dismissed') === 'true') {
