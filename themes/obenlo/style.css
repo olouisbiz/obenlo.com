@@ -992,61 +992,7 @@ body {
     }
 }
 
-/* Mobile Bottom Navigation */
-.mobile-bottom-nav {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 70px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    z-index: 9999;
-    justify-content: space-around;
-    align-items: center;
-    padding-bottom: env(safe-area-inset-bottom);
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.03);
-}
-
-.mobile-bottom-nav .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: #717171;
-    font-size: 11px;
-    font-weight: 600;
-    gap: 4px;
-    flex: 1;
-    transition: all 0.2s ease;
-}
-
-.mobile-bottom-nav .nav-item svg {
-    width: 26px;
-    height: 26px;
-    stroke: #717171;
-}
-
-.mobile-bottom-nav .nav-item.active {
-    color: #e61e4d;
-}
-
-.mobile-bottom-nav .nav-item.active svg {
-    stroke: #e61e4d;
-}
-
 @media (max-width: 768px) {
-    .mobile-bottom-nav {
-        display: flex;
-    }
-    body {
-        padding-bottom: 80px; /* Account for bottom nav */
-    }
-
     /* Refine Header Search on Mobile */
     .smart-search-bar {
         border-radius: 20px !important;
