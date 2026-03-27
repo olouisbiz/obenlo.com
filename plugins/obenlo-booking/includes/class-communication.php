@@ -381,7 +381,6 @@ class Obenlo_Booking_Communication
                 $content .= $button;
             }
         }
-        return $content;
     }
 
     public function render_messages_center($atts)
@@ -400,21 +399,21 @@ class Obenlo_Booking_Communication
 
         ob_start();
 ?>
-        <div class="obenlo-message-center">
+        <div class="obenlo-message-center" style="position:relative;">
             <!-- Threads Sidebar -->
             <div class="message-threads" id="obenlo-threads-sidebar">
                 <div class="sidebar-header">
                     Inbox
                 </div>
                 <div id="obenlo-center-contacts" style="flex-grow:1; overflow-y:auto;">
-                    <div style="padding:40px 20px; text-align:center; color:#999;">Loading...</div>
+                    <div style="padding:40px 20px; text-align:center; color:#999;">Loading contacts...</div>
                 </div>
             </div>
 
             <!-- Chat Window -->
             <div class="message-chat" id="obenlo-center-chat-window">
                 <div id="obenlo-center-header" style="padding:15px 25px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:15px; background:#fff; z-index:10; display:none;">
-                    <button onclick="obenloCloseChat()" class="mobile-back-btn" style="display:none; background:none; border:none; padding:10px; cursor:pointer; color:#e61e4d;">
+                    <button onclick="obenloCenterCloseChat()" class="mobile-back-btn" style="display:none; background:none; border:none; padding:10px; cursor:pointer; color:#e61e4d;">
                         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
                     </button>
                     <div id="obenlo-center-avatar" style="width:40px; height:40px; background:#f0f0f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#888; flex-shrink:0;"></div>
@@ -432,8 +431,8 @@ class Obenlo_Booking_Communication
                     <p style="font-size:0.95rem; margin-top:8px;">Choose a contact from the left to start a conversation.</p>
                 </div>
 
-                <div id="obenlo-center-room" style="flex:1 1 auto; min-height:300px; padding:30px; overflow-y:auto; background:#ffffff; display:none; flex-direction:column; border-bottom:1px solid #f0f0f0; position:relative;">
-                    <div id="obenlo-room-debug" style="position:absolute; top:5px; right:10px; font-size:10px; color:#eee; pointer-events:none;"></div>
+                <div id="obenlo-center-room" style="flex:1 1 auto; min-height:400px; padding:30px; overflow-y:auto; background:#ffffff; display:none; flex-direction:column; border-bottom:1px solid #f0f0f0;">
+                    <!-- Messages will appear here -->
                 </div>
 
                 <div id="obenlo-center-input-area" style="padding:15px; border-top:1px solid #f0f0f0; background:#fff; display:none;">
@@ -463,8 +462,8 @@ class Obenlo_Booking_Communication
             @media (max-width: 900px) {
                 .obenlo-message-center { grid-template-columns: 1fr; height: 600px; border-radius: 0; border: none; }
                 .message-threads.mobile-hide { display: none; }
-                #obenlo-center-chat-window { display: none; }
-                #obenlo-center-chat-window.mobile-show { display: flex; position: absolute; inset: 0; z-index: 100; }
+                #obenlo-center-chat-window { display: none !important; }
+                #obenlo-center-chat-window.mobile-show { display: flex !important; position: absolute; inset: 0; z-index: 100 !important; }
                 .mobile-back-btn { display: block !important; }
             }
         </style>
@@ -501,13 +500,9 @@ class Obenlo_Booking_Communication
                             html += '</div>';
                         });
                     } else {
-                        html = '<div style="padding:40px 20px; text-align:center; color:#999;">No messages yet.</div>';
-                        if (!res.success) console.error("Messaging Error:", res);
+                        html = '<div style="padding:40px 20px; text-align:center; color:#999;">No conversations yet.</div>';
                     }
                     document.getElementById('obenlo-center-contacts').innerHTML = html;
-                }).fail(function(xhr, status, error) {
-                    document.getElementById('obenlo-center-contacts').innerHTML = '<div style="padding:40px 20px; text-align:center; color:red;">Error loading contacts. Check console.</div>';
-                    console.error("AJAX Fail:", status, error, xhr.responseText);
                 });
             }
 
@@ -519,33 +514,31 @@ class Obenlo_Booking_Communication
                 document.getElementById('obenlo-center-empty').style.display = 'none';
                 document.getElementById('obenlo-center-header').style.display = 'flex';
                 document.getElementById('obenlo-center-room').style.display = 'flex';
+                document.getElementById('obenlo-center-input-area').style.display = obenloIsOversight ? 'none' : 'block';
                 
                 // Mobile visibility toggle
                 if (window.innerWidth <= 900) {
                     document.getElementById('obenlo-threads-sidebar').classList.add('mobile-hide');
                     document.getElementById('obenlo-center-chat-window').classList.add('mobile-show');
                 }
-
-                // Hide input area for oversight mode (read-only monitoring)
-                document.getElementById('obenlo-center-input-area').style.display = obenloIsOversight ? 'none' : 'block';
                 
                 document.getElementById('obenlo-center-title').innerText = contactName;
                 document.getElementById('obenlo-center-avatar').innerText = contactName.charAt(0).toUpperCase();
                 
-                document.getElementById('obenlo-center-room').innerHTML = '';
+                document.getElementById('obenlo-center-room').innerHTML = '<div style="padding:20px; text-align:center; color:#ccc;">Loading thread...</div>';
                 obenloCenterLastId = 0;
                 
-                obenloCenterFetchContacts(); // refresh active state
+                obenloCenterFetchContacts(); 
                 obenloCenterFetchMessages();
                 
                 if (obenloCenterInterval) clearInterval(obenloCenterInterval);
-                obenloCenterInterval = setInterval(obenloCenterFetchMessages, 3000); // 3 sec polling
+                obenloCenterInterval = setInterval(obenloCenterFetchMessages, 3000); 
             }
 
             function obenloCenterFetchMessages() {
                 if (!obenloCenterContact) return;
-                let room = document.getElementById('obenlo-center-room');
-                let debug = document.getElementById('obenlo-room-debug');
+                const room = document.getElementById('obenlo-center-room');
+                const debug = document.getElementById('obenlo-global-debug');
                 
                 jQuery.ajax({
                     url: '<?php echo admin_url('admin-ajax.php'); ?>',
@@ -555,16 +548,15 @@ class Obenlo_Booking_Communication
                         action: 'obenlo_fetch_chat_messages',
                         contact_id: obenloCenterContact,
                         last_id: obenloCenterLastId,
+                        nonce: '<?php echo wp_create_nonce("obenlo_chat_nonce"); ?>',
                         oversight: obenloIsOversight ? 1 : 0
                     },
                     success: function(res) {
                         if (res.success) {
-                            debug.innerText = 'Last ID: ' + obenloCenterLastId + ' | Got: ' + res.data.length;
                             if (res.data.length > 0) {
-                                let empty = room.querySelector('.no-messages-placeholder');
-                                if (empty) empty.remove();
+                                if (obenloCenterLastId === 0) room.innerHTML = '';
                                 
-                                let isScrolledToBottom = room.scrollHeight - room.clientHeight <= room.scrollTop + 30;
+                                let isScrolledToBottom = room.scrollHeight - room.clientHeight <= room.scrollTop + 50;
 
                                 res.data.forEach(function(msg) {
                                     let msgId = parseInt(msg.id);
@@ -572,26 +564,25 @@ class Obenlo_Booking_Communication
                                         let type = (msg.sender_id == obenloCenterUserId) ? 'sent' : 'received';
                                         let html = '<div class="obenlo-center-msg ' + type + '" data-msg-id="' + msgId + '">';
                                         html += msg.message;
-                                        html += '<div style="font-size:0.7rem; opacity:0.6; margin-top:6px; text-align:' + (type === 'sent' ? 'right' : 'left') + ';">' + msg.time + '</div>';
+                                        html += '<div style="font-size:0.75rem; opacity:0.6; margin-top:5px; text-align:' + (type === 'sent' ? 'right' : 'left') + ';">' + msg.time + '</div>';
                                         html += '</div>';
                                         room.insertAdjacentHTML('beforeend', html);
                                         obenloCenterLastId = msgId;
                                     }
                                 });
                                 
-                                if (isScrolledToBottom || obenloCenterLastId === parseInt(res.data[res.data.length-1].id)) {
+                                if (isScrolledToBottom) {
                                     room.scrollTop = room.scrollHeight;
                                 }
-                            } else if (obenloCenterLastId === 0 && !room.querySelector('.no-messages-placeholder')) {
-                                room.innerHTML = '<div class="no-messages-placeholder" style="text-align:center; padding:50px; color:#aaa; font-style:italic;">No messages found in this conversation yet.</div>';
-                                room.appendChild(debug); // keep debug
+                            } else if (obenloCenterLastId === 0) {
+                                room.innerHTML = '<div class="no-messages-placeholder" style="text-align:center; padding:50px; color:#aaa; font-style:italic;">No messages here yet.</div>';
                             }
                         } else {
-                            debug.innerText = 'Server Error: ' + (res.data || 'Unknown');
+                            // res.success false
                         }
                     },
                     error: function(xhr, status, error) {
-                        debug.innerText = 'AJAX Error: ' + status + ' ' + error;
+                        console.error('AJAX FAIL!', status, error);
                     }
                 });
             }
@@ -610,12 +601,12 @@ class Obenlo_Booking_Communication
                 }, function(res) {
                     if (res.success) {
                         obenloCenterFetchMessages();
-                        obenloCenterFetchContacts(); // update last message in sidebar
+                        obenloCenterFetchContacts(); 
                     }
                 });
             }
 
-            function obenloCloseChat() {
+            function obenloCenterCloseChat() {
                 document.getElementById('obenlo-threads-sidebar').classList.remove('mobile-hide');
                 document.getElementById('obenlo-center-chat-window').classList.remove('mobile-show');
                 if (obenloCenterInterval) clearInterval(obenloCenterInterval);
@@ -625,11 +616,10 @@ class Obenlo_Booking_Communication
             // Init
             obenloCenterFetchContacts();
             if (obenloCenterContact !== '') {
-                // Fetch user info for pre-selected contact to open room
-                obenloCenterOpenRoom(obenloCenterContact, 'Conversation'); // Ideally we fetch the name, but this suffices to open the UI
+                obenloCenterOpenRoom(obenloCenterContact, 'Conversation');
             }
         </script>
-        <?php
+<?php
         return ob_get_clean();
     }
 
