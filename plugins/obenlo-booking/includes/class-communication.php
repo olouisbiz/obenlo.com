@@ -1070,21 +1070,8 @@ class Obenlo_Booking_Communication
                 $html = Obenlo_Booking_Notifications::wrap_template($subject, $body);
                 $headers = array('Content-Type: text/html; charset=UTF-8', 'From: Obenlo <info@obenlo.com>');
                 
-                wp_mail($guest_email, $subject, $html, $headers);
-            } else {
-                // Trigger Push Notification for registered user
-                if (class_exists('Obenlo_Booking_Push_Notifications')) {
-                    $sender_info = get_userdata($sender_id);
-                    $sender_name = $sender_info ? $sender_info->display_name : 'Someone';
-                    Obenlo_Booking_Push_Notifications::send_push(
-                        $receiver_id,
-                        "New message from $sender_name",
-                        wp_trim_words($message, 15, '...'),
-                        home_url('/messages')
-                    );
-                }
             }
-
+            
             wp_send_json_success(array(
                 'id' => $msg_id,
                 'sender_id' => $sender_id,

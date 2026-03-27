@@ -50,34 +50,6 @@ remove_action('wp_head', 'rsd_link');
 remove_action('wp_head', 'wlwmanifest_link');
 remove_action('wp_head', 'wp_shortlink_wp_head');
 
-/**
- * Serve Service Worker dynamically from root domain
- */
-function obenlo_serve_sw()
-{
-    $request_uri = $_SERVER['REQUEST_URI'] ?? '';
-    $path = parse_url($request_uri, PHP_URL_PATH);
-    // Check if the request is for /sw.js, /manifest.json, or /robots.txt
-    if ($path === '/sw.js' || $path === '/manifest.json' || $path === '/robots.txt') {
-        if ($path === '/sw.js') {
-            header('Content-Type: application/javascript; charset=utf-8');
-            $file = '/sw.js';
-        } elseif ($path === '/manifest.json') {
-            header('Content-Type: application/json; charset=utf-8');
-            $file = '/manifest.json';
-        } else {
-            header('Content-Type: text/plain; charset=utf-8');
-            $file = '/robots.txt';
-        }
-        header('Service-Worker-Allowed: /');
-        header('Cache-Control: no-cache, no-store, must-revalidate');
-        header('Pragma: no-cache');
-        header('Expires: 0');
-        readfile(get_template_directory() . $file);
-        exit;
-    }
-}
-add_action('parse_request', 'obenlo_serve_sw', 1);
 
 /**
  * Redirect /sitemap.xml to /wp-sitemap.xml

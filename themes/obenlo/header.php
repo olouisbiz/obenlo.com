@@ -7,10 +7,6 @@
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#e61e4d">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Obenlo">
     
     <?php
     $seo_title = wp_title('|', false, 'right') . get_bloginfo('name');
@@ -67,10 +63,8 @@
     <meta name="google-site-verification" content="pTHwfkbZtkCHLS8aWdQ3MsKXKB8cIJxcNc2ZGmIBLEU">
     <meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE">
 
-    <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
     <link rel="profile" href="https://gmpg.org/xfn/11">
     <link rel="icon" type="image/png" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
-    <link rel="manifest" href="/manifest.json?v=1.0.3">
     <?php wp_head(); ?>
 
     <?php if ($ga_id): ?>
