@@ -1133,16 +1133,8 @@ class Obenlo_Booking_Communication
                 $sender_info = get_userdata($sender_id);
                 $sender_name = $sender_info ? $sender_info->display_name : 'Someone';
                 
-                // Email
-                Obenlo_Booking_Notifications::notify_message_event($msg_id, $receiver_id);
-                
-                // PWA Push
-                Obenlo_Booking_Notifications::send_push_notification(
-                    $receiver_id,
-                    "New Message from $sender_name",
-                    wp_trim_words($message, 15),
-                    home_url('/host-dashboard?action=messages')
-                );
+                // Email & PWA Push (Delayed via cron to avoid noise while chatting)
+                wp_schedule_single_event(time() + 180, 'obenlo_delayed_message_notification', array($msg_id, $receiver_id));
             }
             
             wp_send_json_success(array(
