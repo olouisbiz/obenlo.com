@@ -494,22 +494,21 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <span style="font-weight:700; color:#222; text-align: left;"><?php echo get_the_title($listing->ID); ?></span>
                                 </div>
                             </td>
-                            <td data-label="Category"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
-                            <td class="mobile-hide"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
+                            <td data-label="Category" class="mobile-hide"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
                             <td data-label="Status"><span class="badge badge-success"><?php echo ucfirst($listing->post_status); ?></span></td>
-                            <td class="mobile-hide">
+                            <td data-label="Units" class="mobile-hide">
                                 <span style="font-weight:600; color:#444;"><?php echo count($children); ?> units</span>
                                 <a href="?action=add&parent_id=<?php echo $listing->ID; ?>" style="display:block; font-size:0.75rem; color:#e61e4d; text-decoration:none;">+ Add unit</a>
                             </td>
                             <td data-label="Actions">
-                                <div style="display:flex; gap:10px; align-items:center;">
-                                    <a href="?action=edit&listing_id=<?php echo $listing->ID; ?>" style="color:#222; font-weight:700; text-decoration:none; font-size:0.85rem;">Edit</a>
-                                    <a href="<?php echo get_permalink($listing->ID); ?>" target="_blank" style="color:#1d9bf0; font-weight:700; text-decoration:none; font-size:0.85rem;">View</a>
-                                    <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="margin:0;" onsubmit="return confirm('Are you sure you want to delete this listing? This cannot be undone.');">
+                                <div style="display:flex; gap:12px; align-items:center;">
+                                    <a href="?action=edit&listing_id=<?php echo $listing->ID; ?>" style="background:#f0f0f0; color:#222; padding:6px 12px; border-radius:8px; font-weight:700; text-decoration:none; font-size:0.8rem;">Edit</a>
+                                    <a href="<?php echo get_permalink($listing->ID); ?>" target="_blank" style="color:#1d9bf0; font-weight:700; text-decoration:none; font-size:0.8rem;">View</a>
+                                    <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="margin:0;" onsubmit="return confirm('Are you sure you want to delete this listing?');">
                                         <input type="hidden" name="action" value="obenlo_dashboard_delete_listing">
                                         <input type="hidden" name="listing_id" value="<?php echo $listing->ID; ?>">
                                         <?php wp_nonce_field('obenlo_delete_listing_' . $listing->ID); ?>
-                                        <button type="submit" style="background:none; border:none; color:#e61e4d; font-weight:700; font-size:0.85rem; cursor:pointer; padding:0;">Delete</button>
+                                        <button type="submit" style="background:none; border:none; color:#e61e4d; font-weight:700; font-size:0.8rem; cursor:pointer; padding:0;">Delete</button>
                                     </form>
                                 </div>
                             </td>
@@ -517,15 +516,13 @@ class Obenlo_Booking_Frontend_Dashboard
                         <?php if (!empty($children)): ?>
                             <?php foreach ($children as $child): ?>
                                 <tr style="background:#fafafa;">
-                                    <td style="padding-left:60px; font-size:0.85rem;">└─ <?php echo get_the_title($child->ID); ?></td>
+                                    <td data-label="Listing" style="padding-left:30px; font-size:0.85rem; color:#666;">└─ <?php echo get_the_title($child->ID); ?></td>
                                     <td class="mobile-hide"></td>
+                                    <td data-label="Status"><span class="badge badge-success" style="opacity:0.6; font-size:0.7rem;"><?php echo ucfirst($child->post_status); ?></span></td>
                                     <td class="mobile-hide"></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td>
-                                        <div style="display:flex; gap:15px; align-items:center;">
-                                            <a href="?action=edit&listing_id=<?php echo $child->ID; ?>" style="color:#666; font-size:0.8rem; text-decoration:none;">Edit Unit</a>
+                                    <td data-label="Actions">
+                                        <div style="display:flex; gap:12px; align-items:center;">
+                                            <a href="?action=edit&listing_id=<?php echo $child->ID; ?>" style="color:#666; font-size:0.8rem; font-weight:600; text-decoration:none;">Edit Unit</a>
                                             <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="margin:0;" onsubmit="return confirm('Are you sure you want to delete this unit?');">
                                                 <input type="hidden" name="action" value="obenlo_dashboard_delete_listing">
                                                 <input type="hidden" name="listing_id" value="<?php echo $child->ID; ?>">
@@ -535,10 +532,8 @@ class Obenlo_Booking_Frontend_Dashboard
                                         </div>
                                     </td>
                                 </tr>
-                            <?php
-                    endforeach; ?>
-                        <?php
-                endif; ?>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     <?php
             endforeach; ?>
                 </tbody>

@@ -173,9 +173,6 @@ class Obenlo_Booking_Notifications
                 $msg     = "A new booking has been requested for your listing: <strong>$listing_title</strong>.<br>Total: <strong>\$$total</strong>";
                 self::send_html_to_user($host_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Bookings', home_url('/host-dashboard/?action=bookings'));
                 self::send_to_admin("New Platform Booking #$booking_id", "A new booking request for $listing_title (\$$total) has been made.");
-                if (class_exists('Obenlo_Booking_Push_Notifications')) {
-                    Obenlo_Booking_Push_Notifications::send_push($host_id, 'New Booking Request', "For $listing_title (\$$total)", home_url('/host-dashboard/?action=bookings'));
-                }
                 break;
 
             case 'booking_confirmed':
@@ -209,9 +206,6 @@ class Obenlo_Booking_Notifications
                 $body_html .= '<p style="margin:0 0 16px 0;">Total paid: <strong>$' . esc_html($total) . '</strong></p>';
 
                 self::send_html_to_user($guest_id, $subject, $body_html, 'View My Trips', home_url('/account?tab=trips'));
-                if (class_exists('Obenlo_Booking_Push_Notifications')) {
-                    Obenlo_Booking_Push_Notifications::send_push($guest_id, 'Booking Confirmed!', "Your trip to $listing_title is set.", home_url('/account?tab=trips'));
-                }
                 break;
 
             case 'booking_cancelled':
@@ -219,10 +213,6 @@ class Obenlo_Booking_Notifications
                 $msg     = "The booking for <strong>$listing_title</strong> has been cancelled.<br>Refund amount: <strong>\$$total</strong>";
                 self::send_html_to_user($guest_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Account', home_url('/account'));
                 self::send_html_to_user($host_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Dashboard', home_url('/host-dashboard/?action=bookings'));
-                if (class_exists('Obenlo_Booking_Push_Notifications')) {
-                    Obenlo_Booking_Push_Notifications::send_push($guest_id, 'Booking Cancelled', "Trip to $listing_title cancelled.", home_url('/account'));
-                    Obenlo_Booking_Push_Notifications::send_push($host_id, 'Booking Cancelled', "Trip to $listing_title cancelled.", home_url('/host-dashboard/?action=bookings'));
-                }
                 break;
         }
     }

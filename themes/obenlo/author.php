@@ -169,7 +169,7 @@ if ($is_demo_preview) $hosting_since = 2024;
         color: white;
         margin: 0;
         line-height: 1.1;
-        text-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        text-shadow: 0 2px 20px rgba(0,0,0,0.6);
     }
     .hero-tagline {
         font-size: 1.5rem;
@@ -271,10 +271,14 @@ if ($is_demo_preview) $hosting_since = 2024;
     .card-price { position: absolute; bottom: 15px; right: 15px; background: var(--primary-color); color: white; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 1.1rem; }
 
     @media (max-width: 992px) {
-        .hero-container { grid-template-columns: 1fr; gap: 40px; padding-top: 60px; }
-        .hero-text h1 { font-size: 3rem; text-align: center; }
-        .hero-tagline { text-align: center; }
-        .host-glass-card { margin-bottom: 40px; }
+        .premium-hero { height: auto; min-height: 450px; padding: 100px 0 60px; }
+        .hero-container { grid-template-columns: 1fr; gap: 80px; padding: 0 24px; }
+        .hero-text h1 { font-size: 2.8rem; text-align: center; }
+        .hero-tagline { text-align: center; font-size: 1.2rem; }
+        .host-glass-card { margin-top: 0; padding: 40px 20px 30px; }
+        .host-logo-large { margin-top: -90px; width: 110px; height: 110px; border-width: 4px; }
+        .premium-stats { flex-direction: column; gap: 20px; margin-top: 20px; padding: 20px; }
+        .stat-item { padding: 0 !important; border: none !important; }
     }
 </style>
 
