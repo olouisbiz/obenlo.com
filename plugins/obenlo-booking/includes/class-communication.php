@@ -433,7 +433,7 @@ class Obenlo_Booking_Communication
                 </div>
 
                 <div id="obenlo-center-room" style="flex-grow:1; padding:30px; overflow-y:auto; background:#ffffff; display:none; flex-direction:column; border-bottom:1px solid #f0f0f0;">
-                    <div style="text-align:center; padding:50px; color:#aaa;">Initializing conversation...</div>
+                    <!-- Messages will appear here -->
                 </div>
 
                 <div id="obenlo-center-input-area" style="padding:15px; border-top:1px solid #f0f0f0; background:#fff; display:none;">
@@ -553,13 +553,16 @@ class Obenlo_Booking_Communication
                     let room = document.getElementById('obenlo-center-room');
                     if (res.success) {
                         if (res.data.length > 0) {
-                            if (obenloCenterLastId === 0) room.innerHTML = ''; // clear initial msg
-                            let isScrolledToBottom = room.scrollHeight - room.clientHeight <= room.scrollTop + 20;
+                            // Hide "No messages" placeholder if it exists
+                            let empty = room.querySelector('.no-messages-placeholder');
+                            if (empty) empty.remove();
+                            
+                            let isScrolledToBottom = room.scrollHeight - room.clientHeight <= room.scrollTop + 30;
 
                             res.data.forEach(function(msg) {
                                 if (msg.id > obenloCenterLastId) {
                                     let type = (msg.sender_id == obenloCenterUserId) ? 'sent' : 'received';
-                                    let html = '<div class="obenlo-center-msg ' + type + '">';
+                                    let html = '<div class="obenlo-center-msg ' + type + '" data-msg-id="' + msg.id + '">';
                                     html += msg.message;
                                     html += '<div style="font-size:0.7rem; opacity:0.6; margin-top:6px; text-align:' + (type === 'sent' ? 'right' : 'left') + ';">' + msg.time + '</div>';
                                     html += '</div>';
@@ -567,14 +570,15 @@ class Obenlo_Booking_Communication
                                     obenloCenterLastId = msg.id;
                                 }
                             });
+                            
                             if (isScrolledToBottom) {
                                 room.scrollTop = room.scrollHeight;
                             }
-                        } else if (obenloCenterLastId === 0) {
-                            room.innerHTML = '<div style="text-align:center; padding:50px; color:#aaa; font-style:italic;">No messages in this conversation yet.</div>';
+                        } else if (obenloCenterLastId === 0 && !room.querySelector('.no-messages-placeholder')) {
+                            room.innerHTML = '<div class="no-messages-placeholder" style="text-align:center; padding:50px; color:#aaa; font-style:italic;">No messages found in this conversation yet.</div>';
                         }
-                    } else {
-                        room.innerHTML = '<div style="text-align:center; padding:50px; color:#e61e4d;">Error loading messages: ' + (res.data || 'Unknown error') + '</div>';
+                    } else if (obenloCenterLastId === 0) {
+                        room.innerHTML = '<div style="text-align:center; padding:50px; color:#e61e4d;">Error loading messages. Please refresh.</div>';
                     }
                 });
             }
