@@ -20,6 +20,9 @@ class Obenlo_PWA
         add_action('wp_head', array($this, 'inject_meta_tags'), 1);
         add_action('parse_request', array($this, 'serve_pwa_assets'), 1);
         add_action('wp_head', array($this, 'inject_pwa_script'), 2);
+
+        // AJAX for PWA subscriptions
+        add_action('wp_ajax_obenlo_save_pwa_subscription', array($this, 'handle_save_subscription'));
     }
 
     /**
@@ -148,7 +151,53 @@ class Obenlo_PWA
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
                         console.log('Obenlo: Notification permission granted.');
+                        subscribeUserToPush();
                     }
+                } else if (Notification.permission === 'granted') {
+                    subscribeUserToPush();
+                }
+            };
+
+            const urlBase64ToUint8Array = (base64String) => {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+                const rawData = window.atob(base64);
+                const outputArray = new Uint8Array(rawData.length);
+                for (let i = 0; i < rawData.length; ++i) {
+                    outputArray[i] = rawData.charCodeAt(i);
+                }
+                return outputArray;
+            };
+
+            const subscribeUserToPush = async () => {
+                try {
+                    const registration = await navigator.serviceWorker.ready;
+                    const publicKey = '<?php echo esc_js(get_option("obenlo_pwa_public_key")); ?>';
+                    
+                    if (!publicKey) {
+                        console.error('Obenlo: Push Public Key missing.');
+                        return;
+                    }
+
+                    const subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(publicKey)
+                    });
+
+                    console.log('Obenlo: PWA Subscribed:', subscription);
+                    
+                    // Save to server
+                    await fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                            action: 'obenlo_save_pwa_subscription',
+                            subscription: JSON.stringify(subscription)
+                        })
+                    });
+                    console.log('Obenlo: PWA Subscription saved to server.');
+                } catch (err) {
+                    console.error('Obenlo: Push subscription failed:', err);
                 }
             };
 
@@ -244,7 +293,77 @@ class Obenlo_PWA
         </script>
         <?php
     }
+
+    /**
+     * AJAX: Save PWA Push Subscription
+     */
+    public function handle_save_subscription()
+    {
+        $user_id = get_current_user_id();
+        $sub_data = isset($_POST['subscription']) ? json_decode(stripslashes($_POST['subscription']), true) : null;
+
+        if (!$user_id || !$sub_data) {
+            wp_send_json_error('Invalid subscription data');
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'obenlo_pwa_subscriptions';
+
+        $endpoint = $sub_data['endpoint'] ?? '';
+        $p256dh = $sub_data['keys']['p256dh'] ?? '';
+        $auth = $sub_data['keys']['auth'] ?? '';
+
+        if (!$endpoint || !$p256dh || !$auth) {
+            wp_send_json_error('Incomplete subscription keys');
+        }
+
+        // Check if already exists
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE endpoint = %s AND user_id = %d", $endpoint, $user_id));
+
+        if ($exists) {
+            wp_send_json_success('Already subscribed');
+        }
+
+        $wpdb->insert($table, array(
+            'user_id' => $user_id,
+            'endpoint' => $endpoint,
+            'p256dh' => $p256dh,
+            'auth' => $auth
+        ));
+
+        wp_send_json_success('Subscription saved');
+    }
+
+    /**
+     * Generate VAPID Keys if missing
+     */
+    public static function generate_keys()
+    {
+        if (get_option('obenlo_pwa_public_key') && get_option('obenlo_pwa_private_key')) {
+            return;
+        }
+
+        // Use WebPush library from Obenlo Booking
+        $autoload = WP_PLUGIN_DIR . '/obenlo-booking/vendor/autoload.php';
+        if (file_exists($autoload)) {
+            require_once $autoload;
+            try {
+                $keys = \Minishlink\WebPush\VAPID::createVapidKeys();
+                update_option('obenlo_pwa_public_key', $keys['publicKey']);
+                update_option('obenlo_pwa_private_key', $keys['privateKey']);
+                error_log('Obenlo PWA: VAPID keys generated successfully.');
+            } catch (\Exception $e) {
+                error_log('Obenlo PWA: Error generating VAPID keys: ' . $e->getMessage());
+            }
+        }
+    }
 }
 
 $obenlo_pwa = new Obenlo_PWA();
 $obenlo_pwa->init();
+
+// Register activation hook
+register_activation_hook(__FILE__, array('Obenlo_PWA', 'generate_keys'));
+
+// Also run it on init once if missing (for existing installs)
+add_action('init', array('Obenlo_PWA', 'generate_keys'), 5);

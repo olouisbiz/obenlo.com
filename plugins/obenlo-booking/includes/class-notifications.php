@@ -15,6 +15,9 @@ class Obenlo_Booking_Notifications
         add_filter('wp_mail_from', array($this, 'set_mail_from'));
         add_filter('wp_mail_from_name', array($this, 'set_mail_from_name'));
         add_filter('wp_mail_content_type', array($this, 'set_mail_content_type'));
+        
+        // Cron hook for delayed messages
+        add_action('obenlo_delayed_message_notification', array($this, 'process_delayed_notification'), 10, 2);
     }
 
     public function set_mail_from($email)
@@ -266,6 +269,38 @@ class Obenlo_Booking_Notifications
     }
 
     /**
+     * Process a notification after a delay (via wp_cron)
+     */
+    public function process_delayed_notification($message_id, $recipient_id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'obenlo_chat_messages';
+        
+        // Check if message is still unread
+        $is_read = $wpdb->get_var($wpdb->prepare("SELECT is_read FROM $table WHERE id = %d", $message_id));
+        
+        if ($is_read == '0') {
+            // Re-fetch sender info for the notification
+            $message_obj = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $message_id));
+            if (!$message_obj) return;
+            
+            $sender_id = $message_obj->sender_id;
+            $sender = get_userdata($sender_id);
+            $sender_name = $sender ? $sender->display_name : 'Someone';
+            
+            // 1. Send Email
+            self::notify_message_event($message_id, $recipient_id);
+            
+            // 2. Send PWA Push
+            self::send_push_notification(
+                $recipient_id,
+                "New Message from $sender_name",
+                wp_trim_words($message_obj->message, 15),
+                home_url('/host-dashboard?action=messages')
+            );
+        }
+    }
+
+    /**
      * Centralized Broadcast Notification
      */
     public static function notify_broadcast_event($broadcast_id, $target)
@@ -380,7 +415,12 @@ class Obenlo_Booking_Notifications
         $public_key = get_option('obenlo_pwa_public_key');
         $private_key = get_option('obenlo_pwa_private_key');
 
-        if (!$public_key || !$private_key) return; // Keys not configured
+        if (!$public_key || !$private_key) {
+            error_log('Obenlo Push Error: VAPID keys missing in options.');
+            return; 
+        }
+
+        error_log('Obenlo Push: Attempting send to user ' . $user_id . ' with ' . count($subs) . ' subscriptions.');
 
         $auth = array(
             'VAPID' => array(
