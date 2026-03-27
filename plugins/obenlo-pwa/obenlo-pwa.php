@@ -75,17 +75,20 @@ class Obenlo_PWA
     {
         // Re-inject the PWA prompt HTML
         ?>
-        <div id="obenlo-pwa-prompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; background:#fff; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.15); z-index:10000; padding:20px; font-family:'Inter', sans-serif; align-items:center; gap:15px; border:1px solid #eee;">
-            <div style="width:50px; height:50px; background:#f0f0f0; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>" alt="Obenlo App" style="width:32px; height:32px; border-radius:8px;">
+        <div id="obenlo-pwa-prompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:94%; max-width:420px; background:#fff; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.2); z-index:10000; padding:20px; font-family:'Inter', -apple-system, sans-serif; align-items:center; gap:15px; border:1px solid rgba(0,0,0,0.05); animation: pwa-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+            <style>
+                @keyframes pwa-slide-up { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+            </style>
+            <div style="width:60px; height:60px; background:#fff; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>" alt="Obenlo App" style="width:40px; height:40px; border-radius:8px;">
             </div>
             <div style="flex-grow:1;">
-                <h4 style="margin:0 0 4px 0; font-size:16px; color:#222; font-weight:700;">Install Obenlo App</h4>
-                <p style="margin:0; font-size:13px; color:#666; line-height:1.4;" id="pwa-prompt-desc">Book faster and get notifications directly on your phone.</p>
+                <h4 style="margin:0 0 4px 0; font-size:17px; color:#1a1a1b; font-weight:800; letter-spacing:-0.01em;">Obenlo: Better with the App</h4>
+                <p style="margin:0; font-size:13px; color:#5e5e62; line-height:1.4;" id="pwa-prompt-desc">Install for a faster experience & instant notifications.</p>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px;">
-                <button id="pwa-install-btn" style="background:#e61e4d; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer;">Install</button>
-                <button id="pwa-dismiss-btn" style="background:transparent; color:#999; border:none; padding:4px; font-size:12px; cursor:pointer; text-decoration:underline;">Not Now</button>
+                <button id="pwa-install-btn" style="background:#e61e4d; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; box-shadow: 0 4px 12px rgba(230, 30, 77, 0.2);">Install</button>
+                <button id="pwa-dismiss-btn" style="background:transparent; color:#999; border:none; padding:4px; font-size:12px; cursor:pointer; font-weight:600;">Maybe later</button>
             </div>
         </div>
 
@@ -101,25 +104,42 @@ class Obenlo_PWA
             const isIos = () => /iphone|ipad|ipod/.test( window.navigator.userAgent.toLowerCase() );
             const isStandalone = () => ('standalone' in window.navigator) && (window.navigator.standalone);
 
+            // Notification Request Logic
+            const requestNotificationPermission = async () => {
+                if ('Notification' in window && Notification.permission !== 'granted') {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        console.log('Obenlo: Notification permission granted.');
+                    }
+                }
+            };
+
             if (isIos() && !isStandalone()) {
                 setTimeout(() => {
-                    document.getElementById('pwa-prompt-desc').innerHTML = 'Tap the Share icon <svg viewBox="0 0 24 24" style="width:14px;height:14px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:2;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> and select "Add to Home Screen".';
+                    document.getElementById('pwa-prompt-desc').innerHTML = 'Tap the Share icon <svg viewBox="0 0 24 24" style="width:14px;height:14px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:2;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> and "Add to Home Screen".';
                     installBtn.style.display = 'none';
                     promptUI.style.display = 'flex';
-                }, 5000);
-            } else {
+                }, 8000);
+            } else if (!isStandalone()) {
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     deferredPrompt = e;
-                    setTimeout(() => { promptUI.style.display = 'flex'; }, 5000);
+                    setTimeout(() => { 
+                        promptUI.style.display = 'flex'; 
+                        // Gently request notification permission when showing install prompt
+                        requestNotificationPermission();
+                    }, 5000);
                 });
 
                 installBtn.addEventListener('click', async () => {
                     promptUI.style.display = 'none';
                     if (deferredPrompt) {
                         deferredPrompt.prompt();
-                        await deferredPrompt.userChoice;
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`Obenlo: User ${outcome} the install prompt`);
                         deferredPrompt = null;
+                        // Request again if they accepted install
+                        if (outcome === 'accepted') requestNotificationPermission();
                     }
                 });
             }
@@ -131,8 +151,18 @@ class Obenlo_PWA
 
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                    navigator.serviceWorker.register('/sw.js?v=1.0.0').then(function(reg) {
+                    navigator.serviceWorker.register('/sw.js?v=2.0.0').then(function(reg) {
                         console.log('Obenlo PWA: ServiceWorker registered');
+                        
+                        // Check for updates
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('Obenlo: New version available. Please refresh.');
+                                }
+                            });
+                        });
                     });
                 });
             }

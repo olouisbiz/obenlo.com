@@ -122,6 +122,17 @@ class Obenlo_Booking_Frontend_Dashboard
                     }
                     .dashboard-content { padding: 20px 15px; overflow-x: hidden; width: 100%; box-sizing: border-box; }
                     .stats-grid { grid-template-columns: 1fr; gap: 15px; }
+                    
+                    /* Responsive Grid System */
+                    .grid-row { flex-direction: column !important; gap: 15px !important; }
+                    .grid-col-1-2, .grid-col-1-3, .grid-col-2-3 { width: 100% !important; flex: none !important; }
+                    
+                    /* Form Section Refinement */
+                    .form-section { padding: 25px 20px !important; }
+                    
+                    /* Restore visibility for previously hidden elements */
+                    .mobile-hide { display: table-cell !important; }
+                    th.mobile-hide { display: table-cell !important; }
                 }
             </style>
 
@@ -359,7 +370,7 @@ class Obenlo_Booking_Frontend_Dashboard
             </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:30px;">
+        <div class="dashboard-grid-layout" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px;">
             <div class="form-section" style="margin-top:0;">
                 <h4 style="margin-top:0; margin-bottom:20px;">Recent Bookings</h4>
                 <?php $this->render_bookings_list(5); ?>
@@ -467,9 +478,9 @@ class Obenlo_Booking_Frontend_Dashboard
                 <thead>
                     <tr>
                         <th>Listing</th>
-                        <th class="mobile-hide">Category</th>
+                        <th>Category</th>
                         <th>Status</th>
-                        <th class="mobile-hide">Units/Sessions</th>
+                        <th>Units/Sessions</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -494,9 +505,9 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <span style="font-weight:700; color:#222; text-align: left;"><?php echo get_the_title($listing->ID); ?></span>
                                 </div>
                             </td>
-                            <td data-label="Category" class="mobile-hide"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
+                            <td data-label="Category"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
                             <td data-label="Status"><span class="badge badge-success"><?php echo ucfirst($listing->post_status); ?></span></td>
-                            <td data-label="Units" class="mobile-hide">
+                            <td data-label="Units">
                                 <span style="font-weight:600; color:#444;"><?php echo count($children); ?> units</span>
                                 <a href="?action=add&parent_id=<?php echo $listing->ID; ?>" style="display:block; font-size:0.75rem; color:#e61e4d; text-decoration:none;">+ Add unit</a>
                             </td>
@@ -517,9 +528,9 @@ class Obenlo_Booking_Frontend_Dashboard
                             <?php foreach ($children as $child): ?>
                                 <tr style="background:#fafafa;">
                                     <td data-label="Listing" style="padding-left:30px; font-size:0.85rem; color:#666;">└─ <?php echo get_the_title($child->ID); ?></td>
-                                    <td class="mobile-hide"></td>
+                                    <td></td>
                                     <td data-label="Status"><span class="badge badge-success" style="opacity:0.6; font-size:0.7rem;"><?php echo ucfirst($child->post_status); ?></span></td>
-                                    <td class="mobile-hide"></td>
+                                    <td></td>
                                     <td data-label="Actions">
                                         <div style="display:flex; gap:12px; align-items:center;">
                                             <a href="?action=edit&listing_id=<?php echo $child->ID; ?>" style="color:#666; font-size:0.8rem; font-weight:600; text-decoration:none;">Edit Unit</a>
@@ -591,9 +602,9 @@ class Obenlo_Booking_Frontend_Dashboard
                     <tr>
                         <th>Booking ID</th>
                         <th>Listing</th>
-                        <th class="mobile-hide">Dates / Details</th>
+                        <th>Dates / Details</th>
                         <th>Guest</th>
-                        <th class="mobile-hide">Total</th>
+                        <th>Total</th>
                         <th>Status</th>
                         <?php if ($limit === -1): ?><th>Confirmation Code</th><th>Actions</th><?php
             endif; ?>
@@ -2020,7 +2031,7 @@ class Obenlo_Booking_Frontend_Dashboard
         <?php
         endif; ?>
 
-        <div style="display:grid; grid-template-columns: 350px 1fr; gap:40px; align-items: start;">
+        <div class="dashboard-grid-layout" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:40px; align-items: start;">
             
             <!-- Create Ticket -->
             <div class="form-section" style="margin-bottom:0; background:#fcfcfc;">
@@ -2214,7 +2225,7 @@ class Obenlo_Booking_Frontend_Dashboard
             $start = isset($business_hours[$key]['start']) ? $business_hours[$key]['start'] : '09:00';
             $end = isset($business_hours[$key]['end']) ? $business_hours[$key]['end'] : '17:00';
 ?>
-                        <div style="display:flex; align-items:center; gap:20px; padding:15px; border:1px solid #eee; border-radius:10px;">
+                        <div class="grid-row" style="display:flex; align-items:center; gap:20px; padding:15px; border:1px solid #eee; border-radius:10px;">
                             <label style="width:120px; font-weight:bold; display:flex; align-items:center; gap:10px;">
                                 <input type="checkbox" name="hours[<?php echo $key; ?>][active]" value="yes" <?php checked($active); ?> style="accent-color:#e61e4d;">
                                 <?php echo $label; ?>
@@ -2236,7 +2247,7 @@ class Obenlo_Booking_Frontend_Dashboard
         if (!empty($vacation_blocks)) {
             foreach ($vacation_blocks as $idx => $block) {
 ?>
-                            <div class="vacation-block-row" style="display:flex; align-items:center; gap:15px; padding:15px; border:1px dashed #ccc; border-radius:10px; background:#fafafa;">
+                            <div class="vacation-block-row grid-row" style="display:flex; align-items:center; gap:15px; padding:15px; border:1px dashed #ccc; border-radius:10px; background:#fafafa;">
                                 <div>
                                     <label style="display:block; font-size:0.8rem; font-weight:bold;">Start Date</label>
                                     <input type="date" name="vacation[<?php echo $idx; ?>][start]" value="<?php echo esc_attr($block['start']); ?>" required style="padding:8px; border:1px solid #ccc; border-radius:6px;">
@@ -2269,7 +2280,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 var addBtn = document.getElementById('add-vacation-block');
                 var blockCount = <?php echo count($vacation_blocks); ?>;
                 var template = `
-                    <div class="vacation-block-row" style="display:flex; align-items:center; gap:15px; padding:15px; border:1px dashed #ccc; border-radius:10px; background:#fafafa; margin-top:15px;">
+                    <div class="vacation-block-row grid-row" style="display:flex; align-items:center; gap:15px; padding:15px; border:1px dashed #ccc; border-radius:10px; background:#fafafa; margin-top:15px;">
                         <div>
                             <label style="display:block; font-size:0.8rem; font-weight:bold;">Start Date</label>
                             <input type="date" name="vacation[{idx}][start]" required style="padding:8px; border:1px solid #ccc; border-radius:6px;">
