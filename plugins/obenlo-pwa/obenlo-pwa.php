@@ -17,9 +17,9 @@ class Obenlo_PWA
 {
     public function init()
     {
-        // add_action('wp_head', array($this, 'inject_meta_tags'), 1);
+        add_action('wp_head', array($this, 'inject_meta_tags'), 1);
         add_action('parse_request', array($this, 'serve_pwa_assets'), 1);
-        // add_action('wp_head', array($this, 'inject_pwa_script'), 2);
+        add_action('wp_head', array($this, 'inject_pwa_script'), 2);
 
         // AJAX for PWA subscriptions
         add_action('wp_ajax_obenlo_save_pwa_subscription', array($this, 'handle_save_subscription'));
