@@ -29,11 +29,12 @@ class Obenlo_PWA
     {
         ?>
         <meta name="theme-color" content="#e61e4d">
+        <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="Obenlo">
-        <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
-        <link rel="manifest" href="/manifest.json?v=1.0.0">
+        <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile-192.png'); ?>">
+        <link rel="manifest" href="<?php echo home_url('/manifest.json'); ?>">
         <?php
     }
 
@@ -138,13 +139,13 @@ class Obenlo_PWA
             } else if (!isStandalone()) {
                 console.log('Obenlo: Standard browser detected, waiting for beforeinstallprompt');
                 window.addEventListener('beforeinstallprompt', (e) => {
-                    console.log('Obenlo: beforeinstallprompt event fired!');
+                    console.log('Obenlo PWA SUCCESS: beforeinstallprompt received!');
                     e.preventDefault();
                     deferredPrompt = e;
                     setTimeout(() => { 
                         promptUI.style.setProperty('display', 'flex', 'important'); 
                         requestNotificationPermission();
-                    }, 5000);
+                    }, 2000);
                 });
 
                 installBtn.addEventListener('click', async () => {
@@ -167,6 +168,32 @@ class Obenlo_PWA
                 promptUI.style.display = 'none';
                 localStorage.setItem('obenlo_pwa_dismissed', 'true');
             });
+
+            // Debug Status Panel
+            if (window.location.search.includes('debug_pwa=1')) {
+                const debugDiv = document.createElement('div');
+                debugDiv.style.cssText = 'position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.8);color:#0f0;padding:10px;border-radius:8px;font-size:10px;z-index:999999;font-family:monospace;pointer-events:none;';
+                debugDiv.id = 'pwa-debug-status';
+                document.body.appendChild(debugDiv);
+                
+                const updateDebug = (msg) => {
+                    debugDiv.innerHTML += '<div>> ' + msg + '</div>';
+                    console.log('PWA DEBUG: ' + msg);
+                };
+
+                updateDebug('PWA Status: ' + (isStandalone() ? 'Standalone' : 'Browser'));
+                updateDebug('iOS: ' + isIos());
+                updateDebug('HTTPS: ' + (location.protocol === 'https:'));
+                
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistration().then(reg => {
+                        updateDebug('SW: ' + (reg ? 'Registered' : 'None'));
+                        if (reg) updateDebug('Scope: ' + reg.scope);
+                    });
+                }
+                
+                window.addEventListener('beforeinstallprompt', () => updateDebug('EVENT: beforeinstallprompt [OK]'));
+            }
 
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
