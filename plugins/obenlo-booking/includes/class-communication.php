@@ -412,7 +412,7 @@ class Obenlo_Booking_Communication
             </div>
 
             <!-- Chat Window -->
-            <div class="message-chat" id="obenlo-chat-window">
+            <div class="message-chat" id="obenlo-center-chat-window">
                 <div id="obenlo-center-header" style="padding:15px 25px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:15px; background:#fff; z-index:10; display:none;">
                     <button onclick="obenloCloseChat()" class="mobile-back-btn" style="display:none; background:none; border:none; padding:10px; cursor:pointer; color:#e61e4d;">
                         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -452,7 +452,7 @@ class Obenlo_Booking_Communication
             .obenlo-message-center { display:grid; grid-template-columns: 320px 1fr; gap:0; height:750px; background:#fff; border:1px solid #eee; border-radius:20px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
             .message-threads { border-right:1px solid #f0f0f0; background:#fcfcfc; display:flex; flex-direction:column; }
             .sidebar-header { padding:25px 20px; border-bottom:1px solid #f0f0f0; font-weight:800; background:#fff; font-size:1.1rem; color:#222; }
-            .message-chat { display:flex; flex-direction:column; background:#fff; position:relative; }
+            .message-chat { display:flex; flex-direction:column; background:#fff; position:relative; min-height: 100%; }
             .obenlo-center-contact-item { padding:20px; border-bottom:1px solid #f5f5f5; cursor:pointer; transition:all 0.2s; display:block; }
             .obenlo-center-contact-item:hover { background:#fff; }
             .obenlo-center-contact-item.active { background:#fff; border-left:4px solid #e61e4d; }
@@ -523,7 +523,7 @@ class Obenlo_Booking_Communication
                 // Mobile visibility toggle
                 if (window.innerWidth <= 900) {
                     document.getElementById('obenlo-threads-sidebar').classList.add('mobile-hide');
-                    document.getElementById('obenlo-chat-window').classList.add('mobile-show');
+                    document.getElementById('obenlo-center-chat-window').classList.add('mobile-show');
                 }
 
                 // Hide input area for oversight mode (read-only monitoring)
@@ -593,7 +593,7 @@ class Obenlo_Booking_Communication
 
             function obenloCloseChat() {
                 document.getElementById('obenlo-threads-sidebar').classList.remove('mobile-hide');
-                document.getElementById('obenlo-chat-window').classList.remove('mobile-show');
+                document.getElementById('obenlo-center-chat-window').classList.remove('mobile-show');
                 if (obenloCenterInterval) clearInterval(obenloCenterInterval);
                 obenloCenterContact = '';
             }
