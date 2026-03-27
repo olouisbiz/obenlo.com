@@ -993,6 +993,31 @@ body {
 }
 
 @media (max-width: 768px) {
+    /* Global Touch Optimization */
+    :root {
+        --mobile-padding: 20px;
+        --touch-target: 48px;
+    }
+
+    /* Prevent iOS auto-zoom on focus by ensuring font-size is at least 16px */
+    input, select, textarea {
+        font-size: 16px !important;
+        min-height: var(--touch-target) !important;
+        padding: 12px 16px !important;
+    }
+
+    button, .btn, .btn-primary, .cta-button, .reserve-btn {
+        min-height: var(--touch-target) !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        font-size: 16px !important;
+    }
+
+    .obenlo-container, .static-page-content, .obenlo-account-container, .obenlo-auth-container {
+        padding-left: var(--mobile-padding) !important;
+        padding-right: var(--mobile-padding) !important;
+    }
+
     /* Refine Header Search on Mobile */
     .smart-search-bar {
         border-radius: 20px !important;
@@ -1072,6 +1097,37 @@ body {
         min-width: 0 !important;
     }
 
+    /* Account Dashboard Refinements */
+    .obenlo-account-container .listing-sidebar {
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        padding-bottom: 15px !important;
+        border-bottom: 1px solid #eee !important;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        gap: 10px !important;
+    }
+    .obenlo-account-container .listing-sidebar::-webkit-scrollbar { display: none; }
+    .obenlo-account-container .listing-sidebar a {
+        flex: 0 0 auto !important;
+        padding: 10px 15px !important;
+        font-size: 14px !important;
+    }
+    .obenlo-account-container .listing-sidebar h1 {
+        display: none !important; /* Hide "Account" title on mobile sidebar */
+    }
+
+    .trip-card {
+        flex-direction: column !important;
+    }
+    .trip-card-thumb {
+        width: 100% !important;
+        height: 180px !important;
+        border-right: none !important;
+        border-bottom: 1px solid #eee !important;
+    }
+
     /* Ensure tables stack into card view by default in the dashboard */
     .dashboard-table, .admin-table {
         display: block !important;
@@ -1095,5 +1151,62 @@ body {
         font-weight: 700;
         color: #888;
         font-size: 0.75rem;
+    }
+
+    /* Listing Page Refinements */
+    .listing-header h1 {
+        font-size: 1.6rem !important;
+        line-height: 1.2 !important;
+    }
+    .category-badge {
+        display: inline-flex !important;
+        align-items: center !important;
+        padding: 6px 14px !important;
+        font-size: 14px !important;
+        border-radius: 50px !important;
+    }
+    .booking-widget {
+        padding: var(--mobile-padding) !important;
+        border-radius: 24px !important;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.06) !important;
+    }
+    .price-value {
+        font-size: 1.5rem !important;
+    }
+
+    /* Front Page Polish */
+    .marketplace-hero {
+        padding: 60px 20px !important;
+        margin-bottom: 40px !important;
+    }
+    .marketplace-hero h1 {
+        font-size: 2.2rem !important;
+        line-height: 1.1 !important;
+    }
+    .category-filters {
+        gap: 12px !important;
+        padding: 0 5px !important;
+        margin-bottom: 30px !important;
+    }
+
+    /* Become a Host Polish */
+    .host-benefits, .step-container, .how-it-works-brief .step-container {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 30px !important;
+        padding: 0 var(--mobile-padding) !important;
+    }
+    .benefit-item, .step-item {
+        width: 100% !important;
+        max-width: none !important;
+        text-align: center !important;
+    }
+    .become-host-hero {
+        padding: 80px var(--mobile-padding) !important;
+        min-height: 400px !important;
+    }
+    .become-host-hero h1 {
+        font-size: 2.2rem !important;
+        line-height: 1.1 !important;
     }
 }
