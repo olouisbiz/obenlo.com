@@ -429,11 +429,20 @@ class Obenlo_Booking_Admin_Dashboard
     private function render_payments_tab()
     {
         // Payment Keys
+        // Payment Mode
         $payment_mode = get_option('obenlo_payment_mode', 'sandbox');
-        $stripe_publishable = get_option('obenlo_stripe_publishable_key', '');
-        $stripe_secret = get_option('obenlo_stripe_secret_key', '');
-        $paypal_client_id = get_option('obenlo_paypal_client_id', '');
-        $paypal_secret = get_option('obenlo_paypal_secret', '');
+
+        // Stripe Keys
+        $stripe_live_pub = get_option('obenlo_stripe_live_publishable_key', '');
+        $stripe_live_sec = get_option('obenlo_stripe_live_secret_key', '');
+        $stripe_sandbox_pub = get_option('obenlo_stripe_sandbox_publishable_key', '');
+        $stripe_sandbox_sec = get_option('obenlo_stripe_sandbox_secret_key', '');
+
+        // PayPal Keys
+        $paypal_live_id = get_option('obenlo_paypal_live_client_id', '');
+        $paypal_live_sec = get_option('obenlo_paypal_live_secret', '');
+        $paypal_sandbox_id = get_option('obenlo_paypal_sandbox_client_id', '');
+        $paypal_sandbox_sec = get_option('obenlo_paypal_sandbox_secret', '');
 ?>
         <h3>Payment Gateway Configuration</h3>
         <div style="background:#fff; border:1px solid #eee; padding:30px; border-radius:12px; max-width:600px;">
@@ -451,21 +460,45 @@ class Obenlo_Booking_Admin_Dashboard
                 </div>
 
                 <div style="margin-bottom:25px; border-top:1px solid #eee; padding-top:25px;">
-                    <h4 style="margin-bottom:10px;">Stripe Configuration</h4>
-                    <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Publishable Key</label>
-                    <input type="text" name="stripe_publishable" value="<?php echo esc_attr($stripe_publishable); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
-                    
-                    <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret Key</label>
-                    <input type="password" name="stripe_secret" value="<?php echo esc_attr($stripe_secret); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
+                        <div>
+                            <h4 style="margin-bottom:15px; color:#e61e4d;">Stripe LIVE Keys</h4>
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Publishable Key (Live)</label>
+                            <input type="text" name="stripe_live_pub" value="<?php echo esc_attr($stripe_live_pub); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret Key (Live)</label>
+                            <input type="password" name="stripe_live_sec" value="<?php echo esc_attr($stripe_live_sec); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom:15px; color:#666;">Stripe SANDBOX Keys</h4>
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Publishable Key (Test)</label>
+                            <input type="text" name="stripe_sandbox_pub" value="<?php echo esc_attr($stripe_sandbox_pub); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret Key (Test)</label>
+                            <input type="password" name="stripe_sandbox_sec" value="<?php echo esc_attr($stripe_sandbox_sec); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                    </div>
                 </div>
 
                 <div style="margin-bottom:25px; border-top:1px solid #eee; padding-top:25px;">
-                    <h4 style="margin-bottom:10px;">PayPal Configuration</h4>
-                    <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Client ID</label>
-                    <input type="text" name="paypal_id" value="<?php echo esc_attr($paypal_client_id); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
-                    
-                    <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret</label>
-                    <input type="password" name="paypal_secret" value="<?php echo esc_attr($paypal_secret); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
+                        <div>
+                            <h4 style="margin-bottom:15px; color:#0070ba;">PayPal LIVE Keys</h4>
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Client ID (Live)</label>
+                            <input type="text" name="paypal_live_id" value="<?php echo esc_attr($paypal_live_id); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret (Live)</label>
+                            <input type="password" name="paypal_live_sec" value="<?php echo esc_attr($paypal_live_sec); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom:15px; color:#666;">PayPal SANDBOX Keys</h4>
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Client ID (Test)</label>
+                            <input type="text" name="paypal_sandbox_id" value="<?php echo esc_attr($paypal_sandbox_id); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret (Test)</label>
+                            <input type="password" name="paypal_sandbox_sec" value="<?php echo esc_attr($paypal_sandbox_sec); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                    </div>
                 </div>
 
                 <button type="submit" style="background:#e61e4d; color:#fff; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:700;">Save Payment Settings</button>
@@ -523,17 +556,31 @@ class Obenlo_Booking_Admin_Dashboard
         if (isset($_POST['payment_mode'])) {
             update_option('obenlo_payment_mode', sanitize_text_field($_POST['payment_mode']));
         }
-        if (isset($_POST['stripe_publishable'])) {
-            update_option('obenlo_stripe_publishable_key', sanitize_text_field($_POST['stripe_publishable']));
+        // Stripe Save
+        if (isset($_POST['stripe_live_pub'])) {
+            update_option('obenlo_stripe_live_publishable_key', sanitize_text_field($_POST['stripe_live_pub']));
         }
-        if (isset($_POST['stripe_secret'])) {
-            update_option('obenlo_stripe_secret_key', sanitize_text_field($_POST['stripe_secret']));
+        if (isset($_POST['stripe_live_sec'])) {
+            update_option('obenlo_stripe_live_secret_key', sanitize_text_field($_POST['stripe_live_sec']));
         }
-        if (isset($_POST['paypal_id'])) {
-            update_option('obenlo_paypal_client_id', sanitize_text_field($_POST['paypal_id']));
+        if (isset($_POST['stripe_sandbox_pub'])) {
+            update_option('obenlo_stripe_sandbox_publishable_key', sanitize_text_field($_POST['stripe_sandbox_pub']));
         }
-        if (isset($_POST['paypal_secret'])) {
-            update_option('obenlo_paypal_secret', sanitize_text_field($_POST['paypal_secret']));
+        if (isset($_POST['stripe_sandbox_sec'])) {
+            update_option('obenlo_stripe_sandbox_secret_key', sanitize_text_field($_POST['stripe_sandbox_sec']));
+        }
+        // PayPal Save
+        if (isset($_POST['paypal_live_id'])) {
+            update_option('obenlo_paypal_live_client_id', sanitize_text_field($_POST['paypal_live_id']));
+        }
+        if (isset($_POST['paypal_live_sec'])) {
+            update_option('obenlo_paypal_live_secret', sanitize_text_field($_POST['paypal_live_sec']));
+        }
+        if (isset($_POST['paypal_sandbox_id'])) {
+            update_option('obenlo_paypal_sandbox_client_id', sanitize_text_field($_POST['paypal_sandbox_id']));
+        }
+        if (isset($_POST['paypal_sandbox_sec'])) {
+            update_option('obenlo_paypal_sandbox_secret', sanitize_text_field($_POST['paypal_sandbox_sec']));
         }
 
         wp_safe_redirect(add_query_arg('tab', 'payments', wp_get_referer()));
@@ -569,16 +616,21 @@ class Obenlo_Booking_Admin_Dashboard
 
         echo '<h3>All Platform Bookings</h3>';
         echo '<table class="admin-table">';
-        echo '<tr><th>ID</th><th>Listing</th><th>Total</th><th>Status</th><th>Date</th></tr>';
+        echo '<tr><th>ID</th><th>Listing</th><th>Total</th><th>Status</th><th>Mode</th><th>Date</th></tr>';
         foreach ($bookings as $booking) {
             $listing_id = get_post_meta($booking->ID, '_obenlo_listing_id', true);
             $total = get_post_meta($booking->ID, '_obenlo_total_price', true);
             $status = get_post_meta($booking->ID, '_obenlo_booking_status', true);
+            $mode = get_post_meta($booking->ID, '_obenlo_payment_mode', true) ?: 'legacy';
+            $mode_color = ($mode === 'live') ? '#e61e4d' : '#666';
+            $mode_label = ($mode === 'live') ? 'LIVE' : 'TEST';
+            
             echo '<tr>';
             echo '<td>#' . $booking->ID . '</td>';
             echo '<td>' . get_the_title($listing_id) . '</td>';
             echo '<td>$' . number_format(floatval($total), 2) . '</td>';
             echo '<td>' . esc_html($status) . '</td>';
+            echo '<td><span class="badge" style="background:' . $mode_color . '; color:#fff;">' . $mode_label . '</span></td>';
             echo '<td>' . get_the_date('', $booking->ID) . '</td>';
             echo '</tr>';
         }

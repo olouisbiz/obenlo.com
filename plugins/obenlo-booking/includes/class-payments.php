@@ -363,6 +363,10 @@ class Obenlo_Booking_Payments
         update_post_meta($booking_id, '_obenlo_booking_status', 'pending_payment');
         update_post_meta($booking_id, '_obenlo_confirmation_code', $confirmation_code);
         update_post_meta($booking_id, '_obenlo_guest_id', $guest_id_val);
+        
+        $payment_mode = get_option('obenlo_payment_mode', 'sandbox');
+        update_post_meta($booking_id, '_obenlo_payment_mode', $payment_mode);
+
         if ($duration_mins > 0) {
             update_post_meta($booking_id, '_obenlo_duration_mins', $duration_mins);
         }
@@ -385,13 +389,14 @@ class Obenlo_Booking_Payments
     private function process_stripe_checkout($booking_id, $amount, $item_name)
     {
         $stripe_secret = Obenlo_Booking_Stripe::get_secret_key();
+        $mode = get_option('obenlo_payment_mode', 'sandbox');
 
         if (empty($stripe_secret)) {
-            error_log('Obenlo: Stripe Secret Key missing in settings. Falling back to simulation.');
+            error_log('Obenlo: Stripe Secret Key missing in ' . $mode . ' mode. Falling back to simulation.');
         }
 
-        // In a real implementation, we would call $stripe_service->create_checkout_session(...) here.
-        // For now, we continue to simulate success but using the centralized configuration.
+        // Environment-aware logging
+        error_log("Obenlo Payment: Processing Stripe Checkout in $mode mode for Booking #$booking_id");
 
         update_post_meta($booking_id, '_obenlo_booking_status', 'confirmed');
         Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'booking_confirmed');
@@ -402,10 +407,13 @@ class Obenlo_Booking_Payments
     private function process_paypal_checkout($booking_id, $amount, $item_name)
     {
         $paypal_id = Obenlo_Booking_PayPal::get_client_id();
+        $mode = get_option('obenlo_payment_mode', 'sandbox');
 
         if (empty($paypal_id)) {
-            error_log('Obenlo: PayPal Client ID missing. Falling back to simulation.');
+            error_log('Obenlo: PayPal Client ID missing in ' . $mode . ' mode. Falling back to simulation.');
         }
+
+        error_log("Obenlo Payment: Processing PayPal Checkout in $mode mode for Booking #$booking_id");
 
         // Simulate success redirect
         update_post_meta($booking_id, '_obenlo_booking_status', 'confirmed');

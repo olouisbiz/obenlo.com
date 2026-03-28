@@ -173,6 +173,9 @@ class Obenlo_Booking_Notifications
         switch ($event) {
             case 'new_booking':
                 $subject = "New Booking Request: $listing_title";
+                if (get_option('obenlo_payment_mode') === 'sandbox') {
+                    $subject = "[TEST MODE] " . $subject;
+                }
                 $msg     = "A new booking has been requested for your listing: <strong>$listing_title</strong>.<br>Total: <strong>\$$total</strong>";
                 self::send_html_to_user($host_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Bookings', home_url('/host-dashboard/?action=bookings'));
                 self::send_to_admin("New Platform Booking #$booking_id", "A new booking request for $listing_title (\$$total) has been made.");
@@ -182,6 +185,9 @@ class Obenlo_Booking_Notifications
                 $confirmation_code = get_post_meta($booking_id, '_obenlo_confirmation_code', true);
                 $guest_id_val      = get_post_meta($booking_id, '_obenlo_guest_id', true);
                 $subject           = "Booking Confirmed! – $listing_title";
+                if (get_option('obenlo_payment_mode') === 'sandbox') {
+                    $subject = "[TEST MODE] " . $subject;
+                }
 
                 $body_html = '
                 <p style="margin:0 0 16px 0;">Great news! Your booking for <strong>' . esc_html($listing_title) . '</strong> has been confirmed.</p>
