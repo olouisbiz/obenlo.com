@@ -99,8 +99,10 @@ class Obenlo_Booking_Communication
             wp_send_json_error(array('message' => 'Please enter a valid email address.'));
         }
 
-        $to      = 'info@obenlo.com';
-        $subject = 'Contact Form: Message from ' . $name;
+        $brand_name    = get_option('obenlo_brand_name', 'Obenlo');
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
+        $to            = get_option('admin_email'); // Or a dedicated support email if added later
+        $subject       = 'Contact Form: Message from ' . $name;
 
         $body_html = '
         <p style="margin:0 0 16px 0;">You have received a new message via the <strong>Contact Us</strong> form.</p>
@@ -111,7 +113,7 @@ class Obenlo_Booking_Communication
             </tr>
             <tr>
                 <td style="padding:10px 14px; border-bottom:1px solid #eee; font-weight:700;">Email</td>
-                <td style="padding:10px 14px; border-bottom:1px solid #eee;"><a href="mailto:' . esc_attr($email) . '" style="color:#e61e4d;">' . esc_html($email) . '</a></td>
+                <td style="padding:10px 14px; border-bottom:1px solid #eee;"><a href="mailto:' . esc_attr($email) . '" style="color:' . esc_attr($primary_color) . ';">' . esc_html($email) . '</a></td>
             </tr>
             <tr>
                 <td style="padding:10px 14px; border-radius:0 0 8px 8px; font-weight:700; vertical-align:top;">Message</td>
@@ -123,7 +125,7 @@ class Obenlo_Booking_Communication
         $html    = Obenlo_Booking_Notifications::wrap_template($subject, $body_html);
         $headers = array(
             'Content-Type: text/html; charset=UTF-8',
-            'From: Obenlo <info@obenlo.com>',
+            'From: ' . $brand_name . ' <' . $to . '>',
             'Reply-To: ' . $name . ' <' . $email . '>',
         );
 
@@ -172,6 +174,10 @@ class Obenlo_Booking_Communication
 
         error_log("Obenlo Debug: Sending guest contact email to host: " . $host->user_email);
 
+        $brand_name    = get_option('obenlo_brand_name', 'Obenlo');
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
+        $support_email = get_option('admin_email');
+
         $listing_title = $listing_id ? get_the_title($listing_id) : 'a listing';
         $subject       = 'A visitor wants to contact you about: ' . $listing_title;
 
@@ -184,7 +190,7 @@ class Obenlo_Booking_Communication
             </tr>
             <tr>
                 <td style="padding:10px 14px; border-bottom:1px solid #eee; font-weight:700;">Email</td>
-                <td style="padding:10px 14px; border-bottom:1px solid #eee;"><a href="mailto:' . esc_attr($visitor_email) . '" style="color:#e61e4d;">' . esc_html($visitor_email) . '</a></td>
+                <td style="padding:10px 14px; border-bottom:1px solid #eee;"><a href="mailto:' . esc_attr($visitor_email) . '" style="color:' . esc_attr($primary_color) . ';">' . esc_html($visitor_email) . '</a></td>
             </tr>
             <tr>
                 <td style="padding:10px 14px; border-radius:0 0 8px 8px; font-weight:700; vertical-align:top;">Message</td>
@@ -196,9 +202,9 @@ class Obenlo_Booking_Communication
         $html    = Obenlo_Booking_Notifications::wrap_template($subject, $body_html);
         $headers = array(
             'Content-Type: text/html; charset=UTF-8',
-            'From: Obenlo <info@obenlo.com>',
+            'From: ' . $brand_name . ' <' . $support_email . '>',
             'Reply-To: ' . $visitor_name . ' <' . $visitor_email . '>',
-            'Cc: info@obenlo.com',
+            'Cc: ' . $support_email,
         );
 
         error_log("Obenlo Debug: Headers: " . print_r($headers, true));
@@ -241,6 +247,7 @@ class Obenlo_Booking_Communication
     public function render_guest_contact_modal()
     {
         if (is_user_logged_in()) return; // Only needed for guests
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
         ?>
         <div id="obenlo-guest-contact-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:99999; align-items:center; justify-content:center; padding:20px;">
             <div style="background:#fff; width:100%; max-width:480px; border-radius:20px; padding:32px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.15); font-family:'Inter',sans-serif;">
@@ -268,18 +275,18 @@ class Obenlo_Booking_Communication
 
                     <div style="margin-bottom:14px;">
                         <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px; color:#333;">Your Name *</label>
-                        <input type="text" name="visitor_name" required placeholder="Jane Smith" style="width:100%; padding:11px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:0.95rem; outline:none; box-sizing:border-box; transition:border 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
+                        <input type="text" name="visitor_name" required placeholder="Jane Smith" style="width:100%; padding:11px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:0.95rem; outline:none; box-sizing:border-box; transition:border 0.2s;" onfocus="this.style.borderColor='<?php echo esc_attr($primary_color); ?>'" onblur="this.style.borderColor='#ddd'">
                     </div>
                     <div style="margin-bottom:14px;">
                         <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px; color:#333;">Your Email *</label>
-                        <input type="email" name="visitor_email" required placeholder="jane@example.com" style="width:100%; padding:11px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:0.95rem; outline:none; box-sizing:border-box; transition:border 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
+                        <input type="email" name="visitor_email" required placeholder="jane@example.com" style="width:100%; padding:11px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:0.95rem; outline:none; box-sizing:border-box; transition:border 0.2s;" onfocus="this.style.borderColor='<?php echo esc_attr($primary_color); ?>'" onblur="this.style.borderColor='#ddd'">
                     </div>
                     <div style="margin-bottom:20px;">
                         <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px; color:#333;">Your Message *</label>
-                        <textarea name="visitor_message" required rows="4" placeholder="Hi, I'm interested in booking your listing..." style="width:100%; padding:11px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:0.95rem; outline:none; resize:vertical; box-sizing:border-box; transition:border 0.2s; font-family:inherit;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'"></textarea>
+                        <textarea name="visitor_message" required rows="4" placeholder="Hi, I'm interested in booking your listing..." style="width:100%; padding:11px 14px; border:1.5px solid #ddd; border-radius:10px; font-size:0.95rem; outline:none; resize:vertical; box-sizing:border-box; transition:border 0.2s; font-family:inherit;" onfocus="this.style.borderColor='<?php echo esc_attr($primary_color); ?>'" onblur="this.style.borderColor='#ddd'"></textarea>
                     </div>
 
-                    <button type="submit" id="gcm-submit-btn" style="width:100%; background:#e61e4d; color:#fff; border:none; padding:14px; border-radius:12px; font-weight:800; font-size:1rem; cursor:pointer; transition:all 0.3s;">
+                    <button type="submit" id="gcm-submit-btn" style="width:100%; background:<?php echo esc_attr($primary_color); ?>; color:#fff; border:none; padding:14px; border-radius:12px; font-weight:800; font-size:1rem; cursor:pointer; transition:all 0.3s;">
                         Send Message
                     </button>
                     <div id="gcm-response" style="margin-top:14px; font-size:0.9rem; font-weight:700; text-align:center; display:none;"></div>
@@ -316,21 +323,22 @@ class Obenlo_Booking_Communication
                     btn.innerText = 'Send Message';
                     btn.disabled = false;
                     resp.style.display = 'block';
+                    const primaryColor = '<?php echo esc_js(get_option('obenlo_primary_color', '#e61e4d')); ?>';
                     if (data.success) {
-                        resp.style.color = '#10b981';
-                        resp.innerText = data.data.message;
-                        document.getElementById('obenlo-guest-contact-form').reset();
-                        setTimeout(function(){ document.getElementById('obenlo-guest-contact-modal').style.display='none'; }, 3500);
+                        resp.style.color = 'green';
+                        resp.innerText = data.data.message || 'Message sent!';
+                        form.reset();
                     } else {
-                        resp.style.color = '#e61e4d';
-                        resp.innerText = data.data.message || 'Error. Please try again.';
+                        resp.style.color = primaryColor;
+                        resp.innerText = data.data.message || 'Error sending message.';
                     }
                 })
                 .catch(function() {
+                    const primaryColor = '<?php echo esc_js(get_option('obenlo_primary_color', '#e61e4d')); ?>';
                     btn.innerText = 'Send Message';
                     btn.disabled = false;
                     resp.style.display = 'block';
-                    resp.style.color = '#e61e4d';
+                    resp.style.color = primaryColor;
                     resp.innerText = 'Network error. Please try again.';
                 });
         });
@@ -369,12 +377,13 @@ class Obenlo_Booking_Communication
                     $onclick = "window.obenloOpenGuestContact($host_id, '" . esc_js($host_name) . "', '" . esc_url($host_avatar) . "');";
                 }
 
+                $primary_color = get_option('obenlo_primary_color', '#e61e4d');
                 $button = '
                 <div class="contact-host-section" style="margin:40px 0; padding:30px; border-radius:32px; background:#fff; border:1px solid #eee; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.03);">
                     <div style="font-weight:800; color:#111; font-size:1.4rem; margin-bottom:15px;">Enjoyed this listing?</div>
                     <p style="color:#666; margin-bottom:25px; font-size:1rem;">Contact <strong>' . esc_html($host_name) . '</strong> directly for any questions.</p>
-                    <button onclick="' . esc_attr($onclick) . '" style="background:#e61e4d; color:white; border:none; padding:15px 35px; border-radius:12px; font-weight:800; font-size:1.1rem; cursor:pointer; display:inline-flex; align-items:center; gap:10px; transition:all 0.3s ease; box-shadow:0 4px 15px rgba(230,30,77,0.3);" onmouseover="this.style.transform=\'scale(1.05)\';this.style.background=\'#000\';" onmouseout="this.style.transform=\'scale(1)\';this.style.background=\'#e61e4d\';">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <button onclick="' . esc_attr($onclick) . '" style="background:' . esc_attr($primary_color) . '; color:white; border:none; padding:15px 35px; border-radius:12px; font-weight:800; font-size:1.1rem; cursor:pointer; display:inline-flex; align-items:center; gap:10px; transition:all 0.3s ease; box-shadow:0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.transform=\'scale(1.05)\';this.style.background=\'#000\';" onmouseout="this.style.transform=\'scale(1)\';this.style.background=\'' . esc_attr($primary_color) . '\';">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap round="stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                         Contact Host
                     </button>
                 </div>';
@@ -397,9 +406,10 @@ class Obenlo_Booking_Communication
         $is_oversight = ($atts['oversight'] === '1' && current_user_can('manage_options'));
         $pre_selected_contact = isset($_GET['recipient_id']) ? sanitize_text_field($_GET['recipient_id']) : '';
 
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
         ob_start();
 ?>
-        <div class="obenlo-message-center" style="position:relative;">
+        <div class="obenlo-message-center" style="position:relative; --obenlo-primary: <?php echo esc_attr($primary_color); ?>;">
             <!-- Threads Sidebar -->
             <div class="message-threads" id="obenlo-threads-sidebar">
                 <div class="sidebar-header">
@@ -413,7 +423,7 @@ class Obenlo_Booking_Communication
             <!-- Chat Window -->
             <div class="message-chat" id="obenlo-center-chat-window">
                 <div id="obenlo-center-header" style="padding:15px 25px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:15px; background:#fff; z-index:10; display:none;">
-                    <button onclick="obenloCenterCloseChat()" class="mobile-back-btn" style="display:none; background:none; border:none; padding:10px; cursor:pointer; color:#e61e4d;">
+                    <button onclick="obenloCenterCloseChat()" class="mobile-back-btn" style="display:none; background:none; border:none; padding:10px; cursor:pointer; color:var(--obenlo-primary);">
                         <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
                     </button>
                     <div id="obenlo-center-avatar" style="width:40px; height:40px; background:#f0f0f0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#888; flex-shrink:0;"></div>
@@ -425,7 +435,7 @@ class Obenlo_Booking_Communication
 
                 <div id="obenlo-center-empty" style="flex-grow:1; display:flex; align-items:center; justify-content:center; color:#999; flex-direction:column; background:#fafafa;">
                     <div style="background:#fff; width:100px; height:100px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#e61e4d" stroke-width="2" style="width:40px; height:40px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="var(--obenlo-primary)" stroke-width="2" style="width:40px; height:40px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     </div>
                     <h4 style="margin:0; color:#333; font-weight:800;">Your Messages</h4>
                     <p style="font-size:0.95rem; margin-top:8px;">Choose a contact from the left to start a conversation.</p>
@@ -438,7 +448,7 @@ class Obenlo_Booking_Communication
                 <div id="obenlo-center-input-area" style="padding:15px; border-top:1px solid #f0f0f0; background:#fff; display:none;">
                     <div style="display:flex; gap:10px; align-items:center; box-sizing:border-box;">
                         <input type="text" id="obenlo-center-input" placeholder="Type your message here..." style="flex-grow:1; padding:12px 20px; border:1px solid #eee; border-radius:30px; background:#f9f9f9; outline:none; font-size:1rem;" onkeypress="if(event.keyCode===13) obenloCenterSendMessage()">
-                        <button onclick="obenloCenterSendMessage()" style="background:#e61e4d; color:white; border:none; width:45px; height:45px; border-radius:50%; flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(230,30,77,0.2);">
+                        <button onclick="obenloCenterSendMessage()" style="background:var(--obenlo-primary); color:white; border:none; width:45px; height:45px; border-radius:50%; flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:20px; height:20px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </button>
                     </div>
@@ -454,9 +464,9 @@ class Obenlo_Booking_Communication
             .message-chat { display:flex; flex-direction:column; background:#fff; position:relative; overflow: hidden; height: 100%; }
             .obenlo-center-contact-item { padding:20px; border-bottom:1px solid #f5f5f5; cursor:pointer; transition:all 0.2s; display:block; }
             .obenlo-center-contact-item:hover { background:#fff; }
-            .obenlo-center-contact-item.active { background:#fff; border-left:4px solid #e61e4d; }
+            .obenlo-center-contact-item.active { background:#fff; border-left:4px solid var(--obenlo-primary); }
             .obenlo-center-msg { max-width:85%; padding:14px 20px; margin-bottom:12px; font-size:0.95rem; line-height:1.6; box-shadow: 0 2px 5px rgba(0,0,0,0.02); word-wrap: break-word; }
-            .obenlo-center-msg.sent { background:#e61e4d; color:white; border-radius:20px 20px 2px 20px; margin-left:auto; }
+            .obenlo-center-msg.sent { background:var(--obenlo-primary); color:white; border-radius:20px 20px 2px 20px; margin-left:auto; }
             .obenlo-center-msg.received { background:#fff; color:#333; border-radius:20px 20px 20px 2px; margin-right:auto; border:1px solid #eee; }
             
             @media (max-width: 900px) {
@@ -493,7 +503,7 @@ class Obenlo_Booking_Communication
                             
                             html += '<div class="obenlo-center-contact-item ' + act + '" onclick="' + onclick + '">';
                             html += '<div style="display:flex; justify-content:space-between; margin-bottom:5px;">';
-                            html += '<strong style="font-size:1rem; color:' + (act ? '#e61e4d' : '#222') + ';">' + c.contact_name + '</strong>';
+                            html += '<strong style="font-size:1rem; color:' + (act ? 'var(--obenlo-primary)' : '#222') + ';">' + c.contact_name + '</strong>';
                             html += '<span style="font-size:0.7rem; color:#aaa;">' + c.last_message_time + '</span>';
                             html += '</div>';
                             html += '<div style="font-size:0.85rem; color:#666; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + c.last_message + '</div>';
@@ -693,7 +703,7 @@ class Obenlo_Booking_Communication
             <div style="background:#fff; border:1px solid #eee; padding:40px; border-radius:16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom:30px;">
                 <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:10px;">
                     <h2 style="margin:0;"><?php echo esc_html($ticket->post_title); ?></h2>
-                    <span style="background:<?php echo $status === 'open' ? '#e61e4d' : '#333'; ?>; color:#fff; padding:5px 12px; border-radius:20px; font-size:0.8em; font-weight:bold;"><?php echo strtoupper($status); ?></span>
+                    <span style="background:<?php echo $status === 'open' ? 'var(--obenlo-primary)' : '#333'; ?>; color:#fff; padding:5px 12px; border-radius:20px; font-size:0.8em; font-weight:bold;"><?php echo strtoupper($status); ?></span>
                 </div>
                 
                 <div style="font-size:0.9em; color:#666; margin-bottom:30px;">
@@ -730,7 +740,7 @@ class Obenlo_Booking_Communication
                 if ($is_internal && !current_user_can('manage_support'))
                     continue;
 
-                $bubble_style = $is_admin_reply ? 'background:#f1f1f1; border-left:4px solid #e61e4d;' : 'background:#fff; border:1px solid #eee;';
+                $bubble_style = $is_admin_reply ? 'background:#f1f1f1; border-left:4px solid var(--obenlo-primary);' : 'background:#fff; border:1px solid #eee;';
                 if ($is_internal)
                     $bubble_style = 'background:#fff9c4; border-left:4px solid #fbc02d;';
 ?>
@@ -741,7 +751,7 @@ class Obenlo_Booking_Communication
                 if ($is_internal)
                     echo '🔒 Internal Note';
                 elseif ($is_admin_reply)
-                    echo 'Obenlo Support';
+                    echo esc_html($brand_name) . ' Support';
                 else
                     echo esc_html(get_userdata($reply->post_author)->display_name);
 ?>
@@ -780,7 +790,7 @@ class Obenlo_Booking_Communication
                                     <span></span>
                                 <?php
             endif; ?>
-                                <button type="submit" style="background:#e61e4d; color:white; border:none; padding:12px 30px; border-radius:8px; cursor:pointer; font-weight:bold;">Send Message</button>
+                                <button type="submit" style="background:var(--obenlo-primary); color:white; border:none; padding:12px 30px; border-radius:8px; cursor:pointer; font-weight:bold;">Send Message</button>
                             </div>
                         </form>
                     </div>
@@ -799,8 +809,10 @@ class Obenlo_Booking_Communication
     private function render_ticket_form()
     {
 ?>
+        $brand_name = get_option('obenlo_brand_name', 'Obenlo');
+        ?>
         <div class="obenlo-support-page" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
-            <h2>Contact Obenlo Support</h2>
+            <h2>Contact <?php echo esc_html($brand_name); ?> Support</h2>
             <p>Need help with a booking or want to raise a dispute with a host? Fill out the form below.</p>
             
             <?php if (isset($_GET['ticket_sent'])): ?>
@@ -820,7 +832,7 @@ class Obenlo_Booking_Communication
                         <option value="support">General Support</option>
                         <option value="dispute">Report an Issue / Dispute with Host</option>
                         <option value="account">Account / Billing Question</option>
-                        <option value="demo">Request a Demo of Obenlo</option>
+                        <option value="demo">Request a Demo of <?php echo esc_html($brand_name); ?></option>
                     </select>
                 </div>
 
@@ -848,8 +860,8 @@ class Obenlo_Booking_Communication
                     <input type="file" name="ticket_attachments[]" multiple accept="image/*">
                 </div>
 
-                <button type="submit" style="background:#e61e4d; color:white; border:none; padding:15px 30px; border-radius:10px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1em; transition: transform 0.2s;">
-                    Submit Ticket to Obenlo
+                <button type="submit" style="background:var(--obenlo-primary); color:white; border:none; padding:15px 30px; border-radius:10px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1em; transition: transform 0.2s;">
+                    Submit Ticket to <?php echo esc_html($brand_name); ?>
                 </button>
             </form>
         </div>
@@ -1121,12 +1133,12 @@ class Obenlo_Booking_Communication
             // If it's a guest, send them an email reply
             if ($guest_email) {
                 $sender_info = get_userdata($sender_id);
-                $sender_name = $sender_info ? $sender_info->display_name : 'Obenlo Host';
-                $subject = "New message from $sender_name on Obenlo";
+                $sender_name = $sender_info ? $sender_info->display_name : $brand_name . ' Host';
+                $subject = "New message from $sender_name on $brand_name";
                 $body = "Hi $guest_name,<br><br>$sender_name has responded to your inquiry:<br><br>\"$message\"<br><br>You can reply directly to this email to continue the conversation.";
                 
                 $html = Obenlo_Booking_Notifications::wrap_template($subject, $body);
-                $headers = array('Content-Type: text/html; charset=UTF-8', 'From: Obenlo <info@obenlo.com>');
+                $headers = array('Content-Type: text/html; charset=UTF-8', 'From: ' . $brand_name . ' <' . get_option('admin_email') . '>');
                 wp_mail($guest_email, $subject, $html, $headers);
             } else {
                 // Notifying a registered user
@@ -1354,20 +1366,21 @@ class Obenlo_Booking_Communication
             return; // Don't show for logged out users. Admins can see it for testing.
         }
         $current_user_id = get_current_user_id();
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
 ?>
-        <div id="obenlo-floating-chat-container">
+        <div id="obenlo-floating-chat-container" style="--obenlo-primary: <?php echo esc_attr($primary_color); ?>;">
             <style>
                 #obenlo-floating-chat-container {
                     position: fixed; bottom: 30px; right: 30px; z-index: 9999;
                     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                 }
                 #obenlo-chat-bubble {
-                    width: 65px; height: 65px; background: #e61e4d; color: white;
+                    width: 65px; height: 65px; background: var(--obenlo-primary); color: white;
                     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-                    cursor: pointer; box-shadow: 0 8px 25px rgba(230,30,77,0.3); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,0.1); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                     border: 2px solid rgba(255,255,255,0.1);
                 }
-                #obenlo-chat-bubble:hover { transform: scale(1.1) rotate(5deg); box-shadow: 0 12px 30px rgba(230,30,77,0.4); }
+                #obenlo-chat-bubble:hover { transform: scale(1.1) rotate(5deg); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
                 #obenlo-chat-bubble svg { width: 32px; height: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
                 
                 #obenlo-chat-window {
@@ -1379,7 +1392,7 @@ class Obenlo_Booking_Communication
                     transition: all 0.3s ease; transform-origin: bottom right;
                 }
                 .obenlo-chat-header {
-                    background: linear-gradient(135deg, #e61e4d 0%, #d91b42 100%); color: white; padding: 20px 25px; font-weight: 800;
+                    background: var(--obenlo-primary); color: white; padding: 20px 25px; font-weight: 800;
                     display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem;
                 }
                 .obenlo-chat-header-close { cursor: pointer; font-size: 24px; line-height: 1; opacity: 0.8; transition: opacity 0.2s; }
@@ -1392,17 +1405,17 @@ class Obenlo_Booking_Communication
                 .obenlo-chat-contact-item { padding: 18px 25px; border-bottom: 1px solid rgba(0,0,0,0.03); cursor: pointer; display: flex; align-items: center; transition: all 0.2s; }
                 .obenlo-chat-contact-item:hover { background: rgba(230,30,77,0.03); }
                 
-                .obenlo-badge { background: #e61e4d; color: white; font-size: 11px; font-weight: 800; border-radius: 12px; padding: 2px 8px; margin-left: auto; box-shadow: 0 2px 5px rgba(230,30,77,0.3); }
+                .obenlo-badge { background: var(--obenlo-primary); color: white; font-size: 11px; font-weight: 800; border-radius: 12px; padding: 2px 8px; margin-left: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
                 
                 .obenlo-chat-messages-list { flex-grow: 1; padding: 20px; overflow-y: auto; background: transparent; display: flex; flex-direction: column; }
                 .obenlo-chat-msg { max-width: 85%; padding: 12px 18px; margin-bottom: 12px; border-radius: 18px; font-size: 14px; line-height: 1.5; word-wrap: break-word; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-                .obenlo-chat-msg.sent { background: #e61e4d; color: white; margin-left: auto; border-bottom-right-radius: 4px; box-shadow: 0 4px 12px rgba(230,30,77,0.15); }
+                .obenlo-chat-msg.sent { background: var(--obenlo-primary); color: white; margin-left: auto; border-bottom-right-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
                 .obenlo-chat-msg.received { background: white; color: #222; border: 1px solid rgba(0,0,0,0.05); margin-right: auto; border-bottom-left-radius: 4px; }
                 
                 .obenlo-chat-input-area { padding: 20px; border-top: 1px solid rgba(0,0,0,0.05); display: flex; gap: 12px; background: rgba(255,255,255,0.5); }
                 .obenlo-chat-input-area input { flex-grow: 1; padding: 12px 20px; border: 1px solid rgba(0,0,0,0.08); border-radius: 30px; outline: none; transition: all 0.2s; font-size: 0.95rem; background: #fff; }
-                .obenlo-chat-input-area input:focus { border-color: #e61e4d; box-shadow: 0 0 0 3px rgba(230,30,77,0.1); }
-                .obenlo-chat-input-area button { background: #e61e4d; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 4px 10px rgba(230,30,77,0.2); }
+                .obenlo-chat-input-area input:focus { border-color: var(--obenlo-primary); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+                .obenlo-chat-input-area button { background: var(--obenlo-primary); color: white; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
                 .obenlo-chat-input-area button:hover { transform: scale(1.05); background: #000; }
                 
                 @media (max-width: 500px) {

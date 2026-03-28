@@ -63,13 +63,13 @@ $grid_query = new WP_Query($grid_args);
     
     <!-- Newsletter Hero Section -->
     <div style="background: linear-gradient(135deg, #222, #111); color: #fff; padding: 60px 40px; text-align: center; margin-bottom: 40px; border-radius: 16px; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-        <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px;">The Obenlo Blog</h1>
+        <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px;"><?php echo sprintf( esc_html__( 'The %s Blog', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></h1>
         <p style="font-size: 1.15rem; color: #ccc; max-width: 600px; margin: 0 auto 30px; line-height: 1.6;">
             Discover travel tips, top host stories, and local guides. Subscribe to our newsletter to receive inspiration straight to your inbox.
         </p>
         <form style="display: flex; max-width: 500px; margin: 0 auto; gap: 10px;" onsubmit="event.preventDefault(); alert('Thanks for subscribing!'); this.reset();">
             <input type="email" placeholder="Your email address" required style="flex-grow: 1; padding: 16px 24px; border-radius: 30px; border: none; font-size: 1rem; outline: none;">
-            <button type="submit" style="background: #e61e4d; color: white; border: none; padding: 16px 32px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s;">Subscribe</button>
+            <button type="submit" style="background: var(--obenlo-primary); color: white; border: none; padding: 16px 32px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s;">Subscribe</button>
         </form>
     </div>
 
@@ -112,7 +112,7 @@ $grid_query = new WP_Query($grid_args);
                     <div class="listing-info" style="display: flex; flex-direction: column; gap: 4px;">
                         <div style="display: flex; justify-content: space-between; align-items: baseline;">
                             <h2 style="margin: 0; font-size: 1rem; font-weight: 600; color: #222;"><?php echo get_the_date(); ?></h2>
-                            <div style="font-size: 0.85em; display: flex; align-items: center; gap: 4px; color: #e61e4d; font-weight: 700;">
+                            <div style="font-size: 0.85em; display: flex; align-items: center; gap: 4px; color: var(--obenlo-primary); font-weight: 700;">
                                 <?php 
                                 $cats = get_the_category();
                                 if(!empty($cats)) echo esc_html($cats[0]->name);
@@ -147,7 +147,7 @@ $grid_query = new WP_Query($grid_args);
         <?php wp_reset_postdata(); else : ?>
             <div style="grid-column: 1/-1; text-align: center; padding: 100px 20px;">
                 <h2 style="font-size: 1.8rem; color: #222;"><?php esc_html_e( 'No stories found.', 'obenlo' ); ?></h2>
-                <a href="<?php echo home_url('/blog'); ?>" style="color: #e61e4d; font-weight: 700;"><?php esc_html_e( 'Back to all posts', 'obenlo' ); ?></a>
+                <a href="<?php echo home_url('/blog'); ?>" style="color: var(--obenlo-primary); font-weight: 700;"><?php esc_html_e( 'Back to all posts', 'obenlo' ); ?></a>
             </div>
         <?php endif; ?>
     </div>

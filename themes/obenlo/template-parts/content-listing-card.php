@@ -38,7 +38,8 @@ if(empty($location)){
         if (class_exists('Obenlo_Booking_Wishlist')) {
             $is_saved = Obenlo_Booking_Wishlist::is_in_wishlist( get_the_ID() );
         }
-        $heart_fill = $is_saved ? '#e61e4d' : 'rgba(0,0,0,0.5)';
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
+        $heart_fill = $is_saved ? $primary_color : 'rgba(0,0,0,0.5)';
         ?>
         <button class="wishlist-btn wishlist-heart <?php echo $is_saved ? 'active' : ''; ?>" 
                 data-listing-id="<?php the_ID(); ?>"

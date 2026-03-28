@@ -58,16 +58,16 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
     <div class="listing-sidebar" style="width: 250px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
         <h1 style="font-size: 2rem; font-weight: 800; margin: 0 0 20px 0; color: #222;">Account</h1>
         
-        <a href="?tab=profile" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'profile' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'profile' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='profile')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='profile')this.style.background='transparent'">
+        <a href="?tab=profile" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'profile' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'profile' ? 'var(--obenlo-primary)' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='profile')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='profile')this.style.background='transparent'">
             Personal Info
         </a>
-        <a href="?tab=trips" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'trips' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'trips' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='trips')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='trips')this.style.background='transparent'">
+        <a href="?tab=trips" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'trips' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'trips' ? 'var(--obenlo-primary)' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='trips')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='trips')this.style.background='transparent'">
             My Trips & Bookings
         </a>
-        <a href="?tab=messages" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'messages' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'messages' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='messages')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='messages')this.style.background='transparent'">
+        <a href="?tab=messages" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'messages' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'messages' ? 'var(--obenlo-primary)' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='messages')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='messages')this.style.background='transparent'">
             Messages
         </a>
-        <a href="?tab=support" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'support' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'support' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='support')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='support')this.style.background='transparent'">
+        <a href="?tab=support" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'support' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'support' ? 'var(--obenlo-primary)' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='support')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='support')this.style.background='transparent'">
             Help & Support
         </a>
         
@@ -99,17 +99,17 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
                 <div class="grid-row" style="margin-bottom: 20px;">
                     <div class="grid-col-1-2">
                         <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #444;">First Name</label>
-                        <input type="text" name="first_name" value="<?php echo esc_attr( $user->first_name ); ?>" required style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
+                        <input type="text" name="first_name" value="<?php echo esc_attr( $user->first_name ); ?>" required style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--obenlo-primary)'" onblur="this.style.borderColor='#ddd'">
                     </div>
                     <div class="grid-col-1-2">
                         <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #444;">Last Name</label>
-                        <input type="text" name="last_name" value="<?php echo esc_attr( $user->last_name ); ?>" style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
+                        <input type="text" name="last_name" value="<?php echo esc_attr( $user->last_name ); ?>" style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--obenlo-primary)'" onblur="this.style.borderColor='#ddd'">
                     </div>
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #444;">Unique Guest ID</label>
-                    <div style="background: #f9fafb; padding: 12px 15px; border: 1px solid #eee; border-radius: 10px; font-family: monospace; font-weight: 800; color: #e61e4d; font-size: 1.1rem; letter-spacing: 1px;">
+                    <div style="background: #f9fafb; padding: 12px 15px; border: 1px solid #eee; border-radius: 10px; font-family: monospace; font-weight: 800; color: var(--obenlo-primary); font-size: 1.1rem; letter-spacing: 1px;">
                         <?php echo esc_html( Obenlo_Booking_Payments::get_user_guest_id($user_id) ); ?>
                     </div>
                     <p style="font-size: 0.75rem; color: #888; margin-top: 6px;">Use this ID for check-ins at the door or when contacting support.</p>
@@ -117,7 +117,7 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
 
                 <div style="margin-bottom: 30px;">
                     <label style="display: block; font-weight: 700; margin-bottom: 8px; color: #444;">Email Address</label>
-                    <input type="email" name="email" value="<?php echo esc_attr( $user->user_email ); ?>" required style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
+                    <input type="email" name="email" value="<?php echo esc_attr( $user->user_email ); ?>" required style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--obenlo-primary)'" onblur="this.style.borderColor='#ddd'">
                 </div>
 
                 <button type="submit" style="background: #222; color: #fff; border: none; padding: 14px 30px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#000'" onmouseout="this.style.background='#222'">
@@ -129,7 +129,7 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
             
             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 30px;">
                 <h2 style="font-size: 1.8rem; font-weight: 800; margin: 0;">My Trips & Bookings</h2>
-                <a href="<?php echo esc_url( home_url('/listings') ); ?>" style="color: #e61e4d; font-weight: 700; text-decoration: none;">Explore Listings &rarr;</a>
+                <a href="<?php echo esc_url( home_url('/listings') ); ?>" style="color: var(--obenlo-primary); font-weight: 700; text-decoration: none;">Explore Listings &rarr;</a>
             </div>
             
             <?php
@@ -206,7 +206,7 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
                                                     $host_avatar = get_avatar_url($host_id);
                                             ?>
                                                 <button onclick="if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url($host_avatar); ?>');} else { window.location.href='<?php echo esc_url(home_url('/login')); ?>'; }"
-                                                        style="background: #e61e4d; color: #fff; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(230,30,77,0.3);">
+                                                        style="background: var(--obenlo-primary); color: #fff; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(var(--obenlo-primary-rgb),0.3);">
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 14px; height: 14px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                                                     Message Host
                                                 </button>
@@ -219,10 +219,10 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
                                     <div style="margin-top: 20px; padding: 15px; background: #fafafa; border: 1px solid #eee; border-radius: 12px; display: flex; flex-direction: column; gap: 12px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center;">
                                             <div>
-                                                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #e61e4d; margin-bottom: 2px;">🎫 Confirmation Code</div>
+                                                <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--obenlo-primary); margin-bottom: 2px;">🎫 Confirmation Code</div>
                                                 <div style="font-size: 1.4rem; font-weight: 900; font-family: monospace; letter-spacing: 2px; color: #222;"><?php echo esc_html($conf_code); ?></div>
                                             </div>
-                                            <button onclick="navigator.clipboard.writeText('<?php echo esc_js($conf_code); ?>').then(()=>this.innerText='Copied!')" style="background: #fff; color: #e61e4d; border: 1px solid #e61e4d; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.75rem;">Copy</button>
+                                            <button onclick="navigator.clipboard.writeText('<?php echo esc_js($conf_code); ?>').then(()=>this.innerText='Copied!')" style="background: #fff; color: var(--obenlo-primary); border: 1px solid var(--obenlo-primary); padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.75rem;">Copy</button>
                                         </div>
                                         <?php 
                                         $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);

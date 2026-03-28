@@ -1,6 +1,6 @@
 <?php
 /**
- * User Roles and Capabilities
+ * User Roles and Capabilities - Obenlo
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,7 +21,6 @@ class Obenlo_Booking_Roles {
             }
         }
     }
-
 
     public function add_roles() {
         // Clone capabilities from standard subscriber for Guest role
@@ -112,9 +111,10 @@ class Obenlo_Booking_Roles {
      */
     public function add_admin_dashboard_widget() {
         if ( current_user_can( 'administrator' ) ) {
+            $brand_name = get_option('obenlo_brand_name', 'Obenlo');
             wp_add_dashboard_widget(
                 'obenlo_admin_stats_widget',
-                'Obenlo Platform Statistics',
+                $brand_name . ' Platform Statistics',
                 array( $this, 'render_admin_dashboard_widget' )
             );
         }
@@ -124,33 +124,25 @@ class Obenlo_Booking_Roles {
      * Render the admin dashboard widget content
      */
     public function render_admin_dashboard_widget() {
-        $user_counts = count_users();
-        $total_users = $user_counts['total_users'];
-        $avail_roles = $user_counts['avail_roles'];
-
-        $hosts = isset( $avail_roles['host'] ) ? $avail_roles['host'] : 0;
-        $guests = isset( $avail_roles['guest'] ) ? $avail_roles['guest'] : 0;
-        $admins = isset( $avail_roles['administrator'] ) ? $avail_roles['administrator'] : 0;
-
-        echo '<div style="display: flex; flex-direction: column; gap: 15px;">';
-        echo '<p style="font-size: 1.1em; margin: 0;">Welcome back! Here is a summary of the Obenlo community:</p>';
+        $brand_name    = get_option('obenlo_brand_name', 'Obenlo');
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
         
-        echo '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
-        
-        echo '<div style="background: #f0f0f1; padding: 15px; border-radius: 8px; text-align: center;">';
-        echo '<span style="display: block; font-size: 2em; font-weight: bold; color: #e61e4d;">' . intval($hosts) . '</span>';
-        echo '<span style="font-weight: bold;">Hosts</span>';
-        echo '</div>';
+        $hosts   = count(get_users(array('role' => 'host')));
+        $guests  = count(get_users(array('role' => 'guest')));
 
-        echo '<div style="background: #f0f0f1; padding: 15px; border-radius: 8px; text-align: center;">';
-        echo '<span style="display: block; font-size: 2em; font-weight: bold; color: #333;">' . intval($guests) . '</span>';
-        echo '<span style="font-weight: bold;">Guests</span>';
+        echo '<p style="font-size: 1.1em; margin: 0;">Welcome back! Here is a summary of the ' . esc_html($brand_name) . ' community:</p>';
+        echo '<div style="display: flex; gap: 40px; margin-top: 20px;">';
+        echo '<div>';
+        echo '<span style="display: block; font-size: 2em; font-weight: bold; color: ' . esc_attr($primary_color) . ';">' . intval($hosts) . '</span>';
+        echo '<span style="color: #666; font-weight: 600;">Active Hosts</span>';
         echo '</div>';
-
+        echo '<div>';
+        echo '<span style="display: block; font-size: 2em; font-weight: bold; color: ' . esc_attr($primary_color) . ';">' . intval($guests) . '</span>';
+        echo '<span style="color: #666; font-weight: 600;">Registered Guests</span>';
         echo '</div>';
-
-        echo '<p style="color: #666; font-size: 0.9em; margin: 0;">Total registered users: <strong>' . intval($total_users) . '</strong> (including ' . intval($admins) . ' Admins)</p>';
-        echo '<a href="' . admin_url( 'users.php' ) . '" class="button button-primary" style="background: #e61e4d; border-color: #e61e4d; align-self: flex-start;">Manage Users</a>';
+        echo '</div>';
+        echo '<div style="margin-top: 25px; display: flex; gap: 10px;">';
+        echo '<a href="' . admin_url('users.php') . '" class="button button-primary" style="background: ' . esc_attr($primary_color) . '; border-color: ' . esc_attr($primary_color) . '; align-self: flex-start;">Manage Users</a>';
         echo '</div>';
     }
 }

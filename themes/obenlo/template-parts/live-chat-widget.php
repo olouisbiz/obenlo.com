@@ -6,13 +6,13 @@
 
 <div id="obenlo-live-chat" style="position:fixed; bottom:30px; right:30px; z-index:9999; font-family: 'Inter', sans-serif;">
     <!-- Chat Bubble -->
-    <div id="chat-bubble" style="width:60px; height:60px; background:#e61e4d; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 10px 25px rgba(230,30,77,0.3); transition:transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+    <div id="chat-bubble" style="width:60px; height:60px; background:var(--obenlo-primary); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 10px 25px rgba(var(--obenlo-primary-rgb),0.3); transition:transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
         <svg viewBox="0 0 24 24" style="width:28px; height:28px; fill:white;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
     </div>
 
     <!-- Chat Window -->
     <div id="chat-window" style="display:none; width:350px; height:500px; background:#fff; border-radius:16px; box-shadow:0 15px 50px rgba(0,0,0,0.15); flex-direction:column; overflow:hidden; border:1px solid #eee;">
-        <div style="background:#e61e4d; color:white; padding:20px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="background:var(--obenlo-primary); color:white; padding:20px; display:flex; justify-content:space-between; align-items:center;">
             <div>
                 <strong style="display:block;"><?php esc_html_e('Obenlo Support', 'obenlo'); ?></strong>
                 <span style="font-size:0.8em; opacity:0.9;"><?php esc_html_e("We're online and ready to help", "obenlo"); ?></span>
@@ -32,7 +32,7 @@
         <div style="padding:15px; border-top:1px solid #eee; background:#fff;">
             <form id="chat-form" style="display:flex; gap:10px;">
                 <input type="text" id="chat-input" placeholder="<?php esc_attr_e('Type a message...', 'obenlo'); ?>" style="flex-grow:1; border:1px solid #eee; padding:10px 15px; border-radius:25px; outline:none; font-size:0.9em; background:#f5f5f5;">
-                <button type="submit" style="background:#e61e4d; border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.2s;">
+                <button type="submit" style="background:var(--obenlo-primary); border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.2s;">
                     <svg viewBox="0 0 24 24" style="width:20px; height:20px; fill:white; transform:rotate(-45deg) translate(2px, -2px);"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                 </button>
             </form>
@@ -140,7 +140,7 @@ endif; ?>
             label = 'Obenlo Support';
         } else {
             align = 'margin-left:20px; align-self: flex-end; border-bottom-right-radius: 4px;';
-            bg = '#e61e4d';
+            bg = getComputedStyle(document.documentElement).getPropertyValue('--obenlo-primary').trim() || '#e61e4d';
             text = '#ffffff';
             label = 'You';
         }

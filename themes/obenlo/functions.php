@@ -96,12 +96,36 @@ class Obenlo_PWA_Core
 
     public function inject_pwa_meta()
     {
+        $brand_name    = get_option('obenlo_brand_name', 'Obenlo');
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
         ?>
-        <meta name="theme-color" content="#e61e4d">
+        <style>
+            :root {
+                --obenlo-primary: <?php echo esc_attr($primary_color); ?>;
+                --obenlo-stay: <?php echo esc_attr(get_option('obenlo_stay_color', '#3b82f6')); ?>;
+                --obenlo-experience: <?php echo esc_attr(get_option('obenlo_experience_color', '#10b981')); ?>;
+                --obenlo-service: <?php echo esc_attr(get_option('obenlo_service_color', '#f97316')); ?>;
+                --obenlo-event: <?php echo esc_attr(get_option('obenlo_event_color', '#e61e4d')); ?>;
+                --obenlo-primary-rgb: <?php 
+                    $hex = str_replace('#', '', $primary_color);
+                    if(strlen($hex) == 3) {
+                        $r = hexdec(substr($hex,0,1).substr($hex,0,1));
+                        $g = hexdec(substr($hex,1,1).substr($hex,1,1));
+                        $b = hexdec(substr($hex,2,1).substr($hex,2,1));
+                    } else {
+                        $r = hexdec(substr($hex,0,2));
+                        $g = hexdec(substr($hex,2,2));
+                        $b = hexdec(substr($hex,4,2));
+                    }
+                    echo "$r, $g, $b";
+                ?>;
+            }
+        </style>
+        <meta name="theme-color" content="<?php echo esc_attr($primary_color); ?>">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="Obenlo">
+        <meta name="apple-mobile-web-app-title" content="<?php echo esc_attr($brand_name); ?>">
         <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile-192.png'); ?>">
         <link rel="manifest" href="<?php echo home_url('/?obenlo_pwa=manifest'); ?>">
         <?php
@@ -128,8 +152,15 @@ class Obenlo_PWA_Core
                 $file = get_template_directory() . '/assets/pwa/manifest.json';
                 if (file_exists($file)) {
                     $manifest = file_get_contents($file);
-                    // Dynamically map icons and start_url if needed
+                    
+                    $brand_name    = get_option('obenlo_brand_name', 'Obenlo');
+                    $primary_color = get_option('obenlo_primary_color', '#e61e4d');
+                    
+                    // Dynamically map icons and start_url
                     $manifest = str_replace('/wp-content/', home_url('/wp-content/'), $manifest);
+                    $manifest = str_replace('"Obenlo"', '"' . esc_attr($brand_name) . '"', $manifest);
+                    $manifest = str_replace('"#e61e4d"', '"' . esc_attr($primary_color) . '"', $manifest);
+                    
                     echo $manifest;
                     exit;
                 }
@@ -144,17 +175,19 @@ class Obenlo_PWA_Core
 
     public function inject_pwa_script()
     {
+        $brand_name    = get_option('obenlo_brand_name', 'Obenlo');
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
         ?>
         <div id="obenlo-pwa-prompt" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:94%; max-width:420px; background:#fff; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.2); z-index:10000; padding:20px; font-family:'Inter', sans-serif; align-items:center; gap:15px; border:1px solid rgba(0,0,0,0.05);">
             <div style="width:60px; height:60px; background:#fff; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
                 <img src="<?php echo get_template_directory_uri(); ?>/assets/images/logo-social-profile.png" style="width:40px; height:40px; border-radius:8px;">
             </div>
             <div style="flex-grow:1;">
-                <h4 style="margin:0 0 4px 0; font-size:17px; color:#1a1a1b; font-weight:800;">Obenlo: Better with the App</h4>
+                <h4 style="margin:0 0 4px 0; font-size:17px; color:#1a1a1b; font-weight:800;"><?php echo esc_html($brand_name); ?>: Better with the App</h4>
                 <p style="margin:0; font-size:13px; color:#5e5e62; line-height:1.4;" id="pwa-prompt-desc">Install for a faster experience & instant notifications.</p>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px;">
-                <button id="pwa-install-btn" style="background:#e61e4d; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer;">Install</button>
+                <button id="pwa-install-btn" style="background:<?php echo esc_attr($primary_color); ?>; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer;">Install</button>
                 <button id="pwa-dismiss-btn" style="background:transparent; color:#999; border:none; padding:4px; font-size:12px; cursor:pointer; font-weight:600;">Maybe later</button>
             </div>
         </div>

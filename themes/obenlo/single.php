@@ -11,7 +11,7 @@ get_header(); ?>
         <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
             
             <header class="entry-header" style="margin-bottom: 40px; text-align: center;">
-                <div style="font-size: 0.9rem; color: #e61e4d; font-weight: bold; margin-bottom: 15px; text-transform: uppercase;">
+                <div style="font-size: 0.9rem; color: var(--obenlo-primary); font-weight: bold; margin-bottom: 15px; text-transform: uppercase;">
                     <?php the_category(', '); ?>
                 </div>
                 <?php the_title( '<h1 class="entry-title" style="font-size: 3rem; line-height: 1.2; margin-bottom: 20px; color: #222;">', '</h1>' ); ?>

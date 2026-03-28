@@ -29,9 +29,9 @@ body {
 }
 
 .site-branding a {
-    color: #e61e4d;
+    color: var(--obenlo-primary, #e61e4d);
     text-decoration: none;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -89,7 +89,7 @@ body {
 }
 
 .search-icon-btn {
-    background: #e61e4d;
+    background: var(--obenlo-primary, #e61e4d);
     color: white;
     border: none;
     border-radius: 50%;
@@ -611,8 +611,8 @@ body {
 }
 
 .tab-btn.active {
-    border-bottom-color: #e61e4d;
-    color: #e61e4d;
+    border-bottom-color: var(--obenlo-primary, #e61e4d);
+    color: var(--obenlo-primary, #e61e4d);
 }
 
 .tab-content {
@@ -646,7 +646,7 @@ body {
 .reserve-btn {
     width: 100%;
     padding: 15px;
-    background: #e61e4d;
+    background: var(--obenlo-primary, #e61e4d);
     color: white;
     border: none;
     border-radius: 8px;
@@ -658,7 +658,8 @@ body {
 }
 
 .reserve-btn:hover {
-    background: #d91b42;
+    background: var(--obenlo-primary, #e61e4d);
+    filter: brightness(0.9);
 }
 
 /* Become a Host Page */
@@ -755,14 +756,14 @@ body {
 
 .cta-button {
     display: inline-block;
-    background: #e61e4d;
+    background: var(--obenlo-primary, #e61e4d);
     color: white;
     padding: 18px 40px;
     border-radius: 12px;
     text-decoration: none;
     font-size: 1.2em;
     font-weight: bold;
-    box-shadow: 0 4px 15px rgba(230, 30, 77, 0.4);
+    box-shadow: 0 4px 15px rgba(var(--obenlo-primary-rgb, 230, 30, 77), 0.4);
     transition: all 0.2s;
 }
 
@@ -900,9 +901,9 @@ body {
 }
 
 .pagination .page-numbers.current {
-    background: #e61e4d;
+    background: var(--obenlo-primary, #e61e4d);
     color: #fff;
-    border-color: #e61e4d;
+    border-color: var(--obenlo-primary, #e61e4d);
 }
 
 /* Single Post Styles */
@@ -918,7 +919,7 @@ body {
 }
 
 .entry-content blockquote {
-    border-left: 4px solid #e61e4d;
+    border-left: 4px solid var(--obenlo-primary, #e61e4d);
     padding-left: 20px;
     margin: 30px 0;
     font-style: italic;
@@ -973,7 +974,7 @@ body {
 }
 
 .wishlist-btn.active svg {
-    fill: #e61e4d !important;
+    fill: var(--obenlo-primary, #e61e4d) !important;
 }
 
 .wishlist-btn.loading {

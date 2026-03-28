@@ -8,7 +8,7 @@ get_header();
 
 <div class="become-host-hero" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('<?php echo get_template_directory_uri(); ?>/assets/images/host-hero.jpg');">
     <div style="max-width: 800px; margin: 0 auto;">
-        <h1>Obenlo your home</h1>
+        <h1><?php echo esc_html(get_option('obenlo_brand_name', 'Obenlo')); ?> your home</h1>
         <p>Join thousands of hosts earning extra income by sharing their space, experiences, or services.</p>
         <a href="<?php echo esc_url( home_url('/login#signup') ); ?>" class="cta-button">Start Hosting Today</a>
     </div>
@@ -18,7 +18,7 @@ get_header();
     <div class="benefit-item">
         <div class="benefit-icon">💰</div>
         <h3>Earn Extra Income</h3>
-        <p style="color: #666;">Turn your extra space or unique skills into a profitable business with Obenlo's secure platform.</p>
+        <p style="color: #666;">Turn your extra space or unique skills into a profitable business with <?php echo esc_html(get_option('obenlo_brand_name', 'Obenlo')); ?>'s secure platform.</p>
     </div>
     <div class="benefit-item">
         <div class="benefit-icon">🌍</div>
@@ -48,13 +48,13 @@ get_header();
         <div class="step-item">
             <span class="step-number">3</span>
             <h4>Get paid</h4>
-            <p style="font-size: 0.9em; color: #666;">Payments are handled securely through Obenlo and deposited directly to you.</p>
+            <p style="font-size: 0.9em; color: #666;">Payments are handled securely through <?php echo esc_html(get_option('obenlo_brand_name', 'Obenlo')); ?> and deposited directly to you.</p>
         </div>
     </div>
 </div>
 
 <div class="ready-to-host">
-    <h2>Ready to Obenlo?</h2>
+    <h2>Ready to <?php echo esc_html(get_option('obenlo_brand_name', 'Obenlo')); ?>?</h2>
     <a href="<?php echo esc_url( home_url('/login#signup') ); ?>" class="cta-button dark">Get Started</a>
 </div>
 

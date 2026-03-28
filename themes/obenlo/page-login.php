@@ -11,7 +11,7 @@ get_header();
         
         <!-- Toggle Tabs -->
         <div class="auth-tabs" style="display: flex; border-bottom: 1px solid #eee;">
-            <button onclick="toggleAuth('login')" id="tab-login" style="flex: 1; padding: 20px; border: none; background: #fff; font-weight: bold; cursor: pointer; color: #e61e4d; border-bottom: 3px solid #e61e4d; transition: all 0.3s; font-size: 1.1rem;">Log In</button>
+            <button onclick="toggleAuth('login')" id="tab-login" style="flex: 1; padding: 20px; border: none; background: #fff; font-weight: bold; cursor: pointer; color: var(--obenlo-primary); border-bottom: 3px solid var(--obenlo-primary); transition: all 0.3s; font-size: 1.1rem;">Log In</button>
             <button onclick="toggleAuth('signup')" id="tab-signup" style="flex: 1; padding: 20px; border: none; background: #fff; font-weight: bold; cursor: pointer; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s; font-size: 1.1rem;">Sign Up</button>
         </div>
 
@@ -41,11 +41,11 @@ get_header();
                         <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: bold; color: #444;">Password</label>
                         <input type="password" name="pwd" required style="width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem;">
                         <div style="text-align: right; margin-top: 10px;">
-                            <a href="<?php echo wp_lostpassword_url(); ?>" style="color: #e61e4d; font-size: 0.85rem; text-decoration: none;">Forgot password?</a>
+                            <a href="<?php echo wp_lostpassword_url(); ?>" style="color: var(--obenlo-primary); font-size: 0.85rem; text-decoration: none;">Forgot password?</a>
                         </div>
                     </div>
 
-                    <button type="submit" style="width: 100%; background: #e61e4d; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+                    <button type="submit" style="width: 100%; background: var(--obenlo-primary); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s;">
                         Enter Obenlo
                     </button>
                 </form>
@@ -116,7 +116,7 @@ get_header();
                         <input type="text" name="user_login" id="user_login" required style="width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem;">
                     </div>
 
-                    <button type="submit" style="width: 100%; background: #e61e4d; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s;">
+                    <button type="submit" style="width: 100%; background: var(--obenlo-primary); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s;">
                         Send Reset Link
                     </button>
                     
@@ -144,16 +144,18 @@ function toggleAuth(mode) {
     forgotForm.style.display = 'none';
     authTabs.style.display = 'flex';
 
+    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--obenlo-primary').trim() || '#e61e4d';
+
     if (mode === 'login') {
         loginForm.style.display = 'block';
-        loginTab.style.color = '#e61e4d';
-        loginTab.style.borderBottomColor = '#e61e4d';
+        loginTab.style.color = primaryColor;
+        loginTab.style.borderBottomColor = primaryColor;
         signupTab.style.color = '#666';
         signupTab.style.borderBottomColor = 'transparent';
     } else if (mode === 'signup') {
         signupForm.style.display = 'block';
-        signupTab.style.color = '#e61e4d';
-        signupTab.style.borderBottomColor = '#e61e4d';
+        signupTab.style.color = primaryColor;
+        signupTab.style.borderBottomColor = primaryColor;
         loginTab.style.color = '#666';
         loginTab.style.borderBottomColor = 'transparent';
     } else if (mode === 'forgot') {

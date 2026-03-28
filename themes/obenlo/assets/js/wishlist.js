@@ -27,7 +27,7 @@ jQuery(document).ready(function($) {
                 if (response.success) {
                     if (response.data.added) {
                         $btn.addClass('active');
-                        $svg.css('fill', '#e61e4d');
+                        $svg.css('fill', 'var(--obenlo-primary)');
                     } else {
                         $btn.removeClass('active');
                         $svg.css('fill', 'rgba(0,0,0,0.5)');

@@ -100,7 +100,7 @@ $grid_query = new WP_Query($grid_args);
                     <div class="listing-info" style="display: flex; flex-direction: column; gap: 4px;">
                         <div style="display: flex; justify-content: space-between; align-items: baseline;">
                             <h2 style="margin: 0; font-size: 1rem; font-weight: 600; color: #222;"><?php echo get_the_date(); ?></h2>
-                            <div style="font-size: 0.85em; display: flex; align-items: center; gap: 4px; color: #e61e4d; font-weight: 700;">
+                            <div style="font-size: 0.85em; display: flex; align-items: center; gap: 4px; color: var(--obenlo-primary); font-weight: 700;">
                                 <?php 
                                 $cats = get_the_category();
                                 if(!empty($cats)) echo esc_html($cats[0]->name);
@@ -135,7 +135,7 @@ $grid_query = new WP_Query($grid_args);
         <?php wp_reset_postdata(); else : ?>
             <div style="grid-column: 1/-1; text-align: center; padding: 100px 20px;">
                 <h2 style="font-size: 1.8rem; color: #222;"><?php esc_html_e( 'No stories found.', 'obenlo' ); ?></h2>
-                <a href="<?php echo home_url('/blog'); ?>" style="color: #e61e4d; font-weight: 700;"><?php esc_html_e( 'Back to all posts', 'obenlo' ); ?></a>
+                <a href="<?php echo home_url('/blog'); ?>" style="color: var(--obenlo-primary); font-weight: 700;"><?php esc_html_e( 'Back to all posts', 'obenlo' ); ?></a>
             </div>
         <?php endif; ?>
     </div>

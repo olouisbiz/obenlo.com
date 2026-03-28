@@ -15,7 +15,7 @@ get_header();
     
     <section id="for-guests" class="static-section">
         <h2>
-            <span class="static-icon-box" style="background:#e61e4d;">🧳</span>
+            <span class="static-icon-box" style="background:var(--obenlo-primary);">🧳</span>
             For Guests
         </h2>
         

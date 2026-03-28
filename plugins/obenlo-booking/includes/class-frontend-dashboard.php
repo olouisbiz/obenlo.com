@@ -51,7 +51,7 @@ class Obenlo_Booking_Frontend_Dashboard
     public function render_dashboard()
     {
         if (!is_user_logged_in()) {
-            return '<div style="padding: 100px 20px; text-align: center;"><p style="font-size: 1.2rem; color: #666;">Please log in to view the host dashboard.</p><a href="' . home_url('/login') . '" style="background: #e61e4d; color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 20px;">Log In</a></div>';
+            return '<div style="padding: 100px 20px; text-align: center;"><p style="font-size: 1.2rem; color: #666;">Please log in to view the host dashboard.</p><a href="' . home_url('/login') . '" style="background: var(--obenlo-primary); color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 20px;">Log In</a></div>';
         }
 
         $user = wp_get_current_user();
@@ -63,15 +63,22 @@ class Obenlo_Booking_Frontend_Dashboard
         $action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'overview';
         $listing_id = isset($_GET['listing_id']) ? intval($_GET['listing_id']) : 0;
 
+        $brand_name = get_option('obenlo_brand_name', 'Obenlo');
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
+
         ob_start();
 ?>
         <div class="obenlo-dashboard-container">
             <style>
+                :root {
+                    --obenlo-primary: <?php echo esc_attr($primary_color); ?>;
+                    --obenlo-primary-rgb: <?php echo implode(',', self::hex2rgb($primary_color)); ?>;
+                }
                 .obenlo-dashboard-container { display: flex; min-height: 800px; background: #fff; font-family: 'Inter', sans-serif; gap: 0; }
                 .dashboard-sidebar { width: 260px; background: #f9f9f9; border-right: 1px solid #eee; padding: 40px 20px; display: flex; flex-direction: column; gap: 5px; }
                 .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; text-decoration: none; color: #555; font-weight: 600; border-radius: 12px; transition: all 0.2s; font-size: 0.95rem; }
-                .sidebar-link:hover { background: #f0f0f0; color: #e61e4d; }
-                .sidebar-link.active { background: #e61e4d; color: #fff; box-shadow: 0 4px 12px rgba(230,30,77,0.2); }
+                .sidebar-link:hover { background: #f0f0f0; color: var(--obenlo-primary); }
+                .sidebar-link.active { background: var(--obenlo-primary); color: #fff; box-shadow: 0 4px 12px rgba(var(--obenlo-primary-rgb),0.2); }
                 .sidebar-link svg { width: 20px; height: 20px; }
                 
                 .dashboard-content { flex-grow: 1; padding: 40px 50px; background: #fff; }
@@ -95,7 +102,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 .badge-danger { background: #fef2f2; color: #ef4444; }
                 .badge-info { background: #eff6ff; color: #3b82f6; }
                 
-                .btn-primary { background: #e61e4d; color: #fff; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+                .btn-primary { background: var(--obenlo-primary); color: #fff; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
                 .btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
                 .form-section { background: #fff; border: 1px solid #eee; padding: 35px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); margin-top: 30px; }
                 
@@ -340,7 +347,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
                     <span class="badge <?php echo $status_class; ?>">Account Status: <?php echo esc_html($status_label); ?></span>
                     <?php if ($verification_status !== 'verified'): ?>
-                        <a href="<?php echo home_url('/host-dashboard?action=verification'); ?>" style="font-size:0.85rem; color:#e61e4d; font-weight:700; text-decoration:none;">Complete Verification →</a>
+                        <a href="<?php echo home_url('/host-dashboard?action=verification'); ?>" style="font-size:0.85rem; color:var(--obenlo-primary); font-weight:700; text-decoration:none;">Complete Verification →</a>
                     <?php
         else: ?>
                         <a href="<?php echo home_url('/host-onboarding?step=3&force=1'); ?>" style="font-size:0.85rem; color:#666; font-weight:600; text-decoration:none;">Update Payouts</a>
@@ -348,7 +355,7 @@ class Obenlo_Booking_Frontend_Dashboard
         endif; ?>
                 </div>
             </div>
-            <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" style="color:#e61e4d; text-decoration:none; font-weight:700; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
+            <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" style="color:var(--obenlo-primary); text-decoration:none; font-weight:700; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px; height:16px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 Preview My Storefront
             </a>
@@ -363,7 +370,7 @@ class Obenlo_Booking_Frontend_Dashboard
             <div class="stat-card">
                 <span class="stat-label">Active Listings</span>
                 <span class="stat-value"><?php echo $listings_count; ?></span>
-                <span style="font-size:0.8rem; color:#3b82f6; font-weight:600;">Live on Obenlo</span>
+                <span style="font-size:0.8rem; color:#3b82f6; font-weight:600;">Live on <?php echo esc_html($brand_name); ?></span>
             </div>
             <div class="stat-card">
                 <span class="stat-label">Total Bookings</span>
@@ -397,7 +404,7 @@ class Obenlo_Booking_Frontend_Dashboard
         echo '<div class="dashboard-header"><h2 class="dashboard-title">Identity Verification</h2></div>';
         
         if ($status === 'verified') {
-            echo '<div style="background:#dcfce7; color:#166534; padding:20px; border-radius:12px; font-weight:500;">✓ Your identity has been successfully verified. Thank you for building trust in the Obenlo community.</div>';
+            echo '<div style="background:#dcfce7; color:#166534; padding:20px; border-radius:12px; font-weight:500;">✓ Your identity has been successfully verified. Thank you for building trust in the ' . esc_html($brand_name) . ' community.</div>';
             return;
         }
         
@@ -516,7 +523,7 @@ class Obenlo_Booking_Frontend_Dashboard
                             <td data-label="Status"><span class="badge badge-success"><?php echo ucfirst($listing->post_status); ?></span></td>
                             <td data-label="Units">
                                 <span style="font-weight:600; color:#444;"><?php echo count($children); ?> units</span>
-                                <a href="?action=add&parent_id=<?php echo $listing->ID; ?>" style="display:block; font-size:0.75rem; color:#e61e4d; text-decoration:none;">+ Add unit</a>
+                                <a href="?action=add&parent_id=<?php echo $listing->ID; ?>" style="display:block; font-size:0.75rem; color:var(--obenlo-primary); text-decoration:none;">+ Add unit</a>
                             </td>
                             <td data-label="Actions">
                                 <div style="display:flex; gap:12px; align-items:center;">
@@ -526,7 +533,7 @@ class Obenlo_Booking_Frontend_Dashboard
                                         <input type="hidden" name="action" value="obenlo_dashboard_delete_listing">
                                         <input type="hidden" name="listing_id" value="<?php echo $listing->ID; ?>">
                                         <?php wp_nonce_field('obenlo_delete_listing_' . $listing->ID); ?>
-                                        <button type="submit" style="background:none; border:none; color:#e61e4d; font-weight:700; font-size:0.8rem; cursor:pointer; padding:0;">Delete</button>
+                                        <button type="submit" style="background:none; border:none; color:var(--obenlo-primary); font-weight:700; font-size:0.8rem; cursor:pointer; padding:0;">Delete</button>
                                     </form>
                                 </div>
                             </td>
@@ -590,7 +597,7 @@ class Obenlo_Booking_Frontend_Dashboard
                     <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#aaa;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     </span>
-                    <input type="text" id="booking-code-search" placeholder="Search by confirmation code or last 4 digits…" style="width:100%; padding:11px 14px 11px 40px; border:2px solid #eee; border-radius:12px; font-size:0.92rem; outline:none; transition:border-color 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#eee'">
+                    <input type="text" id="booking-code-search" placeholder="Search by confirmation code or last 4 digits…" style="width:100%; padding:11px 14px 11px 40px; border:2px solid #eee; border-radius:12px; font-size:0.92rem; outline:none; transition:border-color 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='var(--obenlo-primary)'" onblur="this.style.borderColor='#eee'">
                 </div>
                 <span id="booking-search-count" style="font-size:0.85rem; color:#888;"></span>
                 <button onclick="document.getElementById('booking-code-search').value=''; filterBookings();" style="background:none; border:1px solid #eee; border-radius:10px; padding:10px 16px; color:#666; cursor:pointer; font-size:0.85rem;">Clear</button>
@@ -675,7 +682,7 @@ class Obenlo_Booking_Frontend_Dashboard
                              <?php if ($limit === -1): ?>
                             <td data-label="Conf. Code">
                                 <?php if ($conf_code): ?>
-                                    <code class="conf-code-val" style="background:#f9f9f9; border:1px solid #eee; padding:4px 8px; border-radius:6px; font-family:monospace; font-weight:700; color:#e61e4d; font-size:0.85rem;"><?php echo esc_html($conf_code); ?></code>
+                                    <code class="conf-code-val" style="background:#f9f9f9; border:1px solid #eee; padding:4px 8px; border-radius:6px; font-family:monospace; font-weight:700; color:var(--obenlo-primary); font-size:0.85rem;"><?php echo esc_html($conf_code); ?></code>
                                 <?php else: ?>
                                     <span style="color:#ccc;">—</span>
                                 <?php endif; ?>
@@ -702,7 +709,7 @@ class Obenlo_Booking_Frontend_Dashboard
                         // Check-in Action
                         if (($status === 'approved' || $status === 'confirmed' || $status === 'completed') && !$checked_in) {
                             $checkin_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=checkin'), 'booking_action_' . $booking->ID);
-                            echo '<a href="' . esc_url($checkin_url) . '" onclick="return confirm(\'Check in this guest?\')" style="background:#e61e4d; color:#fff; padding:4px 10px; border-radius:8px; font-weight:700; text-decoration:none; font-size:0.8rem;">Check In</a>';
+                            echo '<a href="' . esc_url($checkin_url) . '" onclick="return confirm(\'Check in this guest?\')" style="background:var(--obenlo-primary); color:#fff; padding:4px 10px; border-radius:8px; font-weight:700; text-decoration:none; font-size:0.8rem;">Check In</a>';
                         }
 
                         echo '<a href="' . esc_url($decline_url) . '" onclick="return confirm(\'Decline this booking?\')" style="color:#ef4444; font-weight:700; text-decoration:none;">Decline</a>';
@@ -953,8 +960,8 @@ class Obenlo_Booking_Frontend_Dashboard
                 $is_demo_create = (isset($_GET['demo']) && $_GET['demo'] == '1');
                 if (($is_demo_edit || $is_demo_create) && current_user_can('administrator')): ?>
                     <input type="hidden" name="is_demo" value="1">
-                    <div style="background:#fff1f3; color:#e61e4d; padding:20px; border-radius:12px; margin-bottom:30px; border:1px solid #fecdd3;">
-                        <h4 style="margin-top:0; margin-bottom:10px; color:#e61e4d;">🛠️ Demo Listing Configuration</h4>
+                    <div style="background:#fff1f3; color:var(--obenlo-primary); padding:20px; border-radius:12px; margin-bottom:30px; border:1px solid #fecdd3;">
+                        <h4 style="margin-top:0; margin-bottom:10px; color:var(--obenlo-primary);">🛠️ Demo Listing Configuration</h4>
                         <p style="margin-top:0; margin-bottom:20px; font-size:0.9rem;">You are configuring a Demo Listing. Specify the simulated Host details below.</p>
                         
                         <div class="grid-row" style="margin-bottom:15px;">
@@ -996,7 +1003,7 @@ class Obenlo_Booking_Frontend_Dashboard
                     
                     <div style="margin-bottom:20px;">
                         <label id="listing_title_label" style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo $title_label; ?></label>
-                        <input type="text" name="listing_title" value="<?php echo esc_attr($title); ?>" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; transition:border-color 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
+                        <input type="text" name="listing_title" value="<?php echo esc_attr($title); ?>" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--obenlo-primary)'" onblur="this.style.borderColor='#ddd'">
                     </div>
 
 
@@ -1173,7 +1180,7 @@ class Obenlo_Booking_Frontend_Dashboard
                         <?php
         endif; ?>
                     </div>
-                    <button type="button" id="add-amenity-btn" style="background:#f9f9f9; border:1px dashed #ccc; color:#666; width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:600; transition:all 0.2s;" onmouseover="this.style.borderColor='#e61e4d';this.style.color='#e61e4d'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">+ Add New</button>
+                    <button type="button" id="add-amenity-btn" style="background:#f9f9f9; border:1px dashed #ccc; color:#666; width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:600; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--obenlo-primary)';this.style.color='var(--obenlo-primary)'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">+ Add New</button>
                     
                     <template id="amenity-template">
                         <div class="amenity-row" style="display:flex; gap:10px; margin-bottom:12px;">
@@ -1228,10 +1235,10 @@ class Obenlo_Booking_Frontend_Dashboard
                     $img_url = wp_get_attachment_image_url($img_id, 'thumbnail');
                     $is_featured = ($img_id == $thumb_id);
 ?>
-                                    <div style="position:relative; aspect-ratio:1; border-radius:12px; overflow:hidden; border:2px solid <?php echo $is_featured ? '#e61e4d' : '#eee'; ?>;">
+                                    <div style="position:relative; aspect-ratio:1; border-radius:12px; overflow:hidden; border:2px solid <?php echo $is_featured ? 'var(--obenlo-primary)' : '#eee'; ?>;">
                                         <img src="<?php echo esc_url($img_url); ?>" style="width:100%; height:100%; object-fit:cover;">
                                         <?php if ($is_featured): ?>
-                                            <div style="position:absolute; top:5px; left:5px; background:#e61e4d; color:#fff; font-size:8px; font-weight:800; padding:2px 6px; border-radius:20px;">COVER</div>
+                                            <div style="position:absolute; top:5px; left:5px; background:var(--obenlo-primary); color:#fff; font-size:8px; font-weight:800; padding:2px 6px; border-radius:20px;">COVER</div>
                                         <?php endif; ?>
                                         <label style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; text-align:center; padding:3px; cursor:pointer;">
                                             <input type="checkbox" name="delete_images[]" value="<?php echo esc_attr($img_id); ?>"> Remove
@@ -1246,7 +1253,7 @@ class Obenlo_Booking_Frontend_Dashboard
                         <label for="listing_file_input" style="cursor:pointer; color:#888;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px; height:40px; margin-bottom:10px; color:#ccc;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                             <div style="font-weight:700; color:#444;">Click to upload photos</div>
-                            <div style="font-size:0.8rem; color:#e61e4d;"><?php echo $media_hint; ?></div>
+                            <div style="font-size:0.8rem; color:var(--obenlo-primary);"><?php echo $media_hint; ?></div>
                         </label>
                     </div>
                 </div>
@@ -1258,7 +1265,7 @@ class Obenlo_Booking_Frontend_Dashboard
                         
                         <div style="margin-bottom:20px;">
                             <select name="policy_type" id="policy_type_select" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                <option value="global" <?php selected($policy_type, 'global'); ?>>Use Obenlo Global Policies (Standard)</option>
+                                <option value="global" <?php selected($policy_type, 'global'); ?>>Use <?php echo esc_html($brand_name); ?> Global Policies (Standard)</option>
                                 <option value="custom" <?php selected($policy_type, 'custom'); ?>>Set Custom Policies</option>
                             </select>
                         </div>
@@ -1282,7 +1289,7 @@ class Obenlo_Booking_Frontend_Dashboard
 
                 <div style="margin-top:40px; margin-bottom:100px;">
                     <button type="submit" class="btn-primary" style="padding:15px 40px; font-size:1.1rem; width:100%;">Save <?php echo($is_child ? 'Unit' : 'Listing'); ?> Now</button>
-                    <p style="text-align:center; color:#888; font-size:0.85rem; margin-top:15px;">By saving, you agree to Obenlo's hosting standard and quality guidelines.</p>
+                    <p style="text-align:center; color:#888; font-size:0.85rem; margin-top:15px;">By saving, you agree to <?php echo esc_html($brand_name); ?>'s hosting standard and quality guidelines.</p>
                 </div>
             </form>
         </div>
@@ -2139,7 +2146,7 @@ class Obenlo_Booking_Frontend_Dashboard
                                 </div>
                                 <div style="border-top:1px solid #f5f5f5; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
                                     <span style="font-size:0.75rem; color:#aaa;">Last updated: <?php echo get_the_modified_date('', $ticket->ID); ?></span>
-                                    <a href="<?php echo esc_url(add_query_arg('ticket_id', $ticket->ID, home_url('/support'))); ?>" style="color:#e61e4d; font-weight:700; text-decoration:none; font-size:0.9rem;">View Conversation →</a>
+                                    <a href="<?php echo esc_url(add_query_arg('ticket_id', $ticket->ID, home_url('/support'))); ?>" style="color:var(--obenlo-primary); font-weight:700; text-decoration:none; font-size:0.9rem;">View Conversation →</a>
                                 </div>
                             </div>
                         <?php
@@ -2157,7 +2164,7 @@ class Obenlo_Booking_Frontend_Dashboard
     {
         echo '<div class="dashboard-header"><h2 class="dashboard-title">Payout Settings</h2></div>';
         echo '<div class="form-section">';
-        echo '<p style="margin-bottom:20px; color:#666;">Manage how you would like to receive your earnings from Obenlo.</p>';
+        echo '<p style="margin-bottom:20px; color:#666;">Manage how you would like to receive your earnings from ' . esc_html($brand_name) . '.</p>';
 
         $user_id = get_current_user_id();
         $current_method = get_user_meta($user_id, 'obenlo_payout_method', true);
@@ -2282,7 +2289,7 @@ class Obenlo_Booking_Frontend_Dashboard
 ?>
                         <div class="grid-row" style="display:flex; align-items:center; gap:20px; padding:15px; border:1px solid #eee; border-radius:10px;">
                             <label style="width:120px; font-weight:bold; display:flex; align-items:center; gap:10px;">
-                                <input type="checkbox" name="hours[<?php echo $key; ?>][active]" value="yes" <?php checked($active); ?> style="accent-color:#e61e4d;">
+                                <input type="checkbox" name="hours[<?php echo $key; ?>][active]" value="yes" <?php checked($active); ?> style="accent-color:var(--obenlo-primary);">
                                 <?php echo $label; ?>
                             </label>
                             <div style="display:flex; align-items:center; gap:10px;">
@@ -2537,5 +2544,21 @@ class Obenlo_Booking_Frontend_Dashboard
         $redirect_url = add_query_arg('obenlo_error', $error_code, $redirect_url);
         wp_safe_redirect($redirect_url);
         exit;
+    }
+    /**
+     * Convert Hex to RGB
+     */
+    public static function hex2rgb($hex) {
+        $hex = str_replace('#', '', $hex);
+        if (strlen($hex) == 3) {
+            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+        } else {
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+        }
+        return array($r, $g, $b);
     }
 }

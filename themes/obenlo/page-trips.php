@@ -34,11 +34,11 @@ $bookings = get_posts( array(
     </div>
 
     <?php if ( empty( $bookings ) ) : ?>
-        <div style="text-align:center; padding:80px 40px; background:#fff; border:1px solid #eee; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="width:64px; height:64px; margin:0 auto 20px; display:block;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            <h3 style="color:#555; font-size:1.3rem; margin:0 0 10px 0;">No trips yet</h3>
-            <p style="color:#888; margin:0 0 30px 0;">Explore listings and make your first booking!</p>
-            <a href="<?php echo esc_url( home_url('/listings') ); ?>" style="background:#e61e4d; color:#fff; padding:14px 35px; border-radius:12px; text-decoration:none; font-weight:700; font-size:1rem;">Explore Listings</a>
+        <div style="text-align:center; padding:60px 20px; background:#fff; border-radius:30px; border:1px solid #eee; margin-bottom: 40px;">
+            <div style="font-size:4rem; margin-bottom:20px;">🏝️</div>
+            <h2 style="margin-bottom:15px;">No trips found</h2>
+            <p style="color:#666; margin-bottom:30px; font-size:1.1rem;">You haven't booked any experiences or stays yet.</p>
+            <a href="<?php echo esc_url( home_url('/listings') ); ?>" style="background:var(--obenlo-primary); color:#fff; padding:14px 35px; border-radius:12px; text-decoration:none; font-weight:700; font-size:1rem;">Explore Listings</a>
         </div>
     <?php else : ?>
         <div style="display:flex; flex-direction:column; gap:20px;">
@@ -89,12 +89,11 @@ $bookings = get_posts( array(
 
                         <?php if ( $conf_code ) : ?>
                             <div style="margin-top:20px; padding:16px 20px; background:linear-gradient(135deg,#fff9f0,#fff3f7); border:2px dashed #f0c0c0; border-radius:14px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
-                                <div>
-                                    <div style="font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#e61e4d; margin-bottom:4px;">🎫 Booking Confirmation Code</div>
-                                    <div style="font-size:1.6rem; font-weight:900; font-family:monospace; letter-spacing:3px; color:#222;"><?php echo esc_html($conf_code); ?></div>
-                                    <div style="font-size:0.78rem; color:#888; margin-top:4px;">Present this code to your host at check-in.</div>
+                                <div style="flex:1;">
+                                    <div style="font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--obenlo-primary); margin-bottom:4px;">🎫 Booking Confirmation Code</div>
+                                    <div style="font-family:monospace; font-size:1.2rem; font-weight:800; color:#333;"><?php echo esc_html($conf_code); ?></div>
                                 </div>
-                                <button onclick="navigator.clipboard.writeText('<?php echo esc_js($conf_code); ?>').then(()=>this.innerText='Copied!')" style="background:#e61e4d; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.85rem; white-space:nowrap;">Copy Code</button>
+                                <button onclick="navigator.clipboard.writeText('<?php echo esc_js($conf_code); ?>').then(()=>this.innerText='Copied!')" style="background:var(--obenlo-primary); color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.85rem; white-space:nowrap;">Copy Code</button>
                             </div>
                         <?php endif; ?>
                     </div>

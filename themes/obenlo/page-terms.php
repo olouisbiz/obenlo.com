@@ -23,22 +23,22 @@ get_header();
     <p>As a Host, you are responsible for the accuracy of your listings, compliance with all local laws and regulations, and the quality and safety of the services or spaces you provide. As a Guest, you agree to follow the rules and guidelines set by the Host and to treat their property and services with respect.</p>
 
     <h2>4. Booking, Payments, and Fees</h2>
-    <p>All bookings made through Obenlo are subject to our payment processing terms. Obenlo serves as a limited collection agent for Hosts, facilitating the transfer of funds from Guests to Hosts. Obenlo may charge service fees for the use of our platform, which will be clearly stated at the time of booking.</p>
+    <p><?php echo sprintf( esc_html__( 'All bookings made through %s are subject to our payment processing terms. %s serves as a limited collection agent for Hosts, facilitating the transfer of funds from Guests to Hosts. %s may charge service fees for the use of our platform, which will be clearly stated at the time of booking.', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></p>
 
     <h2>5. Cancellations, Refunds, and Mediation</h2>
-    <p>Cancellation and refund policies are set by individual Hosts and must be clearly stated in each listing. Obenlo reserves the right to mediate disputes between Guests and Hosts and, in its sole discretion, to issue refunds or adjustments based on our global refund policy.</p>
+    <p><?php echo sprintf( esc_html__( 'Cancellation and refund policies are set by individual Hosts and must be clearly stated in each listing. %s reserves the right to mediate disputes between Guests and Hosts and, in its sole discretion, to issue refunds or adjustments based on our global refund policy.', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></p>
 
     <h2>6. User Content and Prohibited Conduct</h2>
-    <p>Users may post reviews, listing descriptions, and messages on the Obenlo platform. You agree not to post any content that is illegal, offensive, infringing, or otherwise violates our community standards. Obenlo reserves the right to remove any content or suspend any account that violates these rules.</p>
+    <p><?php echo sprintf( esc_html__( 'Users may post reviews, listing descriptions, and messages on the %s platform. You agree not to post any content that is illegal, offensive, infringing, or otherwise violates our community standards. %s reserves the right to remove any content or suspend any account that violates these rules.', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></p>
 
     <h2>7. Platform Usage and Intellectual Property</h2>
-    <p>All content and materials on the Obenlo platform, including text, graphics, logos, and software, are the property of Obenlo or its licensors and are protected by intellectual property laws. You agree not to use, reproduce, or distribute any part of our platform without our express written permission.</p>
+    <p><?php echo sprintf( esc_html__( 'All content and materials on the %s platform, including text, graphics, logos, and software, are the property of %s or its licensors and are protected by intellectual property laws. You agree not to use, reproduce, or distribute any part of our platform without our express written permission.', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></p>
 
     <h2>8. Limitation of Liability and Indemnification</h2>
-    <p>Obenlo is a platform that connects users and is not liable for the actions of individual guests or hosts, or for any damages resulting from the use of our services. You agree to indemnify and hold Obenlo harmless from any claims, damages, or losses arising from your use of the platform or your violation of these terms.</p>
+    <p><?php echo sprintf( esc_html__( '%s is a platform that connects users and is not liable for the actions of individual guests or hosts, or for any damages resulting from the use of our services. You agree to indemnify and hold %s harmless from any claims, damages, or losses arising from your use of the platform or your violation of these terms.', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></p>
 
     <h2>9. Dispute Resolution and Governing Law</h2>
-    <p>Any disputes arising from your use of Obenlo will be resolved through binding arbitration in accordance with our dispute resolution process. These terms are governed by and construed in accordance with the laws of the jurisdiction where Obenlo is headquartered.</p>
+    <p><?php echo sprintf( esc_html__( 'Any disputes arising from your use of %s will be resolved through binding arbitration in accordance with our dispute resolution process. These terms are governed by and construed in accordance with the laws of the jurisdiction where %s is headquartered.', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></p>
 
 
 </div>

@@ -8,7 +8,7 @@ get_header(); ?>
 
 <style>
     :root {
-        --primary-color: #e61e4d;
+        --primary-color: var(--obenlo-primary, #e61e4d);
         --text-dark: #222222;
         --text-muted: #717171;
         --bg-light: #f7f7f7;
@@ -168,7 +168,7 @@ get_header(); ?>
 <main class="hosts-directory-wrapper">
     <header class="directory-header">
         <h1>Meet our Hosts</h1>
-        <p>Discover the talented professionals and dedicated property owners making the Obenlo community exceptional.</p>
+        <p><?php echo sprintf( esc_html__( 'Discover the talented professionals and dedicated property owners making the %s community exceptional.', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></p>
     </header>
 
     <div class="hosts-grid">

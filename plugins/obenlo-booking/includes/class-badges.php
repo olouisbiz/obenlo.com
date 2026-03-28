@@ -17,6 +17,9 @@ class Obenlo_Booking_Badges {
      */
     public static function get_host_badges( $user_id ) {
         $badges = array();
+        
+        $brand_name    = get_option('obenlo_brand_name', 'Obenlo');
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
 
         // 1. Verified Host
         if ( Obenlo_Booking_Host_Verification::get_status( $user_id ) === 'verified' ) {
@@ -25,7 +28,7 @@ class Obenlo_Booking_Badges {
                 'label' => 'Verified Host',
                 'icon'  => '🛡️',
                 'color' => '#1d9bf0', // Twitter Blue
-                'desc'  => 'Identity verified by Obenlo'
+                'desc'  => 'Identity verified by ' . $brand_name
             );
         }
 
@@ -35,8 +38,8 @@ class Obenlo_Booking_Badges {
                 'id'    => 'top_booked',
                 'label' => 'Top Booked',
                 'icon'  => '🏆',
-                'color' => '#e61e4d',
-                'desc'  => 'Among the most popular hosts on Obenlo'
+                'color' => $primary_color,
+                'desc'  => 'Among the most popular hosts on ' . $brand_name
             );
         }
 

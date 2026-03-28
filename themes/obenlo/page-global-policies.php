@@ -36,7 +36,7 @@ get_header(); ?>
 
     <div style="border-top: 1px solid #eee; padding-top: 40px; text-align: center;">
         <p style="color: #888; font-size: 0.9rem;"><?php esc_html_e( 'Last Updated: March 8, 2026', 'obenlo' ); ?></p>
-        <a href="<?php echo home_url('/support'); ?>" style="color: #e61e4d; font-weight: bold; text-decoration: none;"><?php esc_html_e( 'Contact Support for Policy Questions', 'obenlo' ); ?> →</a>
+        <a href="<?php echo home_url('/support'); ?>" style="color: var(--obenlo-primary); font-weight: bold; text-decoration: none;"><?php esc_html_e( 'Contact Support for Policy Questions', 'obenlo' ); ?> →</a>
     </div>
 
 </div>

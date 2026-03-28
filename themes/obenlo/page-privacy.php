@@ -26,10 +26,10 @@ get_header();
     <p>We retain your personal information for as long as necessary to provide our services and fulfill the purposes outlined in this policy. We implement industry-standard security measures, including encryption and secure servers, to protect your information from unauthorized access, alteration, or disclosure.</p>
 
     <h2>5. Your Rights and Choices</h2>
-    <p>You have the right to access, correct, or delete your personal information at any time through your account settings. You can also opt-out of receiving promotional communications from us by following the instructions in those messages. If you have any questions or concerns about your data, please contact Obenlo support.</p>
+    <p><?php echo sprintf( esc_html__( 'You have the right to access, correct, or delete your personal information at any time through your account settings. You can also opt-out of receiving promotional communications from us by following the instructions in those messages. If you have any questions or concerns about your data, please contact %s support.', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></p>
 
     <h2>6. Cookies and Tracking Technologies</h2>
-    <p>We use cookies and similar tracking technologies to enhance your experience on Obenlo, analyze site traffic, and personalize content. You can manage your cookie preferences through your browser settings, although disabling cookies may affect your ability to use certain features of our platform.</p>
+    <p><?php echo sprintf( esc_html__( 'We use cookies and similar tracking technologies to enhance your experience on %s, analyze site traffic, and personalize content. You can manage your cookie preferences through your browser settings, although disabling cookies may affect your ability to use certain features of our platform.', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></p>
 
     <h2>7. Changes to This Policy</h2>
     <p>We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify you of any significant changes by posting the updated policy on our website and updating the "Last Updated" date at the top of the page.</p>

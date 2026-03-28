@@ -9,9 +9,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <?php
+    $brand_logo_url = get_option('obenlo_logo_url');
+    $brand_name = get_option('obenlo_brand_name', 'Obenlo');
     $seo_title = wp_title('|', false, 'right') . get_bloginfo('name');
     $seo_desc = get_bloginfo('description');
-    $seo_image = esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png');
+    $fallback_logo = get_template_directory_uri() . '/assets/images/logo-social-profile.png';
+    $seo_image = esc_url($brand_logo_url ?: $fallback_logo);
     
     if ( is_singular() ) {
         global $post;
@@ -64,7 +67,7 @@
     <meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE">
 
     <link rel="profile" href="https://gmpg.org/xfn/11">
-    <link rel="icon" type="image/png" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
+    <link rel="icon" type="image/png" href="<?php echo esc_url($brand_logo); ?>">
     <?php wp_head(); ?>
 
     <?php if ($ga_id): ?>
@@ -107,9 +110,12 @@
         
         <div class="site-branding">
             <a href="<?php echo esc_url(home_url('/')); ?>" style="display: block; text-decoration: none;">
-                <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/obenlo-logo-no-background.svg'); ?>" alt="<?php bloginfo('name'); ?>" style="height: 38px; width: auto; display: block;">
+                <?php if ($brand_logo_url): ?>
+                    <img src="<?php echo esc_url($brand_logo_url); ?>" alt="<?php echo esc_attr($brand_name); ?>" style="height: 48px; width: auto; display: block;">
+                <?php else: ?>
+                    <span style="font-size: 2rem; font-weight: 800; color: var(--obenlo-primary); letter-spacing: -1.5px; display: block; line-height: 1;"><?php echo esc_html($brand_name); ?></span>
+                <?php endif; ?>
             </a>
-
         </div>
 
         <div class="header-search-nav">
@@ -138,7 +144,7 @@
     $is_host = in_array('host', (array)$user->roles) || in_array('administrator', (array)$user->roles);
 ?>
                 <?php if (!$is_host): ?>
-                    <a href="<?php echo esc_url(home_url('/become-a-host')); ?>" class="become-host-link"><?php esc_html_e('Offer a Service', 'obenlo-booking'); ?></a>
+                    <a href="<?php echo esc_url(get_option('obenlo_become_host_url', home_url('/become-a-host'))); ?>" class="become-host-link"><?php esc_html_e('Offer a Service', 'obenlo-booking'); ?></a>
                 <?php
     else: ?>
                     <a href="<?php echo esc_url(home_url('/host-dashboard')); ?>" class="become-host-link"><?php esc_html_e('Switch to hosting', 'obenlo-booking'); ?></a>
@@ -163,12 +169,12 @@
                     <?php
     endif; ?>
                     <?php if (current_user_can('administrator')): ?>
-                        <a href="<?php echo esc_url(home_url('/site-admin')); ?>" style="color: #e61e4d; font-weight: bold;"><?php esc_html_e('Site Admin', 'obenlo-booking'); ?></a>
+                        <a href="<?php echo esc_url(home_url('/site-admin')); ?>" style="color: var(--obenlo-primary); font-weight: bold;"><?php esc_html_e('Site Admin', 'obenlo-booking'); ?></a>
                     <?php
     endif; ?>
                     <a href="<?php echo esc_url(home_url('/account')); ?>"><?php esc_html_e('Account', 'obenlo-booking'); ?></a>
                     <a href="<?php echo esc_url(home_url('/messages')); ?>"><?php esc_html_e('Messages', 'obenlo-booking'); ?></a>
-                    <a href="<?php echo esc_url(home_url('/support')); ?>"><?php esc_html_e('Support / Dispute', 'obenlo-booking'); ?></a>
+                    <a href="<?php echo esc_url(get_option('obenlo_support_url', home_url('/support'))); ?>"><?php esc_html_e('Support / Dispute', 'obenlo-booking'); ?></a>
                     <div class="menu-divider"></div>
                     <a href="<?php echo esc_url(wp_logout_url(home_url())); ?>"><?php esc_html_e('Log out', 'obenlo-booking'); ?></a>
                 </div>
@@ -176,7 +182,7 @@
             <?php
 else: ?>
                 
-                <a href="<?php echo esc_url(home_url('/become-a-host')); ?>" class="become-host-link"><?php esc_html_e('Offer a Service', 'obenlo-booking'); ?></a>
+                <a href="<?php echo esc_url(get_option('obenlo_become_host_url', home_url('/become-a-host'))); ?>" class="become-host-link"><?php esc_html_e('Offer a Service', 'obenlo-booking'); ?></a>
                 
                 <button class="user-dropdown-btn" onclick="document.getElementById('headerUserMenu').classList.toggle('active')">
                     <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display:block;fill:none;height:16px;width:16px;stroke:currentColor;stroke-width:3;overflow:visible"><g fill="none"><path d="M2 16h28M2 24h28M2 8h28"></path></g></svg>
@@ -189,8 +195,8 @@ else: ?>
                     <a href="<?php echo esc_url(home_url('/login')); ?>" style="font-weight: bold;"><?php esc_html_e('Log in', 'obenlo-booking'); ?></a>
                     <a href="<?php echo esc_url(home_url('/login#signup')); ?>"><?php esc_html_e('Sign up', 'obenlo-booking'); ?></a>
                     <div class="menu-divider"></div>
-                    <a href="<?php echo esc_url(home_url('/become-a-host')); ?>"><?php esc_html_e('Offer a Service', 'obenlo-booking'); ?></a>
-                    <a href="<?php echo esc_url(home_url('/support')); ?>"><?php esc_html_e('Help / Support', 'obenlo-booking'); ?></a>
+                    <a href="<?php echo esc_url(get_option('obenlo_become_host_url', home_url('/become-a-host'))); ?>"><?php esc_html_e('Offer a Service', 'obenlo-booking'); ?></a>
+                    <a href="<?php echo esc_url(get_option('obenlo_support_url', home_url('/support'))); ?>"><?php esc_html_e('Help / Support', 'obenlo-booking'); ?></a>
                 </div>
 
             <?php

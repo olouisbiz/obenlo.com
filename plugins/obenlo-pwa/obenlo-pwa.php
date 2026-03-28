@@ -31,12 +31,12 @@ class Obenlo_PWA
     public function inject_meta_tags()
     {
         ?>
-        <meta name="theme-color" content="#e61e4d">
+        <meta name="theme-color" content="<?php echo esc_attr(get_option('obenlo_primary_color', '#e61e4d')); ?>">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="Obenlo">
-        <link rel="apple-touch-icon" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile-192.png'); ?>">
+        <meta name="apple-mobile-web-app-title" content="<?php echo esc_attr(get_option('obenlo_brand_name', 'Obenlo')); ?>">
+        <link rel="apple-touch-icon" href="<?php echo esc_url(get_option('obenlo_logo_url', get_template_directory_uri() . '/assets/images/logo-social-profile-192.png')); ?>">
         <link rel="manifest" href="<?php echo home_url('/manifest.json'); ?>">
         <?php
     }
@@ -62,6 +62,8 @@ class Obenlo_PWA
                 // We will serve the manifest with dynamic paths for icons
                 $manifest = file_get_contents(OBENLO_PWA_DIR . 'assets/manifest.json');
                 $manifest = str_replace('/wp-content/', home_url('/wp-content/'), $manifest);
+                $manifest = str_replace('"Obenlo"', '"' . esc_js(get_option('obenlo_brand_name', 'Obenlo')) . '"', $manifest);
+                $manifest = str_replace('#e61e4d', esc_js(get_option('obenlo_primary_color', '#e61e4d')), $manifest);
                 echo $manifest;
                 exit;
             }
@@ -90,15 +92,15 @@ class Obenlo_PWA
             <style>
                 @keyframes pwa-slide-up { from { transform: translate(-50%, 100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
             </style>
-            <div style="width:60px; height:60px; background:#fff; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>" alt="Obenlo App" style="width:40px; height:40px; border-radius:8px;">
+            <div style="width:70px; height:70px; background:#fff; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                <img src="<?php echo esc_url(get_option('obenlo_logo_url', get_template_directory_uri() . '/assets/images/logo-social-profile.png')); ?>" alt="<?php echo esc_attr(get_option('obenlo_brand_name', 'Obenlo')); ?> App" style="width:50px; height:50px; border-radius:8px;">
             </div>
             <div style="flex-grow:1;">
-                <h4 style="margin:0 0 4px 0; font-size:17px; color:#1a1a1b; font-weight:800; letter-spacing:-0.01em;">Obenlo: Better with the App</h4>
+                <h4 style="margin:0 0 4px 0; font-size:17px; color:#1a1a1b; font-weight:800; letter-spacing:-0.01em;"><?php echo esc_html(get_option('obenlo_brand_name', 'Obenlo')); ?>: Better with the App</h4>
                 <p style="margin:0; font-size:13px; color:#5e5e62; line-height:1.4;" id="pwa-prompt-desc">Install for a faster experience & instant notifications.</p>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px;">
-                <button id="pwa-install-btn" style="background:#e61e4d; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; box-shadow: 0 4px 12px rgba(230, 30, 77, 0.2);">Install</button>
+                <button id="pwa-install-btn" style="background:<?php echo esc_attr(get_option('obenlo_primary_color', '#e61e4d')); ?>; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; box-shadow: 0 4px 12px rgba(var(--obenlo-primary-rgb, 230, 30, 77), 0.2);">Install</button>
                 <button id="pwa-dismiss-btn" style="background:transparent; color:#999; border:none; padding:4px; font-size:12px; cursor:pointer; font-weight:600;">Maybe later</button>
             </div>
         </div>

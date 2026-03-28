@@ -29,9 +29,9 @@ get_header(); ?>
     </div>
 
     <div style="background: #fff8f8; border: 1px solid #ffecec; padding: 40px; border-radius: 20px; text-align: center;">
-        <h2 style="color: #e61e4d; margin-bottom: 15px;"><?php esc_html_e( 'Report a Concern', 'obenlo' ); ?></h2>
+        <h2 style="color: var(--obenlo-primary); margin-bottom: 15px;"><?php esc_html_e( 'Report a Concern', 'obenlo' ); ?></h2>
         <p><?php esc_html_e( 'If you experience any issues or feel unsafe, please contact our emergency support team immediately.', 'obenlo' ); ?></p>
-        <a href="mailto:safety@obenlo.com" style="margin-top: 20px; display: inline-block; padding: 12px 30px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold;"><?php esc_html_e( 'Contact Safety Team', 'obenlo' ); ?></a>
+        <a href="mailto:safety@obenlo.com" style="margin-top: 20px; display: inline-block; padding: 12px 30px; background: var(--obenlo-primary); color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold;"><?php esc_html_e( 'Contact Safety Team', 'obenlo' ); ?></a>
     </div>
 
 </div>

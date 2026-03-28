@@ -140,7 +140,7 @@ get_header(); ?>
                 $event_location_type = get_post_meta($listing_id, '_obenlo_event_location_type', true);
                 $location_val = get_post_meta($listing_id, '_obenlo_location', true);
                 ?>
-                <span class="category-badge" style="background:#fef2f2; padding:4px 12px; border-radius:30px; font-weight:700; font-size:0.85rem; color:#e61e4d; margin-right:8px; border:1px solid #fee2e2;">
+                <span class="category-badge" style="background:rgba(var(--obenlo-primary-rgb),0.1); padding:4px 12px; border-radius:30px; font-weight:700; font-size:0.85rem; color:var(--obenlo-primary); margin-right:8px; border:1px solid rgba(var(--obenlo-primary-rgb),0.2);">
                     <?php echo $badge_icon; ?> <?php echo esc_html($display_category); ?>
                 </span>
                 
@@ -182,7 +182,7 @@ get_header(); ?>
                     }
                 }
                 ?>
-                <span style="color:#888;">&bull;</span> Hosted by <a href="<?php echo esc_url($host_url); ?>" style="color:#e61e4d; font-weight:bold; text-decoration:none; margin-left:5px;"><?php echo esc_html($host_name); ?></a>
+                <span style="color:#888;">&bull;</span> Hosted by <a href="<?php echo esc_url($host_url); ?>" style="color:var(--obenlo-primary); font-weight:bold; text-decoration:none; margin-left:5px;"><?php echo esc_html($host_name); ?></a>
             </div>
         </div>
 
@@ -331,7 +331,7 @@ get_header(); ?>
 
                 <!-- Tabbed Interface for Content -->
                 <div class="listing-tabs" style="margin-bottom: 20px; border-bottom: 1px solid #ddd; display: flex; gap: 20px;">
-                    <button class="tab-btn active" onclick="openTab(event, 'tab-about')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid #e61e4d; color: #e61e4d;">About</button>
+                    <button class="tab-btn active" onclick="openTab(event, 'tab-about')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid var(--obenlo-primary); color: var(--obenlo-primary);">About</button>
                     <button class="tab-btn" onclick="openTab(event, 'tab-amenities')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; color: #666;">Amenities</button>
                     <button class="tab-btn" onclick="openTab(event, 'tab-policies')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; color: #666;">Policies</button>
                     <button class="tab-btn" id="reviews-tab-trigger" onclick="openTab(event, 'tab-reviews')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; color: #666;">Reviews (<?php echo $review_count; ?>)</button>
@@ -519,7 +519,7 @@ get_header(); ?>
                     <?php
     else: ?>
                         <p style="margin-top: 40px; padding: 20px; background: #f9f9f9; border-radius: 8px; text-align: center;">
-                            Please <a href="<?php echo wp_login_url(get_permalink()); ?>" style="color: #e61e4d; font-weight: bold;">log in</a> to leave a review.
+                            Please <a href="<?php echo wp_login_url(get_permalink()); ?>" style="color: var(--obenlo-primary); font-weight: bold;">log in</a> to leave a review.
                         </p>
                     <?php
     endif; ?>
@@ -539,9 +539,10 @@ get_header(); ?>
                         tablinks[i].style.borderBottomColor = "transparent";
                     }
                     document.getElementById(tabName).style.display = "block";
+                    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--obenlo-primary').trim() || '#e61e4d';
                     evt.currentTarget.className += " active";
-                    evt.currentTarget.style.color = "#e61e4d";
-                    evt.currentTarget.style.borderBottomColor = "#e61e4d";
+                    evt.currentTarget.style.color = primaryColor;
+                    evt.currentTarget.style.borderBottomColor = primaryColor;
                 }
                 </script>
 
@@ -591,7 +592,7 @@ get_header(); ?>
                                         <?php endif; ?>
                                         <div style="flex:1;">
                                             <div style="font-weight:bold; margin-bottom:2px;"><?php echo esc_html($child->post_title); ?></div>
-                                            <div style="font-size:0.9em; color:#e61e4d; font-weight:700;">From $<?php echo esc_html($child_price); ?></div>
+                                            <div style="font-size:0.9em; color:var(--obenlo-primary); font-weight:700;">From $<?php echo esc_html($child_price); ?></div>
                                         </div>
                                         <div style="align-self:center; color:#ccc;">&rsaquo;</div>
                                     </a>
@@ -607,9 +608,9 @@ get_header(); ?>
                         <!-- Contact Host Button (Harmonized) -->
                         <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
                             <button onclick="<?php if(is_user_logged_in()): ?>if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');} <?php else: ?>window.obenloOpenGuestContact(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');<?php endif; ?>"
-                                    style="width: 100%; background: #e61e4d; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(230,30,77,0.3);"
+                                    style="width: 100%; background: var(--obenlo-primary); color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(var(--obenlo-primary-rgb), 0.3);"
                                     onmouseover="this.style.background='#000'; this.style.transform='translateY(-2px)';"
-                                    onmouseout="this.style.background='#e61e4d'; this.style.transform='translateY(0)';"
+                                    onmouseout="this.style.background='var(--obenlo-primary)'; this.style.transform='translateY(0)';"
                             >
                                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                                 Contact Host
@@ -828,7 +829,7 @@ get_header(); ?>
                                 <span>$<span id="live-total"><?php echo esc_html($price); ?></span></span>
                             </div>
 
-                            <button type="submit" class="reserve-btn" style="background:#e61e4d; color:white; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:1.1rem; border:none; cursor:pointer; transition:all 0.2s ease-in-out; box-shadow:0 4px 15px rgba(230,30,77,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(230,30,77,0.4)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(230,30,77,0.3)';">
+                            <button type="submit" class="reserve-btn" style="background:var(--obenlo-primary); color:white; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:1.1rem; border:none; cursor:pointer; transition:all 0.2s ease-in-out; box-shadow:0 4px 15px rgba(var(--obenlo-primary-rgb),0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(var(--obenlo-primary-rgb),0.4)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(var(--obenlo-primary-rgb),0.3)';">
                                 <?php echo in_array($booking_mode, ['event_datetime']) ? 'Buy Tickets' : 'Book Instantly'; ?>
                             </button>
                         </form>
@@ -836,9 +837,9 @@ get_header(); ?>
                         <!-- Contact Host Button (Harmonized) -->
                         <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
                             <button onclick="<?php if(is_user_logged_in()): ?>if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');} <?php else: ?>window.obenloOpenGuestContact(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');<?php endif; ?>"
-                                    style="width: 100%; background: #e61e4d; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(230,30,77,0.2);"
+                                    style="width: 100%; background: var(--obenlo-primary); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(var(--obenlo-primary-rgb),0.2);"
                                     onmouseover="this.style.background='#000'; this.style.transform='translateY(-1px)';"
-                                    onmouseout="this.style.background='#e61e4d'; this.style.transform='translateY(0)';"
+                                    onmouseout="this.style.background='var(--obenlo-primary)'; this.style.transform='translateY(0)';"
                             >
                                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                                 Contact Host
@@ -886,7 +887,7 @@ get_header(); ?>
                             var vacationBlocks = <?php echo json_encode($vacation_blocks); ?>;
                             var reserveBtn = form.querySelector('.reserve-btn');
                             var errorMsgEl = document.createElement('div');
-                            errorMsgEl.style.color = '#e61e4d';
+                            errorMsgEl.style.color = 'var(--obenlo-primary)';
                             errorMsgEl.style.marginTop = '10px';
                             errorMsgEl.style.fontWeight = 'bold';
                             errorMsgEl.style.fontSize = '0.9em';
@@ -989,7 +990,7 @@ get_header(); ?>
                                             var vEnd = new Date(vacationBlocks[i].end + 'T23:59:59');
                                             if (sD <= vEnd && sD >= vStart) {
                                                 container.style.display = 'block';
-                                                grid.innerHTML = '<div style="grid-column:1/-1; color:#e61e4d; font-size:0.9em; font-weight:bold;">Host is away on this date.</div>';
+                                                grid.innerHTML = '<div style="grid-column:1/-1; color:var(--obenlo-primary); font-size:0.9em; font-weight:bold;">Host is away on this date.</div>';
                                                 return;
                                             }
                                         }
@@ -1024,14 +1025,15 @@ get_header(); ?>
                                                 btn.style.fontWeight = 'bold';
                                                 
                                                 btn.addEventListener('click', function() {
+                                                    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--obenlo-primary').trim() || '#e61e4d';
                                                     document.querySelectorAll('.timeslot-btn').forEach(b => {
                                                         b.style.background = '#fff';
                                                         b.style.color = '#333';
                                                         b.style.borderColor = '#ccc';
                                                     });
-                                                    btn.style.background = '#e61e4d';
+                                                    btn.style.background = primaryColor;
                                                     btn.style.color = '#fff';
-                                                    btn.style.borderColor = '#e61e4d';
+                                                    btn.style.borderColor = primaryColor;
                                                     finalStart.value = selectedDate + 'T' + slot.time;
                                                     
                                                     if (reserveBtn) {
@@ -1048,8 +1050,9 @@ get_header(); ?>
                                         }
                                     })
                                     .catch(err => {
+                                        console.error('Fetch error:', err);
                                         loading.style.display = 'none';
-                                        grid.innerHTML = '<div style="grid-column:1/-1; color:#e61e4d; font-size:0.9em;">Error loading slots.</div>';
+                                        grid.innerHTML = '<div style="grid-column:1/-1; color:var(--obenlo-primary); font-size:0.9em;">Error loading slots.</div>';
                                     });
                                 });
                             }

@@ -14,7 +14,7 @@ $date = isset( $review['date'] ) ? $review['date'] : __( 'Recently', 'obenlo' );
 ?>
 
 <div class="review-card" style="background: #fff; border: 1px solid #ddd; border-radius: 16px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)';">
-    <div style="display: flex; gap: 2px; color: #e61e4d; margin-bottom: 15px; font-size: 0.9rem;">
+    <div style="display: flex; gap: 2px; color: var(--obenlo-primary); margin-bottom: 15px; font-size: 0.9rem;">
         <?php for( $i = 0; $i < 5; $i++ ): ?>
             <span><?php echo $i < $rating ? '★' : '☆'; ?></span>
         <?php endfor; ?>

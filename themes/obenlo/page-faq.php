@@ -79,9 +79,9 @@ if ( $type === 'guest' ) {
     
     <div style="text-align: center; margin-top: 40px;">
         <?php if ( $type !== 'all' ) : ?>
-            <a href="<?php echo esc_url( home_url('/faq') ); ?>" style="color: #e61e4d; font-weight: bold; text-decoration: none; margin-right: 20px;"><?php esc_html_e( '&larr; View All FAQs', 'obenlo' ); ?></a>
+            <a href="<?php echo esc_url( home_url('/faq') ); ?>" style="color: var(--obenlo-primary); font-weight: bold; text-decoration: none; margin-right: 20px;"><?php esc_html_e( '&larr; View All FAQs', 'obenlo' ); ?></a>
         <?php endif; ?>
-        <a href="<?php echo esc_url( home_url('/support') ); ?>" style="padding: 12px 30px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold;"><?php esc_html_e( 'Contact Support', 'obenlo' ); ?></a>
+        <a href="<?php echo esc_url( home_url('/support') ); ?>" style="padding: 12px 30px; background: var(--obenlo-primary); color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold;"><?php esc_html_e( 'Contact Support', 'obenlo' ); ?></a>
     </div>
 
 </div>

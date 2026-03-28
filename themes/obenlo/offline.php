@@ -10,7 +10,7 @@ get_header(); ?>
     <p style="font-size: 1.1rem; color: #717171; line-height: 1.6; margin-bottom: 30px;">
         <?php esc_html_e( 'It seems you\'ve lost your connection. Don\'t worry, you can still browse some of your previously visited pages.', 'obenlo' ); ?>
     </p>
-    <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="display: inline-block; padding: 14px 30px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+    <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="display: inline-block; padding: 14px 30px; background: var(--obenlo-primary); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
         <?php esc_html_e( 'Back to Home', 'obenlo' ); ?>
     </a>
 </div>

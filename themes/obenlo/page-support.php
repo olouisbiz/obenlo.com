@@ -19,19 +19,19 @@ get_header(); ?>
             <div style="font-size: 2.5rem; margin-bottom: 20px;">👤</div>
             <h3 style="margin-bottom: 15px;"><?php esc_html_e( 'Guest Support', 'obenlo' ); ?></h3>
             <p style="color: #666; font-size: 0.95rem; margin-bottom: 25px;"><?php esc_html_e( 'Help with bookings, cancellations, and payments.', 'obenlo' ); ?></p>
-            <a href="<?php echo home_url('/faq?type=guest'); ?>" style="color: #e61e4d; font-weight: bold; text-decoration: none;"><?php esc_html_e( 'Browse Articles', 'obenlo' ); ?> &rarr;</a>
+            <a href="<?php echo home_url('/faq?type=guest'); ?>" style="color: var(--obenlo-primary); font-weight: bold; text-decoration: none;"><?php esc_html_e( 'Browse Articles', 'obenlo' ); ?> &rarr;</a>
         </div>
         <div style="padding: 40px; border: 1px solid #eee; border-radius: 20px; text-align: center;">
             <div style="font-size: 2.5rem; margin-bottom: 20px;">🏠</div>
             <h3 style="margin-bottom: 15px;"><?php esc_html_e( 'Host Support', 'obenlo' ); ?></h3>
             <p style="color: #666; font-size: 0.95rem; margin-bottom: 25px;"><?php esc_html_e( 'Resources for managing listings and hosting guests.', 'obenlo' ); ?></p>
-            <a href="<?php echo home_url('/faq?type=host'); ?>" style="color: #e61e4d; font-weight: bold; text-decoration: none;"><?php esc_html_e( 'Browse Articles', 'obenlo' ); ?> &rarr;</a>
+            <a href="<?php echo home_url('/faq?type=host'); ?>" style="color: var(--obenlo-primary); font-weight: bold; text-decoration: none;"><?php esc_html_e( 'Browse Articles', 'obenlo' ); ?> &rarr;</a>
         </div>
         <div style="padding: 40px; border: 1px solid #eee; border-radius: 20px; text-align: center;">
             <div style="font-size: 2.5rem; margin-bottom: 20px;">🛡️</div>
             <h3 style="margin-bottom: 15px;"><?php esc_html_e( 'Safety & Security', 'obenlo' ); ?></h3>
             <p style="color: #666; font-size: 0.95rem; margin-bottom: 25px;"><?php esc_html_e( 'Report a concern or learn about our safety standards.', 'obenlo' ); ?></p>
-            <a href="<?php echo home_url('/trust-safety'); ?>" style="color: #e61e4d; font-weight: bold; text-decoration: none;"><?php esc_html_e( 'Get Help', 'obenlo' ); ?> &rarr;</a>
+            <a href="<?php echo home_url('/trust-safety'); ?>" style="color: var(--obenlo-primary); font-weight: bold; text-decoration: none;"><?php esc_html_e( 'Get Help', 'obenlo' ); ?> &rarr;</a>
         </div>
     </div>
 

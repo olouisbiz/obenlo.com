@@ -27,7 +27,7 @@ class Obenlo_Booking_Notifications
 
     public function set_mail_from_name($name)
     {
-        return 'Obenlo';
+        return get_option('obenlo_mail_from_name', 'Obenlo');
     }
 
     public function set_mail_content_type()
@@ -40,7 +40,9 @@ class Obenlo_Booking_Notifications
      */
     public static function wrap_template($subject, $body_html, $cta_label = '', $cta_url = '')
     {
-        $logo_url  = 'https://obenlo.com/wp-content/themes/obenlo/assets/images/logo-social-profile.png';
+        $brand_name = get_option('obenlo_brand_name', 'Obenlo');
+        $brand_color = get_option('obenlo_primary_color', '#e61e4d');
+        $logo_url  = get_option('obenlo_logo_url', 'https://obenlo.com/wp-content/themes/obenlo/assets/images/logo-social-profile.png');
         $site_url  = home_url('/');
         $year      = date('Y');
 
@@ -48,7 +50,7 @@ class Obenlo_Booking_Notifications
         if ($cta_label && $cta_url) {
             $cta_block = '
             <div style="text-align:center; margin: 32px 0;">
-                <a href="' . esc_url($cta_url) . '" style="background:#e61e4d; color:#ffffff; text-decoration:none; font-weight:700; font-size:1rem; padding:14px 36px; border-radius:14px; display:inline-block; letter-spacing:-0.01em;">'
+                <a href="' . esc_url($cta_url) . '" style="background:' . esc_attr($brand_color) . '; color:#ffffff; text-decoration:none; font-weight:700; font-size:1rem; padding:14px 36px; border-radius:14px; display:inline-block; letter-spacing:-0.01em;">'
                 . esc_html($cta_label) . '
                 </a>
             </div>';
@@ -70,9 +72,9 @@ class Obenlo_Booking_Notifications
 
         <!-- Header -->
         <tr>
-          <td style="background:#e61e4d; padding:28px 40px; text-align:center;">
+          <td style="background:' . esc_attr($brand_color) . '; padding:28px 40px; text-align:center;">
             <a href="' . esc_url($site_url) . '" style="text-decoration:none;">
-              <span style="font-family:\'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size:32px; font-weight:900; color:#ffffff; letter-spacing:-1.5px;">Obenlo</span>
+              <span style="font-family:\'Helvetica Neue\', Helvetica, Arial, sans-serif; font-size:32px; font-weight:900; color:#ffffff; letter-spacing:-1.5px;">' . esc_html($brand_name) . '</span>
             </a>
           </td>
         </tr>
@@ -94,13 +96,13 @@ class Obenlo_Booking_Notifications
         <!-- Footer -->
         <tr>
           <td style="padding:24px 40px; text-align:center; color:#888; font-size:12px; line-height:1.6;">
-            <p style="margin:0 0 6px 0;">© ' . $year . ' Obenlo, Inc. All rights reserved.</p>
+            <p style="margin:0 0 6px 0;">© ' . $year . ' ' . esc_html($brand_name) . '. All rights reserved.</p>
             <p style="margin:0;">
-              <a href="' . esc_url(home_url('/privacy')) . '" style="color:#aaa; text-decoration:none;">Privacy Policy</a>
+              <a href="' . esc_url(get_option('obenlo_privacy_url', home_url('/privacy'))) . '" style="color:#aaa; text-decoration:none;">Privacy Policy</a>
               &middot;
-              <a href="' . esc_url(home_url('/terms')) . '" style="color:#aaa; text-decoration:none;">Terms of Service</a>
+              <a href="' . esc_url(get_option('obenlo_terms_url', home_url('/terms'))) . '" style="color:#aaa; text-decoration:none;">Terms of Service</a>
               &middot;
-              <a href="' . esc_url(home_url('/support')) . '" style="color:#aaa; text-decoration:none;">Help Center</a>
+              <a href="' . esc_url(get_option('obenlo_support_url', home_url('/support'))) . '" style="color:#aaa; text-decoration:none;">Help Center</a>
             </p>
           </td>
         </tr>
@@ -189,11 +191,13 @@ class Obenlo_Booking_Notifications
                     $subject = "[TEST MODE] " . $subject;
                 }
 
+                $brand_color = get_option('obenlo_primary_color', '#e61e4d');
                 $body_html = '
                 <p style="margin:0 0 16px 0;">Great news! Your booking for <strong>' . esc_html($listing_title) . '</strong> has been confirmed.</p>
-                <div style="background:#fef2f2; border:1px solid #fee2e2; border-radius:12px; padding:20px 24px; margin:0 0 20px 0; text-align:center;">
-                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:#e61e4d; font-weight:700; margin-bottom:8px;">Confirmation Code</div>
-                    <div style="font-size:2rem; font-weight:900; letter-spacing:4px; color:#111; font-family:monospace;">' . esc_html($confirmation_code ?: 'N/A') . '</div>';
+                <div style="background-color:#ffffff; padding:40px; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.05); text-align:center;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:' . esc_attr($brand_color) . '; font-weight:700; margin-bottom:8px;">Confirmation Code</div>
+                    <div style="font-size:3rem; font-weight:800; color:#222; letter-spacing:5px;">' . esc_html($confirmation_code ?: 'N/A') . '</div>
+                </div>';
 
                 if ($guest_id_val) {
                     $body_html .= '<div style="margin-top:8px; font-size:0.85rem; color:#555;">Guest ID: <strong>' . esc_html($guest_id_val) . '</strong></div>';
@@ -267,9 +271,10 @@ class Obenlo_Booking_Notifications
         $sender_id   = get_post_field('post_author', $message_id);
         $sender      = get_userdata($sender_id);
         $sender_name = $sender ? $sender->display_name : 'Someone';
+        $brand_name  = get_option('obenlo_brand_name', 'Obenlo');
 
-        $subject   = "New Message from $sender_name – Obenlo";
-        $body_html = '<p style="margin:0 0 16px 0;">You have received a new message on Obenlo from <strong>' . esc_html($sender_name) . '</strong>.</p>';
+        $subject   = "New Message from $sender_name – $brand_name";
+        $body_html = '<p style="margin:0 0 16px 0;">You have received a new message on ' . esc_html($brand_name) . ' from <strong>' . esc_html($sender_name) . '</strong>.</p>';
 
         self::send_html_to_user($recipient_id, $subject, $body_html, 'View Messages', home_url('/messages'));
     }
@@ -342,13 +347,14 @@ class Obenlo_Booking_Notifications
 
         switch ($event) {
             case 'welcome_host':
-                $subject   = 'Welcome to the Obenlo Host Community!';
+                $brand_name = get_option('obenlo_brand_name', 'Obenlo');
+                $subject   = 'Welcome to the ' . $brand_name . ' Host Community!';
                 $body_html = '
                 <p style="margin:0 0 16px 0;">Hi <strong>' . esc_html($name) . '</strong>,</p>
-                <p style="margin:0 0 16px 0;">Welcome to Obenlo! We\'re thrilled to have you as a host.</p>
+                <p style="margin:0 0 16px 0;">Welcome to ' . esc_html($brand_name) . '! We\'re thrilled to have you as a host.</p>
                 <p style="margin:0 0 16px 0;">To start hosting and earning, please complete your identity verification in your dashboard.</p>
                 <p style="margin:0 0 16px 0; color:#666; font-size:0.9rem;">If you have any questions, our support team is always here to help.</p>
-                <p style="margin:0;">Let\'s create amazing experiences together!<br><strong>Team Obenlo</strong></p>';
+                <p style="margin:0;">Let\'s create amazing experiences together!<br><strong>Team ' . esc_html($brand_name) . '</strong></p>';
                 self::send_html_to_user($user_id, $subject, $body_html, 'Complete Verification', home_url('/host-onboarding'));
                 break;
 
@@ -363,12 +369,16 @@ class Obenlo_Booking_Notifications
                 break;
 
             case 'host_rejected':
+                $brand_name  = get_option('obenlo_brand_name', 'Obenlo');
+                $brand_color = get_option('obenlo_primary_color', '#e61e4d');
+                $info_email  = get_option('obenlo_info_email', 'info@obenlo.com');
+
                 $subject   = 'Update regarding your verification';
                 $body_html = '
                 <p style="margin:0 0 16px 0;">Hi <strong>' . esc_html($name) . '</strong>,</p>
                 <p style="margin:0 0 16px 0;">We were unable to verify your identity with the document provided.</p>
                 <p style="margin:0 0 16px 0;">Please log in to your dashboard to review the requirements and re-upload a clear document.</p>
-                <p style="margin:0; font-size:0.9rem; color:#666;">If you believe this was an error, please contact <a href="mailto:support@obenlo.com" style="color:#e61e4d;">support@obenlo.com</a>.</p>';
+                <p style="margin:0; font-size:0.9rem; color:#666;">If you believe this was an error, please contact <a href="mailto:' . esc_attr($info_email) . '" style="color:' . esc_attr($brand_color) . ';">' . esc_html($info_email) . '</a>.</p>';
                 self::send_html_to_user($user_id, $subject, $body_html, 'Re-upload Document', home_url('/host-onboarding'));
                 break;
         }
@@ -384,7 +394,8 @@ class Obenlo_Booking_Notifications
 
         if (!$bot_token || !$chat_ids_string) return;
 
-        $msg  = "📢 <b>Obenlo Live Chat Alert</b>\n";
+        $brand_name = get_option('obenlo_brand_name', 'Obenlo');
+        $msg  = "📢 <b>" . esc_html($brand_name) . " Live Chat Alert</b>\n";
         $msg .= "Session: <code>$session_id</code>\n\n";
         $msg .= "Message: " . esc_html($message) . "\n\n";
         $msg .= "Reply directly to THIS message to respond to the guest.";

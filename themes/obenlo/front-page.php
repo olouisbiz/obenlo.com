@@ -12,7 +12,7 @@ get_header(); ?>
         <h1 style="font-size: 3rem; font-weight: 800; color: #111; margin-bottom: 20px; line-height: 1.2;"><?php esc_html_e( 'Get booked and paid by local customers — instantly.', 'obenlo' ); ?></h1>
         <p style="font-size: 1.2rem; color: #444; max-width: 600px; margin: 0 auto 40px auto; line-height: 1.5;"><?php esc_html_e( 'List your services, accept bookings, and get paid securely without the back-and-forth.', 'obenlo' ); ?></p>
         <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-            <a href="<?php echo esc_url( home_url('/become-a-host') ); ?>" style="padding: 16px 32px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(230,30,77,0.3)';" onmouseout="this.style.transform='';this.style.boxShadow='';"><?php esc_html_e( 'Start offering services', 'obenlo' ); ?></a>
+            <a href="<?php echo esc_url( home_url('/become-a-host') ); ?>" style="padding: 16px 32px; background: var(--obenlo-primary); color: #fff; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(var(--obenlo-primary-rgb), 0.3)';" onmouseout="this.style.transform='';this.style.boxShadow='';"><?php esc_html_e( 'Start offering services', 'obenlo' ); ?></a>
             <a href="#services-explore" style="padding: 16px 32px; background: #fff; color: #222; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; border: 2px solid #222; transition: all 0.2s;" onmouseover="this.style.background='#222';this.style.color='#fff';" onmouseout="this.style.background='#fff';this.style.color='#222';"><?php esc_html_e( 'Book a service', 'obenlo' ); ?></a>
         </div>
     </section>
@@ -83,10 +83,10 @@ get_header(); ?>
             $categories = array(
                 'stay' => array(
                     'label' => __( 'Stays', 'obenlo' ),
-                    'desc'  => __( 'Hotels, guest houses & unique rooms', 'obenlo' ),
-                    'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M28 12H22V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v24h2V18h16v10h2V14h6v14h2V14a2 2 0 0 0-2-2ZM12 14H4v-4h8Zm0-6H4V4h8Zm8 6h-6v-4h6Zm0-6h-6V4h6Z"/></svg>',
-                    'color' => '#3b82f6',
-                    'bg'    => '#eff6ff',
+                    'desc'  => __( 'Homes, Boutique Hotels & Unique Spaces', 'obenlo' ),
+                    'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M26 6H6a2 2 0 0 0-2 2v20h2V8h20v20h2V8a2 2 0 0 0-2-2Zm-7 7h-6v3h6Zm-8 15h2v-8h10v8h2V11H11Zm10-2h-6v-4h6Z"/></svg>',
+                    'color' => get_option('obenlo_stay_color', '#3b82f6'),
+                    'bg'    => 'rgba(' . implode(',', Obenlo_Booking_Frontend_Dashboard::hex2rgb(get_option('obenlo_stay_color', '#3b82f6'))) . ', 0.1)',
                 ),
                 'experience' => array(
                     'label' => __( 'Experiences', 'obenlo' ),
@@ -99,15 +99,15 @@ get_header(); ?>
                     'label' => __( 'Services', 'obenlo' ),
                     'desc'  => __( 'Cleaning, Handyman, Barber & Freelance', 'obenlo' ),
                     'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M18.5 15h-6a4.5 4.5 0 0 0-4.5 4.5V28h2v-8.5A2.503 2.503 0 0 1 12.5 17h6a2.503 2.503 0 0 1 2.5 2.5V28h2v-8.5A4.5 4.5 0 0 0 18.5 15ZM15.5 14A5 5 0 1 0 10.5 9a5.006 5.006 0 0 0 5 5Zm0-8A3 3 0 1 1 12.5 9a3.003 3.003 0 0 1 3-3Z"/></svg>',
-                    'color' => '#f97316',
-                    'bg'    => '#fff7ed',
+                    'color' => get_option('obenlo_service_color', '#f97316'),
+                    'bg'    => 'rgba(' . implode(',', Obenlo_Booking_Frontend_Dashboard::hex2rgb(get_option('obenlo_service_color', '#f97316'))) . ', 0.1)',
                 ),
                 'event' => array(
                     'label' => __( 'Events', 'obenlo' ),
                     'desc'  => __( 'Shows, live nights & performances', 'obenlo' ),
                     'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M26 4H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 22H6V12h20Zm0-16H6V6h20ZM13 25a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Zm8 0a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Zm-4 0a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Z"/></svg>',
-                    'color' => '#e61e4d',
-                    'bg'    => '#fff1f3',
+                    'color' => get_option('obenlo_event_color', '#e61e4d'),
+                    'bg'    => 'rgba(' . implode(',', Obenlo_Booking_Frontend_Dashboard::hex2rgb(get_option('obenlo_event_color', '#e61e4d'))) . ', 0.1)',
                 ),
             );
             foreach ( $categories as $slug => $cat ) :

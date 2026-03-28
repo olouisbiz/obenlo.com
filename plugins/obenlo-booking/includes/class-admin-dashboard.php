@@ -51,22 +51,23 @@ class Obenlo_Booking_Admin_Dashboard
         $tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'overview';
 
         ob_start();
+        $brand_color = get_option('obenlo_primary_color', '#e61e4d');
 ?>
         <div class="obenlo-admin-dashboard" data-version="1.0.2">
             <div style="text-align: right; font-size: 0.7em; color: #ccc; margin-bottom: -20px;">v1.0.2</div>
             <style>
                 .admin-nav { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 15px; display: flex; gap: 20px; }
                 .admin-nav a { text-decoration: none; color: #666; font-weight: 600; padding: 10px 15px; border-radius: 8px; }
-                .admin-nav a.active { background: #e61e4d; color: #fff; }
+                .admin-nav a.active { background: <?php echo esc_attr($brand_color); ?>; color: #fff; }
                 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
                 .stat-card { background: #fff; border: 1px solid #eee; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); text-align: center; }
-                .stat-value { display: block; font-size: 2.5em; font-weight: 800; color: #e61e4d; margin-bottom: 5px; }
+                .stat-value { display: block; font-size: 2.5em; font-weight: 800; color: <?php echo esc_attr($brand_color); ?>; margin-bottom: 5px; }
                 .stat-label { color: #666; font-weight: 600; text-transform: uppercase; font-size: 0.8em; letter-spacing: 1px; }
                 .admin-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #eee; }
                 .admin-table th { background: #f9f9f9; padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #eee; }
                 .admin-table td { padding: 15px; border-bottom: 1px solid #eee; }
                 .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
-                .badge-host { background: #e61e4d; color: #fff; }
+                .badge-host { background: <?php echo esc_attr($brand_color); ?>; color: #fff; }
                 .badge-guest { background: #333; color: #fff; }
                 .btn-approve { color: #4CAF50; font-weight: bold; text-decoration: none; margin-right: 10px; }
                 .btn-reject { color: #F44336; font-weight: bold; text-decoration: none; }
@@ -332,12 +333,17 @@ class Obenlo_Booking_Admin_Dashboard
 
     private function render_settings_tab()
     {
+        $brand_color = get_option('obenlo_primary_color', '#e61e4d');
         $global_fee = get_option('obenlo_global_platform_fee', '10');
         $info_email = get_option('obenlo_info_email', 'info@obenlo.com');
         $admin_email = get_option('obenlo_admin_email', 'admin@obenlo.com');
         $from_name = get_option('obenlo_mail_from_name', 'Obenlo');
         $ga4_id = get_option('obenlo_google_analytics_id', '');
         $pixel_id = get_option('obenlo_meta_pixel_id', '');
+        
+        $brand_name = get_option('obenlo_brand_name', 'Obenlo');
+        $brand_color = get_option('obenlo_primary_color', '#e61e4d');
+        $logo_url = get_option('obenlo_logo_url', 'https://obenlo.com/wp-content/themes/obenlo/assets/images/logo-social-profile.png');
 
         if (isset($_GET['sync_status'])) {
             $color = ($_GET['sync_status'] === 'success') ? '#155724' : '#721c24';
@@ -365,6 +371,42 @@ class Obenlo_Booking_Admin_Dashboard
                             <input type="number" name="global_fee" value="<?php echo esc_attr($global_fee); ?>" step="0.1" required style="width:100px; padding:10px; border:1px solid #ddd; border-radius:8px;"> <span style="font-weight:600;">%</span>
                         </div>
 
+                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px; margin-top:40px;">Branding & Visuals</h4>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Brand Name</label>
+                            <input type="text" name="brand_name" value="<?php echo esc_attr($brand_name); ?>" placeholder="Obenlo" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Primary Brand Color</label>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <input type="color" name="brand_color" value="<?php echo esc_attr($brand_color); ?>" style="width:50px; height:40px; border:none; padding:0; background:none; cursor:pointer;">
+                                <input type="text" value="<?php echo esc_attr($brand_color); ?>" readonly style="width:100px; padding:8px; border:1px solid #eee; border-radius:6px; background:#f9f9f9; font-family:monospace;">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:20px; display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                            <div>
+                                <label style="display:block; font-weight:700; margin-bottom:5px;">Stay Category Color</label>
+                                <input type="color" name="stay_color" value="<?php echo esc_attr(get_option('obenlo_stay_color', '#3b82f6')); ?>" style="width:100%; height:35px; border:none; background:none; cursor:pointer;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-weight:700; margin-bottom:5px;">Experience Category Color</label>
+                                <input type="color" name="experience_color" value="<?php echo esc_attr(get_option('obenlo_experience_color', '#10b981')); ?>" style="width:100%; height:35px; border:none; background:none; cursor:pointer;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-weight:700; margin-bottom:5px;">Service Category Color</label>
+                                <input type="color" name="service_color" value="<?php echo esc_attr(get_option('obenlo_service_color', '#f97316')); ?>" style="width:100%; height:35px; border:none; background:none; cursor:pointer;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-weight:700; margin-bottom:5px;">Event Category Color</label>
+                                <input type="color" name="event_color" value="<?php echo esc_attr(get_option('obenlo_event_color', '#e61e4d')); ?>" style="width:100%; height:35px; border:none; background:none; cursor:pointer;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Platform Logo URL (Social/Email)</label>
+                            <input type="text" name="logo_url" value="<?php echo esc_attr($logo_url); ?>" placeholder="https://..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+
                         <h4 style="border-bottom:2px solid #eee; padding-bottom:10px; margin-top:40px;">Email & Notifications</h4>
                         <div style="margin-bottom:20px;">
                             <label style="display:block; font-weight:700; margin-bottom:5px;">Public From Name</label>
@@ -381,7 +423,63 @@ class Obenlo_Booking_Admin_Dashboard
                     </div>
 
                     <div>
-                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px;">Tracking & Analytics</h4>
+                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px;">Platform Links</h4>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">How it Works URL</label>
+                            <input type="text" name="how_it_works_url" value="<?php echo esc_attr(get_option('obenlo_how_it_works_url', home_url('/how-it-works'))); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Trust & Safety URL</label>
+                            <input type="text" name="trust_safety_url" value="<?php echo esc_attr(get_option('obenlo_trust_safety_url', home_url('/trust-safety'))); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Community URL</label>
+                            <input type="text" name="community_url" value="<?php echo esc_attr(get_option('obenlo_community_url', home_url('/community'))); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Support Center URL</label>
+                            <input type="text" name="support_url" value="<?php echo esc_attr(get_option('obenlo_support_url', home_url('/support'))); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Privacy Policy URL</label>
+                            <input type="text" name="privacy_url" value="<?php echo esc_attr(get_option('obenlo_privacy_url', home_url('/privacy'))); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Terms of Service URL</label>
+                            <input type="text" name="terms_url" value="<?php echo esc_attr(get_option('obenlo_terms_url', home_url('/terms'))); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:15px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Become a Host URL</label>
+                            <input type="text" name="become_host_url" value="<?php echo esc_attr(get_option('obenlo_become_host_url', home_url('/become-a-host'))); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+
+                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px; margin-top:30px;">Social Media Links</h4>
+                        <div style="margin-bottom:10px;">
+                            <label style="display:block; font-weight:700; margin-bottom:3px; font-size:0.85rem;">Facebook URL</label>
+                            <input type="text" name="facebook_url" value="<?php echo esc_attr(get_option('obenlo_facebook_url', '')); ?>" placeholder="https://facebook.com/..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:10px;">
+                            <label style="display:block; font-weight:700; margin-bottom:3px; font-size:0.85rem;">Instagram URL</label>
+                            <input type="text" name="instagram_url" value="<?php echo esc_attr(get_option('obenlo_instagram_url', '')); ?>" placeholder="https://instagram.com/..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:10px;">
+                            <label style="display:block; font-weight:700; margin-bottom:3px; font-size:0.85rem;">Twitter / X URL</label>
+                            <input type="text" name="twitter_url" value="<?php echo esc_attr(get_option('obenlo_twitter_url', '')); ?>" placeholder="https://twitter.com/..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:10px;">
+                            <label style="display:block; font-weight:700; margin-bottom:3px; font-size:0.85rem;">LinkedIn URL</label>
+                            <input type="text" name="linkedin_url" value="<?php echo esc_attr(get_option('obenlo_linkedin_url', '')); ?>" placeholder="https://linkedin.com/..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:10px;">
+                            <label style="display:block; font-weight:700; margin-bottom:3px; font-size:0.85rem;">YouTube URL</label>
+                            <input type="text" name="youtube_url" value="<?php echo esc_attr(get_option('obenlo_youtube_url', '')); ?>" placeholder="https://youtube.com/..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div style="margin-bottom:10px;">
+                            <label style="display:block; font-weight:700; margin-bottom:3px; font-size:0.85rem;">TikTok URL</label>
+                            <input type="text" name="tiktok_url" value="<?php echo esc_attr(get_option('obenlo_tiktok_url', '')); ?>" placeholder="https://tiktok.com/@..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+
+                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px; margin-top:30px;">Tracking & Analytics</h4>
                         <div style="margin-bottom:20px;">
                             <label style="display:block; font-weight:700; margin-bottom:5px;">Google Analytics 4 ID</label>
                             <input type="text" name="ga4_id" value="<?php echo esc_attr($ga4_id); ?>" placeholder="G-XXXXXXXXXX" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
@@ -419,7 +517,7 @@ class Obenlo_Booking_Admin_Dashboard
                 </div>
 
                 <div style="margin-top:40px; border-top:2px solid #eee; padding-top:20px;">
-                    <button type="submit" name="save_obenlo_settings" value="1" style="background:#e61e4d; color:#fff; border:none; padding:15px 40px; border-radius:12px; cursor:pointer; font-weight:800; font-size:1.1em; width:100%; box-shadow:0 4px 10px rgba(230,30,77,0.2);">Save All Site Settings</button>
+                    <button type="submit" name="save_obenlo_settings" value="1" style="background:<?php echo esc_attr($brand_color); ?>; color:#fff; border:none; padding:15px 40px; border-radius:12px; cursor:pointer; font-weight:800; font-size:1.1em; width:100%; box-shadow:0 4px 10px rgba(var(--obenlo-primary-rgb, 230, 30, 77), 0.2);">Save All Site Settings</button>
                 </div>
             </form>
         </div>
@@ -462,7 +560,7 @@ class Obenlo_Booking_Admin_Dashboard
                 <div style="margin-bottom:25px; border-top:1px solid #eee; padding-top:25px;">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                         <div>
-                            <h4 style="margin-bottom:15px; color:#e61e4d;">Stripe LIVE Keys</h4>
+                            <h4 style="margin-bottom:15px; color:<?php echo esc_attr($brand_color); ?>;">Stripe LIVE Keys</h4>
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Publishable Key (Live)</label>
                             <input type="text" name="stripe_live_pub" value="<?php echo esc_attr($stripe_live_pub); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
                             
@@ -501,7 +599,7 @@ class Obenlo_Booking_Admin_Dashboard
                     </div>
                 </div>
 
-                <button type="submit" style="background:#e61e4d; color:#fff; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:700;">Save Payment Settings</button>
+                <button type="submit" style="background:<?php echo esc_attr($brand_color); ?>; color:#fff; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:700;">Save Payment Settings</button>
             </form>
         </div>
         <?php
@@ -537,6 +635,71 @@ class Obenlo_Booking_Admin_Dashboard
         }
         if (isset($_POST['pixel_id'])) {
             update_option('obenlo_meta_pixel_id', sanitize_text_field($_POST['pixel_id']));
+        }
+        if (isset($_POST['brand_name'])) {
+            update_option('obenlo_brand_name', sanitize_text_field($_POST['brand_name']));
+        }
+        if (isset($_POST['brand_color'])) {
+            update_option('obenlo_primary_color', sanitize_text_field($_POST['brand_color']));
+        }
+        if (isset($_POST['logo_url'])) {
+            update_option('obenlo_logo_url', esc_url_raw($_POST['logo_url']));
+        }
+        if (isset($_POST['stay_color'])) {
+            update_option('obenlo_stay_color', sanitize_text_field($_POST['stay_color']));
+        }
+        if (isset($_POST['experience_color'])) {
+            update_option('obenlo_experience_color', sanitize_text_field($_POST['experience_color']));
+        }
+        if (isset($_POST['service_color'])) {
+            update_option('obenlo_service_color', sanitize_text_field($_POST['service_color']));
+        }
+        if (isset($_POST['event_color'])) {
+            update_option('obenlo_event_color', sanitize_text_field($_POST['event_color']));
+        }
+        if (isset($_POST['how_it_works_url'])) {
+            update_option('obenlo_how_it_works_url', esc_url_raw($_POST['how_it_works_url']));
+        }
+        if (isset($_POST['trust_safety_url'])) {
+            update_option('obenlo_trust_safety_url', esc_url_raw($_POST['trust_safety_url']));
+        }
+        if (isset($_POST['community_url'])) {
+            update_option('obenlo_community_url', esc_url_raw($_POST['community_url']));
+        }
+        if (isset($_POST['support_url'])) {
+            update_option('obenlo_support_url', esc_url_raw($_POST['support_url']));
+        }
+        if (isset($_POST['privacy_url'])) {
+            update_option('obenlo_privacy_url', esc_url_raw($_POST['privacy_url']));
+        }
+        if (isset($_POST['terms_url'])) {
+            update_option('obenlo_terms_url', esc_url_raw($_POST['terms_url']));
+        }
+        if (isset($_POST['become_host_url'])) {
+            update_option('obenlo_become_host_url', esc_url_raw($_POST['become_host_url']));
+        }
+
+        // Social Media Links
+        if (isset($_POST['facebook_url'])) {
+            update_option('obenlo_facebook_url', esc_url_raw($_POST['facebook_url']));
+        }
+        if (isset($_POST['instagram_url'])) {
+            update_option('obenlo_instagram_url', esc_url_raw($_POST['instagram_url']));
+        }
+        if (isset($_POST['twitter_url'])) {
+            update_option('obenlo_twitter_url', esc_url_raw($_POST['twitter_url']));
+        }
+        if (isset($_POST['linkedin_url'])) {
+            update_option('obenlo_linkedin_url', esc_url_raw($_POST['linkedin_url']));
+        }
+        if (isset($_POST['youtube_url'])) {
+            update_option('obenlo_youtube_url', esc_url_raw($_POST['youtube_url']));
+        }
+        if (isset($_POST['tiktok_url'])) {
+            update_option('obenlo_tiktok_url', esc_url_raw($_POST['tiktok_url']));
+        }
+        if (isset($_POST['become_host_url'])) {
+            update_option('obenlo_become_host_url', esc_url_raw($_POST['become_host_url']));
         }
 
 
@@ -622,7 +785,8 @@ class Obenlo_Booking_Admin_Dashboard
             $total = get_post_meta($booking->ID, '_obenlo_total_price', true);
             $status = get_post_meta($booking->ID, '_obenlo_booking_status', true);
             $mode = get_post_meta($booking->ID, '_obenlo_payment_mode', true) ?: 'legacy';
-            $mode_color = ($mode === 'live') ? '#e61e4d' : '#666';
+            $brand_color = get_option('obenlo_primary_color', '#e61e4d');
+            $mode_color = ($mode === 'live') ? $brand_color : '#666';
             $mode_label = ($mode === 'live') ? 'LIVE' : 'TEST';
             
             echo '<tr>';
@@ -664,7 +828,8 @@ class Obenlo_Booking_Admin_Dashboard
         echo '<label style="display:block; margin-bottom:15px;">Subject:<br><input type="text" name="broadcast_title" required style="width:100%; padding:10px; margin-top:5px;"></label>';
         echo '<label style="display:block; margin-bottom:15px;">Message (HTML allowed):<br><textarea name="broadcast_content" required style="width:100%; padding:10px; margin-top:5px; height:150px;"></textarea></label>';
 
-        echo '<button type="submit" style="background:#e61e4d; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%;">🚀 Send Broadcast Now</button>';
+        $brand_color = get_option('obenlo_primary_color', '#e61e4d');
+        echo '<button type="submit" style="background:' . esc_attr($brand_color) . '; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%;">🚀 Send Broadcast Now</button>';
         echo '</form>';
         echo '</div>';
 
@@ -687,12 +852,13 @@ class Obenlo_Booking_Admin_Dashboard
                 $user = get_userdata($ticket->post_author);
                 $type = get_post_meta($ticket->ID, '_obenlo_ticket_type', true);
                 $status = get_post_meta($ticket->ID, '_obenlo_ticket_status', true);
-                $status_bg = ($status === 'open') ? '#e61e4d' : '#333';
+                $brand_color = get_option('obenlo_primary_color', '#e61e4d');
+                $status_bg = ($status === 'open') ? $brand_color : '#333';
 
                 echo '<div style="background:#fff; border:1px solid #eee; padding:20px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">';
                 echo '<div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">';
                 echo '<strong>#' . $ticket->ID . ': ' . esc_html($ticket->post_title) . '</strong>';
-                echo '<span class="badge" style="background:' . $status_bg . '; color:#fff; padding:3px 10px; border-radius:10px; font-size:0.75em; font-weight:bold;">' . esc_html(strtoupper($status)) . '</span>';
+                echo '<span class="badge" style="background:' . esc_attr($status_bg) . '; color:#fff; padding:3px 10px; border-radius:10px; font-size:0.75em; font-weight:bold;">' . esc_html(strtoupper($status)) . '</span>';
                 echo '</div>';
                 echo '<div style="font-size:0.85em; color:#888; margin-bottom:10px;">';
                 echo '<span style="color:#222; font-weight:600;">' . ($user ? $user->display_name : 'Unknown') . '</span> • ';
@@ -700,7 +866,7 @@ class Obenlo_Booking_Admin_Dashboard
                 echo '</div>';
                 echo '<div style="font-size:0.9em; color:#444; line-height:1.5;">' . wp_trim_words($ticket->post_content, 12) . '</div>';
                 echo '<div style="margin-top:15px; border-top:1px solid #f9f9f9; padding-top:10px; text-align:right;">';
-                echo '<a href="' . esc_url(add_query_arg('ticket_id', $ticket->ID, home_url('/support'))) . '" style="color:#e61e4d; font-weight:bold; text-decoration:none; font-size:0.9em;">Manage Ticket & Reply →</a>';
+                echo '<a href="' . esc_url(add_query_arg('ticket_id', $ticket->ID, home_url('/support'))) . '" style="color:' . esc_attr($brand_color) . '; font-weight:bold; text-decoration:none; font-size:0.9em;">Manage Ticket & Reply →</a>';
                 echo '</div>';
                 echo '</div>';
             }
@@ -712,9 +878,10 @@ class Obenlo_Booking_Admin_Dashboard
 
     private function render_messaging_oversight_tab()
     {
+        $brand_color = get_option('obenlo_primary_color', '#e61e4d');
         echo '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">';
         echo '<h3>Platform Messaging Oversight</h3>';
-        echo '<div style="background:#fff4f4; border:1px solid #ffcccc; padding:5px 15px; border-radius:30px; font-size:0.8rem; color:#e61e4d; font-weight:700;">Admin View Mode</div>';
+        echo '<div style="background:#fff4f4; border:1px solid #ffcccc; padding:5px 15px; border-radius:30px; font-size:0.8rem; color:' . esc_attr($brand_color) . '; font-weight:700;">Admin View Mode</div>';
         echo '</div>';
         echo '<p style="color:#666; margin-bottom:30px;">Monitor all conversations between platform users for quality control and dispute resolution.</p>';
 
@@ -724,6 +891,7 @@ class Obenlo_Booking_Admin_Dashboard
     private function render_live_chat_tab()
     {
         global $wpdb;
+        $brand_color = get_option('obenlo_primary_color', '#e61e4d');
 
         // Get unique chat sessions
         $sessions = $wpdb->get_results("
@@ -771,7 +939,7 @@ class Obenlo_Booking_Admin_Dashboard
                 <div id="chat-input-area" style="padding:20px; border-top:1px solid #ddd; background:#f9f9f9; display:none;">
                     <form id="admin-chat-form" style="display:flex; gap:10px;">
                         <input type="text" id="admin-chat-input" placeholder="Type your response..." style="flex-grow:1; padding:12px; border:1px solid #ddd; border-radius:25px;">
-                        <button type="submit" style="background:#e61e4d; color:white; border:none; padding:0 25px; border-radius:25px; font-weight:bold; cursor:pointer;">Send</button>
+                        <button type="submit" style="background:<?php echo esc_attr($brand_color); ?>; color:white; border:none; padding:0 25px; border-radius:25px; font-weight:bold; cursor:pointer;">Send</button>
                     </form>
                 </div>
             </div>
@@ -835,7 +1003,8 @@ class Obenlo_Booking_Admin_Dashboard
             }
 
             function appendMessage(msg) {
-                const align = msg.is_staff ? 'margin-left:auto; background:#e61e4d; color:white; border-radius:18px 18px 2px 18px;' : 'margin-right:auto; background:#f1f1f1; color:#333; border-radius:18px 18px 18px 2px;';
+                const brandColor = '<?php echo esc_js($brand_color); ?>';
+                const align = msg.is_staff ? `margin-left:auto; background:${brandColor}; color:white; border-radius:18px 18px 2px 18px;` : 'margin-right:auto; background:#f1f1f1; color:#333; border-radius:18px 18px 18px 2px;';
                 const div = document.createElement('div');
                 div.style.cssText = `max-width:70%; padding:10px 15px; margin-bottom:10px; font-size:0.9em; ${align}`;
                 div.innerHTML = msg.content;
@@ -908,20 +1077,23 @@ class Obenlo_Booking_Admin_Dashboard
             'post_status' => array('publish', 'pending', 'draft')
         ));
 
+        $brand_color = get_option('obenlo_primary_color', '#e61e4d');
         echo '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">';
         echo '<div>';
         echo '<h3 style="margin-bottom:5px;">Demo Listing Manager</h3>';
         echo '<p style="color:#666; margin:0;">Create high-quality demo listings as an admin, then transfer them to new hosts to jumpstart their profile.</p>';
         echo '</div>';
-        echo '<a href="' . esc_url(home_url('/host-dashboard?action=add&demo=1')) . '" style="background:#e61e4d; color:#fff; text-decoration:none; padding:10px 20px; border-radius:8px; font-weight:bold;">+ Create Demo Listing</a>';
+        echo '<a href="' . esc_url(home_url('/host-dashboard?action=add&demo=1')) . '" style="background:' . esc_attr($brand_color) . '; color:#fff; text-decoration:none; padding:10px 20px; border-radius:8px; font-weight:bold;">+ Create Demo Listing</a>';
         echo '</div>';
         
         echo '<table class="admin-table">';
         echo '<tr><th>Preview Name</th><th>Demo Bio</th><th>Location</th><th>Actions</th></tr>';
         
         if (empty($demos)) {
-            echo '<tr><td colspan="4" style="padding:40px; text-align:center; color:#999;">No demo listings created. <a href="' . esc_url(home_url('/host-dashboard?action=add&demo=1')) . '" style="color:#e61e4d; font-weight:bold;">Create one now</a></td></tr>';
+            $brand_color = get_option('obenlo_primary_color', '#e61e4d');
+            echo '<tr><td colspan="4" style="padding:40px; text-align:center; color:#999;">No demo listings created. <a href="' . esc_url(home_url('/host-dashboard?action=add&demo=1')) . '" style="color:' . esc_attr($brand_color) . '; font-weight:bold;">Create one now</a></td></tr>';
         } else {
+            $brand_color = get_option('obenlo_primary_color', '#e61e4d');
             foreach ($demos as $demo) {
                 $d_name = get_post_meta($demo->ID, '_obenlo_demo_host_name', true);
                 $d_bio = get_post_meta($demo->ID, '_obenlo_demo_host_bio', true);
@@ -934,7 +1106,7 @@ class Obenlo_Booking_Admin_Dashboard
                 echo '<td>';
                 echo '<div style="display:flex; gap:15px; align-items:center;">';
                 echo '<a href="' . get_permalink($demo->ID) . '" target="_blank" style="color:#333; font-weight:600; text-decoration:none;">View</a>';
-                echo '<a href="' . esc_url(home_url("/host-dashboard?action=edit&listing_id={$demo->ID}&demo=1")) . '" style="color:#e61e4d; font-weight:700; text-decoration:none;">Edit Setup</a>';
+                echo '<a href="' . esc_url(home_url("/host-dashboard?action=edit&listing_id={$demo->ID}&demo=1")) . '" style="color:' . esc_attr($brand_color) . '; font-weight:700; text-decoration:none;">Edit Setup</a>';
                 
                 // Transfer Form
                 echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:flex; gap:5px; margin:0;" onsubmit="return confirm(\'Are you sure you want to transfer this demo to a real host? This will move all demo data to their profile.\')">';

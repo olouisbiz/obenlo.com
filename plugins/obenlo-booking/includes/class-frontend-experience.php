@@ -1,6 +1,6 @@
 <?php
 /**
- * Frontend Experience Logic - Hiding WordPress Backend
+ * Frontend Experience Logic - Hiding WordPress Backend - Obenlo
  */
 
 if (!defined('ABSPATH')) {
@@ -27,6 +27,11 @@ class Obenlo_Booking_Frontend_Experience
 
         add_action('admin_post_nopriv_obenlo_bespoke_register', array($this, 'handle_bespoke_register'));
         add_action('admin_post_obenlo_bespoke_register', array($this, 'handle_bespoke_register'));
+        
+        // Custom Login Branding (for wp-login.php if accessed)
+        add_action('login_enqueue_scripts', array($this, 'custom_login_branding'));
+        add_filter('login_headerurl', array($this, 'custom_login_url'));
+        add_filter('login_headertext', array($this, 'custom_login_title'));
     }
 
     /**
@@ -57,8 +62,6 @@ class Obenlo_Booking_Frontend_Experience
      */
     public function handle_bespoke_login()
     {
-        // Nonce check removed for PWA compatibility (cached pages cause stale nonces)
-
         $creds = array(
             'user_login' => sanitize_text_field($_POST['log']),
             'user_password' => $_POST['pwd'],
@@ -87,8 +90,6 @@ class Obenlo_Booking_Frontend_Experience
      */
     public function handle_bespoke_register()
     {
-        // Nonce check removed for PWA compatibility (cached pages cause stale nonces)
-
         $username = sanitize_user($_POST['user_login']);
         $email = sanitize_email($_POST['user_email']);
         $password = $_POST['user_pass'];
@@ -151,11 +152,13 @@ class Obenlo_Booking_Frontend_Experience
     }
 
     /**
-     * Change WP login logo to Obenlo style (minimalist version)
+     * Change WP login logo to Brand style
      */
     public function custom_login_branding()
     {
-?>
+        $brand_name    = get_option('obenlo_brand_name', 'Obenlo');
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
+        ?>
         <style type="text/css">
             #login h1 a, .login h1 a {
                 background-image: none !important;
@@ -164,12 +167,12 @@ class Obenlo_Booking_Frontend_Experience
                 text-indent: 0 !important;
                 font-size: 2.5rem !important;
                 font-weight: 700 !important;
-                color: #e61e4d !important;
+                color: <?php echo esc_attr($primary_color); ?> !important;
                 margin-bottom: 20px !important;
                 display: block !important;
             }
             #login h1 a::after {
-                content: 'Obenlo';
+                content: '<?php echo esc_js($brand_name); ?>';
             }
             body.login {
                 background: #fff !important;
@@ -180,8 +183,8 @@ class Obenlo_Booking_Frontend_Experience
                 border-radius: 12px !important;
             }
             .wp-core-ui .button-primary {
-                background: #e61e4d !important;
-                border-color: #e61e4d !important;
+                background: <?php echo esc_attr($primary_color); ?> !important;
+                border-color: <?php echo esc_attr($primary_color); ?> !important;
                 text-shadow: none !important;
                 box-shadow: none !important;
                 font-weight: bold !important;

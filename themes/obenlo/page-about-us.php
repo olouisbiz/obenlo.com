@@ -5,7 +5,7 @@
 
 get_header(); ?>
 
-<div class="static-page-header" style="background: linear-gradient(135deg, #e61e4d 0%, #ff5a5f 100%); padding: 100px 20px; text-align: center; color: #fff;">
+<div class="static-page-header" style="background: var(--obenlo-primary); padding: 100px 20px; text-align: center; color: #fff;">
     <h1 style="font-size: 3.5rem; margin-bottom: 20px;"><?php esc_html_e( 'Our Mission', 'obenlo' ); ?></h1>
     <p style="font-size: 1.4rem; max-width: 800px; margin: 0 auto; line-height: 1.6;">
         <?php esc_html_e( 'Empowering travelers to discover unique stays and local experiences while supporting a global community of diverse hosts.', 'obenlo' ); ?>
@@ -20,7 +20,7 @@ get_header(); ?>
             <p><?php esc_html_e( 'Obenlo is a community-driven travel platform designed to bridge the gap between travelers seeking authenticity and local hosts offering one-of-a-kind hospitality. From luxury hotel rooms to unique local tours and professional services, we provide a centralized marketplace for everything you need on your journey.', 'obenlo' ); ?></p>
         </div>
         <div style="flex: 1; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
-            <div style="background: #e61e4d; color:#fff; padding: 60px; text-align:center; font-size: 2rem; font-weight: bold;">
+            <div style="background: var(--obenlo-primary); color:#fff; padding: 60px; text-align:center; font-size: 2rem; font-weight: bold;">
                 Obenlo.
             </div>
         </div>
@@ -49,7 +49,7 @@ get_header(); ?>
         <p style="margin-bottom: 30px;"><?php esc_html_e( 'Whether you\'re looking to host your space or book your next adventure, we\'re here to help.', 'obenlo' ); ?></p>
         <div style="display: flex; justify-content: center; gap: 20px;">
             <a href="<?php echo esc_url( home_url('/become-a-host') ); ?>" style="padding: 14px 40px; background: #222; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;"><?php esc_html_e( 'Become a Host', 'obenlo' ); ?></a>
-            <a href="<?php echo esc_url( home_url('/') ); ?>" style="padding: 14px 40px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;"><?php esc_html_e( 'Explore Obenlo', 'obenlo' ); ?></a>
+            <a href="<?php echo esc_url( home_url('/') ); ?>" style="padding: 14px 40px; background: var(--obenlo-primary); color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;"><?php esc_html_e( 'Explore Obenlo', 'obenlo' ); ?></a>
         </div>
     </div>
 
