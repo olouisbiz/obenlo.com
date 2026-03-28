@@ -15,37 +15,37 @@ get_header(); ?>
             $error_message = '';
             switch ($obenlo_error) {
                 case 'security_failed':
-                    $error_message = 'Security check failed. Please refresh and try again.';
+                    $error_message = __('Security check failed. Please refresh and try again.', 'obenlo');
                     break;
                 case 'invalid_data':
-                    $error_message = 'Missing required booking information.';
+                    $error_message = __('Missing required booking information.', 'obenlo');
                     break;
                 case 'invalid_listing':
-                    $error_message = 'Invalid listing reference.';
+                    $error_message = __('Invalid listing reference.', 'obenlo');
                     break;
                 case 'capacity_exceeded':
-                    $error_message = 'Guest count exceeds this listing\'s capacity.';
+                    $error_message = __('Guest count exceeds this listing\'s capacity.', 'obenlo');
                     break;
                 case 'host_away':
-                    $error_message = 'The host is unavailable on these dates (Vacation Block).';
+                    $error_message = __('The host is unavailable on these dates (Vacation Block).', 'obenlo');
                     break;
                 case 'day_unavailable':
-                    $error_message = 'The host does not accept bookings on this day.';
+                    $error_message = __('The host does not accept bookings on this day.', 'obenlo');
                     break;
                 case 'time_unavailable':
-                    $error_message = 'The selected time is outside the host\'s operating hours.';
+                    $error_message = __('The selected time is outside the host\'s operating hours.', 'obenlo');
                     break;
                 case 'already_booked':
-                    $error_message = 'These dates or times are already booked. Please try another slot.';
+                    $error_message = __('These dates or times are already booked. Please try another slot.', 'obenlo');
                     break;
                 case 'booking_error':
-                    $error_message = 'There was an error processing your booking. Please try again.';
+                    $error_message = __('There was an error processing your booking. Please try again.', 'obenlo');
                     break;
                 case 'invalid_payment':
-                    $error_message = 'Invalid payment method selected.';
+                    $error_message = __('Invalid payment method selected.', 'obenlo');
                     break;
                 case 'unauthorized':
-                    $error_message = 'Unauthorized: Please log in to perform this action.';
+                    $error_message = __('Unauthorized: Please log in to perform this action.', 'obenlo');
                     break;
             }
             if ($error_message) {
@@ -82,9 +82,9 @@ get_header(); ?>
     // Fetch policies from parent
     $policy_type = get_post_meta($amenity_source_id, '_obenlo_policy_type', true) ?: 'global';
     if ($policy_type === 'global') {
-        $policy_cancel = 'Standard Global Cancellation Policy: Free cancellation for 48 hours for a full refund.';
-        $policy_refund = 'Standard Global Refund Policy: 50% refund up to 7 days before the start date.';
-        $policy_other = 'Standard Rules: Respect the host and other guests.';
+        $policy_cancel = __('Standard Global Cancellation Policy: Free cancellation for 48 hours for a full refund.', 'obenlo');
+        $policy_refund = __('Standard Global Refund Policy: 50% refund up to 7 days before the start date.', 'obenlo');
+        $policy_other = __('Standard Rules: Respect the host and other guests.', 'obenlo');
     }
     else {
         $policy_cancel = get_post_meta($amenity_source_id, '_obenlo_policy_cancel', true);
@@ -103,7 +103,7 @@ get_header(); ?>
         <div class="listing-header">
             <?php if ($parent_id): ?>
                 <a href="<?php echo get_permalink($parent_id); ?>" style="display:inline-block; margin-bottom:15px; color:#666; text-decoration:none;">
-                    &larr; Back to <?php echo esc_html(get_the_title($parent_id)); ?>
+                    &larr; <?php printf(__('Back to %s', 'obenlo'), esc_html(get_the_title($parent_id))); ?>
                 </a>
             <?php
     endif; ?>
@@ -113,7 +113,7 @@ get_header(); ?>
                 <?php if ($avg_rating > 0): ?>
                     <span style="color: #333; font-weight: bold;">★ <?php echo $avg_rating; ?></span>
                     <span>&bull;</span>
-                    <a href="#reviews" onclick="openTab(event, 'tab-reviews')" style="color: #666; text-decoration: underline;"><?php echo $review_count; ?> reviews</a>
+                    <a href="#reviews" onclick="openTab(event, 'tab-reviews')" style="color: #666; text-decoration: underline;"><?php printf( _n('%d review', '%d reviews', $review_count, 'obenlo'), $review_count ); ?></a>
                     <span>&bull;</span>
                 <?php
     endif; ?>
@@ -125,16 +125,16 @@ get_header(); ?>
                 $cat_check = strtolower($type);
                 if (strpos($cat_check, 'stay') !== false || strpos($cat_check, 'hotel') !== false || strpos($cat_check, 'guest-house') !== false) {
                     $badge_icon = '🏠';
-                    $display_category = 'Stay';
+                    $display_category = __('Stay', 'obenlo');
                 } elseif (strpos($cat_check, 'experience') !== false || strpos($cat_check, 'tour') !== false) {
                     $badge_icon = '✨';
-                    $display_category = 'Experience';
+                    $display_category = __('Experience', 'obenlo');
                 } elseif (strpos($cat_check, 'service') !== false || in_array($cat_check, ['chauffeur', 'cook', 'barbershop', 'hairdresser', 'concierge', 'personal-assistant', 'babysitter', 'dogsitter', 'barber'])) {
                     $badge_icon = '🛠️';
-                    $display_category = 'Service';
+                    $display_category = __('Service', 'obenlo');
                 } elseif (strpos($cat_check, 'event') !== false || strpos($cat_check, 'show') !== false || strpos($cat_check, 'dj') !== false) {
                     $badge_icon = '🎟️';
-                    $display_category = 'Event';
+                    $display_category = __('Event', 'obenlo');
                 }
 
                 $event_location_type = get_post_meta($listing_id, '_obenlo_event_location_type', true);
@@ -148,7 +148,7 @@ get_header(); ?>
                     <?php if($event_location_type === 'in_person' && $location_val): ?>
                         <span style="color: #666; font-size: 0.9rem; margin-right:8px;">📍 <?php echo esc_html($location_val); ?></span>
                     <?php elseif($event_location_type === 'virtual'): ?>
-                        <span style="color: #4f46e5; font-size: 0.9rem; font-weight:bold; margin-right:8px;">🌐 Virtual Event</span>
+                        <span style="color: #4f46e5; font-size: 0.9rem; font-weight:bold; margin-right:8px;">🌐 <?php echo __('Virtual Event', 'obenlo'); ?></span>
                     <?php endif; ?>
                 <?php elseif($location_val): ?>
                     <span style="color: #666; font-size: 0.9rem; margin-right:8px;">📍 <?php echo esc_html($location_val); ?></span>
@@ -182,7 +182,7 @@ get_header(); ?>
                     }
                 }
                 ?>
-                <span style="color:#888;">&bull;</span> Hosted by <a href="<?php echo esc_url($host_url); ?>" style="color:var(--obenlo-primary); font-weight:bold; text-decoration:none; margin-left:5px;"><?php echo esc_html($host_name); ?></a>
+                <span style="color:#888;">&bull;</span> <?php echo __('Hosted by', 'obenlo'); ?> <a href="<?php echo esc_url($host_url); ?>" style="color:var(--obenlo-primary); font-weight:bold; text-decoration:none; margin-left:5px;"><?php echo esc_html($host_name); ?></a>
             </div>
         </div>
 
@@ -244,7 +244,7 @@ get_header(); ?>
                         <?php if (isset($image_urls[4])): ?>
                             <div style="background:url('<?php echo esc_url($image_urls[4]); ?>') center/cover; cursor:pointer; position:relative;" onclick="openLightbox(4)">
                                 <?php if (count($image_urls) > 5): ?>
-                                    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.4); color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2em;">+ <?php echo count($image_urls) - 5; ?> more</div>
+                                    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.4); color:white; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2em;">+ <?php printf(__('%d more', 'obenlo'), count($image_urls) - 5); ?></div>
                                 <?php
             endif; ?>
                             </div>
@@ -320,10 +320,10 @@ get_header(); ?>
                 ?>
                     <div class="virtual-event-notice" style="background:#eef2ff; border:1px solid #c7d2fe; padding:25px; border-radius:15px; margin-bottom:30px; display:flex; align-items:center; justify-content:space-between; gap:20px;">
                         <div>
-                            <h4 style="margin:0 0 5px 0; color:#3730a3;">You're booked for this virtual event!</h4>
-                            <p style="margin:0; font-size:0.9rem; color:#4338ca;">Use the link below to join the session at the scheduled time.</p>
+                            <h4 style="margin:0 0 5px 0; color:#3730a3;"><?php echo __('You\'re booked for this virtual event!', 'obenlo'); ?></h4>
+                            <p style="margin:0; font-size:0.9rem; color:#4338ca;"><?php echo __('Use the link below to join the session at the scheduled time.', 'obenlo'); ?></p>
                         </div>
-                        <a href="<?php echo esc_url($virtual_link); ?>" target="_blank" class="btn-primary" style="background:#4f46e5; padding:12px 25px; border-radius:10px; font-weight:800; text-decoration:none; font-size:0.95rem; display:inline-block; white-space:nowrap;">Join Session 🌐</a>
+                        <a href="<?php echo esc_url($virtual_link); ?>" target="_blank" class="btn-primary" style="background:#4f46e5; padding:12px 25px; border-radius:10px; font-weight:800; text-decoration:none; font-size:0.95rem; display:inline-block; white-space:nowrap;"><?php echo __('Join Session 🌐', 'obenlo'); ?></a>
                     </div>
                 <?php endif; endif; ?>
 <?php
@@ -331,10 +331,10 @@ get_header(); ?>
 
                 <!-- Tabbed Interface for Content -->
                 <div class="listing-tabs" style="margin-bottom: 20px; border-bottom: 1px solid #ddd; display: flex; gap: 20px;">
-                    <button class="tab-btn active" onclick="openTab(event, 'tab-about')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid var(--obenlo-primary); color: var(--obenlo-primary);">About</button>
-                    <button class="tab-btn" onclick="openTab(event, 'tab-amenities')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; color: #666;">Amenities</button>
-                    <button class="tab-btn" onclick="openTab(event, 'tab-policies')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; color: #666;">Policies</button>
-                    <button class="tab-btn" id="reviews-tab-trigger" onclick="openTab(event, 'tab-reviews')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; color: #666;">Reviews (<?php echo $review_count; ?>)</button>
+                    <button class="tab-btn active" onclick="openTab(event, 'tab-about')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid var(--obenlo-primary); color: var(--obenlo-primary);"><?php echo __('About', 'obenlo'); ?></button>
+                    <button class="tab-btn" onclick="openTab(event, 'tab-amenities')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; color: #666;"><?php echo __('Amenities', 'obenlo'); ?></button>
+                    <button class="tab-btn" onclick="openTab(event, 'tab-policies')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; color: #666;"><?php echo __('Policies', 'obenlo'); ?></button>
+                    <button class="tab-btn" id="reviews-tab-trigger" onclick="openTab(event, 'tab-reviews')" style="background: none; border: none; font-size: 1.1em; font-weight: bold; padding: 10px 0; cursor: pointer; border-bottom: 3px solid transparent; color: #666;"><?php printf(__('Reviews (%d)', 'obenlo'), $review_count); ?></button>
                 </div>
 
                 <div id="tab-about" class="tab-content" style="display: block; line-height: 1.6; font-size: 1.1em; margin-bottom: 30px;">
@@ -343,7 +343,7 @@ get_header(); ?>
 
                 <div id="tab-amenities" class="tab-content" style="display: none; margin-bottom: 30px;">
                     <?php if (!empty($amenity_terms) && !is_wp_error($amenity_terms)): ?>
-                        <h3><?php echo (in_array($category, ['experience', 'event', 'show'])) ? 'What\'s Included' : 'What this place offers'; ?></h3>
+                        <h3><?php echo (in_array($category, ['experience', 'event', 'show'])) ? __('What\'s Included', 'obenlo') : __('What this place offers', 'obenlo'); ?></h3>
                         <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top:20px;">
                             <?php foreach ($amenity_terms as $amenity): ?>
                                 <li style="display: flex; align-items: center; gap: 10px;">
@@ -361,42 +361,42 @@ get_header(); ?>
                 </div>
 
                 <div id="tab-policies" class="tab-content" style="display: none; margin-bottom: 30px;">
-                    <h3>Stay Policies</h3>
+                    <h3><?php echo __('Stay Policies', 'obenlo'); ?></h3>
                     <div style="margin-top:20px; display:flex; flex-direction:column; gap:20px;">
                         <?php if ($policy_cancel): ?>
                             <div>
-                                <strong>Cancellation Policy:</strong><br>
+                                <strong><?php echo __('Cancellation Policy:', 'obenlo'); ?></strong><br>
                                 <p style="margin-top:5px; color:#555;"><?php echo nl2br(esc_html($policy_cancel)); ?></p>
                             </div>
                         <?php
     endif; ?>
                         <?php if ($policy_refund): ?>
                             <div>
-                                <strong>Refund Policy:</strong><br>
+                                <strong><?php echo __('Refund Policy:', 'obenlo'); ?></strong><br>
                                 <p style="margin-top:5px; color:#555;"><?php echo nl2br(esc_html($policy_refund)); ?></p>
                             </div>
                         <?php
     endif; ?>
                         <?php if ($policy_other): ?>
                             <div>
-                                <strong>Other Rules & Info:</strong><br>
+                                <strong><?php echo __('Other Rules & Info:', 'obenlo'); ?></strong><br>
                                 <p style="margin-top:5px; color:#555;"><?php echo nl2br(esc_html($policy_other)); ?></p>
                             </div>
                         <?php
     endif; ?>
                         <?php if (!$policy_cancel && !$policy_refund && !$policy_other): ?>
-                            <p>No special policies listed.</p>
+                            <p><?php echo __('No special policies listed.', 'obenlo'); ?></p>
                         <?php
     endif; ?>
                     </div>
                 </div>
                 <div id="tab-reviews" class="tab-content" style="display: none; margin-bottom: 30px;">
                     <div id="reviews-anchor"></div>
-                    <h3>Guest Reviews</h3>
+                    <h3><?php echo __('Guest Reviews', 'obenlo'); ?></h3>
                     
                     <?php if ($avg_rating > 0): ?>
                         <div style="font-size: 1.5em; font-weight: bold; margin: 20px 0; display: flex; align-items: center; gap: 10px;">
-                            ★ <?php echo $avg_rating; ?> &bull; <?php echo $review_count; ?> reviews
+                            ★ <?php echo $avg_rating; ?> &bull; <?php printf( _n('%d review', '%d reviews', $review_count, 'obenlo'), $review_count ); ?>
                         </div>
                     <?php
     endif; ?>
@@ -410,7 +410,7 @@ get_header(); ?>
     ));
 
     if (empty($comments)): ?>
-                            <p>No reviews yet. Be the first to leave one!</p>
+                            <p><?php echo __('No reviews yet. Be the first to leave one!', 'obenlo'); ?></p>
                         <?php
     else:
         foreach ($comments as $comment):
@@ -441,7 +441,7 @@ get_header(); ?>
             ));
             foreach ($replies as $reply): ?>
                                         <div class="review-reply" style="margin-top: 15px; margin-left: 30px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                                            <strong>Response from host:</strong>
+                                            <strong><?php echo __('Response from host:', 'obenlo'); ?></strong>
                                             <div style="margin-top: 5px; color: #555;"><?php echo wpautop(esc_html($reply->comment_content)); ?></div>
                                         </div>
                                     <?php
@@ -454,10 +454,10 @@ get_header(); ?>
 
                     <?php if (is_user_logged_in()): ?>
                         <div class="review-form-container" style="margin-top: 40px; padding: 25px; background: #fff; border: 1px solid #ddd; border-radius: 12px;">
-                            <h3 style="margin-top: 0;">Leave a Review</h3>
+                            <h3 style="margin-top: 0;"><?php echo __('Leave a Review', 'obenlo'); ?></h3>
                             <form action="<?php echo esc_url(site_url('/wp-comments-post.php')); ?>" method="post" id="reviewform">
                                 <div style="margin-bottom: 20px;">
-                                    <label style="display: block; font-weight: bold; margin-bottom: 10px;">Rating</label>
+                                    <label style="display: block; font-weight: bold; margin-bottom: 10px;"><?php echo __('Rating', 'obenlo'); ?></label>
                                     <div class="star-rating" style="display: flex; gap: 5px; font-size: 2em; cursor: pointer; color: #ccc;">
                                         <span class="star" data-value="1">★</span>
                                         <span class="star" data-value="2">★</span>
@@ -468,10 +468,11 @@ get_header(); ?>
                                     <input type="hidden" name="rating" id="selected-rating" value="" required>
                                 </div>
                                 <div style="margin-bottom: 20px;">
-                                    <label style="display: block; font-weight: bold; margin-bottom: 10px;">Your Review</label>
+                                    <label style="display: block; font-weight: bold; margin-bottom: 10px;"><?php echo __('Your Review', 'obenlo'); ?></label>
                                     <textarea name="comment" rows="5" required style="width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit;"></textarea>
                                 </div>
-                                <input name="submit" type="submit" value="Submit Review" style="padding: 12px 30px; background: #333; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                <input name="submit" type="submit" value="<?php echo esc_attr(__('Submit Review', 'obenlo')); ?>" style="padding: 12px 30px; background: #333; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+us: 8px; font-weight: bold; cursor: pointer;">
                                 <?php comment_id_fields(); ?>
                                 <?php do_action('comment_form', $listing_id); ?>
                             </form>
@@ -519,7 +520,7 @@ get_header(); ?>
                     <?php
     else: ?>
                         <p style="margin-top: 40px; padding: 20px; background: #f9f9f9; border-radius: 8px; text-align: center;">
-                            Please <a href="<?php echo wp_login_url(get_permalink()); ?>" style="color: var(--obenlo-primary); font-weight: bold;">log in</a> to leave a review.
+                            <?php printf(__('Please %s to leave a review.', 'obenlo'), '<a href="' . wp_login_url(get_permalink()) . '" style="color: var(--obenlo-primary); font-weight: bold;">' . __('log in', 'obenlo') . '</a>'); ?>
                         </p>
                     <?php
     endif; ?>
@@ -558,7 +559,7 @@ get_header(); ?>
 
                 <?php if (!empty($addons)): ?>
                     <div class="listing-addons" style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                        <h3>Available Addons</h3>
+                        <h3><?php echo __('Available Addons', 'obenlo'); ?></h3>
                         <ul style="list-style: none; padding: 0; display:flex; flex-direction:column; gap:10px;">
                             <?php foreach ($addons as $addon): ?>
                                 <li style="display:flex; justify-content:space-between; padding:10px; border:1px solid #ddd; border-radius:8px;">
@@ -578,9 +579,9 @@ get_header(); ?>
                     
                     <?php if ($parent_id == 0): ?>
                         <!-- Parent Listing (Business Profile): Show Children, Hide Booking Form -->
-                        <h3 style="margin-top:0;">Available Options</h3>
+                        <h3 style="margin-top:0;"><?php echo __('Available Options', 'obenlo'); ?></h3>
                         <?php if ($has_children): ?>
-                            <p style="color:#666; font-size:0.9em; margin-bottom: 20px;">Please choose an option below to see pricing and check availability.</p>
+                            <p style="color:#666; font-size:0.9em; margin-bottom: 20px;"><?php echo __('Please choose an option below to see pricing and check availability.', 'obenlo'); ?></p>
                             <div class="child-options-list" style="display:flex; flex-direction:column; gap:12px;">
                                 <?php foreach ($children as $child):
                                     $child_price = get_post_meta($child->ID, '_obenlo_price', true);
@@ -592,16 +593,16 @@ get_header(); ?>
                                         <?php endif; ?>
                                         <div style="flex:1;">
                                             <div style="font-weight:bold; margin-bottom:2px;"><?php echo esc_html($child->post_title); ?></div>
-                                            <div style="font-size:0.9em; color:var(--obenlo-primary); font-weight:700;">From $<?php echo esc_html($child_price); ?></div>
+                                            <div style="font-size:0.9em; color:var(--obenlo-primary); font-weight:700;"><?php printf(__('From $%s', 'obenlo'), esc_html($child_price)); ?></div>
                                         </div>
                                         <div style="align-self:center; color:#ccc;">&rsaquo;</div>
                                     </a>
                                 <?php endforeach; ?>
                             </div>
                         <?php else: ?>
-                            <p style="color:#666; font-style:italic;">No booking options available at this time.</p>
+                            <p style="color:#666; font-style:italic;"><?php echo __('No booking options available at this time.', 'obenlo'); ?></p>
                             <?php if (current_user_can('administrator') || get_current_user_id() == get_post_field('post_author', $listing_id)): ?>
-                                <a href="<?php echo home_url('/host-dashboard?action=add&parent_id=' . $listing_id); ?>" class="btn-primary" style="display:block; text-align:center; margin-top:15px; background:#333; color:white; padding:10px; border-radius:8px; text-decoration:none;">+ Add Unit/Session</a>
+                                <a href="<?php echo home_url('/host-dashboard?action=add&parent_id=' . $listing_id); ?>" class="btn-primary" style="display:block; text-align:center; margin-top:15px; background:#333; color:white; padding:10px; border-radius:8px; text-decoration:none;">+ <?php echo __('Add Unit/Session', 'obenlo'); ?></a>
                             <?php endif; ?>
                         <?php endif; ?>
 
@@ -613,7 +614,7 @@ get_header(); ?>
                                     onmouseout="this.style.background='var(--obenlo-primary)'; this.style.transform='translateY(0)';"
                             >
                                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                Contact Host
+                                <?php echo __('Contact Host', 'obenlo'); ?>
                             </button>
                         </div>
                     <?php else: ?>
@@ -668,8 +669,8 @@ get_header(); ?>
                         <!-- Price Header -->
                         <div class="price-header">
                             <?php if ($pricing_model === 'custom_donation'): ?>
-                                <span class="price-value">Pay What You Want</span>
-                                <div style="color: #666; font-size: 0.9rem; margin-top:5px;">Every contribution counts. Thank you!</div>
+                                <span class="price-value"><?php echo __('Pay What You Want', 'obenlo'); ?></span>
+                                <div style="color: #666; font-size: 0.9rem; margin-top:5px;"><?php echo __('Every contribution counts. Thank you!', 'obenlo'); ?></div>
                             <?php else: ?>
                                 <span class="price-value">$<?php echo esc_html($price); ?></span>
                                 <span style="color: #666;"><?php echo esc_html($price_unit); ?></span>
@@ -702,11 +703,9 @@ get_header(); ?>
                                         echo esc_html($formatted_date);
                                         if(!empty($start_display)) echo " &bull; " . esc_html($start_display);
                                         if(!empty($end_display)) echo " - " . esc_html($end_display);
-                                        ?>
-                                    </div>
-                                    <div style="margin-top:8px; font-size:0.9rem; color:#666; display:flex; align-items:center; gap:5px;">
+                                                                     <div style="margin-top:8px; font-size:0.9rem; color:#666; display:flex; align-items:center; gap:5px;">
                                         <?php if($event_location_type === 'virtual'): ?>
-                                            <span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;">🌐 Virtual Event</span>
+                                            <span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;">🌐 <?php echo __('Virtual Event', 'obenlo'); ?></span>
                                         <?php else: 
                                             $location = get_post_meta($listing_id, '_obenlo_location', true);
                                             if($location): ?>
@@ -731,7 +730,7 @@ get_header(); ?>
                                     <input type="datetime-local" name="start_date" required style="width: 100%; border: 1px solid #ccc; padding: 10px; border-radius: 6px;" min="<?php echo date('Y-m-d\TH:i'); ?>">
                                 </div>
                                 <div class="form-row" style="margin-top:10px;">
-                                    <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;">Duration (Hours)</label>
+                                    <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;"><?php echo __('Duration (Hours)', 'obenlo'); ?></label>
                                     <input type="number" name="booking_duration" min="1" value="1" required style="width: 100%; border: 1px solid #ccc; padding: 10px; border-radius: 6px;">
                                 </div>
                                 <input type="hidden" name="booking_duration_unit" value="hours">
@@ -742,10 +741,10 @@ get_header(); ?>
                                     <input type="date" id="timeslot_date" required style="width: 100%; border: 1px solid #ccc; padding: 10px; border-radius: 6px;" min="<?php echo date('Y-m-d'); ?>">
                                 </div>
                                 <div class="form-row" id="timeslots_container" style="margin-top:15px; display:none;">
-                                    <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 10px;">Select Available Time</label>
+                                    <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 10px;"><?php echo __('Select Available Time', 'obenlo'); ?></label>
                                     <div id="timeslots_grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
                                 </div>
-                                <div id="timeslot_loading" style="display:none; margin-top:10px; font-size:0.9em; color:#666;">Checking availability...</div>
+                                <div id="timeslot_loading" style="display:none; margin-top:10px; font-size:0.9em; color:#666;"><?php echo __('Checking availability...', 'obenlo'); ?></div>
                                 <input type="hidden" name="start_date" id="final_start_date" required>
                                 <?php if ($duration_val): ?>
                                     <input type="hidden" name="booking_duration" value="<?php echo esc_attr($duration_val); ?>">
@@ -767,15 +766,14 @@ get_header(); ?>
                             <?php
         endif; ?>
 
-                            <!-- ── Custom Donation Input ── -->
-                            <?php if ($pricing_model === 'custom_donation'): ?>
+                                 <?php if ($pricing_model === 'custom_donation'): ?>
                                 <div class="form-row" style="margin-bottom: 20px; background: #fffcf0; padding: 15px; border: 1px solid #fde68a; border-radius: 10px;">
-                                    <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 8px;">Your Donation Amount ($)</label>
+                                    <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 8px;"><?php echo __('Your Donation Amount ($)', 'obenlo'); ?></label>
                                     <div style="position:relative;">
                                         <span style="position:absolute; left:12px; top:10px; color:#888; font-weight:bold;">$</span>
-                                        <input type="number" name="custom_donation_amount" min="1" step="0.01" required placeholder="<?php echo esc_attr($price); ?> (Suggested)" style="width: 100%; border: 1px solid #ccc; padding: 10px 10px 10px 30px; border-radius: 8px; font-size:1.1rem; font-weight:bold;">
+                                        <input type="number" name="custom_donation_amount" min="1" step="0.01" required placeholder="<?php printf(__('%s (Suggested)', 'obenlo'), esc_attr($price)); ?>" style="width: 100%; border: 1px solid #ccc; padding: 10px 10px 10px 30px; border-radius: 8px; font-size:1.1rem; font-weight:bold;">
                                     </div>
-                                    <p style="font-size:0.8rem; color:#92400e; margin-top:8px;">Help support this cause with a contribution of your choice.</p>
+                                    <p style="font-size:0.8rem; color:#92400e; margin-top:8px;"><?php echo __('Help support this cause with a contribution of your choice.', 'obenlo'); ?></p>
                                 </div>
                             <?php endif; ?>
 
@@ -783,9 +781,9 @@ get_header(); ?>
                             <?php if ($form_has_guests): ?>
                                 <div class="form-row">
                                     <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;">
-                                        <?php echo in_array($booking_mode, ['event_datetime']) ? 'Tickets' : 'Guests'; ?>
+                                        <?php echo in_array($booking_mode, ['event_datetime']) ? __('Tickets', 'obenlo') : __('Guests', 'obenlo'); ?>
                                         <?php if ($capacity)
-                echo '(max ' . esc_html($capacity) . ')'; ?>
+                echo ' ' . sprintf(__('(max %d)', 'obenlo'), $capacity); ?>
                                     </label>
                                     <input type="number" name="guests" min="1" <?php if ($capacity)
                 echo 'max="' . esc_attr($capacity) . '"'; ?> value="1" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
@@ -798,16 +796,16 @@ get_header(); ?>
 
                             <!-- ── Payment Method ── -->
                             <div class="form-row" style="margin-top: 10px;">
-                                <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;">Payment Method</label>
+                                <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;"><?php echo __('Payment Method', 'obenlo'); ?></label>
                                 <select name="payment_method" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
-                                    <option value="stripe">Credit Card (Stripe)</option>
-                                    <option value="paypal">PayPal</option>
+                                    <option value="stripe"><?php echo __('Credit Card (Stripe)', 'obenlo'); ?></option>
+                                    <option value="paypal"><?php echo __('PayPal', 'obenlo'); ?></option>
                                 </select>
                             </div>
 
                             <?php if (!empty($addons)): ?>
                                 <div class="form-row" style="margin-top: 10px;">
-                                    <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;">Add Extras</label>
+                                    <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;"><?php echo __('Add Extras', 'obenlo'); ?></label>
                                     <div style="display:flex; flex-direction:column; gap:8px;">
                                         <?php foreach ($addons as $idx => $addon): ?>
                                             <label style="display:flex; align-items:center; justify-content:space-between; padding:10px; border:1px solid #eee; border-radius:6px; cursor:pointer;">
@@ -825,24 +823,24 @@ get_header(); ?>
         endif; ?>
 
                             <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee; display:flex; justify-content:space-between; font-size:1.2em; font-weight:bold;">
-                                <span>Total:</span>
+                                <span><?php echo __('Total:', 'obenlo'); ?></span>
                                 <span>$<span id="live-total"><?php echo esc_html($price); ?></span></span>
                             </div>
 
                             <button type="submit" class="reserve-btn" style="background:var(--obenlo-primary); color:white; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:1.1rem; border:none; cursor:pointer; transition:all 0.2s ease-in-out; box-shadow:0 4px 15px rgba(var(--obenlo-primary-rgb),0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(var(--obenlo-primary-rgb),0.4)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(var(--obenlo-primary-rgb),0.3)';">
-                                <?php echo in_array($booking_mode, ['event_datetime']) ? 'Buy Tickets' : 'Book Instantly'; ?>
+                                <?php echo in_array($booking_mode, ['event_datetime']) ? __('Buy Tickets', 'obenlo') : __('Book Instantly', 'obenlo'); ?>
                             </button>
                         </form>
 
                         <!-- Contact Host Button (Harmonized) -->
                         <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
                             <button onclick="<?php if(is_user_logged_in()): ?>if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');} <?php else: ?>window.obenloOpenGuestContact(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');<?php endif; ?>"
-                                    style="width: 100%; background: var(--obenlo-primary); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(var(--obenlo-primary-rgb),0.2);"
+                                     style="width: 100%; background: var(--obenlo-primary); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(var(--obenlo-primary-rgb),0.2);"
                                     onmouseover="this.style.background='#000'; this.style.transform='translateY(-1px)';"
                                     onmouseout="this.style.background='var(--obenlo-primary)'; this.style.transform='translateY(0)';"
                             >
                                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                Contact Host
+                                <?php echo __('Contact Host', 'obenlo'); ?>
                             </button>
                         </div>
 
@@ -917,7 +915,7 @@ get_header(); ?>
                                         var vStart = new Date(vacationBlocks[i].start + 'T00:00:00');
                                         var vEnd = new Date(vacationBlocks[i].end + 'T23:59:59');
                                         if (startD <= vEnd && endD >= vStart) {
-                                            errorMsgEl.innerText = 'These dates are unavailable (Host is away).';
+                                            errorMsgEl.innerText = "<?php echo esc_js(__('These dates are unavailable (Host is away).', 'obenlo')); ?>";
                                             reserveBtn.disabled = true;
                                             reserveBtn.style.opacity = '0.5';
                                             reserveBtn.style.cursor = 'not-allowed';
@@ -937,14 +935,14 @@ get_header(); ?>
                                     if (timeStr && businessHours && businessHours[dayOfWeek]) {
                                         var conf = businessHours[dayOfWeek];
                                         if (conf.active !== 'yes') {
-                                            errorMsgEl.innerText = 'The host does not accept bookings on ' + dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1) + 's.';
+                                            errorMsgEl.innerText = "<?php echo esc_js(__('The host does not accept bookings on this day.', 'obenlo')); ?>";
                                             reserveBtn.disabled = true;
                                             reserveBtn.style.opacity = '0.5';
                                             reserveBtn.style.cursor = 'not-allowed';
                                             return;
                                         }
                                         if (timeStr < conf.start || timeStr > conf.end) {
-                                            errorMsgEl.innerText = 'Available hours on ' + dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1) + ' are ' + conf.start + ' to ' + conf.end + '.';
+                                            errorMsgEl.innerText = "<?php echo esc_js(__('The selected time is outside the host\'s operating hours.', 'obenlo')); ?>";
                                             reserveBtn.disabled = true;
                                             reserveBtn.style.opacity = '0.5';
                                             reserveBtn.style.cursor = 'not-allowed';
@@ -990,7 +988,7 @@ get_header(); ?>
                                             var vEnd = new Date(vacationBlocks[i].end + 'T23:59:59');
                                             if (sD <= vEnd && sD >= vStart) {
                                                 container.style.display = 'block';
-                                                grid.innerHTML = '<div style="grid-column:1/-1; color:var(--obenlo-primary); font-size:0.9em; font-weight:bold;">Host is away on this date.</div>';
+                                                grid.innerHTML = '<div style="grid-column:1/-1; color:var(--obenlo-primary); font-size:0.9em; font-weight:bold;"><?php echo esc_js(__('Host is away on this date.', 'obenlo')); ?></div>';
                                                 return;
                                             }
                                         }
@@ -1045,14 +1043,14 @@ get_header(); ?>
                                                 grid.appendChild(btn);
                                             });
                                         } else {
-                                            var msg = (response.data && response.data.message) ? response.data.message : 'No available slots on this date.';
+                                            var msg = (response.data && response.data.message) ? response.data.message : "<?php echo esc_js(__('No available slots on this date.', 'obenlo')); ?>";
                                             grid.innerHTML = '<div style="grid-column:1/-1; color:#666; font-size:0.9em;">' + msg + '</div>';
                                         }
                                     })
                                     .catch(err => {
                                         console.error('Fetch error:', err);
                                         loading.style.display = 'none';
-                                        grid.innerHTML = '<div style="grid-column:1/-1; color:var(--obenlo-primary); font-size:0.9em;">Error loading slots.</div>';
+                                        grid.innerHTML = '<div style="grid-column:1/-1; color:var(--obenlo-primary); font-size:0.9em;"><?php echo esc_js(__('Error loading slots.', 'obenlo')); ?></div>';
                                     });
                                 });
                             }
@@ -1083,6 +1081,11 @@ get_header(); ?>
                         </script>
                     <?php
     endif; ?>
+                </div>
+            </div>
+            
+        </div>
+?>
                 </div>
             </div>
             

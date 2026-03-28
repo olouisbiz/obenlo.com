@@ -27,7 +27,7 @@ if (class_exists('Obenlo_Booking_Wishlist')) {
 <main id="primary" class="site-main">
     <div class="obenlo-container" style="padding-top: 60px; padding-bottom: 80px; max-width: 1400px; margin: 0 auto; padding-left: 40px; padding-right: 40px;">
         <header class="archive-header" style="margin-bottom: 40px;">
-            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px;">Wishlists</h1>
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px;"><?php echo __('Wishlists', 'obenlo'); ?></h1>
         </header>
 
         <?php if ( ! empty( $wishlist_ids ) ) : ?>
@@ -47,15 +47,15 @@ if (class_exists('Obenlo_Booking_Wishlist')) {
                     endwhile;
                     wp_reset_postdata();
                 else :
-                    echo '<p>No saved listings found.</p>';
+                    echo '<p>' . __('No saved listings found.', 'obenlo') . '</p>';
                 endif;
                 ?>
             </div>
         <?php else : ?>
             <div class="empty-wishlist" style="text-align: center; padding: 100px 20px; background: #f9f9f9; border-radius: 24px;">
-                <h2 style="font-size: 1.8rem; margin-bottom: 20px;">Create your first wishlist</h2>
-                <p style="color: #717171; font-size: 1.1rem; margin-bottom: 30px;">As you search, click the heart icon to save your favorite stays and experiences.</p>
-                <a href="<?php echo home_url(); ?>" class="cta-button" style="background:#222; box-shadow:none;">Start exploring</a>
+                <h2 style="font-size: 1.8rem; margin-bottom: 20px;"><?php echo __('Create your first wishlist', 'obenlo'); ?></h2>
+                <p style="color: #717171; font-size: 1.1rem; margin-bottom: 30px;"><?php echo __('As you search, click the heart icon to save your favorite stays and experiences.', 'obenlo'); ?></p>
+                <a href="<?php echo home_url(); ?>" class="cta-button" style="background:#222; box-shadow:none;"><?php echo __('Start exploring', 'obenlo'); ?></a>
             </div>
         <?php endif; ?>
     </div>

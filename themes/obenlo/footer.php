@@ -9,7 +9,7 @@
                 <li><a href="<?php echo esc_url(get_option('obenlo_support_url', home_url('/support'))); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Help Center', 'obenlo'); ?></a></li>
                 <li><a href="<?php echo esc_url(get_option('obenlo_how_it_works_url', home_url('/how-it-works'))); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('How Obenlo works', 'obenlo'); ?></a></li>
                 <li><a href="<?php echo home_url('/faq'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('FAQ', 'obenlo'); ?></a></li>
-                <li><a href="#" class="trigger-contact-modal" style="color: inherit; text-decoration: none;">Contact Us</a></li>
+                <li><a href="#" class="trigger-contact-modal" style="color: inherit; text-decoration: none;"><?php esc_html_e('Contact Us', 'obenlo-booking'); ?></a></li>
             </ul>
         </div>
 
@@ -46,7 +46,7 @@
 
 
         <div class="footer-col">
-            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid var(--obenlo-primary); display: inline-block; padding-bottom: 5px;">Follow Us</h4>
+            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid var(--obenlo-primary); display: inline-block; padding-bottom: 5px;"><?php esc_html_e('Follow Us', 'obenlo-booking'); ?></h4>
             <div style="display: flex; gap: 15px; margin-top: 10px;">
                 <?php 
                 $socials = array(
@@ -75,7 +75,7 @@
         </a>
 
         <div style="color: #666; font-size: 0.85em;">
-            &copy; <?php echo date('Y'); ?> <?php bloginfo('name'); ?>, Inc. All rights reserved. &middot; <a href="<?php echo esc_url(get_option('obenlo_privacy_url', home_url('/privacy'))); ?>" style="color: inherit; text-decoration: none;">Privacy</a> &middot; <a href="<?php echo esc_url(get_option('obenlo_terms_url', home_url('/terms'))); ?>" style="color: inherit; text-decoration: none;">Terms</a> &middot; Sitemap
+            &copy; <?php echo date('Y'); ?> <?php bloginfo('name'); ?>, Inc. <?php echo __('All rights reserved.', 'obenlo-booking'); ?> &middot; <a href="<?php echo esc_url(get_option('obenlo_privacy_url', home_url('/privacy'))); ?>" style="color: inherit; text-decoration: none;"><?php echo __('Privacy', 'obenlo-booking'); ?></a> &middot; <a href="<?php echo esc_url(get_option('obenlo_terms_url', home_url('/terms'))); ?>" style="color: inherit; text-decoration: none;"><?php echo __('Terms', 'obenlo-booking'); ?></a> &middot; <?php echo __('Sitemap', 'obenlo-booking'); ?>
         </div>
     </div>
 </footer>
@@ -84,14 +84,14 @@
 <div id="obenlo-success-modal">
     <div class="modal-content">
         <div id="modal-icon" style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
-        <h2 id="modal-title" style="margin-bottom: 15px; font-size: 1.8rem;">Success!</h2>
-        <p id="modal-message" style="color: #666; margin-bottom: 30px; font-size: 1.1rem; line-height: 1.6;">Your action was completed successfully.</p>
+        <h2 id="modal-title" style="margin-bottom: 15px; font-size: 1.8rem;"><?php echo __('Success!', 'obenlo-booking'); ?></h2>
+        <p id="modal-message" style="color: #666; margin-bottom: 30px; font-size: 1.1rem; line-height: 1.6;"><?php echo __('Your action was completed successfully.', 'obenlo-booking'); ?></p>
         
         <div id="modal-actions" style="display: flex; flex-direction: column; gap: 12px;">
             <!-- Buttons will be injected here -->
         </div>
         
-        <button onclick="closeObenloModal()" style="margin-top: 20px; background: transparent; border: none; color: #999; cursor: pointer; font-size: 0.9rem; text-decoration: underline;">Close</button>
+        <button onclick="closeObenloModal()" style="margin-top: 20px; background: transparent; border: none; color: #999; cursor: pointer; font-size: 0.9rem; text-decoration: underline;"><?php echo __('Close', 'obenlo-booking'); ?></button>
     </div>
 </div>
 
@@ -118,28 +118,28 @@
             const icon = document.getElementById('modal-icon');
             const actions = document.getElementById('modal-actions');
             
-            let btn1Text = 'Dashboard';
+            let btn1Text = '<?php echo esc_js(__('Dashboard', 'obenlo-booking')); ?>';
             let btn1Url = '<?php echo home_url('/host-dashboard'); ?>';
-            let btn2Text = 'Home';
+            let btn2Text = '<?php echo esc_js(__('Home', 'obenlo-booking')); ?>';
             let btn2Url = '<?php echo home_url(); ?>';
 
             if (modalType === 'listing_saved') {
                 icon.innerText = '🏠';
-                title.innerText = 'Listing Saved!';
-                msg.innerText = 'Your listing has been updated and is now live on Obenlo.';
-                btn1Text = 'Manage Listings';
+                title.innerText = '<?php echo esc_js(__('Listing Saved!', 'obenlo-booking')); ?>';
+                msg.innerText = '<?php echo esc_js(__('Your listing has been updated and is now live on Obenlo.', 'obenlo-booking')); ?>';
+                btn1Text = '<?php echo esc_js(__('Manage Listings', 'obenlo-booking')); ?>';
                 btn1Url = '<?php echo home_url('/host-dashboard#listings'); ?>';
             } else if (modalType === 'booking_confirmed') {
                 icon.innerText = '✨';
-                title.innerText = 'Booking Confirmed!';
-                msg.innerText = 'Pack your bags! Your booking is confirmed and the host has been notified.';
-                btn1Text = 'View My Trips';
+                title.innerText = '<?php echo esc_js(__('Booking Confirmed!', 'obenlo-booking')); ?>';
+                msg.innerText = '<?php echo esc_js(__('Pack your bags! Your booking is confirmed and the host has been notified.', 'obenlo-booking')); ?>';
+                btn1Text = '<?php echo esc_js(__('View My Trips', 'obenlo-booking')); ?>';
                 btn1Url = '<?php echo home_url('/account?tab=trips'); ?>';
             } else if (modalType === 'ticket_submitted') {
                 icon.innerText = '✉️';
-                title.innerText = 'Ticket Received';
-                msg.innerText = 'Our support team has received your request and will get back to you shortly.';
-                btn1Text = 'Support Center';
+                title.innerText = '<?php echo esc_js(__('Ticket Received', 'obenlo-booking')); ?>';
+                msg.innerText = '<?php echo esc_js(__('Our support team has received your request and will get back to you shortly.', 'obenlo-booking')); ?>';
+                btn1Text = '<?php echo esc_js(__('Support Center', 'obenlo-booking')); ?>';
                 btn1Url = '<?php echo home_url('/support'); ?>';
             }
 
@@ -185,30 +185,30 @@
 <div id="obenlo-contact-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99999; align-items: center; justify-content: center;">
     <div style="background: #fff; width: 100%; max-width: 500px; border-radius: 16px; padding: 30px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
         <button id="close-contact-modal" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
-        <h2 style="margin-bottom: 10px; font-size: 1.5rem;">Contact Us</h2>
-        <p style="color: #666; margin-bottom: 20px;">Have a question? Send us a message and we'll get back to you shortly.</p>
+        <h2 style="margin-bottom: 10px; font-size: 1.5rem;"><?php echo __('Contact Us', 'obenlo-booking'); ?></h2>
+        <p style="color: #666; margin-bottom: 20px;"><?php echo __("Have a question? Send us a message and we'll get back to you shortly.", 'obenlo-booking'); ?></p>
         
         <form id="contact-us-form">
             <input type="hidden" name="action" value="obenlo_submit_contact_form">
             <input type="hidden" name="contact_nonce" value="<?php echo wp_create_nonce('obenlo_contact_nonce'); ?>">
             
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Your Name</label>
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;"><?php echo __('Your Name', 'obenlo-booking'); ?></label>
                 <input type="text" name="contact_name" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
             </div>
             
             <div style="margin-bottom: 15px;">
-                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Your Email</label>
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;"><?php echo __('Your Email', 'obenlo-booking'); ?></label>
                 <input type="email" name="contact_email" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
             </div>
             
             <div style="margin-bottom: 20px;">
-                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Message</label>
+                <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;"><?php echo __('Message', 'obenlo-booking'); ?></label>
                 <textarea name="contact_message" required rows="4" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: vertical;"></textarea>
             </div>
             
             <button type="submit" style="background: var(--obenlo-primary); color: #fff; font-weight: bold; padding: 14px 24px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1rem;">
-                Send Message
+                <?php echo __('Send Message', 'obenlo-booking'); ?>
             </button>
             <div id="contact-form-response" style="margin-top: 15px; font-weight: bold; text-align: center; display: none;"></div>
         </form>
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const submitBtn = form.querySelector('button[type="submit"]');
-            submitBtn.innerText = 'Sending...';
+            submitBtn.innerText = '<?php echo esc_js(__('Sending...', 'obenlo-booking')); ?>';
             submitBtn.disabled = true;
             responseDiv.style.display = 'none';
 
@@ -260,13 +260,13 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
-                submitBtn.innerText = 'Send Message';
+                submitBtn.innerText = '<?php echo esc_js(__('Send Message', 'obenlo-booking')); ?>';
                 submitBtn.disabled = false;
                 responseDiv.style.display = 'block';
                 
                 if (data.success) {
                     responseDiv.style.color = 'green';
-                    responseDiv.innerText = data.data.message || 'Message sent successfully!';
+                    responseDiv.innerText = data.data.message || '<?php echo esc_js(__('Message sent successfully!', 'obenlo-booking')); ?>';
                     form.reset();
                     setTimeout(() => {
                         modal.style.display = 'none';
@@ -274,15 +274,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 3000);
                 } else {
                     responseDiv.style.color = 'red';
-                    responseDiv.innerText = data.data.message || 'Error sending message. Please try again.';
+                    responseDiv.innerText = data.data.message || '<?php echo esc_js(__('Error sending message. Please try again.', 'obenlo-booking')); ?>';
                 }
             })
             .catch(error => {
-                submitBtn.innerText = 'Send Message';
+                submitBtn.innerText = '<?php echo esc_js(__('Send Message', 'obenlo-booking')); ?>';
                 submitBtn.disabled = false;
                 responseDiv.style.display = 'block';
                 responseDiv.style.color = 'red';
-                responseDiv.innerText = 'Network error. Please try again later.';
+                responseDiv.innerText = '<?php echo esc_js(__('Network error. Please try again later.', 'obenlo-booking')); ?>';
             });
         });
     }

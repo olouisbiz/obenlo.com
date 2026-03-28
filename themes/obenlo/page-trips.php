@@ -29,22 +29,22 @@ $bookings = get_posts( array(
 <div class="obenlo-container" style="max-width:1100px; margin:60px auto; padding:0 20px;">
 
     <div style="margin-bottom:40px;">
-        <h1 style="font-size:2.2rem; font-weight:800; color:#222; margin:0 0 8px 0;">My Trips</h1>
-        <p style="color:#666; font-size:1rem; margin:0;">Your booking history and confirmation codes.</p>
+        <h1 style="font-size:2.2rem; font-weight:800; color:#222; margin:0 0 8px 0;"><?php echo __('My Trips', 'obenlo'); ?></h1>
+        <p style="color:#666; font-size:1rem; margin:0;"><?php echo __('Your booking history and confirmation codes.', 'obenlo'); ?></p>
     </div>
 
     <?php if ( empty( $bookings ) ) : ?>
         <div style="text-align:center; padding:60px 20px; background:#fff; border-radius:30px; border:1px solid #eee; margin-bottom: 40px;">
             <div style="font-size:4rem; margin-bottom:20px;">🏝️</div>
-            <h2 style="margin-bottom:15px;">No trips found</h2>
-            <p style="color:#666; margin-bottom:30px; font-size:1.1rem;">You haven't booked any experiences or stays yet.</p>
-            <a href="<?php echo esc_url( home_url('/listings') ); ?>" style="background:var(--obenlo-primary); color:#fff; padding:14px 35px; border-radius:12px; text-decoration:none; font-weight:700; font-size:1rem;">Explore Listings</a>
+            <h2 style="margin-bottom:15px;"><?php echo __('No trips found', 'obenlo'); ?></h2>
+            <p style="color:#666; margin-bottom:30px; font-size:1.1rem;"><?php echo __('You haven\'t booked any experiences or stays yet.', 'obenlo'); ?></p>
+            <a href="<?php echo esc_url( home_url('/listings') ); ?>" style="background:var(--obenlo-primary); color:#fff; padding:14px 35px; border-radius:12px; text-decoration:none; font-weight:700; font-size:1rem;"><?php echo __('Explore Listings', 'obenlo'); ?></a>
         </div>
     <?php else : ?>
         <div style="display:flex; flex-direction:column; gap:20px;">
             <?php foreach ( $bookings as $booking ) :
                 $listing_id   = get_post_meta( $booking->ID, '_obenlo_listing_id', true );
-                $listing_title = $listing_id ? get_the_title( $listing_id ) : 'Unknown Listing';
+                $listing_title = $listing_id ? get_the_title( $listing_id ) : __('Unknown Listing', 'obenlo');
                 $listing_url  = $listing_id ? get_permalink( $listing_id ) : '#';
                 $start_date   = get_post_meta( $booking->ID, '_obenlo_start_date', true );
                 $end_date     = get_post_meta( $booking->ID, '_obenlo_end_date', true );
@@ -70,7 +70,7 @@ $bookings = get_posts( array(
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:20px;">
                             <div>
                                 <div style="margin-bottom:6px;">
-                                    <span style="background:<?php echo $status_bg; ?>; color:<?php echo $status_color; ?>; font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; padding:4px 10px; border-radius:20px;"><?php echo esc_html( ucwords( str_replace('_', ' ', $status) ) ); ?></span>
+                                    <span style="background:<?php echo $status_bg; ?>; color:<?php echo $status_color; ?>; font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; padding:4px 10px; border-radius:20px;"><?php echo esc_html__( ucwords( str_replace('_', ' ', $status) ), 'obenlo' ); ?></span>
                                 </div>
                                 <h3 style="margin:6px 0 4px 0; font-size:1.2rem; font-weight:800; color:#222;">
                                     <a href="<?php echo esc_url($listing_url); ?>" style="color:inherit; text-decoration:none;"><?php echo esc_html($listing_title); ?></a>
@@ -78,22 +78,22 @@ $bookings = get_posts( array(
                                 <div style="color:#888; font-size:0.88rem; margin-top:4px;">
                                     <?php echo esc_html($start_date); ?>
                                     <?php echo $end_date ? ' &rarr; ' . esc_html($end_date) : ''; ?>
-                                    <?php if ($guests) : ?>&nbsp;&bull;&nbsp;<?php echo esc_html($guests); ?> guest(s)<?php endif; ?>
+                                    <?php if ($guests) : ?>&nbsp;&bull;&nbsp;<?php printf(_n('%d guest', '%d guests', $guests, 'obenlo'), $guests); ?><?php endif; ?>
                                 </div>
                             </div>
                             <div style="text-align:right; flex-shrink:0;">
                                 <div style="font-size:1.4rem; font-weight:800; color:#222;">$<?php echo number_format(floatval($total), 2); ?></div>
-                                <div style="font-size:0.8rem; color:#888; margin-top:2px;">Total paid</div>
+                                <div style="font-size:0.8rem; color:#888; margin-top:2px;"><?php echo __('Total paid', 'obenlo'); ?></div>
                             </div>
                         </div>
 
                         <?php if ( $conf_code ) : ?>
                             <div style="margin-top:20px; padding:16px 20px; background:linear-gradient(135deg,#fff9f0,#fff3f7); border:2px dashed #f0c0c0; border-radius:14px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
                                 <div style="flex:1;">
-                                    <div style="font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--obenlo-primary); margin-bottom:4px;">🎫 Booking Confirmation Code</div>
+                                    <div style="font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--obenlo-primary); margin-bottom:4px;">🎫 <?php echo __('Booking Confirmation Code', 'obenlo'); ?></div>
                                     <div style="font-family:monospace; font-size:1.2rem; font-weight:800; color:#333;"><?php echo esc_html($conf_code); ?></div>
                                 </div>
-                                <button onclick="navigator.clipboard.writeText('<?php echo esc_js($conf_code); ?>').then(()=>this.innerText='Copied!')" style="background:var(--obenlo-primary); color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.85rem; white-space:nowrap;">Copy Code</button>
+                                <button onclick="navigator.clipboard.writeText('<?php echo esc_js($conf_code); ?>').then(()=>this.innerText='<?php echo esc_js(__('Copied!', 'obenlo')); ?>')" style="background:var(--obenlo-primary); color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:700; cursor:pointer; font-size:0.85rem; white-space:nowrap;"><?php echo __('Copy Code', 'obenlo'); ?></button>
                             </div>
                         <?php endif; ?>
                     </div>

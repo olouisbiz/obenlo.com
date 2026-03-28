@@ -75,8 +75,8 @@ if ($demo_listing_id && get_post_meta($demo_listing_id, '_obenlo_is_demo', true)
 }
 
 // Meta Data (Standard)
-$store_name = ($is_demo_preview && !empty($demo_meta['name'])) ? $demo_meta['name'] : (get_user_meta($user_id, 'obenlo_store_name', true) ?: ($curauth ? $curauth->display_name : 'Obe Louis'));
-$store_desc = ($is_demo_preview && !empty($demo_meta['bio'])) ? $demo_meta['bio'] : (get_user_meta($user_id, 'obenlo_store_description', true) ?: ($curauth ? $curauth->description : 'High-end host on ' . get_option('obenlo_brand_name', 'Obenlo') . '.'));
+$store_name = ($is_demo_preview && !empty($demo_meta['name'])) ? $demo_meta['name'] : (get_user_meta($user_id, 'obenlo_store_name', true) ?: ($curauth ? $curauth->display_name : __('Obe Louis', 'obenlo')));
+$store_desc = ($is_demo_preview && !empty($demo_meta['bio'])) ? $demo_meta['bio'] : (get_user_meta($user_id, 'obenlo_store_description', true) ?: ($curauth ? $curauth->description : sprintf(__('High-end host on %s.', 'obenlo'), get_option('obenlo_brand_name', 'Obenlo'))));
 $store_location = ($is_demo_preview && !empty($demo_meta['location'])) ? $demo_meta['location'] : get_user_meta($user_id, 'obenlo_store_location', true);
 $store_tagline = ($is_demo_preview && !empty($demo_meta['tagline'])) ? $demo_meta['tagline'] : get_user_meta($user_id, 'obenlo_store_tagline', true);
 
@@ -323,12 +323,12 @@ if ($is_demo_preview) $hosting_since = 2024;
                 <button onclick="<?php if(is_user_logged_in()): ?>if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $user_id; ?>, '<?php echo esc_js($store_name); ?>', '<?php echo esc_url($logo_url); ?>');} <?php else: ?>window.obenloOpenGuestContact(<?php echo $user_id; ?>, '<?php echo esc_js($store_name); ?>', '<?php echo esc_url($logo_url); ?>');<?php endif; ?>"
                         style="margin-top: 25px; background: var(--obenlo-primary); color: #fff; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(var(--obenlo-primary-rgb), 0.3);">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    Contact Host
+                    <?php echo __('Contact Host', 'obenlo'); ?>
                 </button>
 
                 <?php if($specialties): ?>
                     <div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">
-                        <div style="font-size:0.7rem; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; font-weight:700;">Host Specialties</div>
+                        <div style="font-size:0.7rem; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; font-weight:700;"><?php echo __('Host Specialties', 'obenlo'); ?></div>
                         <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">
                             <?php foreach(explode(',', $specialties) as $spec): ?>
                                 <span style="font-size:0.85rem; color:#444; font-weight:600;">• <?php echo esc_html(trim($spec)); ?></span>
@@ -344,25 +344,25 @@ if ($is_demo_preview) $hosting_since = 2024;
     <div class="premium-stats">
         <div class="stat-item">
             <span class="stat-val"><?php echo $host_avg_rating ? number_format($host_avg_rating, 1) : '5.0'; ?> ★</span>
-            <span class="stat-lbl"><?php echo $host_review_count; ?> REVIEWS</span>
+            <span class="stat-lbl"><?php printf( _n('%d REVIEW', '%d REVIEWS', $host_review_count, 'obenlo'), $host_review_count ); ?></span>
         </div>
         <div class="stat-item" style="border-left:1px solid #eee; border-right:1px solid #eee; padding: 0 40px;">
             <span class="stat-val"><?php echo (date('Y') - $hosting_since) ?: '1'; ?>+</span>
-            <span class="stat-lbl">YEARS HOSTING</span>
+            <span class="stat-lbl"><?php echo __('YEARS HOSTING', 'obenlo'); ?></span>
         </div>
         <div class="stat-item">
-            <span class="stat-val">< 1 hour</span>
-            <span class="stat-lbl">RESPONSE TIME</span>
+            <span class="stat-val"><?php echo __('< 1 hour', 'obenlo'); ?></span>
+            <span class="stat-lbl"><?php echo __('RESPONSE TIME', 'obenlo'); ?></span>
         </div>
     </div>
 
     <div class="obenlo-container" style="max-width:1200px; margin:0 auto; padding:0 40px;">
         <!-- Navigation -->
         <nav class="storefront-nav">
-            <a class="nav-tab active" data-tab="store">Storefront</a>
-            <a class="nav-tab" data-tab="about">About Host</a>
+            <a class="nav-tab active" data-tab="store"><?php echo __('Storefront', 'obenlo'); ?></a>
+            <a class="nav-tab" data-tab="about"><?php echo __('About Host', 'obenlo'); ?></a>
             <?php if($host_review_count > 0): ?>
-                <a class="nav-tab" data-tab="reviews">Reviews (<?php echo $host_review_count; ?>)</a>
+                <a class="nav-tab" data-tab="reviews"><?php printf(__('Reviews (%d)', 'obenlo'), $host_review_count); ?></a>
             <?php endif; ?>
         </nav>
 
@@ -449,7 +449,7 @@ if ($is_demo_preview) $hosting_since = 2024;
                                 <h4 style="margin:0 0 10px; font-size:1.3rem; font-weight:800;"><?php the_title(); ?></h4>
                                 <div style="display:flex; align-items:center; gap:10px; color:#888; font-size:0.9rem;">
                                     <span style="color:#ffd700;">★★★★★</span>
-                                    <span>(New)</span>
+                                    <span>(<?php echo __('New', 'obenlo'); ?>)</span>
                                 </div>
                             </div>
                         </a>
@@ -458,7 +458,7 @@ if ($is_demo_preview) $hosting_since = 2024;
                 echo '</div>';
                 wp_reset_postdata();
             else:
-                echo '<div style="text-align:center; padding:100px 0; color:#888;"><h3>No active listings found in this store.</h3></div>';
+                echo '<div style="text-align:center; padding:100px 0; color:#888;"><h3>' . __('No active listings found in this store.', 'obenlo') . '</h3></div>';
             endif; ?>
         </div>
 
@@ -466,7 +466,7 @@ if ($is_demo_preview) $hosting_since = 2024;
         <div id="tab-about" class="tab-content">
             <div style="display:grid; grid-template-columns: 2fr 1fr; gap:60px; padding:20px 0;">
                 <div>
-                    <h3 style="font-size:1.8rem; font-weight:900; margin-bottom:25px;">Our Story</h3>
+                    <h3 style="font-size:1.8rem; font-weight:900; margin-bottom:25px;"><?php echo __('Our Story', 'obenlo'); ?></h3>
                     <p style="font-size:1.15rem; line-height:1.8; color:#444;"><?php echo nl2br(esc_html($store_desc)); ?></p>
                     
                     <?php if($store_video): ?>
@@ -484,19 +484,29 @@ if ($is_demo_preview) $hosting_since = 2024;
 
                 <div>
                     <div style="background:white; border-radius:24px; padding:30px; border:1px solid #eee; box-shadow:0 10px 30px rgba(0,0,0,0.03);">
-                        <h4 style="margin-top:0; margin-bottom:20px;">Business Hours</h4>
+                        <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Business Hours', 'obenlo'); ?></h4>
                         <?php if(!empty($business_hours) && is_array($business_hours)): ?>
                             <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px;">
-                                <?php foreach(['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] as $day):
-                                    $conf = $business_hours[$day]; ?>
+                                <?php 
+                                $days = [
+                                    'monday' => __('Monday', 'obenlo'),
+                                    'tuesday' => __('Tuesday', 'obenlo'),
+                                    'wednesday' => __('Wednesday', 'obenlo'),
+                                    'thursday' => __('Thursday', 'obenlo'),
+                                    'friday' => __('Friday', 'obenlo'),
+                                    'saturday' => __('Saturday', 'obenlo'),
+                                    'sunday' => __('Sunday', 'obenlo')
+                                ];
+                                foreach($days as $day_key => $day_label):
+                                    $conf = $business_hours[$day_key]; ?>
                                     <li style="display:flex; justify-content:space-between; font-size:0.95rem; <?php echo $conf['active'] !== 'yes' ? 'opacity:0.4;' : 'font-weight:600;'; ?>">
-                                        <span style="text-transform:capitalize;"><?php echo $day; ?></span>
-                                        <span><?php echo $conf['active'] === 'yes' ? esc_html($conf['start'].' - '.$conf['end']) : 'Closed'; ?></span>
+                                        <span style="text-transform:capitalize;"><?php echo $day_label; ?></span>
+                                        <span><?php echo $conf['active'] === 'yes' ? esc_html($conf['start'].' - '.$conf['end']) : __('Closed', 'obenlo'); ?></span>
                                     </li>
                                 <?php endforeach; ?>
                             </ul>
                         <?php else: ?>
-                            <p style="color:#888;">Not specified</p>
+                            <p style="color:#888;"><?php echo __('Not specified', 'obenlo'); ?></p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -507,9 +517,9 @@ if ($is_demo_preview) $hosting_since = 2024;
         <?php if($host_review_count > 0): ?>
             <div id="tab-reviews" class="tab-content">
                 <div style="padding:20px 0;">
-                    <h3 style="font-size:1.8rem; font-weight:900; margin-bottom:40px;">Host Reviews</h3>
+                    <h3 style="font-size:1.8rem; font-weight:900; margin-bottom:40px;"><?php echo __('Host Reviews', 'obenlo'); ?></h3>
                     <!-- Placeholder for actual review implementation matching standard Obenlo review styling -->
-                    <p style="color:#666;">Showing the latest feedback from guests...</p>
+                    <p style="color:#666;"><?php echo __('Showing the latest feedback from guests...', 'obenlo'); ?></p>
                 </div>
             </div>
         <?php endif; ?>

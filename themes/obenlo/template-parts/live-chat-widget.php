@@ -137,12 +137,12 @@ endif; ?>
             align = 'margin-right:20px; align-self: flex-start; border-bottom-left-radius: 4px;';
             bg = '#ffffff';
             text = '#222222';
-            label = 'Obenlo Support';
+            label = '<?php echo esc_js(__('Obenlo Support', 'obenlo')); ?>';
         } else {
             align = 'margin-left:20px; align-self: flex-end; border-bottom-right-radius: 4px;';
             bg = getComputedStyle(document.documentElement).getPropertyValue('--obenlo-primary').trim() || '#e61e4d';
             text = '#ffffff';
-            label = 'You';
+            label = '<?php echo esc_js(__('You', 'obenlo')); ?>';
         }
 
         const div = document.createElement('div');

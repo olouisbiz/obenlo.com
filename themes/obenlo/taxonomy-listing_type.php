@@ -10,9 +10,9 @@ get_header(); ?>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
             <div>
                 <nav class="breadcrumb" style="font-size: 0.85rem; color: #717171; margin-bottom: 15px;">
-                    <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="color: inherit; text-decoration: none;">Home</a> 
+                    <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="color: inherit; text-decoration: none;"><?php echo __('Home', 'obenlo'); ?></a> 
                     <span style="margin: 0 8px;">/</span> 
-                    <span style="color: #222; font-weight: 500;">Details</span>
+                    <span style="color: #222; font-weight: 500;"><?php echo __('Details', 'obenlo'); ?></span>
                 </nav>
                 <h1 class="page-title" style="font-size: 2.2rem; font-weight: 800; color: #222; margin: 0;">
                     <?php single_term_title(); ?>
@@ -24,7 +24,7 @@ get_header(); ?>
                         <?php echo wp_kses_post( $term->description ); ?>
                     </div>
                 <?php else : ?>
-                    <p style="color: #717171; margin-top: 10px;">Unique curated selections for your next <?php echo strtolower(single_term_title('', false)); ?>.</p>
+                    <p style="color: #717171; margin-top: 10px;"><?php printf(__('Unique curated selections for your next %s.', 'obenlo'), strtolower(single_term_title('', false))); ?></p>
                 <?php endif; ?>
             </div>
             
@@ -35,7 +35,7 @@ get_header(); ?>
                     echo $wp_query->found_posts; 
                     ?>
                 </span>
-                <span style="font-size: 0.9rem; color: #717171;">Listings available</span>
+                <span style="font-size: 0.9rem; color: #717171;"><?php echo __('Listings available', 'obenlo'); ?></span>
             </div>
         </div>
     </header>
@@ -50,8 +50,8 @@ get_header(); ?>
                 <?php 
                 the_posts_pagination( array(
                     'mid_size'  => 2,
-                    'prev_text' => '<span style="font-size: 1.2rem;">←</span> Previous',
-                    'next_text' => 'Next <span style="font-size: 1.2rem;">→</span>',
+                    'prev_text' => '<span style="font-size: 1.2rem;">←</span> ' . __('Previous', 'obenlo'),
+                    'next_text' => __('Next', 'obenlo') . ' <span style="font-size: 1.2rem;">→</span>',
                     'class'     => 'premium-pagination'
                 ) ); 
                 ?>
@@ -60,9 +60,9 @@ get_header(); ?>
         <?php else : ?>
             <div style="grid-column: 1 / -1; text-align: center; padding: 100px 0; background: #f9f9f9; border-radius: 24px;">
                 <div style="font-size: 3rem; margin-bottom: 20px;">🔍</div>
-                <h2 style="font-size: 1.5rem; color: #222; margin-bottom: 10px;">No listings found</h2>
-                <p style="color: #717171; margin-bottom: 30px;">We couldn't find any results in this category right now.</p>
-                <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="display: inline-block; padding: 12px 24px; background: #222; color: #fff; text-decoration: none; border-radius: 10px; font-weight: 600;">Explore all categories</a>
+                <h2 style="font-size: 1.5rem; color: #222; margin-bottom: 10px;"><?php echo __('No listings found', 'obenlo'); ?></h2>
+                <p style="color: #717171; margin-bottom: 30px;"><?php echo __('We couldn\'t find any results in this category right now.', 'obenlo'); ?></p>
+                <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="display: inline-block; padding: 12px 24px; background: #222; color: #fff; text-decoration: none; border-radius: 10px; font-weight: 600;"><?php echo __('Explore all categories', 'obenlo'); ?></a>
             </div>
         <?php endif; ?>
     </div>

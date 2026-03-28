@@ -66,8 +66,8 @@ get_header(); ?>
             <div style="grid-column: 1/-1; display: flex; justify-content: center; margin-top: 60px;">
                 <?php
                 the_posts_pagination( array(
-                    'prev_text'          => '&larr; Previous',
-                    'next_text'          => 'Next &rarr;',
+                    'prev_text'          => '&larr; ' . __('Previous', 'obenlo'),
+                    'next_text'          => __('Next', 'obenlo') . ' &rarr;',
                     'type'               => 'plain',
                 ) );
                 ?>

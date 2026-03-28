@@ -167,7 +167,7 @@ get_header(); ?>
 
 <main class="hosts-directory-wrapper">
     <header class="directory-header">
-        <h1>Meet our Hosts</h1>
+        <h1><?php echo __('Meet our Hosts', 'obenlo'); ?></h1>
         <p><?php echo sprintf( esc_html__( 'Discover the talented professionals and dedicated property owners making the %s community exceptional.', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></p>
     </header>
 
@@ -187,7 +187,7 @@ get_header(); ?>
             foreach ($hosts as $host) {
                 $user_id = $host->ID;
                 $store_name = get_user_meta($user_id, 'obenlo_store_name', true) ?: $host->display_name;
-                $location = get_user_meta($user_id, 'obenlo_store_location', true) ?: 'Global';
+                $location = get_user_meta($user_id, 'obenlo_store_location', true) ?: __('Global', 'obenlo');
                 $bio = get_user_meta($user_id, 'obenlo_store_description', true) ?: $host->description;
                 $logo_id = get_user_meta($user_id, 'obenlo_store_logo', true);
                 $avatar_url = $logo_id ? wp_get_attachment_image_url($logo_id, 'thumbnail') : get_avatar_url($user_id);
@@ -218,7 +218,7 @@ get_header(); ?>
 
                     <?php echo Obenlo_Booking_Badges::render_badges_html($user_id, 'directory'); ?>
 
-                    <div class="view-host-btn">View Storefront</div>
+                    <div class="view-host-btn"><?php echo __('View Storefront', 'obenlo'); ?></div>
                 </a>
                 <?php
             }
@@ -230,7 +230,7 @@ get_header(); ?>
             
             foreach ($admins as $admin) {
                 // Reuse same card logic or simple message
-                echo '<p style="text-align:center; grid-column:1/-1;">No public hosts listed yet. Check back soon!</p>';
+                echo '<p style="text-align:center; grid-column:1/-1;">' . __('No public hosts listed yet. Check back soon!', 'obenlo') . '</p>';
                 break;
             }
         }

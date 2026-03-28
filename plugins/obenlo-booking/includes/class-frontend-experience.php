@@ -109,10 +109,12 @@ class Obenlo_Booking_Frontend_Experience
 
             if ($requested_role === 'host') {
                 $user->set_role('host');
+                update_user_meta($user_id, '_obenlo_new_user', '1');
                 wp_safe_redirect(home_url('/host-onboarding'));
             }
             else {
                 $user->set_role('guest');
+                update_user_meta($user_id, '_obenlo_new_user', '1');
                 wp_safe_redirect(home_url('/account'));
             }
         }
@@ -148,6 +150,79 @@ class Obenlo_Booking_Frontend_Experience
                 wp_safe_redirect(home_url('/account'));
             }
             exit;
+        }
+    }
+
+    /**
+     * Render a premium welcome modal for new users
+     */
+    public static function render_welcome_modal()
+    {
+        $user_id = get_current_user_id();
+        if (!$user_id || get_user_meta($user_id, '_obenlo_new_user', true) !== '1') {
+            return;
+        }
+
+        $user = get_userdata($user_id);
+        $first_name = $user ? $user->first_name : '';
+        $brand_name = get_option('obenlo_brand_name', 'Obenlo');
+        $primary_color = get_option('obenlo_primary_color', '#e61e4d');
+
+        // Clear the flag immediately to prevent re-shows on refresh
+        delete_user_meta($user_id, '_obenlo_new_user');
+?>
+        <div id="obenlo-welcome-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:99999; display:flex; align-items:center; justify-content:center; animation:fadeIn 0.5s ease;">
+            <style>
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+                .welcome-card { background: #fff; width: 90%; max-width: 550px; border-radius: 32px; padding: 50px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3); animation: slideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden; }
+                .welcome-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: linear-gradient(90deg, <?php echo $primary_color; ?>, #ff5a5f); }
+                .welcome-icon { width: 80px; height: 80px; background: #fffcfc; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; border: 1px solid #f0f0f0; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+                .welcome-icon svg { width: 40px; height: 40px; color: <?php echo $primary_color; ?>; }
+                .welcome-btn { background: <?php echo $primary_color; ?>; color: #fff; padding: 16px 40px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; border: none; cursor: pointer; transition: all 0.3s; margin-top: 30px; box-shadow: 0 10px 20px rgba(230, 30, 77, 0.2); }
+                .welcome-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(230, 30, 77, 0.3); }
+            </style>
+            <div class="welcome-card">
+                <div class="welcome-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </div>
+                <h2 style="font-size: 2.2rem; font-weight: 900; color: #222; margin-bottom: 15px;"><?php printf(__('Welcome to %s!', 'obenlo-booking'), esc_html($brand_name)); ?></h2>
+                <?php if ($first_name): ?>
+                    <p style="font-size: 1.2rem; color: <?php echo $primary_color; ?>; font-weight: 700; margin-bottom: 20px;"><?php printf(__('Hello, %s!', 'obenlo-booking'), esc_html($first_name)); ?></p>
+                <?php endif; ?>
+                <p style="font-size: 1.05rem; color: #666; line-height: 1.6;"><?php printf(__('We\'re thrilled to have you here. Whether you\'re hosting or traveling, %s is your place for unique shared experiences.', 'obenlo-booking'), esc_html($brand_name)); ?></p>
+                <button class="welcome-btn" onclick="document.getElementById('obenlo-welcome-overlay').style.display='none'"><?php echo __('Let\'s Get Started', 'obenlo-booking'); ?></button>
+            </div>
+        </div>
+<?php
+    }
+
+    /**
+     * Render success/error notices for dashboard actions
+     */
+    public static function obenlo_render_dashboard_notices()
+    {
+        $message = isset($_GET['message']) ? sanitize_text_field($_GET['message']) : '';
+        $error = isset($_GET['obenlo_error']) ? sanitize_text_field($_GET['obenlo_error']) : '';
+        
+        if ($message === 'saved' || (isset($_GET['obenlo_message']) && $_GET['obenlo_message'] == '1')) {
+            echo '<div style="background:#ecfdf5; color:#059669; padding:20px; border-radius:16px; margin-bottom:30px; font-weight:700; display:flex; align-items:center; gap:12px; border:1px solid #d1fae5; animation:slideUp 0.4s ease;">';
+            echo '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            echo '<span>' . __('Success! Your changes have been saved.', 'obenlo-booking') . '</span>';
+            echo '</div>';
+        }
+
+        if ($error) {
+            $error_msg = __('An error occurred. Please try again.', 'obenlo-booking');
+            switch($error) {
+                case 'unauthorized': $error_msg = __('You do not have permission for this.', 'obenlo-booking'); break;
+                case 'security_failed': $error_msg = __('Security check failed. Refresh and try again.', 'obenlo-booking'); break;
+                case 'invalid_data': $error_msg = __('Missing required information.', 'obenlo-booking'); break;
+            }
+            echo '<div style="background:#fef2f2; color:#dc2626; padding:20px; border-radius:16px; margin-bottom:30px; font-weight:700; display:flex; align-items:center; gap:12px; border:1px solid #fee2e2; animation:slideUp 0.4s ease;">';
+            echo '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+            echo '<span>' . esc_html($error_msg) . '</span>';
+            echo '</div>';
         }
     }
 

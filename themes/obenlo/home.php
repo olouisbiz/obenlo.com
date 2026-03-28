@@ -65,11 +65,11 @@ $grid_query = new WP_Query($grid_args);
     <div style="background: linear-gradient(135deg, #222, #111); color: #fff; padding: 60px 40px; text-align: center; margin-bottom: 40px; border-radius: 16px; margin-top: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
         <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px;"><?php echo sprintf( esc_html__( 'The %s Blog', 'obenlo' ), esc_html( get_option('obenlo_brand_name', 'Obenlo') ) ); ?></h1>
         <p style="font-size: 1.15rem; color: #ccc; max-width: 600px; margin: 0 auto 30px; line-height: 1.6;">
-            Discover travel tips, top host stories, and local guides. Subscribe to our newsletter to receive inspiration straight to your inbox.
+            <?php echo __('Discover travel tips, top host stories, and local guides. Subscribe to our newsletter to receive inspiration straight to your inbox.', 'obenlo'); ?>
         </p>
-        <form style="display: flex; max-width: 500px; margin: 0 auto; gap: 10px;" onsubmit="event.preventDefault(); alert('Thanks for subscribing!'); this.reset();">
-            <input type="email" placeholder="Your email address" required style="flex-grow: 1; padding: 16px 24px; border-radius: 30px; border: none; font-size: 1rem; outline: none;">
-            <button type="submit" style="background: var(--obenlo-primary); color: white; border: none; padding: 16px 32px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s;">Subscribe</button>
+        <form style="display: flex; max-width: 500px; margin: 0 auto; gap: 10px;" onsubmit="event.preventDefault(); alert('<?php echo esc_js(__('Thanks for subscribing!', 'obenlo')); ?>'); this.reset();">
+            <input type="email" placeholder="<?php echo esc_attr(__('Your email address', 'obenlo')); ?>" required style="flex-grow: 1; padding: 16px 24px; border-radius: 30px; border: none; font-size: 1rem; outline: none;">
+            <button type="submit" style="background: var(--obenlo-primary); color: white; border: none; padding: 16px 32px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s;"><?php echo __('Subscribe', 'obenlo'); ?></button>
         </form>
     </div>
 
@@ -77,7 +77,7 @@ $grid_query = new WP_Query($grid_args);
     <div class="blog-filters" style="display: flex; gap: 32px; justify-content: center; margin-bottom: 40px; overflow-x: auto; border-bottom: 1px solid #eee; padding-top: 10px;">
         <a href="<?php echo home_url('/blog'); ?>" class="blog-cat-item <?php echo empty($current_category) ? 'active' : ''; ?>">
             <span style="font-size:1.5rem;">🌎</span>
-            <span>All Posts</span>
+            <span><?php echo __('All Posts', 'obenlo'); ?></span>
         </a>
         <?php 
         $emoji_map = ['news' => '📰', 'hosting' => '🏠', 'local' => '📍', 'updates' => '✨', 'tips' => '💡'];
@@ -137,8 +137,8 @@ $grid_query = new WP_Query($grid_args);
                     'format'       => '?paged=%#%',
                     'current'      => max( 1, get_query_var( 'paged' ) ),
                     'total'        => $grid_query->max_num_pages,
-                    'prev_text'    => '&larr; Previous',
-                    'next_text'    => 'Next &rarr;',
+                    'prev_text'    => '&larr; ' . __('Previous', 'obenlo'),
+                    'next_text'    => __('Next', 'obenlo') . ' &rarr;',
                     'type'         => 'plain',
                 ) );
                 ?>

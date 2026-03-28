@@ -10,13 +10,13 @@ get_header(); ?>
         <h1 class="page-title" style="font-size: 2.2rem; font-weight: 800; color: #222; margin: 0;">
             <?php 
             if ( is_search() ) {
-                echo 'Results for: "' . get_search_query() . '"';
+                printf( __('Results for: "%s"', 'obenlo'), get_search_query() );
             } else {
-                echo 'All Listings';
+                echo __('All Listings', 'obenlo');
             }
             ?>
         </h1>
-        <p style="color: #717171; margin-top: 10px;">Discover stays, experiences, and services from our expert hosts.</p>
+        <p style="color: #717171; margin-top: 10px;"><?php echo __('Discover stays, experiences, and services from our expert hosts.', 'obenlo'); ?></p>
     </header>
 
     <div class="listing-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 40px 30px;">
@@ -28,15 +28,15 @@ get_header(); ?>
             <div class="pagination-wrapper" style="grid-column: 1 / -1; margin-top: 80px; text-align: center;">
                 <?php the_posts_pagination( array(
                     'mid_size'  => 2,
-                    'prev_text' => '← Previous',
-                    'next_text' => 'Next →',
+                    'prev_text' => '← ' . __('Previous', 'obenlo'),
+                    'next_text' => __('Next', 'obenlo') . ' →',
                 ) ); ?>
             </div>
 
         <?php else : ?>
             <div style="grid-column: 1 / -1; text-align: center; padding: 100px 0;">
-                <p style="font-size: 1.2rem; color: #717171;">No listings found matching your criteria.</p>
-                <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="display: inline-block; margin-top: 20px; color: #222; font-weight: 600; text-decoration: underline;">Explore all categories</a>
+                <p style="font-size: 1.2rem; color: #717171;"><?php echo __('No listings found matching your criteria.', 'obenlo'); ?></p>
+                <a href="<?php echo esc_url( home_url( '/' ) ); ?>" style="display: inline-block; margin-top: 20px; color: #222; font-weight: 600; text-decoration: underline;"><?php echo __('Explore all categories', 'obenlo'); ?></a>
             </div>
         <?php endif; ?>
     </div>

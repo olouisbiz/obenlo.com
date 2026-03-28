@@ -484,6 +484,8 @@ class Obenlo_Booking_Communication
             let obenloCenterInterval = null;
             let obenloCenterUserId = <?php echo $current_user_id; ?>;
             let obenloIsOversight = <?php echo $is_oversight ? 'true' : 'false'; ?>;
+            let obenloCenterPairA = 0;
+            let obenloCenterPairB = 0;
 
             function obenloCenterFetchContacts() {
                 jQuery.get('<?php echo admin_url('admin-ajax.php'); ?>', {
@@ -519,7 +521,9 @@ class Obenlo_Booking_Communication
             function obenloCenterOpenRoom(contactId, contactName, pairA, pairB) {
                 obenloCenterContact = contactId;
                 if (obenloIsOversight && pairA) {
-                    obenloCenterUserId = pairA;
+                    obenloCenterPairA = pairA;
+                    obenloCenterPairB = pairB;
+                    obenloCenterUserId = pairA; // used for msg alignment
                 }
                 document.getElementById('obenlo-center-empty').style.display = 'none';
                 document.getElementById('obenlo-center-header').style.display = 'flex';
@@ -559,7 +563,9 @@ class Obenlo_Booking_Communication
                         contact_id: obenloCenterContact,
                         last_id: obenloCenterLastId,
                         nonce: '<?php echo wp_create_nonce("obenlo_chat_nonce"); ?>',
-                        oversight: obenloIsOversight ? 1 : 0
+                        oversight: obenloIsOversight ? 1 : 0,
+                        pair_a: obenloCenterPairA || 0,
+                        pair_b: obenloCenterPairB || 0
                     },
                     success: function(res) {
                         if (res.success) {
@@ -654,13 +660,15 @@ class Obenlo_Booking_Communication
     {
         $ticket = get_post($ticket_id);
         if (!$ticket || $ticket->post_type !== 'ticket') {
-            echo '<p>Ticket not found.</p>';
+            echo '<p>' . esc_html__( 'Ticket not found.', 'obenlo' ) . '</p>';
             return;
         }
 
+        $brand_name = get_option('obenlo_brand_name', 'Obenlo');
+
         // Security check: Only author or admin/agent
         if ($ticket->post_author != $current_user_id && !current_user_can('manage_support')) {
-            echo '<p>You do not have permission to view this ticket.</p>';
+            echo '<p>' . esc_html__( 'You do not have permission to view this ticket.', 'obenlo' ) . '</p>';
             return;
         }
 
@@ -681,7 +689,7 @@ class Obenlo_Booking_Communication
 ?>
         <div class="obenlo-ticket-details" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <a href="<?php echo esc_url($back_url); ?>" style="color:#666; text-decoration:none;">← Back to Support</a>
+                <a href="<?php echo esc_url($back_url); ?>" style="color:#666; text-decoration:none;">&larr; <?php esc_html_e( 'Back to Support', 'obenlo' ); ?></a>
                 
                 <?php if (current_user_can('manage_support') || $ticket->post_author == $current_user_id): ?>
                     <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline;">
@@ -689,10 +697,10 @@ class Obenlo_Booking_Communication
                         <input type="hidden" name="ticket_id" value="<?php echo $ticket_id; ?>">
                         <?php wp_nonce_field('update_ticket_status_' . $ticket_id, 'status_nonce'); ?>
                         <?php if ($status === 'open'): ?>
-                            <button type="submit" name="new_status" value="closed" style="background:#222; color:#fff; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:0.9em;">Close Ticket</button>
+                            <button type="submit" name="new_status" value="closed" style="background:#222; color:#fff; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:0.9em;"><?php esc_html_e( 'Close Ticket', 'obenlo' ); ?></button>
                         <?php
             else: ?>
-                            <button type="submit" name="new_status" value="open" style="background:#4CAF50; color:#fff; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:0.9em;">Reopen Ticket</button>
+                            <button type="submit" name="new_status" value="open" style="background:#4CAF50; color:#fff; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:0.9em;"><?php esc_html_e( 'Reopen Ticket', 'obenlo' ); ?></button>
                         <?php
             endif; ?>
                     </form>
@@ -707,7 +715,7 @@ class Obenlo_Booking_Communication
                 </div>
                 
                 <div style="font-size:0.9em; color:#666; margin-bottom:30px;">
-                    Type: <?php echo esc_html(ucfirst($type)); ?> | Submitted on: <?php echo get_the_date('', $ticket_id); ?>
+                    <?php printf( esc_html__( 'Type: %s | Submitted on: %s', 'obenlo' ), esc_html(ucfirst($type)), get_the_date('', $ticket_id) ); ?>
                 </div>
 
                 <div style="line-height:1.7; color:#333; margin-bottom:30px; background:#f9f9f9; padding:20px; border-radius:12px;">
@@ -731,7 +739,7 @@ class Obenlo_Booking_Communication
                 <!-- Conversation History -->
                 <div class="ticket-conversation">
                     <?php if (!empty($replies)): ?>
-                        <h4 style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:10px;">Messages</h4>
+                        <h4 style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:10px;"><?php esc_html_e( 'Messages', 'obenlo' ); ?></h4>
                         <?php foreach ($replies as $reply):
                 $is_admin_reply = user_can($reply->post_author, 'administrator');
                 $is_internal = get_post_meta($reply->ID, '_obenlo_is_internal_note', true);
@@ -749,9 +757,9 @@ class Obenlo_Booking_Communication
                                     <strong>
                                         <?php
                 if ($is_internal)
-                    echo '🔒 Internal Note';
+                    echo '🔒 ' . esc_html__( 'Internal Note', 'obenlo' );
                 elseif ($is_admin_reply)
-                    echo esc_html($brand_name) . ' Support';
+                    printf( esc_html__( '%s Support', 'obenlo' ), esc_html($brand_name) );
                 else
                     echo esc_html(get_userdata($reply->post_author)->display_name);
 ?>
@@ -771,33 +779,33 @@ class Obenlo_Booking_Communication
                 <!-- Reply Form -->
                 <?php if ($status === 'open'): ?>
                     <div style="margin-top:40px; border-top:2px solid #f1f1f1; padding-top:30px;">
-                        <h4 style="margin-bottom:15px;">Add a Reply</h4>
+                        <h4 style="margin-bottom:15px;"><?php esc_html_e( 'Add a Reply', 'obenlo' ); ?></h4>
                         <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST">
                             <input type="hidden" name="action" value="obenlo_submit_ticket_reply">
                             <input type="hidden" name="ticket_id" value="<?php echo $ticket_id; ?>">
                             <?php wp_nonce_field('submit_ticket_reply_' . $ticket_id, 'reply_nonce'); ?>
                             
-                            <textarea name="reply_content" required rows="4" placeholder="Type your message here..." style="width:100%; padding:15px; border:1px solid #ddd; border-radius:12px; margin-bottom:15px; font-family:inherit;"></textarea>
+                            <textarea name="reply_content" required rows="4" placeholder="<?php esc_attr_e( 'Type your message here...', 'obenlo' ); ?>" style="width:100%; padding:15px; border:1px solid #ddd; border-radius:12px; margin-bottom:15px; font-family:inherit;"></textarea>
                             
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <?php if (current_user_can('manage_support')): ?>
                                     <label style="font-size:0.9em; display:flex; align-items:center; gap:8px; cursor:pointer;">
                                         <input type="checkbox" name="is_internal_note" value="1"> 
-                                        <span>Post as Internal Note (Staff only)</span>
+                                        <span><?php esc_html_e( 'Post as Internal Note (Staff only)', 'obenlo' ); ?></span>
                                     </label>
                                 <?php
             else: ?>
                                     <span></span>
                                 <?php
             endif; ?>
-                                <button type="submit" style="background:var(--obenlo-primary); color:white; border:none; padding:12px 30px; border-radius:8px; cursor:pointer; font-weight:bold;">Send Message</button>
+                                <button type="submit" style="background:var(--obenlo-primary); color:white; border:none; padding:12px 30px; border-radius:8px; cursor:pointer; font-weight:bold;"><?php esc_html_e( 'Send Message', 'obenlo' ); ?></button>
                             </div>
                         </form>
                     </div>
                 <?php
         else: ?>
                     <div style="margin-top:30px; text-align:center; padding:20px; background:#f9f9f9; border-radius:12px; color:#666;">
-                        This ticket is closed. If you still need help, please reopen the ticket or create a new one.
+                        <?php esc_html_e( 'This ticket is closed. If you still need help, please reopen the ticket or create a new one.', 'obenlo' ); ?>
                     </div>
                 <?php
         endif; ?>
@@ -808,16 +816,15 @@ class Obenlo_Booking_Communication
 
     private function render_ticket_form()
     {
-?>
         $brand_name = get_option('obenlo_brand_name', 'Obenlo');
-        ?>
+?>
         <div class="obenlo-support-page" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
-            <h2>Contact <?php echo esc_html($brand_name); ?> Support</h2>
-            <p>Need help with a booking or want to raise a dispute with a host? Fill out the form below.</p>
+            <h2><?php printf( esc_html__( 'Contact %s Support', 'obenlo' ), esc_html($brand_name) ); ?></h2>
+            <p><?php esc_html_e( 'Need help with a booking or want to raise a dispute with a host? Fill out the form below.', 'obenlo' ); ?></p>
             
             <?php if (isset($_GET['ticket_sent'])): ?>
                 <div style="background:#d4edda; padding:20px; margin-bottom:30px; border-radius:12px; border:1px solid #c3e6cb; color:#155724;">
-                    <strong>Success!</strong> Your ticket has been received. Our team will review it and get back to you at your registration email.
+                    <strong><?php esc_html_e( 'Success!', 'obenlo' ); ?></strong> <?php esc_html_e( 'Your ticket has been received. Our team will review it and get back to you at your registration email.', 'obenlo' ); ?>
                 </div>
             <?php
         endif; ?>
@@ -827,41 +834,41 @@ class Obenlo_Booking_Communication
                 <?php wp_nonce_field('submit_ticket', 'ticket_nonce'); ?>
 
                 <div style="margin-bottom:20px;">
-                    <label style="display:block; font-weight:bold; margin-bottom:8px;">Reason for Contact:</label>
+                    <label style="display:block; font-weight:bold; margin-bottom:8px;"><?php esc_html_e( 'Reason for Contact:', 'obenlo' ); ?></label>
                     <select name="ticket_type" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
-                        <option value="support">General Support</option>
-                        <option value="dispute">Report an Issue / Dispute with Host</option>
-                        <option value="account">Account / Billing Question</option>
-                        <option value="demo">Request a Demo of <?php echo esc_html($brand_name); ?></option>
+                        <option value="support"><?php esc_html_e( 'General Support', 'obenlo' ); ?></option>
+                        <option value="dispute"><?php esc_html_e( 'Report an Issue / Dispute with Host', 'obenlo' ); ?></option>
+                        <option value="account"><?php esc_html_e( 'Account / Billing Question', 'obenlo' ); ?></option>
+                        <option value="demo"><?php printf( esc_html__( 'Request a Demo of %s', 'obenlo' ), esc_html($brand_name) ); ?></option>
                     </select>
                 </div>
 
                 <?php if (!is_user_logged_in()): ?>
                 <div style="margin-bottom:20px;">
-                    <label style="display:block; font-weight:bold; margin-bottom:8px;">Your Email:</label>
-                    <input type="email" name="ticket_email" required placeholder="For us to reply to you" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                    <label style="display:block; font-weight:bold; margin-bottom:8px;"><?php esc_html_e( 'Your Email:', 'obenlo' ); ?></label>
+                    <input type="email" name="ticket_email" required placeholder="<?php esc_attr_e( 'For us to reply to you', 'obenlo' ); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
                 </div>
                 <?php
         endif; ?>
 
                 <div style="margin-bottom:20px;">
-                    <label style="display:block; font-weight:bold; margin-bottom:8px;">Subject:</label>
-                    <input type="text" name="ticket_title" required placeholder="Brief summary of the issue" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
+                    <label style="display:block; font-weight:bold; margin-bottom:8px;"><?php esc_html_e( 'Subject:', 'obenlo' ); ?></label>
+                    <input type="text" name="ticket_title" required placeholder="<?php esc_attr_e( 'Brief summary of the issue', 'obenlo' ); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;">
                 </div>
 
                 <div style="margin-bottom:20px;">
-                    <label style="display:block; font-weight:bold; margin-bottom:8px;">Describe the Issue:</label>
-                    <textarea name="ticket_content" required rows="6" placeholder="Please provide as much detail as possible..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;"></textarea>
+                    <label style="display:block; font-weight:bold; margin-bottom:8px;"><?php esc_html_e( 'Describe the Issue:', 'obenlo' ); ?></label>
+                    <textarea name="ticket_content" required rows="6" placeholder="<?php esc_attr_e( 'Please provide as much detail as possible...', 'obenlo' ); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px;"></textarea>
                 </div>
 
                 <div style="margin-bottom:30px; background:#f9f9f9; padding:20px; border-radius:8px;">
-                    <label style="display:block; font-weight:bold; margin-bottom:8px;">Evidence / Photo (Optional):</label>
-                    <p style="font-size:0.85em; color:#666; margin-bottom:12px;">If this is a dispute, please upload photos to support your claim.</p>
+                    <label style="display:block; font-weight:bold; margin-bottom:8px;"><?php esc_html_e( 'Evidence / Photo (Optional):', 'obenlo' ); ?></label>
+                    <p style="font-size:0.85em; color:#666; margin-bottom:12px;"><?php esc_html_e( 'If this is a dispute, please upload photos to support your claim.', 'obenlo' ); ?></p>
                     <input type="file" name="ticket_attachments[]" multiple accept="image/*">
                 </div>
 
                 <button type="submit" style="background:var(--obenlo-primary); color:white; border:none; padding:15px 30px; border-radius:10px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1em; transition: transform 0.2s;">
-                    Submit Ticket to <?php echo esc_html($brand_name); ?>
+                    <?php printf( esc_html__( 'Submit Ticket to %s', 'obenlo' ), esc_html($brand_name) ); ?>
                 </button>
             </form>
         </div>
@@ -1069,8 +1076,35 @@ class Obenlo_Booking_Communication
                     array('key' => '_obenlo_broadcast_recipient', 'value' => $role),
                     array('key' => '_obenlo_broadcast_recipient', 'value' => 'all')
             ),
-            'posts_per_page' => 5
+            'posts_per_page' => 10,
+            'post_status' => 'publish'
         ));
+    }
+
+    /**
+     * Render a list of broadcasts for the dashboard
+     */
+    public static function render_broadcasts_list($role)
+    {
+        $broadcasts = self::get_role_broadcasts($role);
+        
+        if (empty($broadcasts)) {
+            echo '<div style="padding:40px; text-align:center; color:#999; background:#fff; border-radius:16px; border:1px solid #eee;">' . __('No announcements at this time.', 'obenlo-booking') . '</div>';
+            return;
+        }
+
+        echo '<div style="display:flex; flex-direction:column; gap:20px;">';
+        foreach ($broadcasts as $post) {
+            $date = get_the_date('', $post->ID);
+            echo '<div style="background:#fff; border:1px solid #eee; border-radius:20px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,0.02);">';
+            echo '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">';
+            echo '<h3 style="margin:0; font-size:1.2rem; font-weight:800; color:#222;">' . esc_html($post->post_title) . '</h3>';
+            echo '<span style="font-size:0.8rem; color:#888; font-weight:600;">' . esc_html($date) . '</span>';
+            echo '</div>';
+            echo '<div style="color:#555; line-height:1.6; font-size:0.95rem;">' . wpautop(wp_kses_post($post->post_content)) . '</div>';
+            echo '</div>';
+        }
+        echo '</div>';
     }
 
     /**
@@ -1167,13 +1201,43 @@ class Obenlo_Booking_Communication
     public function handle_fetch_chat_messages()
     {
         check_ajax_referer('obenlo_chat_nonce', 'nonce');
-        $user_id = get_current_user_id();
+        $user_id    = get_current_user_id();
         $contact_id = isset($_GET['contact_id']) ? sanitize_text_field($_GET['contact_id']) : '0';
-        $last_id = isset($_GET['last_id']) ? intval($_GET['last_id']) : 0;
+        $last_id    = isset($_GET['last_id']) ? intval($_GET['last_id']) : 0;
         $is_oversight = (isset($_GET['oversight']) && $_GET['oversight'] == '1' && current_user_can('manage_options'));
+
+        // Oversight mode sends its own pair IDs – use those instead of the admin's ID
+        $pair_a = isset($_GET['pair_a']) ? intval($_GET['pair_a']) : 0;
+        $pair_b = isset($_GET['pair_b']) ? intval($_GET['pair_b']) : 0;
 
         global $wpdb;
         $table = $wpdb->prefix . 'obenlo_chat_messages';
+
+        if ($is_oversight && $pair_a && $pair_b) {
+            // Fetch the full conversation between pair_a and pair_b
+            $query = $wpdb->prepare("
+                SELECT * FROM $table
+                WHERE ((sender_id = %d AND receiver_id = %d)
+                    OR (sender_id = %d AND receiver_id = %d))
+                  AND id > %d
+                ORDER BY id ASC
+                LIMIT 500
+            ", $pair_a, $pair_b, $pair_b, $pair_a, $last_id);
+
+            $messages = $wpdb->get_results($query);
+            $data = array();
+            foreach ($messages as $msg) {
+                $sender_info = get_userdata($msg->sender_id);
+                $data[] = array(
+                    'id'        => $msg->id,
+                    'sender_id' => $msg->sender_id,
+                    'sender_name' => $sender_info ? $sender_info->display_name : 'Unknown',
+                    'message'   => wp_kses_post($msg->message),
+                    'time'      => gmdate('H:i', strtotime($msg->created_at) + (get_option('gmt_offset') * 3600))
+                );
+            }
+            wp_send_json_success($data);
+        }
 
         if (strpos($contact_id, 'guest_') === 0) {
             // It's a guest thread. We need to find the email.
@@ -1199,27 +1263,14 @@ class Obenlo_Booking_Communication
             ", $user_id, $guest_email, $user_id, $guest_email, $last_id);
         } else {
             $contact_id_int = intval($contact_id);
-            if ($is_oversight) {
-                // In oversight mode, fetch messages between ANY two users (sender/receiver or receiver/sender)
-                // Note: user_id here is actually the first person in the conversation pair passed from the frontend
-                $query = $wpdb->prepare("
-                    SELECT * FROM $table 
-                    WHERE ((sender_id = %d AND receiver_id = %d) 
-                       OR (sender_id = %d AND receiver_id = %d))
-                      AND id > %d
-                    ORDER BY id ASC
-                    LIMIT 500
-                ", $user_id, $contact_id_int, $contact_id_int, $user_id, $last_id);
-            } else {
-                $query = $wpdb->prepare("
-                    SELECT * FROM $table 
-                    WHERE ((sender_id = %d AND receiver_id = %d) 
-                       OR (sender_id = %d AND receiver_id = %d))
-                      AND id > %d
-                    ORDER BY id ASC
-                    LIMIT 100
-                ", $user_id, $contact_id_int, $contact_id_int, $user_id, $last_id);
-            }
+            $query = $wpdb->prepare("
+                SELECT * FROM $table 
+                WHERE ((sender_id = %d AND receiver_id = %d) 
+                   OR (sender_id = %d AND receiver_id = %d))
+                  AND id > %d
+                ORDER BY id ASC
+                LIMIT 100
+            ", $user_id, $contact_id_int, $contact_id_int, $user_id, $last_id);
         }
 
         $messages = $wpdb->get_results($query);
@@ -1227,10 +1278,10 @@ class Obenlo_Booking_Communication
 
         foreach ($messages as $msg) {
             $data[] = array(
-                'id' => $msg->id,
+                'id'        => $msg->id,
                 'sender_id' => $msg->sender_id,
-                'message' => wp_kses_post($msg->message),
-                'time' => gmdate('H:i', strtotime($msg->created_at) + (get_option('gmt_offset') * 3600))
+                'message'   => wp_kses_post($msg->message),
+                'time'      => gmdate('H:i', strtotime($msg->created_at) + (get_option('gmt_offset') * 3600))
             );
 
             // Mark as read if received by current user
@@ -1259,37 +1310,53 @@ class Obenlo_Booking_Communication
         $table = $wpdb->prefix . 'obenlo_chat_messages';
 
         if ($is_oversight) {
-            // Oversight: Get ALL unique conversation pairs on the site
+            // Oversight: Get all UNIQUE conversation pairs (normalize A↔B so they appear only once)
             $query = "
                 SELECT 
-                    sender_id, receiver_id, guest_name, guest_email, MAX(id) as max_id
-                FROM $table 
-                GROUP BY sender_id, receiver_id, guest_email
-                ORDER BY max_id DESC 
+                    LEAST(sender_id, receiver_id)   AS pair_a,
+                    GREATEST(sender_id, receiver_id) AS pair_b,
+                    MAX(guest_name)  AS guest_name,
+                    MAX(guest_email) AS guest_email,
+                    MAX(id)          AS max_id
+                FROM $table
+                WHERE receiver_id > 0
+                GROUP BY pair_a, pair_b
+                ORDER BY max_id DESC
                 LIMIT 50
             ";
             $results = $wpdb->get_results($query);
             $contacts = array();
+            $seen     = array();
 
             foreach ($results as $row) {
-                $user_a = $row->sender_id ? get_userdata($row->sender_id) : null;
-                $user_b = $row->receiver_id ? get_userdata($row->receiver_id) : null;
-                
-                $name_a = $user_a ? $user_a->display_name : ($row->guest_name ?: 'Guest');
-                $name_b = $user_b ? $user_b->display_name : 'Guest';
+                $key = $row->pair_a . '_' . $row->pair_b;
+                if (isset($seen[$key])) continue;
+                $seen[$key] = true;
 
-                $last_msg = $wpdb->get_row($wpdb->prepare("SELECT message, created_at FROM $table WHERE id = %d", $row->max_id));
+                $user_a = $row->pair_a ? get_userdata($row->pair_a) : null;
+                $user_b = $row->pair_b ? get_userdata($row->pair_b) : null;
 
+                // Skip pairs where a user no longer exists
+                if (!$user_a || !$user_b) continue;
+
+                $name_a = $user_a->display_name;
+                $name_b = $user_b->display_name;
+
+                $last_msg = $wpdb->get_row($wpdb->prepare(
+                    "SELECT message, created_at FROM $table WHERE id = %d", $row->max_id
+                ));
+
+                // Use a stable unique key for this conversation so the frontend can open it
                 $contacts[] = array(
-                    'contact_id' => $row->receiver_id ?: 'guest_' . md5($row->guest_email),
-                    'contact_name' => $name_a . ' & ' . $name_b,
-                    'last_message' => $last_msg ? wp_trim_words($last_msg->message, 8) : '',
+                    'contact_id'        => 'pair_' . $row->pair_a . '_' . $row->pair_b,
+                    'contact_name'      => $name_a . ' ↔ ' . $name_b,
+                    'last_message'      => $last_msg ? wp_trim_words($last_msg->message, 8) : '',
                     'last_message_time' => $last_msg ? gmdate('M j, H:i', strtotime($last_msg->created_at) + (get_option('gmt_offset') * 3600)) : '',
-                    'unread_count' => 0,
+                    'unread_count'      => 0,
                     'is_oversight_pair' => true,
-                    'pair_a' => $row->sender_id,
-                    'pair_b' => $row->receiver_id,
-                    'guest_email' => $row->guest_email
+                    'pair_a'            => $row->pair_a,
+                    'pair_b'            => $row->pair_b,
+                    'guest_email'       => ''
                 );
             }
             wp_send_json_success($contacts);

@@ -36,33 +36,33 @@ if ( $status === 'verified' && ! isset( $_GET['force'] ) ) {
             <div class="step-dot <?php echo $current_step >= 2 ? 'active' : ''; ?>" style="z-index: 3; background: <?php echo $current_step >= 2 ? 'var(--obenlo-primary)' : '#fff'; ?>; border: 2px solid <?php echo $current_step >= 2 ? 'var(--obenlo-primary)' : '#eee'; ?>; color: <?php echo $current_step >= 2 ? '#fff' : '#999'; ?>; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">2</div>
         </div>
         <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.8rem; font-weight: 700; color: #717171; max-width: 320px; margin-left: auto; margin-right: auto;">
-            <span style="<?php echo $current_step == 1 ? 'color: var(--obenlo-primary);' : ''; ?>"><?php esc_html_e( 'Basic Info', 'obenlo' ); ?></span>
-            <span style="<?php echo $current_step == 2 ? 'color: var(--obenlo-primary);' : ''; ?>"><?php esc_html_e( 'Payouts', 'obenlo' ); ?></span>
+            <span style="<?php echo $current_step == 1 ? 'color: var(--obenlo-primary);' : ''; ?>"><?php echo __('Basic Info', 'obenlo'); ?></span>
+            <span style="<?php echo $current_step == 2 ? 'color: var(--obenlo-primary);' : ''; ?>"><?php echo __('Payouts', 'obenlo'); ?></span>
         </div>
     </div>
 
     <div class="onboarding-content">
         <?php if ( $current_step === 1 ) : ?>
             <div class="step-view">
-                <h2><?php esc_html_e( 'Confirm your account details', 'obenlo' ); ?></h2>
-                <p><?php esc_html_e( 'Ensure your public profile information is accurate.', 'obenlo' ); ?></p>
+                <h2><?php echo __('Confirm your account details', 'obenlo'); ?></h2>
+                <p><?php echo __('Ensure your public profile information is accurate.', 'obenlo'); ?></p>
                 <form id="onboarding-step-1" style="margin-top: 30px;">
                     <div class="form-group" style="margin-bottom: 20px;">
-                        <label style="display: block; font-weight: bold; margin-bottom: 8px;"><?php esc_html_e( 'Legal Name', 'obenlo' ); ?></label>
+                        <label style="display: block; font-weight: bold; margin-bottom: 8px;"><?php echo __('Legal Name', 'obenlo'); ?></label>
                         <input type="text" value="<?php echo esc_attr( wp_get_current_user()->display_name ); ?>" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
                     </div>
                     <div class="form-group" style="margin-bottom: 30px;">
-                        <label style="display: block; font-weight: bold; margin-bottom: 8px;"><?php esc_html_e( 'Main Phone Number', 'obenlo' ); ?></label>
+                        <label style="display: block; font-weight: bold; margin-bottom: 8px;"><?php echo __('Main Phone Number', 'obenlo'); ?></label>
                         <input type="tel" placeholder="+1 XXX XXX XXXX" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px;">
                     </div>
-                    <a href="?step=2" class="cta-button" style="display: block; text-align: center; background: var(--obenlo-primary); color: #fff; padding: 15px; border-radius: 12px; text-decoration: none; font-weight: bold;"><?php esc_html_e( 'Next: Payout Setup', 'obenlo' ); ?></a>
+                    <a href="?step=2" class="cta-button" style="display: block; text-align: center; background: var(--obenlo-primary); color: #fff; padding: 15px; border-radius: 12px; text-decoration: none; font-weight: bold;"><?php echo __('Next: Payout Setup', 'obenlo'); ?></a>
                 </form>
             </div>
 
         <?php elseif ( $current_step === 2 ) : ?>
             <div class="step-view">
-                <h2><?php esc_html_e( 'Step 2: Payout Method', 'obenlo' ); ?></h2>
-                <p><?php esc_html_e( 'Select how you want to receive your earnings.', 'obenlo' ); ?></p>
+                <h2><?php echo __('Step 2: Payout Method', 'obenlo'); ?></h2>
+                <p><?php echo __('Select how you want to receive your earnings.', 'obenlo'); ?></p>
 
                 <div class="payout-selector" style="margin-top: 30px; display: grid; gap: 15px;">
                     <?php 
@@ -71,8 +71,8 @@ if ( $status === 'verified' && ! isset( $_GET['force'] ) ) {
                         <label style="display: flex; align-items: center; gap: 15px; padding: 15px 20px; border: 1px solid #ddd; border-radius: 12px; cursor: pointer; transition: border-color 0.2s;">
                             <input type="radio" name="payout_method" value="<?php echo esc_attr($key); ?>" style="width: 20px; height: 20px;">
                             <div style="flex: 1;">
-                                <div style="font-weight: bold;"><?php echo esc_html($method['label']); ?></div>
-                                <div style="font-size: 0.85rem; color: #717171;"><?php echo esc_html($method['placeholder']); ?></div>
+                                <div style="font-weight: bold;"><?php echo esc_html(__($method['label'], 'obenlo')); ?></div>
+                                <div style="font-size: 0.85rem; color: #717171;"><?php echo esc_html(__($method['placeholder'], 'obenlo')); ?></div>
                             </div>
                         </label>
                     <?php endforeach; ?>
@@ -84,7 +84,7 @@ if ( $status === 'verified' && ! isset( $_GET['force'] ) ) {
                 </div>
 
                 <div style="margin-top: 40px;">
-                    <button id="save-onboarding" style="width: 100%; padding: 18px; background: var(--obenlo-primary); color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(var(--obenlo-primary-rgb),0.3);"><?php esc_html_e( 'Finish & Go to Dashboard', 'obenlo' ); ?></button>
+                    <button id="save-onboarding" style="width: 100%; padding: 18px; background: var(--obenlo-primary); color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(var(--obenlo-primary-rgb),0.3);"><?php echo __('Finish & Go to Dashboard', 'obenlo'); ?></button>
                 </div>
             </div>
         <?php endif; ?>
@@ -98,6 +98,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const detailLabel = document.getElementById('payout-detail-label');
     const detailInput = document.getElementById('payout_detail_input');
 
+    const i18n = {
+        emailAddress: '<?php echo esc_js(__('Email Address', 'obenlo')); ?>',
+        information: '<?php echo esc_js(__('Information', 'obenlo')); ?>',
+        completeFields: '<?php echo esc_js(__('Please complete all fields.', 'obenlo')); ?>'
+    };
+
     payoutOptions.forEach(opt => {
         opt.addEventListener('change', function() {
             const method = this.value;
@@ -105,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const current = methods[method];
 
             detailsForm.style.display = 'block';
-            detailLabel.innerHTML = current.label + ' ' + (current.field === 'email' ? 'Email Address' : 'Information');
+            detailLabel.innerHTML = current.label + ' ' + (current.field === 'email' ? i18n.emailAddress : i18n.information);
             detailInput.placeholder = current.placeholder;
             detailInput.type = current.field;
         });
@@ -144,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const details = detailInput.value;
 
             if (!method || !details) {
-                alert('Please complete all fields.');
+                alert(i18n.completeFields);
                 return;
             }
 

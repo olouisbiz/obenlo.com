@@ -35,7 +35,6 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-host-verification.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-payout-manager.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-badges.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-wishlist.php';
-require_once OBENLO_BOOKING_DIR . 'includes/class-i18n.php'; // i18n Localization
 require_once OBENLO_BOOKING_DIR . 'includes/class-virtual-security.php'; // Virtual Event Security
 
 // Initialize the plugin
@@ -84,10 +83,6 @@ function obenlo_booking_init()
 
     $wishlist = new Obenlo_Booking_Wishlist();
     $wishlist->init();
-
-    $i18n = new Obenlo_Booking_i18n();
-    $i18n->init();
-
 
     $virtual_security = new Obenlo_Booking_Virtual_Security();
     $virtual_security->init();
@@ -237,39 +232,6 @@ function obenlo_author_link($link, $author_id)
 }
 add_filter('author_link', 'obenlo_author_link', 10, 2);
 
-// Activation hook for defining roles and rewriting rules
-function obenlo_booking_activate()
-{
-    try {
-        error_log('Obenlo Activation: Starting...');
-
-        $post_types = new Obenlo_Booking_Post_Types();
-        $post_types->register_custom_post_types();
-        error_log('Obenlo Activation: Post types registered.');
-
-        flush_rewrite_rules();
-        error_log('Obenlo Activation: Rewrite rules flushed.');
-
-        $roles = new Obenlo_Booking_Roles();
-        $roles->add_roles();
-        error_log('Obenlo Activation: Roles added.');
-
-        // Enable user registration
-        update_option('users_can_register', 1);
-        update_option('default_role', 'guest');
-        error_log('Obenlo Activation: Options updated.');
-
-        // Initialize Native DB Tables
-        obenlo_booking_install_tables();
-        update_site_option('obenlo_booking_db_version', OBENLO_BOOKING_VERSION);
-        error_log('Obenlo Activation: Custom tables created.');
-    }
-    catch (Exception $e) {
-        error_log('Obenlo Activation Error: ' . $e->getMessage());
-    }
-}
-register_activation_hook(__FILE__, 'obenlo_booking_activate');
-
 // Force /listings page to load the directory archive template
 function obenlo_force_listings_archive_template($template)
 {
@@ -304,3 +266,40 @@ function obenlo_force_hosts_directory_template($template)
     return $template;
 }
 add_filter('template_include', 'obenlo_force_hosts_directory_template', 99);
+
+// Combined activation logic
+function obenlo_booking_activate() {
+    try {
+        error_log('Obenlo Activation: Starting...');
+        
+        // Register Post Types (needed for flushing)
+        require_once OBENLO_BOOKING_DIR . 'includes/class-post-types.php';
+        $post_types = new Obenlo_Booking_Post_Types();
+        $post_types->register_custom_post_types();
+        error_log('Obenlo Activation: Post types registered.');
+
+        // Initialize Roles
+        require_once OBENLO_BOOKING_DIR . 'includes/class-roles.php';
+        $roles = new Obenlo_Booking_Roles();
+        $roles->add_roles();
+        error_log('Obenlo Activation: Roles added.');
+        
+        // Options
+        update_option('users_can_register', 1);
+        update_option('default_role', 'guest');
+
+        // Initialize DB Tables
+        obenlo_booking_install_tables();
+        update_site_option('obenlo_booking_db_version', OBENLO_BOOKING_VERSION);
+
+        // Register and flush rewrites
+        obenlo_booking_rewrite_rules();
+        flush_rewrite_rules();
+        
+        error_log('Obenlo Activation: Completed successfully.');
+    }
+    catch (Exception $e) {
+        error_log('Obenlo Activation Error: ' . $e->getMessage());
+    }
+}
+register_activation_hook(__FILE__, 'obenlo_booking_activate');

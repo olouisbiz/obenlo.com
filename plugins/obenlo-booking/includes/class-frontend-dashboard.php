@@ -60,7 +60,10 @@ class Obenlo_Booking_Frontend_Dashboard
         }
 
         $user_id = get_current_user_id();
-        $action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'overview';
+        $action = get_query_var('action');
+        if (!$action) {
+            $action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'overview';
+        }
         $listing_id = isset($_GET['listing_id']) ? intval($_GET['listing_id']) : 0;
 
         $brand_name = get_option('obenlo_brand_name', 'Obenlo');
@@ -146,47 +149,51 @@ class Obenlo_Booking_Frontend_Dashboard
 
             <!-- Sidebar Navigation -->
             <div class="dashboard-sidebar">
-                <a href="?action=overview" class="sidebar-link <?php echo $action === 'overview' ? 'active' : ''; ?>">
+                <a href="<?php echo home_url('/host-dashboard/overview'); ?>" class="sidebar-link <?php echo $action === 'overview' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    <span>Overview</span>
+                    <span><?php echo __('Overview', 'obenlo-booking'); ?></span>
                 </a>
-                <a href="?action=list" class="sidebar-link <?php echo($action === 'list' || $action === 'edit') ? 'active' : ''; ?>">
+                <a href="<?php echo home_url('/host-dashboard/list'); ?>" class="sidebar-link <?php echo($action === 'list' || $action === 'edit') ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    <span>My Listings</span>
+                    <span><?php echo __('My Listings', 'obenlo-booking'); ?></span>
                 </a>
-                <a href="?action=bookings" class="sidebar-link <?php echo $action === 'bookings' ? 'active' : ''; ?>">
+                <a href="<?php echo home_url('/host-dashboard/bookings'); ?>" class="sidebar-link <?php echo $action === 'bookings' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    <span>Bookings</span>
+                    <span><?php echo __('Bookings', 'obenlo-booking'); ?></span>
                 </a>
-                <a href="?action=storefront" class="sidebar-link <?php echo $action === 'storefront' ? 'active' : ''; ?>">
+                <a href="<?php echo home_url('/host-dashboard/storefront'); ?>" class="sidebar-link <?php echo $action === 'storefront' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span>Storefront</span>
+                    <span><?php echo __('Storefront', 'obenlo-booking'); ?></span>
                 </a>
-                <a href="?action=reviews" class="sidebar-link <?php echo $action === 'reviews' ? 'active' : ''; ?>">
+                <a href="<?php echo home_url('/host-dashboard/reviews'); ?>" class="sidebar-link <?php echo $action === 'reviews' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <span>Reviews</span>
+                    <span><?php echo __('Reviews', 'obenlo-booking'); ?></span>
                 </a>
-                <a href="?action=messages" class="sidebar-link <?php echo $action === 'messages' ? 'active' : ''; ?>">
+                <a href="<?php echo home_url('/host-dashboard/messages'); ?>" class="sidebar-link <?php echo $action === 'messages' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    <span>Messages</span>
+                    <span><?php echo __('Messages', 'obenlo-booking'); ?></span>
                 </a>
-                <a href="?action=availability" class="sidebar-link <?php echo $action === 'availability' ? 'active' : ''; ?>">
+                <a href="<?php echo home_url('/host-dashboard/availability'); ?>" class="sidebar-link <?php echo $action === 'availability' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <span>Availability</span>
+                    <span><?php echo __('Availability', 'obenlo-booking'); ?></span>
                 </a>
-                <a href="?action=payouts" class="sidebar-link <?php echo $action === 'payouts' ? 'active' : ''; ?>">
+                <a href="<?php echo home_url('/host-dashboard/payouts'); ?>" class="sidebar-link <?php echo $action === 'payouts' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                    <span>Payout Settings</span>
+                    <span><?php echo __('Payout Settings', 'obenlo-booking'); ?></span>
                 </a>
-                <a href="?action=support" class="sidebar-link <?php echo $action === 'support' ? 'active' : ''; ?>">
+                <a href="<?php echo home_url('/host-dashboard/support'); ?>" class="sidebar-link <?php echo $action === 'support' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    <span>Help Center</span>
+                    <span><?php echo __('Help Center', 'obenlo-booking'); ?></span>
+                </a>
+                <a href="<?php echo home_url('/host-dashboard/broadcasts'); ?>" class="sidebar-link <?php echo $action === 'broadcasts' ? 'active' : ''; ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 21l1.9-4.9-3.3-1.4L11 8.8l3.3 1.4-1.9 4.9 3.3 1.4z"></path></svg>
+                    <span><?php echo __('Broadcasts', 'obenlo-booking'); ?></span>
                 </a>
 
                 <div style="margin-top:auto; padding-top:20px; border-top:1px solid #eee;">
                     <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" class="sidebar-link" style="opacity:0.8;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                        <span>View Storefront</span>
+                        <span><?php echo __('View Storefront', 'obenlo-booking'); ?></span>
                     </a>
                 </div>
             </div>
@@ -194,67 +201,8 @@ class Obenlo_Booking_Frontend_Dashboard
             <!-- Content Area -->
             <div class="dashboard-content">
                 <?php
-        // Flash Messages & Errors
-        if (isset($_GET['message']) && $_GET['message'] === 'saved') {
-            echo '<div class="badge badge-success" style="margin-bottom:30px; display:block; text-align:center; padding:15px; border-radius:12px; font-weight:700;">✓ Action completed successfully!</div>';
-        }
-
-        if (isset($_GET['obenlo_error'])) {
-            $error_code = sanitize_text_field($_GET['obenlo_error']);
-            $error_msg = 'An unexpected error occurred. Please try again.';
-            
-            switch($error_code) {
-
-                case 'unauthorized':
-                    $error_msg = 'Unauthorized: You do not have permission to perform this action.';
-                    break;
-                case 'security_failed':
-                    $error_msg = 'Security check failed. Please refresh the page and try again.';
-                    break;
-                case 'invalid_booking':
-                    $error_msg = 'Invalid booking or listing reference.';
-                    break;
-                case 'invalid_data':
-                    $error_msg = 'Missing required information for this action.';
-                    break;
-                case 'invalid_listing':
-                    $error_msg = 'Invalid listing reference.';
-                    break;
-                case 'capacity_exceeded':
-                    $error_msg = 'Guest count exceeds capacity.';
-                    break;
-                case 'host_away':
-                    $error_msg = 'Selected dates are unavailable (Host vacation).';
-                    break;
-                case 'day_unavailable':
-                    $error_msg = 'Host is not available on this day.';
-                    break;
-                case 'time_unavailable':
-                    $error_msg = 'Selected time is outside operating hours.';
-                    break;
-                case 'already_booked':
-                    $error_msg = 'These dates/times are already booked.';
-                    break;
-                case 'booking_error':
-                    $error_msg = 'Error creating booking. Please try again.';
-                    break;
-                case 'invalid_payment':
-                    $error_msg = 'Invalid payment method selected.';
-                    break;
-                case 'no_bookings':
-                    $error_msg = 'No bookings found for the selected date.';
-                    break;
-                case 'invalid_date':
-                    $error_msg = 'Please select a valid date for export.';
-                    break;
-            }
-            
-            echo '<div style="background:#fef2f2; color:#ef4444; border:1px solid #fee2e2; padding:15px 20px; border-radius:12px; margin-bottom:30px; font-weight:700; display:flex; align-items:center; gap:10px; border-left: 4px solid #ef4444;">';
-            echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px; height:20px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-            echo '<span>' . esc_html($error_msg) . '</span>';
-            echo '</div>';
-        }
-
+        Obenlo_Booking_Frontend_Experience::render_welcome_modal();
+        Obenlo_Booking_Frontend_Experience::obenlo_render_dashboard_notices();
 
         if ($action === 'overview') {
             $this->render_overview_tab();
@@ -272,7 +220,7 @@ class Obenlo_Booking_Frontend_Dashboard
             $this->render_reviews_list();
         }
         elseif ($action === 'messages') {
-            echo '<div class="dashboard-header"><h2 class="dashboard-title">Inbox</h2></div>';
+            echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Inbox', 'obenlo-booking') . '</h2></div>';
             echo do_shortcode('[obenlo_messages_page]');
         }
         elseif ($action === 'availability') {
@@ -286,6 +234,10 @@ class Obenlo_Booking_Frontend_Dashboard
         }
         elseif ($action === 'support') {
             $this->render_support_section();
+        }
+        elseif ($action === 'broadcasts') {
+            echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Site Announcements', 'obenlo-booking') . '</h2></div>';
+            Obenlo_Booking_Communication::render_broadcasts_list('host');
         }
         else {
             $this->render_listings_list();
@@ -343,55 +295,55 @@ class Obenlo_Booking_Frontend_Dashboard
 ?>
         <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <h2 class="dashboard-title">Dashboard Overview</h2>
+                <h2 class="dashboard-title"><?php echo __('Dashboard Overview', 'obenlo-booking'); ?></h2>
                 <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
-                    <span class="badge <?php echo $status_class; ?>">Account Status: <?php echo esc_html($status_label); ?></span>
+                    <span class="badge <?php echo $status_class; ?>"><?php echo __('Account Status:', 'obenlo-booking'); ?> <?php echo esc_html($status_label); ?></span>
                     <?php if ($verification_status !== 'verified'): ?>
-                        <a href="<?php echo home_url('/host-dashboard?action=verification'); ?>" style="font-size:0.85rem; color:var(--obenlo-primary); font-weight:700; text-decoration:none;">Complete Verification →</a>
+                        <a href="<?php echo home_url('/host-dashboard?action=verification'); ?>" style="font-size:0.85rem; color:var(--obenlo-primary); font-weight:700; text-decoration:none;"><?php echo __('Complete Verification →', 'obenlo-booking'); ?></a>
                     <?php
         else: ?>
-                        <a href="<?php echo home_url('/host-onboarding?step=3&force=1'); ?>" style="font-size:0.85rem; color:#666; font-weight:600; text-decoration:none;">Update Payouts</a>
+                        <a href="<?php echo home_url('/host-onboarding?step=3&force=1'); ?>" style="font-size:0.85rem; color:#666; font-weight:600; text-decoration:none;"><?php echo __('Update Payouts', 'obenlo-booking'); ?></a>
                     <?php
         endif; ?>
                 </div>
             </div>
             <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" style="color:var(--obenlo-primary); text-decoration:none; font-weight:700; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px; height:16px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                Preview My Storefront
+                <?php echo __('Preview My Storefront', 'obenlo-booking'); ?>
             </a>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
-                <span class="stat-label">Total Earnings</span>
+                <span class="stat-label"><?php echo __('Total Earnings', 'obenlo-booking'); ?></span>
                 <span class="stat-value">$<?php echo number_format($total_earnings, 2); ?></span>
-                <span style="font-size:0.8rem; color:#10b981; font-weight:600;">Completed Bookings</span>
+                <span style="font-size:0.8rem; color:#10b981; font-weight:600;"><?php echo __('Completed Bookings', 'obenlo-booking'); ?></span>
             </div>
             <div class="stat-card">
-                <span class="stat-label">Active Listings</span>
+                <span class="stat-label"><?php echo __('Active Listings', 'obenlo-booking'); ?></span>
                 <span class="stat-value"><?php echo $listings_count; ?></span>
-                <span style="font-size:0.8rem; color:#3b82f6; font-weight:600;">Live on <?php echo esc_html($brand_name); ?></span>
+                <span style="font-size:0.8rem; color:#3b82f6; font-weight:600;"><?php printf(__('Live on %s', 'obenlo-booking'), esc_html($brand_name)); ?></span>
             </div>
             <div class="stat-card">
-                <span class="stat-label">Total Bookings</span>
+                <span class="stat-label"><?php echo __('Total Bookings', 'obenlo-booking'); ?></span>
                 <span class="stat-value"><?php echo count($bookings); ?></span>
-                <span style="font-size:0.8rem; color:#f97316; font-weight:600;">Lifetime volume</span>
+                <span style="font-size:0.8rem; color:#f97316; font-weight:600;"><?php echo __('Lifetime volume', 'obenlo-booking'); ?></span>
             </div>
             <div class="stat-card">
-                <span class="stat-label">Avg. Rating</span>
+                <span class="stat-label"><?php echo __('Avg. Rating', 'obenlo-booking'); ?></span>
                 <span class="stat-value"><?php echo $avg_rating ?: 'N/A'; ?> ★</span>
-                <span style="font-size:0.8rem; color:#eab308; font-weight:600;">Host Reputation</span>
+                <span style="font-size:0.8rem; color:#eab308; font-weight:600;"><?php echo __('Host Reputation', 'obenlo-booking'); ?></span>
             </div>
         </div>
 
         <div class="dashboard-grid-layout" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px;">
             <div class="form-section" style="margin-top:0;">
-                <h4 style="margin-top:0; margin-bottom:20px;">Recent Bookings</h4>
+                <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Recent Bookings', 'obenlo-booking'); ?></h4>
                 <?php $this->render_bookings_list(5); ?>
             </div>
             <div class="form-section" style="margin-top:0;">
-                <h4 style="margin-top:0; margin-bottom:20px;">Performance</h4>
-                <p style="color:#666; font-size:0.9rem;">Your response rate and booking conversion stats will appear here as your hosting history grows.</p>
+                <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Performance', 'obenlo-booking'); ?></h4>
+                <p style="color:#666; font-size:0.9rem;"><?php echo __('Your response rate and booking conversion stats will appear here as your hosting history grows.', 'obenlo-booking'); ?></p>
             </div>
         </div>
         <?php
@@ -400,39 +352,40 @@ class Obenlo_Booking_Frontend_Dashboard
     private function render_verification_tab() {
         $user_id = get_current_user_id();
         $status = Obenlo_Booking_Host_Verification::get_status($user_id);
+        $brand_name = get_option('obenlo_brand_name', 'Obenlo');
         
-        echo '<div class="dashboard-header"><h2 class="dashboard-title">Identity Verification</h2></div>';
+        echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Identity Verification', 'obenlo-booking') . '</h2></div>';
         
         if ($status === 'verified') {
-            echo '<div style="background:#dcfce7; color:#166534; padding:20px; border-radius:12px; font-weight:500;">✓ Your identity has been successfully verified. Thank you for building trust in the ' . esc_html($brand_name) . ' community.</div>';
+            echo '<div style="background:#dcfce7; color:#166534; padding:20px; border-radius:12px; font-weight:500;">✓ ' . sprintf(__('Your identity has been successfully verified. Thank you for building trust in the %s community.', 'obenlo-booking'), esc_html($brand_name)) . '</div>';
             return;
         }
         
         if ($status === 'pending') {
-            echo '<div style="background:#fef9c3; color:#854d0e; padding:20px; border-radius:12px; font-weight:500;">⏳ Your verification document is currently under review by our team. Approval usually takes 24-48 hours.</div>';
+            echo '<div style="background:#fef9c3; color:#854d0e; padding:20px; border-radius:12px; font-weight:500;">⏳ ' . __('Your verification document is currently under review by our team. Approval usually takes 24-48 hours.', 'obenlo-booking') . '</div>';
             return;
         }
         
         if ($status === 'rejected') {
-            echo '<div style="background:#fee2e2; color:#991b1b; padding:20px; border-radius:12px; margin-bottom:20px; font-weight:500;">⚠️ Your previous verification attempt was rejected. Please ensure the document is clear, legible, and a valid government-issued ID.</div>';
+            echo '<div style="background:#fee2e2; color:#991b1b; padding:20px; border-radius:12px; margin-bottom:20px; font-weight:500;">⚠️ ' . __('Your previous verification attempt was rejected. Please ensure the document is clear, legible, and a valid government-issued ID.', 'obenlo-booking') . '</div>';
         }
         
         echo '<div style="background:#fff; padding:30px; border-radius:16px; border:1px solid #ddd; max-width:600px;">';
-        echo '<h3 style="margin-top:0;">Upload Identification</h3>';
-        echo '<p style="color:#666; font-size:0.95em;">To keep our community safe, we require all hosts to upload a valid government-issued ID (Passport, Driver\'s License, or National ID Card) before accepting bookings.</p>';
+        echo '<h3 style="margin-top:0;">' . __('Upload Identification', 'obenlo-booking') . '</h3>';
+        echo '<p style="color:#666; font-size:0.95em;">' . __('To keep our community safe, we require all hosts to upload a valid government-issued ID (Passport, Driver\'s License, or National ID Card) before accepting bookings.', 'obenlo-booking') . '</p>';
         echo '<div style="margin: 25px 0;">';
         echo '<input type="file" id="id_document_input" accept="image/jpeg,image/png,application/pdf" style="display:block; width:100%; padding:15px; border:2px dashed #ddd; border-radius:8px; cursor:pointer;">';
-        echo '<small style="color:#888; display:block; margin-top:8px;">Max file size: 5MB. Formats: JPG, PNG, PDF</small>';
+        echo '<small style="color:#888; display:block; margin-top:8px;">' . __('Max file size: 5MB. Formats: JPG, PNG, PDF', 'obenlo-booking') . '</small>';
         echo '</div>';
-        echo '<button id="submit_verification" class="btn-primary" style="width:100%; border:none; padding:15px; border-radius:10px; cursor:pointer;">Submit Document for Review</button>';
+        echo '<button id="submit_verification" class="btn-primary" style="width:100%; border:none; padding:15px; border-radius:10px; cursor:pointer;">' . __('Submit Document for Review', 'obenlo-booking') . '</button>';
         echo '</div>';
         
         echo "<script>
         document.getElementById('submit_verification').addEventListener('click', function() {
             const fileInput = document.getElementById('id_document_input');
-            if (!fileInput.files[0]) { alert('Please select a file to upload.'); return; }
+            if (!fileInput.files[0]) { alert('" . esc_js(__('Please select a file to upload.', 'obenlo-booking')) . "'); return; }
             
-            this.textContent = 'Uploading...';
+            this.textContent = '" . esc_js(__('Uploading...', 'obenlo-booking')) . "';
             this.style.opacity = '0.7';
             this.disabled = true;
 
@@ -447,7 +400,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 if (res.success) { 
                     window.location.reload(); 
                 } else { 
-                    alert(res.data || 'Upload failed. Please try again.'); 
+                    alert(res.data || '" . esc_js(__('Upload failed. Please try again.', 'obenlo-booking')) . "'); 
                     this.textContent = 'Submit Document for Review'; 
                     this.style.opacity = '1';
                     this.disabled = false;
@@ -511,7 +464,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 ));
 ?>
                         <tr>
-                            <td data-label="Listing">
+                            <td data-label="<?php echo __('Listing', 'obenlo-booking'); ?>">
                                 <div style="display:flex; align-items:center; gap:15px;">
                                     <?php if (has_post_thumbnail($listing->ID)): ?>
                                         <img src="<?php echo get_the_post_thumbnail_url($listing->ID, 'thumbnail'); ?>" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">
@@ -519,21 +472,21 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <span style="font-weight:700; color:#222; text-align: left;"><?php echo get_the_title($listing->ID); ?></span>
                                 </div>
                             </td>
-                            <td data-label="Category"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
-                            <td data-label="Status"><span class="badge badge-success"><?php echo ucfirst($listing->post_status); ?></span></td>
-                            <td data-label="Units">
-                                <span style="font-weight:600; color:#444;"><?php echo count($children); ?> units</span>
-                                <a href="?action=add&parent_id=<?php echo $listing->ID; ?>" style="display:block; font-size:0.75rem; color:var(--obenlo-primary); text-decoration:none;">+ Add unit</a>
+                            <td data-label="<?php echo __('Category', 'obenlo-booking'); ?>"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
+                            <td data-label="<?php echo __('Status', 'obenlo-booking'); ?>"><span class="badge badge-success"><?php echo ucfirst($listing->post_status); ?></span></td>
+                            <td data-label="<?php echo __('Units', 'obenlo-booking'); ?>">
+                                <span style="font-weight:600; color:#444;"><?php printf(__('%d units', 'obenlo-booking'), count($children)); ?></span>
+                                <a href="?action=add&parent_id=<?php echo $listing->ID; ?>" style="display:block; font-size:0.75rem; color:var(--obenlo-primary); text-decoration:none;"><?php echo __('+ Add unit', 'obenlo-booking'); ?></a>
                             </td>
-                            <td data-label="Actions">
+                            <td data-label="<?php echo __('Actions', 'obenlo-booking'); ?>">
                                 <div style="display:flex; gap:12px; align-items:center;">
-                                    <a href="?action=edit&listing_id=<?php echo $listing->ID; ?>" style="background:#f0f0f0; color:#222; padding:6px 12px; border-radius:8px; font-weight:700; text-decoration:none; font-size:0.8rem;">Edit</a>
-                                    <a href="<?php echo get_permalink($listing->ID); ?>" target="_blank" style="color:#1d9bf0; font-weight:700; text-decoration:none; font-size:0.8rem;">View</a>
-                                    <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="margin:0;" onsubmit="return confirm('Are you sure you want to delete this listing?');">
+                                    <a href="?action=edit&listing_id=<?php echo $listing->ID; ?>" style="background:#f0f0f0; color:#222; padding:6px 12px; border-radius:8px; font-weight:700; text-decoration:none; font-size:0.8rem;"><?php echo __('Edit', 'obenlo-booking'); ?></a>
+                                    <a href="<?php echo get_permalink($listing->ID); ?>" target="_blank" style="color:#1d9bf0; font-weight:700; text-decoration:none; font-size:0.8rem;"><?php echo __('View', 'obenlo-booking'); ?></a>
+                                    <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="margin:0;" onsubmit="return confirm('<?php echo esc_js(__('Are you sure you want to delete this listing?', 'obenlo-booking')); ?>');">
                                         <input type="hidden" name="action" value="obenlo_dashboard_delete_listing">
                                         <input type="hidden" name="listing_id" value="<?php echo $listing->ID; ?>">
                                         <?php wp_nonce_field('obenlo_delete_listing_' . $listing->ID); ?>
-                                        <button type="submit" style="background:none; border:none; color:var(--obenlo-primary); font-weight:700; font-size:0.8rem; cursor:pointer; padding:0;">Delete</button>
+                                        <button type="submit" style="background:none; border:none; color:var(--obenlo-primary); font-weight:700; font-size:0.8rem; cursor:pointer; padding:0;"><?php echo __('Delete', 'obenlo-booking'); ?></button>
                                     </form>
                                 </div>
                             </td>
@@ -597,18 +550,18 @@ class Obenlo_Booking_Frontend_Dashboard
                     <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#aaa;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     </span>
-                    <input type="text" id="booking-code-search" placeholder="Search by confirmation code or last 4 digits…" style="width:100%; padding:11px 14px 11px 40px; border:2px solid #eee; border-radius:12px; font-size:0.92rem; outline:none; transition:border-color 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='var(--obenlo-primary)'" onblur="this.style.borderColor='#eee'">
+                    <input type="text" id="booking-code-search" placeholder="<?php echo esc_attr(__('Search by confirmation code or last 4 digits…', 'obenlo-booking')); ?>" style="width:100%; padding:11px 14px 11px 40px; border:2px solid #eee; border-radius:12px; font-size:0.92rem; outline:none; transition:border-color 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='var(--obenlo-primary)'" onblur="this.style.borderColor='#eee'">
                 </div>
                 <span id="booking-search-count" style="font-size:0.85rem; color:#888;"></span>
-                <button onclick="document.getElementById('booking-code-search').value=''; filterBookings();" style="background:none; border:1px solid #eee; border-radius:10px; padding:10px 16px; color:#666; cursor:pointer; font-size:0.85rem;">Clear</button>
+                <button onclick="document.getElementById('booking-code-search').value=''; filterBookings();" style="background:none; border:1px solid #eee; border-radius:10px; padding:10px 16px; color:#666; cursor:pointer; font-size:0.85rem;"><?php echo __('Clear', 'obenlo-booking'); ?></button>
                 
                 <!-- ── Booking Export Form ── -->
                 <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="display:flex; gap:10px; align-items:center; margin-left:auto;">
                     <input type="hidden" name="action" value="obenlo_export_bookings">
                     <?php wp_nonce_field('obenlo_export_bookings'); ?>
-                    <label style="font-size:0.85rem; font-weight:700; color:#666;">Export date:</label>
+                    <label style="font-size:0.85rem; font-weight:700; color:#666;"><?php echo __('Export date:', 'obenlo-booking'); ?></label>
                     <input type="date" name="export_date" value="<?php echo date('Y-m-d'); ?>" style="padding:8px; border:2px solid #eee; border-radius:10px; font-size:0.9rem;">
-                    <button type="submit" class="btn-primary" style="padding:10px 20px; font-size:0.85rem;">Export CSV</button>
+                    <button type="submit" class="btn-primary" style="padding:10px 20px; font-size:0.85rem;"><?php echo __('Export CSV', 'obenlo-booking'); ?></button>
                 </form>
             </div>
         <?php
@@ -616,27 +569,27 @@ class Obenlo_Booking_Frontend_Dashboard
         
         <?php if (empty($bookings)): ?>
             <div class="form-section">
-                <p style="color:#666; font-size:1rem;">You have no bookings yet.</p>
+                <p style="color:#666; font-size:1rem;"><?php echo __('You have no bookings yet.', 'obenlo-booking'); ?></p>
             </div>
         <?php
         else: ?>
             <table class="admin-table" id="bookings-table">
                 <thead>
                     <tr>
-                        <th>Booking ID</th>
-                        <th>Listing</th>
-                        <th>Dates / Details</th>
-                        <th>Guest</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <?php if ($limit === -1): ?><th>Confirmation Code</th><th>Actions</th><?php
+                        <th><?php echo __('Booking ID', 'obenlo-booking'); ?></th>
+                        <th><?php echo __('Listing', 'obenlo-booking'); ?></th>
+                        <th><?php echo __('Dates / Details', 'obenlo-booking'); ?></th>
+                        <th><?php echo __('Guest', 'obenlo-booking'); ?></th>
+                        <th><?php echo __('Total', 'obenlo-booking'); ?></th>
+                        <th><?php echo __('Status', 'obenlo-booking'); ?></th>
+                        <?php if ($limit === -1): ?><th><?php echo __('Confirmation Code', 'obenlo-booking'); ?></th><th><?php echo __('Actions', 'obenlo-booking'); ?></th><?php
             endif; ?>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($bookings as $booking):
                 $listing_id = get_post_meta($booking->ID, '_obenlo_listing_id', true);
-                $listing_title = $listing_id ? get_the_title($listing_id) : 'Unknown Listing';
+                $listing_title = $listing_id ? get_the_title($listing_id) : __('Unknown Listing', 'obenlo-booking');
                 $start_date = get_post_meta($booking->ID, '_obenlo_start_date', true);
                 $end_date = get_post_meta($booking->ID, '_obenlo_end_date', true);
                 $guests = get_post_meta($booking->ID, '_obenlo_guests', true);
@@ -647,7 +600,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 $checked_in = get_post_meta($booking->ID, '_obenlo_checked_in', true) === 'yes';
 
                 $guest_user = get_user_by('id', $booking->post_author);
-                $guest_info = $guest_user ? $guest_user->display_name : 'Guest #' . $booking->post_author;
+                $guest_info = $guest_user ? $guest_user->display_name : sprintf(__('Guest #%d', 'obenlo-booking'), $booking->post_author);
 
                 $status_badge = 'badge-info';
                 if ($status === 'confirmed' || $status === 'approved' || $status === 'completed')
@@ -658,17 +611,17 @@ class Obenlo_Booking_Frontend_Dashboard
                     $status_badge = 'badge-warning';
 ?>
                         <tr>
-                            <td data-label="Booking ID"><span style="font-family:monospace; color:#888;">#<?php echo $booking->ID; ?></span></td>
-                            <td data-label="Listing"><strong><?php echo esc_html($listing_title); ?></strong></td>
-                            <td data-label="Details">
+                            <td data-label="<?php echo esc_attr(__('Booking ID', 'obenlo-booking')); ?>"><span style="font-family:monospace; color:#888;">#<?php echo $booking->ID; ?></span></td>
+                            <td data-label="<?php echo esc_attr(__('Listing', 'obenlo-booking')); ?>"><strong><?php echo esc_html($listing_title); ?></strong></td>
+                            <td data-label="<?php echo __('Details', 'obenlo-booking'); ?>">
                                 <div><?php echo esc_html($start_date); ?><?php echo $end_date ? ' → ' . esc_html($end_date) : ''; ?></div>
-                                <div style="font-size:0.75rem; color:#888;"><?php echo esc_html($guests); ?> guests</div>
+                                <div style="font-size:0.75rem; color:#888;"><?php printf(__('%s guests', 'obenlo-booking'), esc_html($guests)); ?></div>
                             </td>
-                             <td data-label="Guest">
+                             <td data-label="<?php echo esc_attr(__('Guest', 'obenlo-booking')); ?>">
                                 <div style="display:flex; align-items:center; gap:10px; justify-content: flex-end;">
                                     <strong><?php echo esc_html($guest_info); ?></strong>
                                     <?php if ($guest_user) : ?>
-                                        <button onclick="window.obenloStartChatWith(<?php echo $guest_user->ID; ?>, '<?php echo esc_js($guest_user->display_name); ?>', '<?php echo esc_url(get_avatar_url($guest_user->ID)); ?>')" style="padding:5px; border:1px solid #eee; background:#f9f9f9; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;" title="Message Guest">
+                                        <button onclick="window.obenloStartChatWith(<?php echo $guest_user->ID; ?>, '<?php echo esc_js($guest_user->display_name); ?>', '<?php echo esc_url(get_avatar_url($guest_user->ID)); ?>')" style="padding:5px; border:1px solid #eee; background:#f9f9f9; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;" title="<?php echo esc_attr(__('Message Guest', 'obenlo-booking')); ?>">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                                         </button>
                                     <?php endif; ?>
@@ -677,10 +630,10 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <div class="guest-id-val" style="font-size:0.75rem; color:#888; font-family:monospace; margin-top:2px;">ID: <?php echo esc_html($guest_id); ?></div>
                                 <?php endif; ?>
                             </td>
-                            <td data-label="Total"><span style="font-weight:700; color:#222;">$<?php echo number_format(floatval($total), 2); ?></span></td>
-                            <td data-label="Status"><span class="badge <?php echo $status_badge; ?>"><?php echo esc_html(str_replace('_', ' ', $status)); ?></span></td>
+                            <td data-label="<?php echo __('Total', 'obenlo-booking'); ?>"><span style="font-weight:700; color:#222;">$<?php echo number_format(floatval($total), 2); ?></span></td>
+                            <td data-label="<?php echo __('Status', 'obenlo-booking'); ?>"><span class="badge <?php echo $status_badge; ?>"><?php echo esc_html(__(str_replace('_', ' ', $status), 'obenlo-booking')); ?></span></td>
                              <?php if ($limit === -1): ?>
-                            <td data-label="Conf. Code">
+                            <td data-label="<?php echo __('Conf. Code', 'obenlo-booking'); ?>">
                                 <?php if ($conf_code): ?>
                                     <code class="conf-code-val" style="background:#f9f9f9; border:1px solid #eee; padding:4px 8px; border-radius:6px; font-family:monospace; font-weight:700; color:var(--obenlo-primary); font-size:0.85rem;"><?php echo esc_html($conf_code); ?></code>
                                 <?php else: ?>
@@ -688,7 +641,7 @@ class Obenlo_Booking_Frontend_Dashboard
                                 <?php endif; ?>
 
                                 <?php if ($checked_in) : ?>
-                                    <div style="margin-top:8px;"><span class="badge badge-success" style="font-size:0.7rem; padding:3px 8px;">✓ CHECKED IN</span></div>
+                                    <div style="margin-top:8px;"><span class="badge badge-success" style="font-size:0.7rem; padding:3px 8px;">✓ <?php echo __('CHECKED IN', 'obenlo-booking'); ?></span></div>
                                 <?php endif; ?>
                             </td>
                             <td>
@@ -700,22 +653,22 @@ class Obenlo_Booking_Frontend_Dashboard
                         $complete_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=complete'), 'booking_action_' . $booking->ID);
 
                         if (!in_array($status, ['approved', 'confirmed'])) {
-                            echo '<a href="' . esc_url($approve_url) . '" onclick="return confirm(\'Approve this booking?\')" style="color:#10b981; font-weight:700; text-decoration:none;">Approve</a>';
+                            echo '<a href="' . esc_url($approve_url) . '" onclick="return confirm(\'' . esc_js(__('Approve this booking?', 'obenlo-booking')) . '\')" style="color:#10b981; font-weight:700; text-decoration:none;">' . __('Approve', 'obenlo-booking') . '</a>';
                         }
                         else {
-                            echo '<a href="' . esc_url($complete_url) . '" onclick="return confirm(\'Mark as completed?\')" style="color:#3b82f6; font-weight:700; text-decoration:none;">Complete</a>';
+                            echo '<a href="' . esc_url($complete_url) . '" onclick="return confirm(\'' . esc_js(__('Mark as completed?', 'obenlo-booking')) . '\')" style="color:#3b82f6; font-weight:700; text-decoration:none;">' . __('Complete', 'obenlo-booking') . '</a>';
                         }
                         
                         // Check-in Action
                         if (($status === 'approved' || $status === 'confirmed' || $status === 'completed') && !$checked_in) {
                             $checkin_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=checkin'), 'booking_action_' . $booking->ID);
-                            echo '<a href="' . esc_url($checkin_url) . '" onclick="return confirm(\'Check in this guest?\')" style="background:var(--obenlo-primary); color:#fff; padding:4px 10px; border-radius:8px; font-weight:700; text-decoration:none; font-size:0.8rem;">Check In</a>';
+                            echo '<a href="' . esc_url($checkin_url) . '" onclick="return confirm(\'' . esc_js(__('Check in this guest?', 'obenlo-booking')) . '\')" style="background:var(--obenlo-primary); color:#fff; padding:4px 10px; border-radius:8px; font-weight:700; text-decoration:none; font-size:0.8rem;">' . __('Check In', 'obenlo-booking') . '</a>';
                         }
 
-                        echo '<a href="' . esc_url($decline_url) . '" onclick="return confirm(\'Decline this booking?\')" style="color:#ef4444; font-weight:700; text-decoration:none;">Decline</a>';
+                        echo '<a href="' . esc_url($decline_url) . '" onclick="return confirm(\'' . esc_js(__('Decline this booking?', 'obenlo-booking')) . '\')" style="color:#ef4444; font-weight:700; text-decoration:none;">' . __('Decline', 'obenlo-booking') . '</a>';
                     }
                     else {
-                        echo '<span style="color:#ccc; font-size:0.85rem;">No actions</span>';
+                        echo '<span style="color:#ccc; font-size:0.85rem;">' . __('No actions', 'obenlo-booking') . '</span>';
                     }
 ?>
                                 </div>
@@ -800,7 +753,7 @@ class Obenlo_Booking_Frontend_Dashboard
 
                 echo '<div class="review-item" style="border:1px solid #eee; padding:20px; border-radius:12px; background:#fff;">';
                 echo '<div style="display:flex; justify-content:space-between; margin-bottom:10px;">';
-                echo '<div><strong>' . esc_html($comment->comment_author) . '</strong> on <a href="' . esc_url($listing_url) . '">' . esc_html($listing_title) . '</a></div>';
+                echo '<div><strong>' . esc_html($comment->comment_author) . '</strong> ' . __('on', 'obenlo-booking') . ' <a href="' . esc_url($listing_url) . '">' . esc_html($listing_title) . '</a></div>';
                 echo '<div style="font-size:0.85em; color:#666;">' . get_comment_date('', $comment->comment_ID) . '</div>';
                 echo '</div>';
 
@@ -878,7 +831,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 $policy_other = get_post_meta($listing_id, '_obenlo_policy_other', true);
             }
             else {
-                echo '<p>Invalid listing.</p>';
+                echo '<p>' . __('Invalid listing.', 'obenlo-booking') . '</p>';
                 return;
             }
         }
@@ -904,10 +857,10 @@ class Obenlo_Booking_Frontend_Dashboard
         $form_action = esc_url(admin_url('admin-post.php'));
         
         // Contextual Labels
-        $title_label = $is_child ? 'Unit / Session Name' : 'Business / Property Name';
-        $desc_label = $is_child ? 'About this Unit / Session' : 'About your Business / Property';
-        $media_label = $is_child ? 'Unit Specific Photos' : 'Primary Property Photos';
-        $media_hint = $is_child ? 'Upload up to 3 photos' : 'Upload up to 10 photos';
+        $title_label = $is_child ? __('Unit / Session Name', 'obenlo-booking') : __('Business / Property Name', 'obenlo-booking');
+        $desc_label = $is_child ? __('About this Unit / Session', 'obenlo-booking') : __('About your Business / Property', 'obenlo-booking');
+        $media_label = $is_child ? __('Unit Specific Photos', 'obenlo-booking') : __('Primary Property Photos', 'obenlo-booking');
+        $media_hint = $is_child ? __('Upload up to 3 photos', 'obenlo-booking') : __('Upload up to 10 photos', 'obenlo-booking');
         $media_limit = $is_child ? 3 : 10;
 
         // Derive category flag for dynamic headings
@@ -930,19 +883,25 @@ class Obenlo_Booking_Frontend_Dashboard
 
 ?>
         <div class="dashboard-header">
-            <h2 class="dashboard-title"><?php echo($listing_id ? 'Edit ' . ($is_child ? 'Unit/Session' : 'Listing') : 'Add New ' . ($is_child ? 'Unit/Session' : 'Listing')); ?></h2>
-            <a href="?action=list" style="color:#666; font-weight:700; text-decoration:none;">← Back to Listings</a>
+            <h2 class="dashboard-title"><?php 
+                if ($listing_id) {
+                    echo $is_child ? __('Edit Unit/Session', 'obenlo-booking') : __('Edit Listing', 'obenlo-booking');
+                } else {
+                    echo $is_child ? __('Add New Unit/Session', 'obenlo-booking') : __('Add New Listing', 'obenlo-booking');
+                }
+            ?></h2>
+            <a href="?action=list" style="color:#666; font-weight:700; text-decoration:none;">← <?php echo __('Back to Listings', 'obenlo-booking'); ?></a>
         </div>
 
         <div style="max-width:800px;">
             <?php if ($is_child): ?>
                 <p style="background: #eff6ff; color: #1e40af; padding: 15px 20px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;">
-                    Adding a specific bookable unit to: <strong><?php echo esc_html($parent_post->post_title); ?></strong>
+                    <?php printf(__('Adding a specific bookable unit to: %s', 'obenlo-booking'), '<strong>' . esc_html($parent_post->post_title) . '</strong>'); ?>
                 </p>
             <?php
         else: ?>
                 <p style="color:#666; font-size:0.95rem; margin-bottom:30px;">
-                    Create the main property, experience, or service. (You will add specific bookable rooms/sessions later).
+                    <?php echo __('Create the main property, experience, or service. (You will add specific bookable rooms/sessions later).', 'obenlo-booking'); ?>
                 </p>
             <?php
         endif; ?>
@@ -961,35 +920,35 @@ class Obenlo_Booking_Frontend_Dashboard
                 if (($is_demo_edit || $is_demo_create) && current_user_can('administrator')): ?>
                     <input type="hidden" name="is_demo" value="1">
                     <div style="background:#fff1f3; color:var(--obenlo-primary); padding:20px; border-radius:12px; margin-bottom:30px; border:1px solid #fecdd3;">
-                        <h4 style="margin-top:0; margin-bottom:10px; color:var(--obenlo-primary);">🛠️ Demo Listing Configuration</h4>
-                        <p style="margin-top:0; margin-bottom:20px; font-size:0.9rem;">You are configuring a Demo Listing. Specify the simulated Host details below.</p>
+                        <h4 style="margin-top:0; margin-bottom:10px; color:var(--obenlo-primary);">🛠️ <?php echo __('Demo Listing Configuration', 'obenlo-booking'); ?></h4>
+                        <p style="margin-top:0; margin-bottom:20px; font-size:0.9rem;"><?php echo __('You are configuring a Demo Listing. Specify the simulated Host details below.', 'obenlo-booking'); ?></p>
                         
                         <div class="grid-row" style="margin-bottom:15px;">
                             <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Host Name</label>
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;"><?php echo __('Demo Host Name', 'obenlo-booking'); ?></label>
                                 <input type="text" name="_obenlo_demo_host_name" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_name', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
                             </div>
                             <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Host Tagline</label>
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;"><?php echo __('Demo Host Tagline', 'obenlo-booking'); ?></label>
                                 <input type="text" name="_obenlo_demo_host_tagline" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_tagline', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
                             </div>
                         </div>
                         <div class="grid-row" style="margin-bottom:15px;">
                             <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Instagram (e.g. @obenlo)</label>
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;"><?php echo __('Demo Instagram (e.g. @obenlo)', 'obenlo-booking'); ?></label>
                                 <input type="text" name="_obenlo_demo_host_instagram" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_instagram', true)); ?>" placeholder="@username" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
                             </div>
                             <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Facebook URL</label>
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;"><?php echo __('Demo Facebook URL', 'obenlo-booking'); ?></label>
                                 <input type="text" name="_obenlo_demo_host_facebook" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_facebook', true)); ?>" placeholder="https://facebook.com/..." style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
                             </div>
                         </div>
                         <div style="margin-bottom:15px;">
-                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Host Location</label>
+                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;"><?php echo __('Demo Host Location', 'obenlo-booking'); ?></label>
                             <input type="text" name="_obenlo_demo_host_location" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_location', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
                         </div>
                         <div>
-                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Host Bio</label>
+                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;"><?php echo __('Demo Host Bio', 'obenlo-booking'); ?></label>
                             <textarea name="_obenlo_demo_host_bio" rows="3" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;"><?php echo esc_textarea(get_post_meta($listing_id, '_obenlo_demo_host_bio', true)); ?></textarea>
                         </div>
                     </div>
@@ -999,7 +958,7 @@ class Obenlo_Booking_Frontend_Dashboard
 
                 <!-- Basic Information -->
                 <div class="form-section">
-                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Basic Information</h4>
+                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Basic Information', 'obenlo-booking'); ?></h4>
                     
                     <div style="margin-bottom:20px;">
                         <label id="listing_title_label" style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo $title_label; ?></label>
@@ -1009,9 +968,9 @@ class Obenlo_Booking_Frontend_Dashboard
 
                     <?php if (!$is_child): ?>
                         <div style="margin-bottom:20px;">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Category</label>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Category', 'obenlo-booking'); ?></label>
                             <select name="listing_type" id="smart_listing_type" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                <option value="">-- Select a Category --</option>
+                                <option value=""><?php echo __('-- Select a Category --', 'obenlo-booking'); ?></option>
                                 <?php
             $types = get_terms(array('taxonomy' => 'listing_type', 'hide_empty' => false));
             if (!is_wp_error($types)) {
@@ -1025,60 +984,60 @@ class Obenlo_Booking_Frontend_Dashboard
                         </div>
 
                         <div style="margin-bottom:20px;" id="generic_location_wrapper">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Location</label>
-                            <input type="text" name="listing_location" value="<?php echo esc_attr($location); ?>" placeholder="e.g. Tulum, Mexico" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Location', 'obenlo-booking'); ?></label>
+                            <input type="text" name="listing_location" value="<?php echo esc_attr($location); ?>" placeholder="<?php echo esc_attr(__('e.g. Tulum, Mexico', 'obenlo-booking')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         </div>
                     <?php endif; ?>
 
                     <div style="margin-bottom:0;">
                         <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo $desc_label; ?></label>
-                        <textarea name="listing_content" rows="6" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;" placeholder="<?php echo $is_child ? 'Describe this specific unit, room, or session...' : 'Describe your overall business, property, or service group...'; ?>"><?php echo esc_textarea($content); ?></textarea>
+                        <textarea name="listing_content" rows="6" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;" placeholder="<?php echo $is_child ? esc_attr(__('Describe this specific unit, room, or session...', 'obenlo-booking')) : esc_attr(__('Describe your overall business, property, or service group...', 'obenlo-booking')); ?>"><?php echo esc_textarea($content); ?></textarea>
                     </div>
 
                     <!-- Event Specific Configuration -->
                     <div id="event_config_wrapper" style="margin-top:20px; display:none; padding:20px; background:#f9f9f9; border-radius:12px; border:1px solid #eee;">
-                        <h4 style="margin-top:0; margin-bottom:15px; color:#333;">Event Schedule & Location</h4>
+                        <h4 style="margin-top:0; margin-bottom:15px; color:#333;"><?php echo __('Event Schedule & Location', 'obenlo-booking'); ?></h4>
                         
                         <div style="margin-bottom:15px;">
                             <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:700;">
                                 <input type="checkbox" name="event_is_fixed" value="yes" id="event_is_fixed_toggle" <?php checked($event_is_fixed, 'yes'); ?>>
-                                Specific Scheduled Time (e.g., Monday 8 April, 4pm-10pm)
+                                <?php echo __('Specific Scheduled Time (e.g., Monday 8 April, 4pm-10pm)', 'obenlo-booking'); ?>
                             </label>
                         </div>
 
                         <div id="fixed_time_fields" style="display:<?php echo ($event_is_fixed === 'yes') ? 'block' : 'none'; ?>; margin-bottom:20px;">
                             <div class="grid-row">
                                 <div class="grid-col-1-3">
-                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;">Event Date</label>
+                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('Event Date', 'obenlo-booking'); ?></label>
                                     <input type="date" name="event_date" value="<?php echo esc_attr($event_date); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                                 </div>
                                 <div class="grid-col-1-3">
-                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;">Start Time</label>
+                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('Start Time', 'obenlo-booking'); ?></label>
                                     <input type="time" name="event_start_time" value="<?php echo esc_attr($event_start_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                                 </div>
                                 <div class="grid-col-1-3">
-                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;">End Time</label>
+                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('End Time', 'obenlo-booking'); ?></label>
                                     <input type="time" name="event_end_time" value="<?php echo esc_attr($event_end_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                                 </div>
                             </div>
                         </div>
 
                         <div style="margin-bottom:15px;">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Event Type</label>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Event Type', 'obenlo-booking'); ?></label>
                             <select name="event_location_type" id="event_location_type_select" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                <option value="virtual" <?php selected($event_location_type, 'virtual'); ?>>Virtual (Zoom, Google Meet, etc.)</option>
-                                <option value="in_person" <?php selected($event_location_type, 'in_person'); ?>>In-Person (Physical Address)</option>
+                                <option value="virtual" <?php selected($event_location_type, 'virtual'); ?>><?php echo __('Virtual (Zoom, Google Meet, etc.)', 'obenlo-booking'); ?></option>
+                                <option value="in_person" <?php selected($event_location_type, 'in_person'); ?>><?php echo __('In-Person (Physical Address)', 'obenlo-booking'); ?></option>
                             </select>
                         </div>
 
                         <div id="virtual_link_wrapper" style="display:<?php echo ($event_location_type === 'virtual') ? 'block' : 'none'; ?>;">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Virtual Meeting Link</label>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Virtual Meeting Link', 'obenlo-booking'); ?></label>
                             <input type="url" name="virtual_link" value="<?php echo esc_url($virtual_link); ?>" placeholder="https://zoom.us/j/..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         </div>
 
                         <div id="in_person_address_wrapper" style="display:<?php echo ($event_location_type === 'in_person') ? 'block' : 'none'; ?>;">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Event Address</label>
-                            <input type="text" name="listing_event_address" value="<?php echo esc_attr($location); ?>" placeholder="Enter physical address..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Event Address', 'obenlo-booking'); ?></label>
+                            <input type="text" name="listing_event_address" value="<?php echo esc_attr($location); ?>" placeholder="<?php echo esc_attr(__('Enter physical address...', 'obenlo-booking')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         </div>
                     </div>
                 </div>
@@ -1086,47 +1045,47 @@ class Obenlo_Booking_Frontend_Dashboard
                 <!-- Pricing, Model & Capacity -->
                 <?php if ($is_child): ?>
                     <div class="form-section">
-                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Pricing & Booking Rules</h4>
+                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Pricing & Booking Rules', 'obenlo-booking'); ?></h4>
                         
                         <div class="grid-row" style="margin-bottom:20px;">
                             <div class="grid-col-1-2">
-                                <label id="listing_price_label" style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Base Price</label>
+                                <label id="listing_price_label" style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Base Price', 'obenlo-booking'); ?></label>
                                 <div style="position:relative;">
                                     <span style="position:absolute; left:12px; top:12px; color:#888;">$</span>
                                     <input type="number" step="0.01" name="listing_price" value="<?php echo esc_attr($price); ?>" required style="width:100%; padding:12px 12px 12px 30px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
                                 </div>
                             </div>
                             <div id="pricing_model_wrapper" class="grid-col-1-2">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Pricing Model</label>
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Pricing Model', 'obenlo-booking'); ?></label>
                                 <select name="pricing_model" id="pricing_model" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                    <option value="per_night" <?php selected($pricing_model, 'per_night'); ?>>Per Night</option>
-                                    <option value="per_day" <?php selected($pricing_model, 'per_day'); ?>>Per Day</option>
-                                    <option value="per_hour" <?php selected($pricing_model, 'per_hour'); ?>>Per Hour</option>
-                                    <option value="per_session" <?php selected($pricing_model, 'per_session'); ?>>Per Session / Appointment</option>
-                                    <option value="per_person" <?php selected($pricing_model, 'per_person'); ?>>Per Person</option>
-                                    <option value="per_event" <?php selected($pricing_model, 'per_event'); ?>>Per Event (Flat Fee)</option>
-                                    <option value="per_donation" <?php selected($pricing_model, 'per_donation'); ?>>Per Donation (Fixed Amount)</option>
-                                    <option value="custom_donation" <?php selected($pricing_model, 'custom_donation'); ?>>Custom Donation Amount (Pay What You Want)</option>
-                                    <option value="flat_fee" <?php selected($pricing_model, 'flat_fee'); ?>>Flat Fee</option>
+                                    <option value="per_night" <?php selected($pricing_model, 'per_night'); ?>><?php echo __('Per Night', 'obenlo-booking'); ?></option>
+                                    <option value="per_day" <?php selected($pricing_model, 'per_day'); ?>><?php echo __('Per Day', 'obenlo-booking'); ?></option>
+                                    <option value="per_hour" <?php selected($pricing_model, 'per_hour'); ?>><?php echo __('Per Hour', 'obenlo-booking'); ?></option>
+                                    <option value="per_session" <?php selected($pricing_model, 'per_session'); ?>><?php echo __('Per Session / Appointment', 'obenlo-booking'); ?></option>
+                                    <option value="per_person" <?php selected($pricing_model, 'per_person'); ?>><?php echo __('Per Person', 'obenlo-booking'); ?></option>
+                                    <option value="per_event" <?php selected($pricing_model, 'per_event'); ?>><?php echo __('Per Event (Flat Fee)', 'obenlo-booking'); ?></option>
+                                    <option value="per_donation" <?php selected($pricing_model, 'per_donation'); ?>><?php echo __('Per Donation (Fixed Amount)', 'obenlo-booking'); ?></option>
+                                    <option value="custom_donation" <?php selected($pricing_model, 'custom_donation'); ?>><?php echo __('Custom Donation Amount (Pay What You Want)', 'obenlo-booking'); ?></option>
+                                    <option value="flat_fee" <?php selected($pricing_model, 'flat_fee'); ?>><?php echo __('Flat Fee', 'obenlo-booking'); ?></option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="grid-row" style="margin-bottom:20px;">
                             <div id="capacity_wrapper" class="grid-col-1-2">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Max Capacity (Guests/Tickets)</label>
-                                <input type="number" name="listing_capacity" value="<?php echo esc_attr($capacity); ?>" placeholder="Leave blank if not applicable" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Max Capacity (Guests/Tickets)', 'obenlo-booking'); ?></label>
+                                <input type="number" name="listing_capacity" value="<?php echo esc_attr($capacity); ?>" placeholder="<?php echo esc_attr(__('Leave blank if not applicable', 'obenlo-booking')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
                             </div>
                             <div id="duration_wrapper" class="grid-col-1-2" style="display:flex; gap:10px;">
                                 <div style="flex:1;">
-                                    <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Duration</label>
-                                    <input type="number" step="0.5" name="duration_val" value="<?php echo esc_attr($duration_val); ?>" placeholder="e.g. 1.5" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
+                                    <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Duration', 'obenlo-booking'); ?></label>
+                                    <input type="number" step="0.5" name="duration_val" value="<?php echo esc_attr($duration_val); ?>" placeholder="<?php echo esc_attr(__('e.g. 1.5', 'obenlo-booking')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
                                 </div>
                                 <div style="flex:1;">
-                                    <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Unit</label>
+                                    <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Unit', 'obenlo-booking'); ?></label>
                                     <select name="duration_unit" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                        <option value="hours" <?php selected($duration_unit, 'hours'); ?>>Hours</option>
-                                        <option value="minutes" <?php selected($duration_unit, 'minutes'); ?>>Minutes</option>
+                                        <option value="hours" <?php selected($duration_unit, 'hours'); ?>><?php echo __('Hours', 'obenlo-booking'); ?></option>
+                                        <option value="minutes" <?php selected($duration_unit, 'minutes'); ?>><?php echo __('Minutes', 'obenlo-booking'); ?></option>
                                     </select>
                                 </div>
                             </div>
@@ -1135,9 +1094,9 @@ class Obenlo_Booking_Frontend_Dashboard
                         <div id="requires_slots_wrapper" style="margin-top:10px;">
                             <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                                 <input type="checkbox" name="requires_slots" value="yes" <?php checked($requires_slots, 'yes'); ?> style="width:18px; height:18px;">
-                                <span style="font-weight:700; color:#444;">Requires Booking Time Slots</span>
+                                <span style="font-weight:700; color:#444;"><?php echo __('Requires Booking Time Slots', 'obenlo-booking'); ?></span>
                             </label>
-                            <p style="font-size:0.85rem; color:#666; margin-top:5px; margin-left:28px;">Check this if you want the calendar to automatically show available time slots during your business hours (e.g. for Haircuts, Spa treatments).</p>
+                            <p style="font-size:0.85rem; color:#666; margin-top:5px; margin-left:28px;"><?php echo __('Check this if you want the calendar to automatically show available time slots during your business hours (e.g. for Haircuts, Spa treatments).', 'obenlo-booking'); ?></p>
                         </div>
                     </div>
                 <?php else: ?>
@@ -1145,8 +1104,8 @@ class Obenlo_Booking_Frontend_Dashboard
                         <div style="display:flex; gap:15px; align-items:center;">
                             <div style="font-size:1.5rem;">ℹ️</div>
                             <div>
-                                <h4 style="margin:0 0 5px 0; color:#0369a1;">Business Profile Mode</h4>
-                                <p style="margin:0; font-size:0.9rem; color:#0c4a6e;">This is your main profile. You will add bookable units, sessions, or events (with their own pricing) after saving this profile.</p>
+                                <h4 style="margin:0 0 5px 0; color:#0369a1;"><?php echo __('Business Profile Mode', 'obenlo-booking'); ?></h4>
+                                <p style="margin:0; font-size:0.9rem; color:#0c4a6e;"><?php echo __('This is your main profile. You will add bookable units, sessions, or events (with their own pricing) after saving this profile.', 'obenlo-booking'); ?></p>
                             </div>
                         </div>
                     </div>
@@ -1156,9 +1115,9 @@ class Obenlo_Booking_Frontend_Dashboard
 
 
                 <?php 
-                $amenity_title = 'Amenities';
+                $amenity_title = __('Amenities', 'obenlo-booking');
                 if (in_array($category_flag, ['experience', 'event', 'show'])) {
-                    $amenity_title = 'What\'s Included';
+                    $amenity_title = __('What\'s Included', 'obenlo-booking');
                 }
                 ?>
                 <!-- Amenities -->
@@ -1172,7 +1131,7 @@ class Obenlo_Booking_Frontend_Dashboard
         if (!empty($current_amenities)):
             foreach ($current_amenities as $amenity_name): ?>
                                 <div class="amenity-row" style="display:flex; gap:10px; margin-bottom:12px;">
-                                    <input type="text" name="listing_amenities_repeater[]" value="<?php echo esc_attr($amenity_name); ?>" placeholder="e.g. WiFi or Textbook" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                    <input type="text" name="listing_amenities_repeater[]" value="<?php echo esc_attr($amenity_name); ?>" placeholder="<?php echo esc_attr(__('e.g. WiFi or Textbook', 'obenlo-booking')); ?>" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
                                     <button type="button" class="remove-amenity-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
                                 </div>
                             <?php
@@ -1180,11 +1139,11 @@ class Obenlo_Booking_Frontend_Dashboard
                         <?php
         endif; ?>
                     </div>
-                    <button type="button" id="add-amenity-btn" style="background:#f9f9f9; border:1px dashed #ccc; color:#666; width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:600; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--obenlo-primary)';this.style.color='var(--obenlo-primary)'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">+ Add New</button>
+                    <button type="button" id="add-amenity-btn" style="background:#f9f9f9; border:1px dashed #ccc; color:#666; width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:600; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--obenlo-primary)';this.style.color='var(--obenlo-primary)'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'"><?php echo __('+ Add New', 'obenlo-booking'); ?></button>
                     
                     <template id="amenity-template">
                         <div class="amenity-row" style="display:flex; gap:10px; margin-bottom:12px;">
-                            <input type="text" name="listing_amenities_repeater[]" value="" placeholder="e.g. WiFi or Textbook" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                            <input type="text" name="listing_amenities_repeater[]" value="" placeholder="<?php echo esc_attr(__('e.g. WiFi or Textbook', 'obenlo-booking')); ?>" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
                             <button type="button" class="remove-amenity-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
                         </div>
                     </template>
@@ -1193,13 +1152,13 @@ class Obenlo_Booking_Frontend_Dashboard
                 <?php if ($is_child): ?>
                     <!-- Addons -->
                     <div class="form-section">
-                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Add-ons (Optional Upsells)</h4>
+                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Add-ons (Optional Upsells)', 'obenlo-booking'); ?></h4>
                         <div id="addons-container">
                             <?php if (!empty($addons)):
                 foreach ($addons as $addon): ?>
                                     <div class="addon-row" style="display:flex; gap:10px; margin-bottom:12px;">
-                                        <input type="text" name="addon_names[]" value="<?php echo esc_attr($addon['name']); ?>" placeholder="Addon (e.g. Breakfast)" style="flex:2; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                        <input type="number" step="0.01" name="addon_prices[]" value="<?php echo esc_attr($addon['price']); ?>" placeholder="$" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                        <input type="text" name="addon_names[]" value="<?php echo esc_attr($addon['name']); ?>" placeholder="<?php echo esc_attr(__('Addon (e.g. Breakfast)', 'obenlo-booking')); ?>" style="flex:2; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                        <input type="number" step="0.01" name="addon_prices[]" value="<?php echo esc_attr($addon['price']); ?>" placeholder="<?php echo esc_attr(__('$', 'obenlo-booking')); ?>" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
                                         <button type="button" class="remove-addon-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
                                     </div>
                                 <?php
@@ -1207,12 +1166,12 @@ class Obenlo_Booking_Frontend_Dashboard
                             <?php
             endif; ?>
                         </div>
-                        <button type="button" id="add-addon-btn" style="background:#f9f9f9; border:1px dashed #ccc; color:#666; width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:600;">+ Add New Addon</button>
+                        <button type="button" id="add-addon-btn" style="background:#f9f9f9; border:1px dashed #ccc; color:#666; width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:600;"><?php echo __('+ Add New Addon', 'obenlo-booking'); ?></button>
                         
                         <template id="addon-template">
                             <div class="addon-row" style="display:flex; gap:10px; margin-bottom:12px;">
-                                <input type="text" name="addon_names[]" value="" placeholder="Addon (e.g. Breakfast)" style="flex:2; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                <input type="number" step="0.01" name="addon_prices[]" value="" placeholder="$" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                <input type="text" name="addon_names[]" value="" placeholder="<?php echo esc_attr(__('Addon (e.g. Breakfast)', 'obenlo-booking')); ?>" style="flex:2; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                <input type="number" step="0.01" name="addon_prices[]" value="" placeholder="<?php echo esc_attr(__('$', 'obenlo-booking')); ?>" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
                                 <button type="button" class="remove-addon-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
                             </div>
                         </template>
@@ -1238,10 +1197,10 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <div style="position:relative; aspect-ratio:1; border-radius:12px; overflow:hidden; border:2px solid <?php echo $is_featured ? 'var(--obenlo-primary)' : '#eee'; ?>;">
                                         <img src="<?php echo esc_url($img_url); ?>" style="width:100%; height:100%; object-fit:cover;">
                                         <?php if ($is_featured): ?>
-                                            <div style="position:absolute; top:5px; left:5px; background:var(--obenlo-primary); color:#fff; font-size:8px; font-weight:800; padding:2px 6px; border-radius:20px;">COVER</div>
+                                            <div style="position:absolute; top:5px; left:5px; background:var(--obenlo-primary); color:#fff; font-size:8px; font-weight:800; padding:2px 6px; border-radius:20px;"><?php echo __('COVER', 'obenlo-booking'); ?></div>
                                         <?php endif; ?>
                                         <label style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; text-align:center; padding:3px; cursor:pointer;">
-                                            <input type="checkbox" name="delete_images[]" value="<?php echo esc_attr($img_id); ?>"> Remove
+                                            <input type="checkbox" name="delete_images[]" value="<?php echo esc_attr($img_id); ?>"> <?php echo __('Remove', 'obenlo-booking'); ?>
                                         </label>
                                     </div>
                                 <?php endforeach; ?>
@@ -1252,7 +1211,7 @@ class Obenlo_Booking_Frontend_Dashboard
                         <input type="file" name="listing_images[]" multiple accept="image/*" style="display:none;" id="listing_file_input" data-limit="<?php echo $media_limit; ?>">
                         <label for="listing_file_input" style="cursor:pointer; color:#888;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px; height:40px; margin-bottom:10px; color:#ccc;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                            <div style="font-weight:700; color:#444;">Click to upload photos</div>
+                            <div style="font-weight:700; color:#444;"><?php echo __('Click to upload photos', 'obenlo-booking'); ?></div>
                             <div style="font-size:0.8rem; color:var(--obenlo-primary);"><?php echo $media_hint; ?></div>
                         </label>
                     </div>
@@ -1261,26 +1220,26 @@ class Obenlo_Booking_Frontend_Dashboard
                 <?php if (!$is_child): ?>
                     <!-- Policies -->
                     <div class="form-section">
-                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Policies & Rules</h4>
+                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Policies & Rules', 'obenlo-booking'); ?></h4>
                         
                         <div style="margin-bottom:20px;">
                             <select name="policy_type" id="policy_type_select" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                <option value="global" <?php selected($policy_type, 'global'); ?>>Use <?php echo esc_html($brand_name); ?> Global Policies (Standard)</option>
-                                <option value="custom" <?php selected($policy_type, 'custom'); ?>>Set Custom Policies</option>
+                                <option value="global" <?php selected($policy_type, 'global'); ?>><?php printf(__('Use %s Global Policies (Standard)', 'obenlo-booking'), esc_html($brand_name)); ?></option>
+                                <option value="custom" <?php selected($policy_type, 'custom'); ?>><?php echo __('Set Custom Policies', 'obenlo-booking'); ?></option>
                             </select>
                         </div>
                         
                         <div id="custom_policies_fields" style="display:<?php echo($policy_type === 'custom') ? 'block' : 'none'; ?>;">
                             <div style="margin-bottom:20px;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Cancellation Policy</label>
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Cancellation Policy', 'obenlo-booking'); ?></label>
                                 <textarea name="policy_cancel" rows="3" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($policy_cancel); ?></textarea>
                             </div>
                             <div style="margin-bottom:20px;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Refund Policy</label>
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Refund Policy', 'obenlo-booking'); ?></label>
                                 <textarea name="policy_refund" rows="3" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($policy_refund); ?></textarea>
                             </div>
                             <div style="margin-bottom:0;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">House Rules / Other</label>
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('House Rules / Other', 'obenlo-booking'); ?></label>
                                 <textarea name="policy_other" rows="3" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($policy_other); ?></textarea>
                             </div>
                         </div>
@@ -1288,8 +1247,14 @@ class Obenlo_Booking_Frontend_Dashboard
                 <?php endif; ?>
 
                 <div style="margin-top:40px; margin-bottom:100px;">
-                    <button type="submit" class="btn-primary" style="padding:15px 40px; font-size:1.1rem; width:100%;">Save <?php echo($is_child ? 'Unit' : 'Listing'); ?> Now</button>
-                    <p style="text-align:center; color:#888; font-size:0.85rem; margin-top:15px;">By saving, you agree to <?php echo esc_html($brand_name); ?>'s hosting standard and quality guidelines.</p>
+                    <button type="submit" class="btn-primary" style="padding:15px 40px; font-size:1.1rem; width:100%;"><?php 
+                        if ($is_child) {
+                            echo __('Save Unit Now', 'obenlo-booking');
+                        } else {
+                            echo __('Save Listing Now', 'obenlo-booking');
+                        }
+                    ?></button>
+                    <p style="text-align:center; color:#888; font-size:0.85rem; margin-top:15px;"><?php printf(__('By saving, you agree to %s\'s hosting standard and quality guidelines.', 'obenlo-booking'), esc_html($brand_name)); ?></p>
                 </div>
             </form>
         </div>
@@ -1376,8 +1341,8 @@ class Obenlo_Booking_Frontend_Dashboard
                 }
 
                 if (category === 'stay') {
-                    if (priceLabel) priceLabel.innerText = 'Price (Per Night)';
-                    if (capLabel) capLabel.innerText = 'Capacity/Max Guests';
+                    if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Night)', 'obenlo-booking')); ?>';
+                    if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Capacity/Max Guests', 'obenlo-booking')); ?>';
                     if (pricingModel) {
                         pricingModel.value = 'per_night';
                         Array.from(pricingModel.options).forEach(opt => {
@@ -1389,10 +1354,10 @@ class Obenlo_Booking_Frontend_Dashboard
                     }
                     if (durationWrapper) durationWrapper.style.display = 'none';
                     if (slotsWrapper) slotsWrapper.style.display = 'none';
-                    if (amenHeading) amenHeading.innerText = 'Amenities';
+                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Amenities', 'obenlo-booking')); ?>';
                 } else if (category === 'event' || category === 'experience') {
-                    if (priceLabel) priceLabel.innerText = category === 'event' ? 'Price (Per Ticket)' : 'Price (Per Person/Ticket)';
-                    if (capLabel) capLabel.innerText = category === 'event' ? 'Total Tickets Available' : 'Max Tickets/Participants';
+                    if (priceLabel) priceLabel.innerText = category === 'event' ? '<?php echo esc_js(__('Price (Per Ticket)', 'obenlo-booking')); ?>' : '<?php echo esc_js(__('Price (Per Person/Ticket)', 'obenlo-booking')); ?>';
+                    if (capLabel) capLabel.innerText = category === 'event' ? '<?php echo esc_js(__('Total Tickets Available', 'obenlo-booking')); ?>' : '<?php echo esc_js(__('Max Tickets/Participants', 'obenlo-booking')); ?>';
                     if (pricingModel) {
                         pricingModel.value = 'per_person';
                         Array.from(pricingModel.options).forEach(opt => {
@@ -1405,10 +1370,10 @@ class Obenlo_Booking_Frontend_Dashboard
                     if (slotsWrapper) slotsWrapper.style.display = 'none';
                     if (eventConfigWrapper) eventConfigWrapper.style.display = 'block';
                     if (genericLocationWrapper) genericLocationWrapper.style.display = 'none';
-                    if (amenHeading) amenHeading.innerText = 'What\'s Included';
+                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('What\'s Included', 'obenlo-booking')); ?>';
                 } else if (category === 'service') {
-                    if (priceLabel) priceLabel.innerText = 'Price (Per Hour/Session)';
-                    if (capLabel) capLabel.innerText = 'Max Clients per Slot';
+                    if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Hour/Session)', 'obenlo-booking')); ?>';
+                    if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Max Clients per Slot', 'obenlo-booking')); ?>';
                     if (pricingModel) {
                         pricingModel.value = 'per_session';
                         Array.from(pricingModel.options).forEach(opt => {
@@ -1422,10 +1387,10 @@ class Obenlo_Booking_Frontend_Dashboard
                             pricingModel.value = 'per_hour';
                         }
                     }
-                    if (amenHeading) amenHeading.innerText = 'Amenities';
+                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Amenities', 'obenlo-booking')); ?>';
                 } else if (category === 'celebration') {
-                    if (priceLabel) priceLabel.innerText = 'Event Fee ($)';
-                    if (capLabel) capLabel.innerText = 'Max Guests';
+                    if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Event Fee ($)', 'obenlo-booking')); ?>';
+                    if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Max Guests', 'obenlo-booking')); ?>';
                     if (pricingModel) {
                         pricingModel.value = 'per_event';
                         Array.from(pricingModel.options).forEach(opt => {
@@ -1438,10 +1403,10 @@ class Obenlo_Booking_Frontend_Dashboard
                     if (slotsWrapper) slotsWrapper.style.display = 'none';
                     if (eventConfigWrapper) eventConfigWrapper.style.display = 'block';
                     if (genericLocationWrapper) genericLocationWrapper.style.display = 'none';
-                    if (amenHeading) amenHeading.innerText = 'What\'s Included';
+                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('What\'s Included', 'obenlo-booking')); ?>';
                 } else if (category === 'donation') {
-                    if (priceLabel) priceLabel.innerText = 'Suggested Donation ($)';
-                    if (capLabel) capLabel.innerText = 'Max Donors/Supporters (Optional)';
+                    if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Suggested Donation ($)', 'obenlo-booking')); ?>';
+                    if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Max Donors/Supporters (Optional)', 'obenlo-booking')); ?>';
                     if (pricingModel) {
                         pricingModel.value = 'per_donation';
                         Array.from(pricingModel.options).forEach(opt => {
@@ -1454,11 +1419,11 @@ class Obenlo_Booking_Frontend_Dashboard
                     if (durationWrapper) durationWrapper.style.display = 'none';
                     if (slotsWrapper) slotsWrapper.style.display = 'none';
                     if (eventConfigWrapper) eventConfigWrapper.style.display = 'none';
-                    if (amenHeading) amenHeading.innerText = 'Donation Details';
+                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Donation Details', 'obenlo-booking')); ?>';
                 } else {
-                    if (priceLabel) priceLabel.innerText = 'Price (Base)';
-                    if (capLabel) capLabel.innerText = 'Capacity/Max Guests';
-                    if (amenHeading) amenHeading.innerText = 'Amenities';
+                    if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Base)', 'obenlo-booking')); ?>';
+                    if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Capacity/Max Guests', 'obenlo-booking')); ?>';
+                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Amenities', 'obenlo-booking')); ?>';
                 }
 
                 // Call location toggles within footer JS context
@@ -1576,16 +1541,16 @@ class Obenlo_Booking_Frontend_Dashboard
 
 ?>
         <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 class="dashboard-title">Storefront Settings</h2>
+            <h2 class="dashboard-title"><?php echo __('Storefront Settings', 'obenlo-booking'); ?></h2>
             <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" class="btn-primary" style="padding:10px 20px; font-size:0.9rem; display:flex; align-items:center; gap:8px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px; height:16px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                View Live Storefront
+                <?php echo __('View Live Storefront', 'obenlo-booking'); ?>
             </a>
         </div>
 
         <div style="max-width:800px;">
             <p style="color:#666; font-size:0.95rem; margin-bottom:30px;">
-                Customize how your host profile appears to guests. A professional storefront builds trust and increases bookings.
+                <?php echo __('Customize how your host profile appears to guests. A professional storefront builds trust and increases bookings.', 'obenlo-booking'); ?>
             </p>
 
             <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" enctype="multipart/form-data">
@@ -1593,63 +1558,63 @@ class Obenlo_Booking_Frontend_Dashboard
                 <?php wp_nonce_field('dashboard_save_storefront', 'dashboard_storefront_nonce'); ?>
 
                 <div class="form-section">
-                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Public Profile</h4>
+                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Public Profile', 'obenlo-booking'); ?></h4>
                     
                     <div style="margin-bottom:20px;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Host / Store Name</label>
+                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Host / Store Name', 'obenlo-booking'); ?></label>
                         <input type="text" name="store_name" value="<?php echo esc_attr($store_name); ?>" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                     </div>
 
                     <div style="margin-bottom:20px;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Host Location</label>
-                        <input type="text" name="store_location" value="<?php echo esc_attr($store_location); ?>" placeholder="e.g. New York, NY" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Host Location', 'obenlo-booking'); ?></label>
+                        <input type="text" name="store_location" value="<?php echo esc_attr($store_location); ?>" placeholder="<?php echo esc_attr(__('e.g. New York, NY', 'obenlo-booking')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                     </div>
 
                     <div style="margin-bottom:20px;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Tagline (Catchy Hook)</label>
-                        <input type="text" name="store_tagline" value="<?php echo esc_attr($store_tagline); ?>" placeholder="e.g. Luxury Haircare in the heart of Paris" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Tagline (Catchy Hook)', 'obenlo-booking'); ?></label>
+                        <input type="text" name="store_tagline" value="<?php echo esc_attr($store_tagline); ?>" placeholder="<?php echo esc_attr(__('e.g. Luxury Haircare in the heart of Paris', 'obenlo-booking')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                     </div>
 
                     <div style="margin-bottom:20px;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Host Specialties</label>
-                        <input type="text" name="store_specialties" value="<?php echo esc_attr($store_specialties); ?>" placeholder="e.g. Organic, Pet Friendly, Multilingual" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
-                        <p style="font-size:0.8rem; color:#888; margin-top:5px;">Separate your specialties with commas.</p>
+                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Host Specialties', 'obenlo-booking'); ?></label>
+                        <input type="text" name="store_specialties" value="<?php echo esc_attr($store_specialties); ?>" placeholder="<?php echo esc_attr(__('e.g. Organic, Pet Friendly, Multilingual', 'obenlo-booking')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <p style="font-size:0.8rem; color:#888; margin-top:5px;"><?php echo __('Separate your specialties with commas.', 'obenlo-booking'); ?></p>
                     </div>
 
                     <div style="margin-bottom:20px;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Description / Bio</label>
-                        <textarea name="store_description" rows="5" placeholder="Tell guests about yourself or your hospitality business..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($store_desc); ?></textarea>
+                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Description / Bio', 'obenlo-booking'); ?></label>
+                        <textarea name="store_description" rows="5" placeholder="<?php echo esc_attr(__('Tell guests about yourself or your hospitality business...', 'obenlo-booking')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($store_desc); ?></textarea>
                     </div>
 
                     <div style="margin-bottom:20px;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Featured Video (YouTube/Vimeo)</label>
+                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Featured Video (YouTube/Vimeo)', 'obenlo-booking'); ?></label>
                         <input type="url" name="store_video" value="<?php echo esc_attr($store_video); ?>" placeholder="https://www.youtube.com/watch?v=..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
-                        <p style="font-size:0.8rem; color:#888; margin-top:5px;">Share a welcoming video with your future guests.</p>
+                        <p style="font-size:0.8rem; color:#888; margin-top:5px;"><?php echo __('Share a welcoming video with your future guests.', 'obenlo-booking'); ?></p>
                     </div>
 
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
                         <div>
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Instagram Profile</label>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Instagram Profile', 'obenlo-booking'); ?></label>
                             <input type="text" name="social_insta" value="<?php echo esc_attr($social_insta); ?>" placeholder="@youraccount" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         </div>
                         <div>
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Facebook Page</label>
+                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Facebook Page', 'obenlo-booking'); ?></label>
                             <input type="text" name="social_fb" value="<?php echo esc_attr($social_fb); ?>" placeholder="facebook.com/yourpage" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">Branding & Identity</h4>
+                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Branding & Identity', 'obenlo-booking'); ?></h4>
                     
                     <div style="display:grid; grid-template-columns: 1fr 2fr; gap:30px;">
                          <div>
-                            <label style="display:block; font-weight:700; margin-bottom:12px; color:#444;">Host Logo</label>
+                            <label style="display:block; font-weight:700; margin-bottom:12px; color:#444;"><?php echo __('Host Logo', 'obenlo-booking'); ?></label>
                             <?php if ($store_logo_id): ?>
                                 <div style="margin-bottom:15px; position:relative; width:120px; height:120px;">
                                     <img src="<?php echo esc_url(wp_get_attachment_image_url($store_logo_id, 'thumbnail')); ?>" style="width:100%; height:100%; border-radius:50%; object-fit:cover; border:3px solid #eee;">
                                     <label style="display:block; margin-top:10px; color:#ef4444; font-size:0.8rem; font-weight:600; cursor:pointer;">
-                                        <input type="checkbox" name="remove_logo" value="1"> Remove
+                                        <input type="checkbox" name="remove_logo" value="1"> <?php echo __('Remove', 'obenlo-booking'); ?>
                                     </label>
                                 </div>
                             <?php
@@ -1658,12 +1623,12 @@ class Obenlo_Booking_Frontend_Dashboard
                          </div>
 
                          <div>
-                            <label style="display:block; font-weight:700; margin-bottom:12px; color:#444;">Store Banner</label>
+                            <label style="display:block; font-weight:700; margin-bottom:12px; color:#444;"><?php echo __('Store Banner', 'obenlo-booking'); ?></label>
                             <?php if ($store_banner_id): ?>
                                 <div style="margin-bottom:15px;">
                                     <img src="<?php echo esc_url(wp_get_attachment_image_url($store_banner_id, 'medium')); ?>" style="width:100%; height:100px; border-radius:12px; object-fit:cover; border:1px solid #eee;">
                                     <label style="display:block; margin-top:10px; color:#ef4444; font-size:0.8rem; font-weight:600; cursor:pointer;">
-                                        <input type="checkbox" name="remove_banner" value="1"> Remove
+                                        <input type="checkbox" name="remove_banner" value="1"> <?php echo __('Remove', 'obenlo-booking'); ?>
                                     </label>
                                 </div>
                             <?php
@@ -1674,7 +1639,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 </div>
 
                 <div style="margin-top:40px; margin-bottom:100px;">
-                    <button type="submit" class="btn-primary" style="padding:15px 40px; font-size:1.1rem; width:100%;">Update My Storefront</button>
+                    <button type="submit" class="btn-primary" style="padding:15px 40px; font-size:1.1rem; width:100%;"><?php echo __('Update My Storefront', 'obenlo-booking'); ?></button>
                 </div>
             </form>
         </div>
@@ -2082,13 +2047,13 @@ class Obenlo_Booking_Frontend_Dashboard
 
 ?>
         <div class="dashboard-header">
-            <h2 class="dashboard-title">Support & Assistance</h2>
+            <h2 class="dashboard-title"><?php echo __('Support & Assistance', 'obenlo-booking'); ?></h2>
         </div>
 
         <?php if (isset($_GET['ticket_sent'])): ?>
             <div style="background:#ecfdf5; color:#065f46; padding:15px 20px; border-radius:12px; margin-bottom:30px; border:1px solid #a7f3d0; font-weight:600;">
                 <svg viewBox="0 0 20 20" fill="currentColor" style="width:20px; height:20px; display:inline-block; vertical-align:middle; margin-right:8px;"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                Ticket submitted successfully! Our team will review it and get back to you.
+                <?php echo __('Ticket submitted successfully! Our team will review it and get back to you.', 'obenlo-booking'); ?>
             </div>
         <?php
         endif; ?>
@@ -2097,33 +2062,33 @@ class Obenlo_Booking_Frontend_Dashboard
             
             <!-- Create Ticket -->
             <div class="form-section" style="margin-bottom:0; background:#fcfcfc;">
-                <h4 style="margin-top:0; margin-bottom:20px;">Open New Ticket</h4>
+                <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Open New Ticket', 'obenlo-booking'); ?></h4>
                 <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST">
                     <input type="hidden" name="action" value="obenlo_submit_ticket">
                     <input type="hidden" name="ticket_type" value="support">
                     <?php wp_nonce_field('submit_ticket', 'ticket_nonce'); ?>
                     
                     <div style="margin-bottom:15px;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Subject</label>
-                        <input type="text" name="ticket_title" placeholder="How can we help?" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;"><?php echo __('Subject', 'obenlo-booking'); ?></label>
+                        <input type="text" name="ticket_title" placeholder="<?php echo esc_attr(__('How can we help?', 'obenlo-booking')); ?>" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                     </div>
 
                     <div style="margin-bottom:20px;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;">Message Detail</label>
-                        <textarea name="ticket_content" placeholder="Describe your issue or question..." required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; height:120px;"></textarea>
+                        <label style="display:block; font-weight:700; margin-bottom:8px; font-size:0.9rem;"><?php echo __('Message Detail', 'obenlo-booking'); ?></label>
+                        <textarea name="ticket_content" placeholder="<?php echo esc_attr(__('Describe your issue or question...', 'obenlo-booking')); ?>" required style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; height:120px;"></textarea>
                     </div>
 
-                    <button type="submit" class="btn-primary" style="width:100%; padding:12px;">Create Ticket</button>
+                    <button type="submit" class="btn-primary" style="width:100%; padding:12px;"><?php echo __('Create Ticket', 'obenlo-booking'); ?></button>
                 </form>
             </div>
 
             <!-- Ticket List -->
             <div>
-                <h4 style="margin-top:0; margin-bottom:20px;">Support History</h4>
+                <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Support History', 'obenlo-booking'); ?></h4>
                 <?php if (empty($tickets)): ?>
                     <div style="background:#fff; border:1px dashed #ddd; padding:40px; border-radius:15px; text-align:center; color:#888;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px; height:40px; margin-bottom:15px; opacity:0.3;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        <p>No support history found.</p>
+                        <p><?php echo __('No support history found.', 'obenlo-booking'); ?></p>
                     </div>
                 <?php
         else: ?>
@@ -2145,8 +2110,8 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <?php echo wp_trim_words($ticket->post_content, 20); ?>
                                 </div>
                                 <div style="border-top:1px solid #f5f5f5; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:0.75rem; color:#aaa;">Last updated: <?php echo get_the_modified_date('', $ticket->ID); ?></span>
-                                    <a href="<?php echo esc_url(add_query_arg('ticket_id', $ticket->ID, home_url('/support'))); ?>" style="color:var(--obenlo-primary); font-weight:700; text-decoration:none; font-size:0.9rem;">View Conversation →</a>
+                                    <span style="font-size:0.75rem; color:#aaa;"><?php printf(__('Last updated: %s', 'obenlo-booking'), get_the_modified_date('', $ticket->ID)); ?></span>
+                                    <a href="<?php echo esc_url(add_query_arg('ticket_id', $ticket->ID, home_url('/support'))); ?>" style="color:var(--obenlo-primary); font-weight:700; text-decoration:none; font-size:0.9rem;"><?php echo __('View Conversation →', 'obenlo-booking'); ?></a>
                                 </div>
                             </div>
                         <?php
@@ -2162,9 +2127,10 @@ class Obenlo_Booking_Frontend_Dashboard
 
     private function render_payout_tab()
     {
-        echo '<div class="dashboard-header"><h2 class="dashboard-title">Payout Settings</h2></div>';
+        $brand_name = get_option('obenlo_brand_name', 'Obenlo');
+        echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Payout Settings', 'obenlo-booking') . '</h2></div>';
         echo '<div class="form-section">';
-        echo '<p style="margin-bottom:20px; color:#666;">Manage how you would like to receive your earnings from ' . esc_html($brand_name) . '.</p>';
+        echo '<p style="margin-bottom:20px; color:#666;">' . sprintf(__('Manage how you would like to receive your earnings from %s.', 'obenlo-booking'), esc_html($brand_name)) . '</p>';
 
         $user_id = get_current_user_id();
         $current_method = get_user_meta($user_id, 'obenlo_payout_method', true);
@@ -2175,9 +2141,9 @@ class Obenlo_Booking_Frontend_Dashboard
         <form id="payout-settings-form">
             <?php wp_nonce_field('obenlo_payout_nonce', 'security'); ?>
             <div style="margin-bottom:20px;">
-                <label style="display:block; font-weight:700; margin-bottom:8px;">Payout Method</label>
+                <label style="display:block; font-weight:700; margin-bottom:8px;"><?php echo __('Payout Method', 'obenlo-booking'); ?></label>
                 <select name="payout_method" id="payout_method_select" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
-                    <option value="">Select Method...</option>
+                    <option value=""><?php echo __('Select Method...', 'obenlo-booking'); ?></option>
                     <?php foreach ($methods as $key => $method): ?>
                         <option value="<?php echo esc_attr($key); ?>" <?php selected($current_method, $key); ?>><?php echo esc_html($method['label']); ?></option>
                     <?php
@@ -2185,11 +2151,11 @@ class Obenlo_Booking_Frontend_Dashboard
                 </select>
             </div>
             <div style="margin-bottom:25px;" id="payout_details_wrapper">
-                <label style="display:block; font-weight:700; margin-bottom:8px;">Payment Details</label>
+                <label style="display:block; font-weight:700; margin-bottom:8px;"><?php echo __('Payment Details', 'obenlo-booking'); ?></label>
                 <input type="text" name="payout_details" value="<?php echo esc_attr($current_details); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                 <p style="font-size:0.8rem; color:#888; mt-2;" id="method_hint"></p>
             </div>
-            <button type="submit" class="btn-primary" id="save-payout-btn">Save Payout Preferences</button>
+            <button type="submit" class="btn-primary" id="save-payout-btn"><?php echo __('Save Payout Preferences', 'obenlo-booking'); ?></button>
             <div id="payout-msg" style="margin-top:15px; font-weight:600;"></div>
         </form>
 
@@ -2216,7 +2182,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 var btn = document.getElementById('save-payout-btn');
                 var msg = document.getElementById('payout-msg');
                 btn.disabled = true;
-                btn.innerText = 'Saving...';
+                btn.innerText = '<?php echo esc_js(__('Saving...', 'obenlo-booking')); ?>';
                 
                 var formData = new FormData(form);
                 formData.append('action', 'obenlo_save_payout_settings');
@@ -2237,7 +2203,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 })
                 .finally(() => {
                     btn.disabled = false;
-                    btn.innerText = 'Save Payout Preferences';
+                    btn.innerText = '<?php echo esc_js(__('Save Payout Preferences', 'obenlo-booking')); ?>';
                 });
             });
         });
@@ -2267,21 +2233,29 @@ class Obenlo_Booking_Frontend_Dashboard
             $vacation_blocks = array();
         }
 
-        echo '<div class="dashboard-header"><h2 class="dashboard-title">Availability Settings</h2></div>';
+        echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Availability Settings', 'obenlo-booking') . '</h2></div>';
 
         // Output Form
 ?>
         <div class="form-section">
-            <p style="margin-bottom:20px; color:#666;">Set your default weekly business hours and block out specific dates for vacations or maintenance.</p>
+            <p style="margin-bottom:20px; color:#666;"><?php echo __('Set your default weekly business hours and block out specific dates for vacations or maintenance.', 'obenlo-booking'); ?></p>
             
             <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
                 <input type="hidden" name="action" value="obenlo_dashboard_save_availability">
                 <?php wp_nonce_field('save_availability', 'availability_nonce'); ?>
                 
-                <h3 style="margin-bottom: 20px;">Business Hours</h3>
+                <h3 style="margin-bottom: 20px;"><?php echo __('Business Hours', 'obenlo-booking'); ?></h3>
                 <div style="display:flex; flex-direction:column; gap:15px; margin-bottom: 40px;">
                     <?php
-        $days = array('monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday', 'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday', 'sunday' => 'Sunday');
+        $days = array(
+            'monday' => __('Monday', 'obenlo-booking'),
+            'tuesday' => __('Tuesday', 'obenlo-booking'),
+            'wednesday' => __('Wednesday', 'obenlo-booking'),
+            'thursday' => __('Thursday', 'obenlo-booking'),
+            'friday' => __('Friday', 'obenlo-booking'),
+            'saturday' => __('Saturday', 'obenlo-booking'),
+            'sunday' => __('Sunday', 'obenlo-booking')
+        );
         foreach ($days as $key => $label) {
             $active = isset($business_hours[$key]['active']) && $business_hours[$key]['active'] === 'yes';
             $start = isset($business_hours[$key]['start']) ? $business_hours[$key]['start'] : '09:00';
@@ -2294,7 +2268,7 @@ class Obenlo_Booking_Frontend_Dashboard
                             </label>
                             <div style="display:flex; align-items:center; gap:10px;">
                                 <input type="time" name="hours[<?php echo $key; ?>][start]" value="<?php echo esc_attr($start); ?>" style="padding:8px; border:1px solid #ccc; border-radius:6px;">
-                                <span>to</span>
+                                <span><?php echo __('to', 'obenlo-booking'); ?></span>
                                 <input type="time" name="hours[<?php echo $key; ?>][end]" value="<?php echo esc_attr($end); ?>" style="padding:8px; border:1px solid #ccc; border-radius:6px;">
                             </div>
                         </div>
@@ -2303,7 +2277,7 @@ class Obenlo_Booking_Frontend_Dashboard
 ?>
                 </div>
 
-                <h3 style="margin-bottom: 20px;">Vacation / Blocked Dates</h3>
+                <h3 style="margin-bottom: 20px;"><?php echo __('Vacation / Blocked Dates', 'obenlo-booking'); ?></h3>
                 <div id="vacation-blocks" style="display:flex; flex-direction:column; gap:15px; margin-bottom: 20px;">
                     <?php
         if (!empty($vacation_blocks)) {
@@ -2311,28 +2285,28 @@ class Obenlo_Booking_Frontend_Dashboard
 ?>
                             <div class="vacation-block-row grid-row" style="display:flex; align-items:center; gap:15px; padding:15px; border:1px dashed #ccc; border-radius:10px; background:#fafafa;">
                                 <div>
-                                    <label style="display:block; font-size:0.8rem; font-weight:bold;">Start Date</label>
+                                    <label style="display:block; font-size:0.8rem; font-weight:bold;"><?php echo __('Start Date', 'obenlo-booking'); ?></label>
                                     <input type="date" name="vacation[<?php echo $idx; ?>][start]" value="<?php echo esc_attr($block['start']); ?>" required style="padding:8px; border:1px solid #ccc; border-radius:6px;">
                                 </div>
                                 <div>
-                                    <label style="display:block; font-size:0.8rem; font-weight:bold;">End Date</label>
+                                    <label style="display:block; font-size:0.8rem; font-weight:bold;"><?php echo __('End Date', 'obenlo-booking'); ?></label>
                                     <input type="date" name="vacation[<?php echo $idx; ?>][end]" value="<?php echo esc_attr($block['end']); ?>" required style="padding:8px; border:1px solid #ccc; border-radius:6px;">
                                 </div>
                                 <div>
-                                    <label style="display:block; font-size:0.8rem; font-weight:bold;">Reason (Optional)</label>
-                                    <input type="text" name="vacation[<?php echo $idx; ?>][reason]" value="<?php echo esc_attr($block['reason']); ?>" placeholder="e.g. Renovation" style="padding:8px; border:1px solid #ccc; border-radius:6px; width:200px;">
+                                    <label style="display:block; font-size:0.8rem; font-weight:bold;"><?php echo __('Reason (Optional)', 'obenlo-booking'); ?></label>
+                                    <input type="text" name="vacation[<?php echo $idx; ?>][reason]" value="<?php echo esc_attr($block['reason']); ?>" placeholder="<?php echo esc_attr(__('e.g. Renovation', 'obenlo-booking')); ?>" style="padding:8px; border:1px solid #ccc; border-radius:6px; width:200px;">
                                 </div>
-                                <button type="button" class="remove-block-btn" style="align-self:flex-end; padding:9px 15px; background:#fff; border:1px solid #ef4444; color:#ef4444; border-radius:6px; cursor:pointer;">Remove</button>
+                                <button type="button" class="remove-block-btn" style="align-self:flex-end; padding:9px 15px; background:#fff; border:1px solid #ef4444; color:#ef4444; border-radius:6px; cursor:pointer;"><?php echo __('Remove', 'obenlo-booking'); ?></button>
                             </div>
                             <?php
             }
         }
 ?>
                 </div>
-                <button type="button" id="add-vacation-block" style="padding:10px 20px; background:#f0f0f0; border:1px solid #ccc; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:40px;">+ Add Blocked Date Range</button>
+                <button type="button" id="add-vacation-block" style="padding:10px 20px; background:#f0f0f0; border:1px solid #ccc; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:40px;">+ <?php echo __('Add Blocked Date Range', 'obenlo-booking'); ?></button>
                 <div style="clear:both;"></div>
                 
-                <button type="submit" class="btn-primary">Save Availability Settings</button>
+                <button type="submit" class="btn-primary"><?php echo __('Save Availability Settings', 'obenlo-booking'); ?></button>
             </form>
         </div>
 
@@ -2344,18 +2318,18 @@ class Obenlo_Booking_Frontend_Dashboard
                 var template = `
                     <div class="vacation-block-row grid-row" style="display:flex; align-items:center; gap:15px; padding:15px; border:1px dashed #ccc; border-radius:10px; background:#fafafa; margin-top:15px;">
                         <div>
-                            <label style="display:block; font-size:0.8rem; font-weight:bold;">Start Date</label>
+                            <label style="display:block; font-size:0.8rem; font-weight:bold;"><?php echo esc_js(__('Start Date', 'obenlo-booking')); ?></label>
                             <input type="date" name="vacation[{idx}][start]" required style="padding:8px; border:1px solid #ccc; border-radius:6px;">
                         </div>
                         <div>
-                            <label style="display:block; font-size:0.8rem; font-weight:bold;">End Date</label>
+                            <label style="display:block; font-size:0.8rem; font-weight:bold;"><?php echo esc_js(__('End Date', 'obenlo-booking')); ?></label>
                             <input type="date" name="vacation[{idx}][end]" required style="padding:8px; border:1px solid #ccc; border-radius:6px;">
                         </div>
                         <div>
-                            <label style="display:block; font-size:0.8rem; font-weight:bold;">Reason (Optional)</label>
-                            <input type="text" name="vacation[{idx}][reason]" placeholder="e.g. Renovation" style="padding:8px; border:1px solid #ccc; border-radius:6px; width:200px;">
+                            <label style="display:block; font-size:0.8rem; font-weight:bold;"><?php echo esc_js(__('Reason (Optional)', 'obenlo-booking')); ?></label>
+                            <input type="text" name="vacation[{idx}][reason]" placeholder="<?php echo esc_js(__('e.g. Renovation', 'obenlo-booking')); ?>" style="padding:8px; border:1px solid #ccc; border-radius:6px; width:200px;">
                         </div>
-                        <button type="button" class="remove-block-btn" style="align-self:flex-end; padding:9px 15px; background:#fff; border:1px solid #ef4444; color:#ef4444; border-radius:6px; cursor:pointer;">Remove</button>
+                        <button type="button" class="remove-block-btn" style="align-self:flex-end; padding:9px 15px; background:#fff; border:1px solid #ef4444; color:#ef4444; border-radius:6px; cursor:pointer;"><?php echo esc_js(__('Remove', 'obenlo-booking')); ?></button>
                     </div>
                 `;
 

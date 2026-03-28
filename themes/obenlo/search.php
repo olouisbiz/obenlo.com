@@ -91,21 +91,21 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
 
 <div class="obenlo-container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: 'Inter', sans-serif;">
     <h1 style="font-size: 2em; margin-bottom: 30px;">
-        Search results for "<?php echo esc_html( $clean_query ); ?>"
+        <?php printf(__('Search results for "%s"', 'obenlo'), esc_html( $clean_query )); ?>
     </h1>
 
     <?php if ( ! $has_results ) : ?>
         <div style="text-align: center; padding: 60px 20px; background: #fafafa; border-radius: 12px;">
             <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="fill:none; height:48px; width:48px; stroke:#ccc; stroke-width:2; margin-bottom: 20px; display:inline-block;"><circle cx="14" cy="14" r="10"></circle><path d="m21 21 8 8"></path></svg>
-            <h2>No results found</h2>
-            <p style="color: #666; font-size: 1.1em;">We couldn't find anything matching "<?php echo esc_html( $clean_query ); ?>". Try searching for a different host, location, or keyword.</p>
+            <h2><?php echo __('No results found', 'obenlo'); ?></h2>
+            <p style="color: #666; font-size: 1.1em;"><?php printf(__("We couldn't find anything matching \"%s\". Try searching for a different host, location, or keyword.", 'obenlo'), esc_html( $clean_query )); ?></p>
         </div>
     <?php else: ?>
 
         <?php /* --- HOSTS RESULTS --- */ ?>
         <?php if ( ! empty( $hosts ) ) : ?>
             <div class="search-section" style="margin-bottom: 50px;">
-                <h2 style="font-size: 1.5em; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Hosts</h2>
+                <h2 style="font-size: 1.5em; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;"><?php echo __('Hosts', 'obenlo'); ?></h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
                     <?php foreach ( $hosts as $host ) : 
                         $logo_id = get_user_meta( $host->ID, 'obenlo_store_logo', true );
@@ -116,7 +116,7 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
                              <a href="<?php echo esc_url( get_author_posts_url( $host->ID ) ); ?>" style="text-decoration: none; color: inherit; display: block; width: 100%;">
                                 <img src="<?php echo esc_url( $avatar_url ); ?>" alt="<?php echo esc_attr( $store_name ); ?>" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #f0f0f0;">
                                 <h3 style="margin: 0 0 5px 0; font-size: 1.1em;"><?php echo esc_html( $store_name ); ?></h3>
-                                <div style="font-size: 0.9em; color: #666;">View Profile</div>
+                                <div style="font-size: 0.9em; color: #666;"><?php echo __('View Profile', 'obenlo'); ?></div>
                             </a>
                         </div>
                     <?php endforeach; ?>
@@ -128,7 +128,7 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
         <?php /* --- CATEGORIES RESULTS --- */ ?>
         <?php if ( ! empty( $categories ) && ! is_wp_error( $categories ) ) : ?>
             <div class="search-section" style="margin-bottom: 50px;">
-                <h2 style="font-size: 1.5em; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Categories</h2>
+                <h2 style="font-size: 1.5em; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;"><?php echo __('Categories', 'obenlo'); ?></h2>
                 <div style="display: flex; flex-wrap: wrap; gap: 15px;">
                     <?php foreach ( $categories as $category ) : 
                         $cat_link = get_term_link( $category );
@@ -146,7 +146,7 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
         <?php /* --- LISTINGS & LOCATIONS RESULTS --- */ ?>
         <?php if ( $final_listings_query && $final_listings_query->have_posts() ) : ?>
             <div class="search-section">
-                <h2 style="font-size: 1.5em; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Listings & Locations</h2>
+                <h2 style="font-size: 1.5em; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;"><?php echo __('Listings & Locations', 'obenlo'); ?></h2>
                 <div class="listings-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
                     <?php while ( $final_listings_query->have_posts() ) : $final_listings_query->the_post(); 
                         $price = get_post_meta( get_the_ID(), '_listing_price', true ) ?: get_post_meta( get_the_ID(), '_obenlo_price', true );
@@ -161,7 +161,7 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
                                     if ( has_post_thumbnail() ) {
                                         the_post_thumbnail( 'medium', array( 'style' => 'width: 100%; height: 100%; object-fit: cover; display: block;' ) );
                                     } else {
-                                        echo '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#ccc;">No Image</div>';
+                                        echo '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#ccc;">' . __('No Image', 'obenlo') . '</div>';
                                     }
                                     ?>
                                 </div>
@@ -177,7 +177,7 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
                                     <?php endif; ?>
                                     
                                     <div style="font-weight: bold; color: #222; margin-top: 10px; font-size: 1.1em;">
-                                       $<?php echo esc_html( $price ?: '0' ); ?> <span style="font-weight: normal; color: #666; font-size: 0.8em;">total</span>
+                                       $<?php echo esc_html( $price ?: '0' ); ?> <span style="font-weight: normal; color: #666; font-size: 0.8em;"><?php echo __('total', 'obenlo'); ?></span>
                                     </div>
                                 </div>
                             </a>

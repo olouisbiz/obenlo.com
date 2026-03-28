@@ -20,37 +20,37 @@ get_header(); ?>
                 <h2 style="font-size: 2.2rem; margin-bottom: 15px;"><?php esc_html_e( 'Host Spotlights', 'obenlo' ); ?></h2>
                 <p style="color: #666; font-size: 1.1rem;"><?php esc_html_e( 'Meet the people opening their doors and sharing their passions.', 'obenlo' ); ?></p>
             </div>
-            <a href="<?php echo home_url('/blog'); ?>" style="color: var(--obenlo-primary); font-weight: bold; text-decoration: none;">Read all stories &rarr;</a>
+            <a href="<?php echo home_url('/blog'); ?>" style="color: var(--obenlo-primary); font-weight: bold; text-decoration: none;"><?php echo __('Read all stories &rarr;', 'obenlo'); ?></a>
         </div>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
             <div style="border: 1px solid #eee; border-radius: 20px; overflow: hidden; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
                 <div style="background: #f7f7f7; height: 200px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🎨</div>
                 <div style="padding: 25px;">
-                    <div style="color: var(--obenlo-primary); font-weight: bold; font-size: 0.85rem; margin-bottom: 10px; text-transform: uppercase;">Experience Host</div>
-                    <h3 style="margin-bottom: 10px; font-size: 1.3rem;">Hosting a Pottery Masterclass in the City</h3>
-                    <p style="color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">Learn how Sarah turned her weekend hobby into a fully booked experience on Obenlo.</p>
-                    <a href="<?php echo home_url('/blog'); ?>" style="color: #222; font-weight: bold; text-decoration: none;">Read Story</a>
+                    <div style="color: var(--obenlo-primary); font-weight: bold; font-size: 0.85rem; margin-bottom: 10px; text-transform: uppercase;"><?php echo __('Experience Host', 'obenlo'); ?></div>
+                    <h3 style="margin-bottom: 10px; font-size: 1.3rem;"><?php echo __('Hosting a Pottery Masterclass in the City', 'obenlo'); ?></h3>
+                    <p style="color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;"><?php echo __('Learn how Sarah turned her weekend hobby into a fully booked experience on Obenlo.', 'obenlo'); ?></p>
+                    <a href="<?php echo home_url('/blog'); ?>" style="color: #222; font-weight: bold; text-decoration: none;"><?php echo __('Read Story', 'obenlo'); ?></a>
                 </div>
             </div>
             
             <div style="border: 1px solid #eee; border-radius: 20px; overflow: hidden; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
                 <div style="background: #f7f7f7; height: 200px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🏡</div>
                 <div style="padding: 25px;">
-                    <div style="color: var(--obenlo-primary); font-weight: bold; font-size: 0.85rem; margin-bottom: 10px; text-transform: uppercase;">Stay Host</div>
-                    <h3 style="margin-bottom: 10px; font-size: 1.3rem;">From Empty Nest to Global Guest Book</h3>
-                    <p style="color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">How a retired couple found a new calling by sharing their historic farmhouse.</p>
-                    <a href="<?php echo home_url('/blog'); ?>" style="color: #222; font-weight: bold; text-decoration: none;">Read Story</a>
+                    <div style="color: var(--obenlo-primary); font-weight: bold; font-size: 0.85rem; margin-bottom: 10px; text-transform: uppercase;"><?php echo __('Stay Host', 'obenlo'); ?></div>
+                    <h3 style="margin-bottom: 10px; font-size: 1.3rem;"><?php echo __('From Empty Nest to Global Guest Book', 'obenlo'); ?></h3>
+                    <p style="color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;"><?php echo __('How a retired couple found a new calling by sharing their historic farmhouse.', 'obenlo'); ?></p>
+                    <a href="<?php echo home_url('/blog'); ?>" style="color: #222; font-weight: bold; text-decoration: none;"><?php echo __('Read Story', 'obenlo'); ?></a>
                 </div>
             </div>
 
             <div style="border: 1px solid #eee; border-radius: 20px; overflow: hidden; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
                 <div style="background: #f7f7f7; height: 200px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🛠️</div>
                 <div style="padding: 25px;">
-                    <div style="color: var(--obenlo-primary); font-weight: bold; font-size: 0.85rem; margin-bottom: 10px; text-transform: uppercase;">Service Host</div>
-                    <h3 style="margin-bottom: 10px; font-size: 1.3rem;">Building a Freelance Business with Obenlo</h3>
-                    <p style="color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">Discover how local guides and professionals are scaling their services securely.</p>
-                    <a href="<?php echo home_url('/blog'); ?>" style="color: #222; font-weight: bold; text-decoration: none;">Read Story</a>
+                    <div style="color: var(--obenlo-primary); font-weight: bold; font-size: 0.85rem; margin-bottom: 10px; text-transform: uppercase;"><?php echo __('Service Host', 'obenlo'); ?></div>
+                    <h3 style="margin-bottom: 10px; font-size: 1.3rem;"><?php echo __('Building a Freelance Business with Obenlo', 'obenlo'); ?></h3>
+                    <p style="color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;"><?php echo __('Discover how local guides and professionals are scaling their services securely.', 'obenlo'); ?></p>
+                    <a href="<?php echo home_url('/blog'); ?>" style="color: #222; font-weight: bold; text-decoration: none;"><?php echo __('Read Story', 'obenlo'); ?></a>
                 </div>
             </div>
         </div>
@@ -63,7 +63,7 @@ get_header(); ?>
             <?php esc_html_e( 'We are building a dedicated space for you to ask questions, share itineraries, and collaborate on best practices with hosts and guests worldwide.', 'obenlo' ); ?>
         </p>
         <button style="background: #fff; color: var(--obenlo-primary); border: none; padding: 16px 40px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; cursor: pointer; opacity: 0.5;">
-            Forum Coming 2026
+            <?php echo __('Forum Coming 2026', 'obenlo'); ?>
         </button>
     </section>
 
@@ -75,7 +75,7 @@ get_header(); ?>
             <p style="color: #666; font-size: 1.05rem; line-height: 1.6; margin-bottom: 25px;">
                 <?php esc_html_e( 'Join us at our upcoming host events and traveler mixers in major cities. Stay tuned to the blog for the next Obenlo meetup near you.', 'obenlo' ); ?>
             </p>
-            <a href="<?php echo home_url('/blog'); ?>" style="display: inline-block; background: #222; color: #fff; text-decoration: none; padding: 12px 25px; border-radius: 8px; font-weight: bold;">Check Schedule</a>
+            <a href="<?php echo home_url('/blog'); ?>" style="display: inline-block; background: #222; color: #fff; text-decoration: none; padding: 12px 25px; border-radius: 8px; font-weight: bold;"><?php echo __('Check Schedule', 'obenlo'); ?></a>
         </div>
         
         <div style="background: #f7f7f7; padding: 50px; border-radius: 30px;">

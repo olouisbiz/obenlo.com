@@ -35,7 +35,7 @@
         if ( !empty($term->description) ) {
             $seo_desc = wp_strip_all_tags($term->description);
         } else {
-            $seo_desc = 'Find the best local ' . strtolower($term->name) . ' professionals on ' . get_bloginfo('name') . '.';
+            $seo_desc = sprintf(__('Find the best local %s professionals on %s.', 'obenlo-booking'), strtolower($term->name), get_bloginfo('name'));
         }
     }
     ?>
@@ -120,7 +120,7 @@
 
         <div class="header-search-nav">
             <form role="search" method="get" class="smart-search-bar" action="<?php echo esc_url(home_url('/')); ?>">
-                <input type="text" name="s" class="search-input" placeholder="Search listings, categories, locations or hosts..." value="<?php echo get_search_query(); ?>">
+                <input type="text" name="s" class="search-input" placeholder="<?php echo esc_attr(__('Search listings, categories, locations or hosts...', 'obenlo-booking')); ?>" value="<?php echo get_search_query(); ?>">
                 <button type="submit" class="search-icon-btn">
                     <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display:block;fill:none;height:12px;width:12px;stroke:currentColor;stroke-width:5.33333;overflow:visible"><g fill="none"><path d="m13 24c6.0751322 0 11-4.9248678 11-11 0-6.07513225-4.9248678-11-11-11-6.07513225 0-11 4.92486775-11 11 0 6.0751322 4.92486775 11 11 11zm8-3 9 9"></path></g></svg>
                 </button>
@@ -159,7 +159,7 @@
                 </button>
 
                 <div class="user-dropdown-menu">
-                    <div style="padding: 12px 20px; font-weight: bold;">Hi, <?php echo esc_html($user->display_name); ?></div>
+                    <div style="padding: 12px 20px; font-weight: bold;"><?php printf(__('Hi, %s', 'obenlo-booking'), esc_html($user->display_name)); ?></div>
                     <div class="menu-divider"></div>
                     <a href="<?php echo esc_url(home_url('/account?tab=trips')); ?>"><?php esc_html_e('Trips', 'obenlo-booking'); ?></a>
                     <a href="<?php echo esc_url(home_url('/wishlists')); ?>"><?php esc_html_e('Wishlists', 'obenlo-booking'); ?></a>

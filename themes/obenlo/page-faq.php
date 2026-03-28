@@ -6,15 +6,15 @@
 get_header();
 
 $type = isset( $_GET['type'] ) ? sanitize_text_field( $_GET['type'] ) : 'all';
-$title = 'Frequently Asked Questions';
-$desc = 'Quick answers to common questions about Obenlo.';
+$title = __('Frequently Asked Questions', 'obenlo');
+$desc = __('Quick answers to common questions about Obenlo.', 'obenlo');
 
 if ( $type === 'guest' ) {
-    $title = 'Guest Support';
-    $desc = 'Find answers about booking, staying, and interacting with hosts.';
+    $title = __('Guest Support', 'obenlo');
+    $desc = __('Find answers about booking, staying, and interacting with hosts.', 'obenlo');
 } elseif ( $type === 'host' ) {
-    $title = 'Host Support';
-    $desc = 'Find answers about listing your space, managing bookings, and getting paid.';
+    $title = __('Host Support', 'obenlo');
+    $desc = __('Find answers about listing your space, managing bookings, and getting paid.', 'obenlo');
 }
 ?>
 
@@ -79,7 +79,7 @@ if ( $type === 'guest' ) {
     
     <div style="text-align: center; margin-top: 40px;">
         <?php if ( $type !== 'all' ) : ?>
-            <a href="<?php echo esc_url( home_url('/faq') ); ?>" style="color: var(--obenlo-primary); font-weight: bold; text-decoration: none; margin-right: 20px;"><?php esc_html_e( '&larr; View All FAQs', 'obenlo' ); ?></a>
+            <a href="<?php echo esc_url( home_url('/faq') ); ?>" style="color: var(--obenlo-primary); font-weight: bold; text-decoration: none; margin-right: 20px;"><?php echo __('&larr; View All FAQs', 'obenlo'); ?></a>
         <?php endif; ?>
         <a href="<?php echo esc_url( home_url('/support') ); ?>" style="padding: 12px 30px; background: var(--obenlo-primary); color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold;"><?php esc_html_e( 'Contact Support', 'obenlo' ); ?></a>
     </div>

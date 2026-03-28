@@ -65,7 +65,7 @@ $grid_query = new WP_Query($grid_args);
     <div class="blog-filters" style="display: flex; gap: 32px; justify-content: center; margin-bottom: 40px; overflow-x: auto; border-bottom: 1px solid #eee; padding-top: 10px;">
         <a href="<?php echo home_url('/blog'); ?>" class="blog-cat-item <?php echo empty($current_category) ? 'active' : ''; ?>">
             <span style="font-size:1.5rem;">🌎</span>
-            <span>All Posts</span>
+            <span><?php echo __('All Posts', 'obenlo'); ?></span>
         </a>
         <?php 
         $emoji_map = ['news' => '📰', 'hosting' => '🏠', 'local' => '📍', 'updates' => '✨', 'tips' => '💡'];
@@ -75,7 +75,7 @@ $grid_query = new WP_Query($grid_args);
         ?>
             <a href="?category=<?php echo $cat->slug; ?>" class="blog-cat-item <?php echo $cat_active; ?>">
                 <span style="font-size:1.5rem;"><?php echo $emoji; ?></span>
-                <span><?php echo esc_html($cat->name); ?></span>
+                <span><?php echo esc_html(__($cat->name, 'obenlo')); ?></span>
             </a>
         <?php endforeach; ?>
     </div>
@@ -103,7 +103,7 @@ $grid_query = new WP_Query($grid_args);
                             <div style="font-size: 0.85em; display: flex; align-items: center; gap: 4px; color: var(--obenlo-primary); font-weight: 700;">
                                 <?php 
                                 $cats = get_the_category();
-                                if(!empty($cats)) echo esc_html($cats[0]->name);
+                                if(!empty($cats)) echo esc_html(__($cats[0]->name, 'obenlo'));
                                 ?>
                             </div>
                         </div>
@@ -125,8 +125,8 @@ $grid_query = new WP_Query($grid_args);
                     'format'       => '?paged=%#%',
                     'current'      => max( 1, get_query_var( 'paged' ) ),
                     'total'        => $grid_query->max_num_pages,
-                    'prev_text'    => '&larr; Previous',
-                    'next_text'    => 'Next &rarr;',
+                    'prev_text'    => '&larr; ' . __('Previous', 'obenlo'),
+                    'next_text'    => __('Next', 'obenlo') . ' &rarr;',
                     'type'         => 'plain',
                 ) );
                 ?>
@@ -134,8 +134,8 @@ $grid_query = new WP_Query($grid_args);
 
         <?php wp_reset_postdata(); else : ?>
             <div style="grid-column: 1/-1; text-align: center; padding: 100px 20px;">
-                <h2 style="font-size: 1.8rem; color: #222;"><?php esc_html_e( 'No stories found.', 'obenlo' ); ?></h2>
-                <a href="<?php echo home_url('/blog'); ?>" style="color: var(--obenlo-primary); font-weight: 700;"><?php esc_html_e( 'Back to all posts', 'obenlo' ); ?></a>
+                <h2 style="font-size: 1.8rem; color: #222;"><?php echo __( 'No stories found.', 'obenlo' ); ?></h2>
+                <a href="<?php echo home_url('/blog'); ?>" style="color: var(--obenlo-primary); font-weight: 700;"><?php echo __( 'Back to all posts', 'obenlo' ); ?></a>
             </div>
         <?php endif; ?>
     </div>

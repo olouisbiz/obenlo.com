@@ -56,7 +56,7 @@ get_header(); ?>
                 <div class="author-bio" style="margin-top: 50px; padding: 40px; background: #f9f9f9; border-radius: 15px; display: flex; gap: 20px; align-items: flex-start;">
                     <?php echo get_avatar( get_the_author_meta( 'ID' ), 80, '', '', array('style' => 'border-radius: 50%;') ); ?>
                     <div>
-                        <h4 style="margin-bottom: 10px; font-size: 1.2rem;"><?php esc_html_e( 'About', 'obenlo' ); ?> <?php the_author(); ?></h4>
+                        <h4 style="margin-bottom: 10px; font-size: 1.2rem;"><?php printf(__('About %s', 'obenlo'), get_the_author()); ?></h4>
                         <p style="font-size: 0.95rem; color: #666; margin: 0;"><?php the_author_meta( 'description' ); ?></p>
                     </div>
                 </div>

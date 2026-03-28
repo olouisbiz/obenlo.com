@@ -287,9 +287,9 @@ get_header(); ?>
             <?php
             // Mock reviews for now - later can pull from actual comments/meta
             $mock_reviews = array(
-                array('author' => 'Sarah', 'comment' => 'The mountain experience was breathtaking. The host was so professional!', 'rating' => 5, 'date' => 'March 2026'),
-                array('author' => 'Michael', 'comment' => 'Obenlo made booking our summer stay so simple. Highly recommend this platform.', 'rating' => 5, 'date' => 'February 2026'),
-                array('author' => 'Elena', 'comment' => 'Unique services that I couldnt find anywhere else. A truly casual and friendly vibe.', 'rating' => 4, 'date' => 'January 2026'),
+                array('author' => 'Sarah', 'comment' => __('The mountain experience was breathtaking. The host was so professional!', 'obenlo'), 'rating' => 5, 'date' => __('March 2026', 'obenlo')),
+                array('author' => 'Michael', 'comment' => __('Obenlo made booking our summer stay so simple. Highly recommend this platform.', 'obenlo'), 'rating' => 5, 'date' => __('February 2026', 'obenlo')),
+                array('author' => 'Elena', 'comment' => __('Unique services that I couldnt find anywhere else. A truly casual and friendly vibe.', 'obenlo'), 'rating' => 4, 'date' => __('January 2026', 'obenlo')),
             );
             foreach ( $mock_reviews as $review ) {
                 include locate_template('template-parts/content-review-card.php');
