@@ -14,11 +14,19 @@ class Obenlo_Booking_Stripe {
     }
 
     public static function get_publishable_key() {
-        return get_option( 'obenlo_stripe_publishable_key', '' );
+        $mode = get_option( 'obenlo_payment_mode', 'sandbox' );
+        if ( $mode === 'live' ) {
+            return get_option( 'obenlo_stripe_live_publishable_key', '' );
+        }
+        return get_option( 'obenlo_stripe_sandbox_publishable_key', '' );
     }
 
     public static function get_secret_key() {
-        return get_option( 'obenlo_stripe_secret_key', '' );
+        $mode = get_option( 'obenlo_payment_mode', 'sandbox' );
+        if ( $mode === 'live' ) {
+            return get_option( 'obenlo_stripe_live_secret_key', '' );
+        }
+        return get_option( 'obenlo_stripe_sandbox_secret_key', '' );
     }
 
     /**

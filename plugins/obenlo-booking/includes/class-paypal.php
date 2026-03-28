@@ -14,11 +14,19 @@ class Obenlo_Booking_PayPal {
     }
 
     public static function get_client_id() {
-        return get_option( 'obenlo_paypal_client_id', '' );
+        $mode = get_option( 'obenlo_payment_mode', 'sandbox' );
+        if ( $mode === 'live' ) {
+            return get_option( 'obenlo_paypal_live_client_id', '' );
+        }
+        return get_option( 'obenlo_paypal_sandbox_client_id', '' );
     }
 
     public static function get_secret() {
-        return get_option( 'obenlo_paypal_secret', '' );
+        $mode = get_option( 'obenlo_payment_mode', 'sandbox' );
+        if ( $mode === 'live' ) {
+            return get_option( 'obenlo_paypal_live_secret', '' );
+        }
+        return get_option( 'obenlo_paypal_sandbox_secret', '' );
     }
 
     /**
