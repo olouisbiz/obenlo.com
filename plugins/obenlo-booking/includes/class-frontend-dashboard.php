@@ -19,6 +19,7 @@ class Obenlo_Booking_Frontend_Dashboard
         add_action('admin_post_obenlo_dashboard_booking_action', array($this, 'handle_booking_action'));
         add_action('admin_post_obenlo_dashboard_save_availability', array($this, 'handle_save_availability'));
         add_action('admin_post_obenlo_dashboard_delete_listing', array($this, 'handle_delete_listing'));
+        add_action('admin_post_obenlo_export_bookings', array($this, 'handle_export_bookings'));
         add_action('init', array($this, 'handle_global_location_fix'));
     }
 
@@ -232,6 +233,12 @@ class Obenlo_Booking_Frontend_Dashboard
                     break;
                 case 'invalid_payment':
                     $error_msg = 'Invalid payment method selected.';
+                    break;
+                case 'no_bookings':
+                    $error_msg = 'No bookings found for the selected date.';
+                    break;
+                case 'invalid_date':
+                    $error_msg = 'Please select a valid date for export.';
                     break;
             }
             
@@ -587,6 +594,15 @@ class Obenlo_Booking_Frontend_Dashboard
                 </div>
                 <span id="booking-search-count" style="font-size:0.85rem; color:#888;"></span>
                 <button onclick="document.getElementById('booking-code-search').value=''; filterBookings();" style="background:none; border:1px solid #eee; border-radius:10px; padding:10px 16px; color:#666; cursor:pointer; font-size:0.85rem;">Clear</button>
+                
+                <!-- ── Booking Export Form ── -->
+                <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="display:flex; gap:10px; align-items:center; margin-left:auto;">
+                    <input type="hidden" name="action" value="obenlo_export_bookings">
+                    <?php wp_nonce_field('obenlo_export_bookings'); ?>
+                    <label style="font-size:0.85rem; font-weight:700; color:#666;">Export date:</label>
+                    <input type="date" name="export_date" value="<?php echo date('Y-m-d'); ?>" style="padding:8px; border:2px solid #eee; border-radius:10px; font-size:0.9rem;">
+                    <button type="submit" class="btn-primary" style="padding:10px 20px; font-size:0.85rem;">Export CSV</button>
+                </form>
             </div>
         <?php
         endif; ?>
@@ -2437,6 +2453,79 @@ class Obenlo_Booking_Frontend_Dashboard
         wp_delete_post($listing_id, true);
 
         wp_safe_redirect(add_query_arg(array('action' => 'list', 'message' => 'deleted'), home_url('/host-dashboard')));
+        exit;
+    }
+
+    public function handle_export_bookings()
+    {
+        if (!is_user_logged_in()) {
+            wp_die('Unauthorized');
+        }
+
+        check_admin_referer('obenlo_export_bookings');
+
+        $user_id = get_current_user_id();
+        $export_date = isset($_POST['export_date']) ? sanitize_text_field($_POST['export_date']) : '';
+
+        if (!$export_date) {
+            $this->redirect_with_error('invalid_date');
+        }
+
+        // Fetch bookings for this host and date
+        $args = array(
+            'post_type' => 'booking',
+            'posts_per_page' => -1,
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => '_obenlo_host_id',
+                    'value' => $user_id,
+                ),
+                array(
+                    'key' => '_obenlo_start_date',
+                    'value' => $export_date,
+                    'compare' => 'LIKE' // Match Y-m-d regardless of optional time
+                )
+            ),
+            'orderby' => 'date',
+            'order' => 'DESC'
+        );
+        $bookings = get_posts($args);
+
+        if (empty($bookings)) {
+            $this->redirect_with_error('no_bookings');
+        }
+
+        // CSV Headers
+        $filename = 'bookings-' . $export_date . '.csv';
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=' . $filename);
+
+        $output = fopen('php://output', 'w');
+        
+        // CSV Column Titles
+        fputcsv($output, array('Booking ID', 'Listing', 'Guest Name', 'Guest Email', 'Start Date', 'End Date', 'Guests', 'Total Price ($)', 'Status', 'Confirmation Code'));
+
+        foreach ($bookings as $booking) {
+            $listing_id = get_post_meta($booking->ID, '_obenlo_listing_id', true);
+            $listing_title = $listing_id ? get_the_title($listing_id) : 'Unknown';
+            $guest_user = get_user_by('id', $booking->post_author);
+            
+            fputcsv($output, array(
+                $booking->ID,
+                $listing_title,
+                $guest_user ? $guest_user->display_name : 'Guest #' . $booking->post_author,
+                $guest_user ? $guest_user->user_email : 'N/A',
+                get_post_meta($booking->ID, '_obenlo_start_date', true),
+                get_post_meta($booking->ID, '_obenlo_end_date', true) ?: 'N/A',
+                get_post_meta($booking->ID, '_obenlo_guests', true),
+                get_post_meta($booking->ID, '_obenlo_total_price', true),
+                get_post_meta($booking->ID, '_obenlo_booking_status', true),
+                get_post_meta($booking->ID, '_obenlo_confirmation_code', true)
+            ));
+        }
+
+        fclose($output);
         exit;
     }
 
