@@ -203,8 +203,12 @@ class Obenlo_Booking_Payments
             $total_price = $price_per_unit * $booking_duration;
             $duration_mins = $booking_duration * 60;
         }
-        elseif ($pricing_model === 'per_person' || $pricing_model === 'per_session' || $pricing_model === 'flat_fee') {
-            if ($pricing_model === 'per_person') {
+        elseif (in_array($pricing_model, ['per_person', 'per_session', 'per_event', 'per_donation', 'custom_donation', 'flat_fee'])) {
+            if ($pricing_model === 'custom_donation') {
+                $custom_amount = isset($_POST['custom_donation_amount']) ? floatval($_POST['custom_donation_amount']) : 0;
+                $total_price = ($custom_amount > 0) ? $custom_amount : $price_per_unit;
+            }
+            elseif ($pricing_model === 'per_person') {
                 $form_has_guests = true;
                 $capacity = get_post_meta($listing_id, '_obenlo_capacity', true);
                 if ($capacity && $guests > $capacity) {

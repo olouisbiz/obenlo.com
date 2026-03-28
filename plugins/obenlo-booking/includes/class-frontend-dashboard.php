@@ -1081,6 +1081,9 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <option value="per_hour" <?php selected($pricing_model, 'per_hour'); ?>>Per Hour</option>
                                     <option value="per_session" <?php selected($pricing_model, 'per_session'); ?>>Per Session / Appointment</option>
                                     <option value="per_person" <?php selected($pricing_model, 'per_person'); ?>>Per Person</option>
+                                    <option value="per_event" <?php selected($pricing_model, 'per_event'); ?>>Per Event (Flat Fee)</option>
+                                    <option value="per_donation" <?php selected($pricing_model, 'per_donation'); ?>>Per Donation (Fixed Amount)</option>
+                                    <option value="custom_donation" <?php selected($pricing_model, 'custom_donation'); ?>>Custom Donation Amount (Pay What You Want)</option>
                                     <option value="flat_fee" <?php selected($pricing_model, 'flat_fee'); ?>>Flat Fee</option>
                                 </select>
                             </div>
@@ -1289,6 +1292,10 @@ class Obenlo_Booking_Frontend_Dashboard
                     $type_map[$type->term_id] = 'stay';
                 elseif (strpos($name_lower, 'experience') !== false || strpos($name_lower, 'tour') !== false)
                     $type_map[$type->term_id] = 'experience';
+                elseif (in_array($slug, ['celebration']) || strpos($name_lower, 'celebration') !== false)
+                    $type_map[$type->term_id] = 'celebration';
+                elseif (in_array($slug, ['donation-giving']) || strpos($name_lower, 'donation') !== false)
+                    $type_map[$type->term_id] = 'donation';
                 elseif (in_array($slug, ['event', 'show']) || strpos($name_lower, 'event') !== false)
                     $type_map[$type->term_id] = 'event';
                 elseif (strpos($name_lower, 'service') !== false || in_array($slug, ['chauffeur', 'cook', 'barbershop', 'hairdresser', 'concierge', 'personal-assistant', 'babysitter', 'dogsitter']))
@@ -1393,6 +1400,38 @@ class Obenlo_Booking_Frontend_Dashboard
                         }
                     }
                     if (amenHeading) amenHeading.innerText = 'Amenities';
+                } else if (category === 'celebration') {
+                    if (priceLabel) priceLabel.innerText = 'Event Fee ($)';
+                    if (capLabel) capLabel.innerText = 'Max Guests';
+                    if (pricingModel) {
+                        pricingModel.value = 'per_event';
+                        Array.from(pricingModel.options).forEach(opt => {
+                            if (!['per_event', 'per_hour', 'per_person', 'flat_fee'].includes(opt.value)) {
+                                opt.hidden = true;
+                                opt.disabled = true;
+                            }
+                        });
+                    }
+                    if (slotsWrapper) slotsWrapper.style.display = 'none';
+                    if (eventConfigWrapper) eventConfigWrapper.style.display = 'block';
+                    if (genericLocationWrapper) genericLocationWrapper.style.display = 'none';
+                    if (amenHeading) amenHeading.innerText = 'What\'s Included';
+                } else if (category === 'donation') {
+                    if (priceLabel) priceLabel.innerText = 'Suggested Donation ($)';
+                    if (capLabel) capLabel.innerText = 'Max Donors/Supporters (Optional)';
+                    if (pricingModel) {
+                        pricingModel.value = 'per_donation';
+                        Array.from(pricingModel.options).forEach(opt => {
+                            if (!['per_donation', 'custom_donation', 'flat_fee'].includes(opt.value)) {
+                                opt.hidden = true;
+                                opt.disabled = true;
+                            }
+                        });
+                    }
+                    if (durationWrapper) durationWrapper.style.display = 'none';
+                    if (slotsWrapper) slotsWrapper.style.display = 'none';
+                    if (eventConfigWrapper) eventConfigWrapper.style.display = 'none';
+                    if (amenHeading) amenHeading.innerText = 'Donation Details';
                 } else {
                     if (priceLabel) priceLabel.innerText = 'Price (Base)';
                     if (capLabel) capLabel.innerText = 'Capacity/Max Guests';
