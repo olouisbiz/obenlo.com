@@ -230,6 +230,8 @@ class Obenlo_Booking_Post_Types {
             'Dogsitter'          => 'service',
             'Tour'               => 'experience',
             'Show'               => 'event',
+            'Celebration'        => 'event',
+            'Donation & Giving'  => 'event',
             'Cleaning'           => 'service',
             'Barber'             => 'service',
             'Handyman'           => 'service',
