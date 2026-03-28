@@ -641,6 +641,15 @@ get_header(); ?>
         elseif ($pricing_model === 'per_person') {
             $cfg = array('mode' => 'event_datetime', 'price_unit' => '/ person', 'date_label' => 'Select Event Time', 'has_guests' => true);
         }
+        elseif ($pricing_model === 'per_event') {
+            $cfg = array('mode' => 'event_datetime', 'price_unit' => 'event fee', 'date_label' => 'Select Event Date', 'has_guests' => true);
+        }
+        elseif ($pricing_model === 'per_donation') {
+            $cfg = array('mode' => 'date_only', 'price_unit' => 'donation', 'date_label' => 'Donation Date', 'has_guests' => false);
+        }
+        elseif ($pricing_model === 'custom_donation') {
+            $cfg = array('mode' => 'date_only', 'price_unit' => 'donation', 'date_label' => 'Donation Date', 'has_guests' => false);
+        }
         elseif ($pricing_model === 'flat_fee') {
             $cfg = array('mode' => 'date_only', 'price_unit' => 'flat fee', 'date_label' => 'Select Date', 'has_guests' => false);
         }
@@ -657,8 +666,13 @@ get_header(); ?>
 
                         <!-- Price Header -->
                         <div class="price-header">
-                            <span class="price-value">$<?php echo esc_html($price); ?></span>
-                            <span style="color: #666;"><?php echo esc_html($price_unit); ?></span>
+                            <?php if ($pricing_model === 'custom_donation'): ?>
+                                <span class="price-value">Pay What You Want</span>
+                                <div style="color: #666; font-size: 0.9rem; margin-top:5px;">Every contribution counts. Thank you!</div>
+                            <?php else: ?>
+                                <span class="price-value">$<?php echo esc_html($price); ?></span>
+                                <span style="color: #666;"><?php echo esc_html($price_unit); ?></span>
+                            <?php endif; ?>
                         </div>
 
                         <?php 
@@ -751,6 +765,18 @@ get_header(); ?>
                                 </div>
                             <?php
         endif; ?>
+
+                            <!-- ── Custom Donation Input ── -->
+                            <?php if ($pricing_model === 'custom_donation'): ?>
+                                <div class="form-row" style="margin-bottom: 20px; background: #fffcf0; padding: 15px; border: 1px solid #fde68a; border-radius: 10px;">
+                                    <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 8px;">Your Donation Amount ($)</label>
+                                    <div style="position:relative;">
+                                        <span style="position:absolute; left:12px; top:10px; color:#888; font-weight:bold;">$</span>
+                                        <input type="number" name="custom_donation_amount" min="1" step="0.01" required placeholder="<?php echo esc_attr($price); ?> (Suggested)" style="width: 100%; border: 1px solid #ccc; padding: 10px 10px 10px 30px; border-radius: 8px; font-size:1.1rem; font-weight:bold;">
+                                    </div>
+                                    <p style="font-size:0.8rem; color:#92400e; margin-top:8px;">Help support this cause with a contribution of your choice.</p>
+                                </div>
+                            <?php endif; ?>
 
                             <!-- ── Guests / Tickets ── -->
                             <?php if ($form_has_guests): ?>
