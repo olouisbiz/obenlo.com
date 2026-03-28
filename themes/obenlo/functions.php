@@ -325,3 +325,44 @@ $obenlo_pwa_core->init();
 
 // Ensure keys exist
 add_action('init', array('Obenlo_PWA_Core', 'generate_keys'), 10);
+
+/**
+ * Redirect users to the Welcome Landing Page after login and registration
+ */
+function obenlo_welcome_redirect($redirect_to, $request, $user)
+{
+    // If the user object is not valid (e.g. login failed), don't redirect
+    if (is_wp_error($user) || !isset($user->roles)) {
+        return $redirect_to;
+    }
+
+    // Don't redirect administrators or support agents out of the backend
+    if (in_array('administrator', (array) $user->roles) || in_array('support_agent', (array) $user->roles)) {
+        return $redirect_to;
+    }
+
+    // Redirect to our custom welcome page
+    return home_url('/welcome/');
+}
+add_filter('login_redirect', 'obenlo_welcome_redirect', 10, 3);
+
+add_filter('registration_redirect', function() {
+    return home_url('/welcome/');
+});
+
+/**
+ * Ensure the Welcome page exists in the database
+ */
+add_action('init', function() {
+    if (get_page_by_path('welcome')) {
+        return;
+    }
+
+    wp_insert_post(array(
+        'post_title'   => 'Welcome',
+        'post_name'    => 'welcome',
+        'post_status'  => 'publish',
+        'post_type'    => 'page',
+        'page_template' => 'page-welcome.php'
+    ));
+});
