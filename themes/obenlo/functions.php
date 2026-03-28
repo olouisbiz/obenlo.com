@@ -378,3 +378,77 @@ function obenlo_filter_listing_children($query)
     }
 }
 add_action('pre_get_posts', 'obenlo_filter_listing_children');
+
+/**
+ * --- WHITE LABELING & BRANDING ---
+ * Removes all traces of WordPress branding for a premium experience.
+ */
+
+// 1. One-time cleanup of default content
+add_action('init', function() {
+    if (get_option('obenlo_initial_cleanup')) return;
+    wp_delete_post(1, true); // Hello World
+    wp_delete_post(2, true); // Sample Page
+    wp_delete_comment(1, true); // Default Comment
+    update_option('obenlo_initial_cleanup', 1);
+});
+
+// 2. Customize Login Page Branding
+add_action('login_enqueue_scripts', function() {
+    $logo = get_template_directory_uri() . '/assets/images/logo-social-profile.png';
+    ?>
+    <style type="text/css">
+        #login h1 a {
+            background-image: url('<?php echo esc_url($logo); ?>');
+            background-size: contain;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+        }
+        body.login { background: #f9f9f9; }
+        .login #login_error, .login .message, .login .success { border-left-color: #e61e4d; border-radius: 8px; }
+        #loginform { border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .wp-core-ui .button-primary { background: #e61e4d !important; border-color: #e61e4d !important; border-radius: 8px; height: 40px; font-weight: 700; box-shadow: none; text-shadow: none; }
+        .login #backtoblog a, .login #nav a { color: #666 !important; transition: color 0.2s; }
+        .login #backtoblog a:hover, .login #nav a:hover { color: #e61e4d !important; }
+    </style>
+    <?php
+});
+add_filter('login_headerurl', function() { return home_url(); });
+add_filter('login_headertext', function() { return 'Obenlo Platform'; });
+
+// 3. Clean up the Admin Bar for all users
+add_action('admin_bar_menu', function($wp_admin_bar) {
+    $wp_admin_bar->remove_node('wp-logo');
+    $wp_admin_bar->remove_node('about');
+    $wp_admin_bar->remove_node('wporg');
+    $wp_admin_bar->remove_node('documentation');
+    $wp_admin_bar->remove_node('support-forums');
+    $wp_admin_bar->remove_node('feedback');
+}, 999);
+
+// 4. Rename "Howdy" greeting
+add_filter('gettext', function($translated_text, $text, $domain) {
+    if ($text === 'Howdy, %1$s') {
+        return 'Welcome, %1$s';
+    }
+    return $translated_text;
+}, 10, 3);
+
+// 5. Hide Dashboard Widgets for non-admins
+add_action('wp_dashboard_setup', function() {
+    if (!current_user_can('administrator')) {
+        remove_meta_box('dashboard_primary', 'dashboard', 'side');
+        remove_meta_box('dashboard_secondary', 'dashboard', 'side');
+        remove_meta_box('dashboard_quick_press', 'dashboard', 'side');
+        remove_meta_box('dashboard_recent_drafts', 'dashboard', 'side');
+        remove_meta_box('dashboard_right_now', 'dashboard', 'normal');
+        remove_meta_box('dashboard_activity', 'dashboard', 'normal');
+    }
+});
+
+// 6. Footer White Labeling
+add_filter('admin_footer_text', function() {
+    return '<span>Management Hub provided by Obenlo Platform.</span>';
+});
+add_filter('update_footer', '__return_empty_string', 11);
