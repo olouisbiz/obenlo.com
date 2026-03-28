@@ -14,6 +14,7 @@ class Obenlo_Booking_Communication
     {
         add_shortcode('obenlo_support_page', array($this, 'render_support_page'));
         add_shortcode('obenlo_messages_page', array($this, 'render_messages_center'));
+        add_shortcode('obenlo_broadcasts_page', array($this, 'render_broadcasts_page'));
         add_action('admin_post_obenlo_submit_ticket', array($this, 'handle_submit_ticket'));
         add_action('admin_post_nopriv_obenlo_submit_ticket', array($this, 'handle_submit_ticket'));
         add_action('admin_post_obenlo_send_broadcast', array($this, 'handle_send_broadcast'));
@@ -1057,8 +1058,59 @@ class Obenlo_Booking_Communication
                     array('key' => '_obenlo_broadcast_recipient', 'value' => $role),
                     array('key' => '_obenlo_broadcast_recipient', 'value' => 'all')
             ),
-            'posts_per_page' => 5
+            'posts_per_page' => 20, // Increased from 5 to 20
+            'orderby' => 'date',
+            'order' => 'DESC'
         ));
+    }
+
+    /**
+     * Render the broadcasts page for the current user's role
+     */
+    public function render_broadcasts_page($atts)
+    {
+        if (!is_user_logged_in()) {
+            return '<div style="padding:40px; text-align:center;">Please log in to view broadcasts.</div>';
+        }
+
+        $user = wp_get_current_user();
+        $role = in_array('host', (array)$user->roles) ? 'host' : 'guest';
+        $broadcasts = self::get_role_broadcasts($role);
+
+        ob_start();
+?>
+        <div class="obenlo-broadcasts-center" style="max-width: 800px;">
+            <style>
+                .broadcast-card { background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 30px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+                .broadcast-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px; border-bottom: 1px solid #f9f9f9; padding-bottom: 15px; }
+                .broadcast-title { font-size: 1.4rem; font-weight: 800; color: #222; margin: 0; }
+                .broadcast-date { font-size: 0.85rem; color: #aaa; font-weight: 600; }
+                .broadcast-content { font-size: 1rem; line-height: 1.6; color: #444; }
+                .broadcast-empty { padding: 60px 40px; text-align: center; color: #999; background: #fafafa; border-radius: 20px; border: 1px solid #eee; }
+                .broadcast-megaphone { width: 48px; height: 48px; color: #e61e4d; margin-bottom: 20px; }
+            </style>
+
+            <?php if (empty($broadcasts)) : ?>
+                <div class="broadcast-empty">
+                    <svg class="broadcast-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.5 1.5"></path><path d="M22 22l-7.5-1.5"></path></svg>
+                    <p style="font-size: 1.1rem; font-weight: 600;">No announcements at this time.</p>
+                </div>
+            <?php else : ?>
+                <?php foreach ($broadcasts as $broadcast) : ?>
+                    <div class="broadcast-card">
+                        <div class="broadcast-header">
+                            <h3 class="broadcast-title"><?php echo esc_html($broadcast->post_title); ?></h3>
+                            <span class="broadcast-date"><?php echo get_the_date('', $broadcast->ID); ?></span>
+                        </div>
+                        <div class="broadcast-content">
+                            <?php echo wp_kses_post($broadcast->post_content); ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+<?php
+        return ob_get_clean();
     }
 
     /**

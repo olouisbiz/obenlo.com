@@ -67,6 +67,9 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
         <a href="?tab=messages" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'messages' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'messages' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='messages')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='messages')this.style.background='transparent'">
             Messages
         </a>
+        <a href="?tab=broadcasts" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'broadcasts' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'broadcasts' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='broadcasts')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='broadcasts')this.style.background='transparent'">
+            Broadcasts
+        </a>
         <a href="?tab=support" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'support' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'support' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='support')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='support')this.style.background='transparent'">
             Help & Support
         </a>
@@ -246,6 +249,13 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
             <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 30px;">Messages</h2>
             <div style="background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 0; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow: hidden;">
                 <?php echo do_shortcode('[obenlo_messages_page]'); ?>
+            </div>
+
+        <?php elseif ( $tab === 'broadcasts' ) : ?>
+            <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 30px;">Platform Broadcasts</h2>
+            <p style="color:#666; margin-bottom:30px;">Latest announcements from Obenlo.</p>
+            <div style="background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <?php echo do_shortcode('[obenlo_broadcasts_page]'); ?>
             </div>
 
         <?php elseif ( $tab === 'support' ) : ?>

@@ -163,6 +163,10 @@ class Obenlo_Booking_Frontend_Dashboard
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     <span>Messages</span>
                 </a>
+                <a href="?action=broadcasts" class="sidebar-link <?php echo $action === 'broadcasts' ? 'active' : ''; ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    <span>Broadcasts</span>
+                </a>
                 <a href="?action=availability" class="sidebar-link <?php echo $action === 'availability' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     <span>Availability</span>
@@ -267,6 +271,11 @@ class Obenlo_Booking_Frontend_Dashboard
         elseif ($action === 'messages') {
             echo '<div class="dashboard-header"><h2 class="dashboard-title">Inbox</h2></div>';
             echo do_shortcode('[obenlo_messages_page]');
+        }
+        elseif ($action === 'broadcasts') {
+            echo '<div class="dashboard-header"><h2 class="dashboard-title">Platform Broadcasts</h2></div>';
+            echo '<p style="margin-bottom:30px; color:#666; padding: 0 20px;">Stay updated with official announcements from the Obenlo team.</p>';
+            echo '<div style="padding: 0 20px;">' . do_shortcode('[obenlo_broadcasts_page]') . '</div>';
         }
         elseif ($action === 'availability') {
             $this->render_availability_tab();
