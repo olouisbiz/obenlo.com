@@ -204,10 +204,11 @@ class Obenlo_PWA
             if (isIos() && !isStandalone()) {
                 console.log('Obenlo: iOS detected, showing manual install instructions');
                 setTimeout(() => {
-                    document.getElementById('pwa-prompt-desc').innerHTML = 'Tap the Share icon <svg viewBox="0 0 24 24" style="width:14px;height:14px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:2;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> and "Add to Home Screen".';
+                    const shareIcon = '<svg viewBox="0 0 24 24" style="width:20px;height:20px;vertical-align:middle;margin:0 3px;fill:none;stroke:#e61e4d;stroke-width:2.5;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>';
+                    document.getElementById('pwa-prompt-desc').innerHTML = 'Tap the ' + shareIcon + ' icon and then select <b>"Add to Home Screen"</b>.';
                     installBtn.style.display = 'none';
                     promptUI.style.setProperty('display', 'flex', 'important');
-                }, 8000);
+                }, 3000); // Reduced delay for better UX
             } else if (!isStandalone()) {
                 console.log('Obenlo: Standard browser detected, waiting for beforeinstallprompt');
                 window.addEventListener('beforeinstallprompt', (e) => {
