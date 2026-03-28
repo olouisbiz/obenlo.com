@@ -78,3 +78,16 @@ Press **Enter**.
 
 You will see a checklist of files being downloaded and updated on your screen. 
 **That's it! Your live website (`obenlo.com`) is now instantly updated with your newest features!**
+
+---
+
+## 🆘 Troubleshooting: "Already up to date" or Pulling Fails
+
+If you have "force-pushed" a rollback (like we just did) or if the live server gets confused, a simple `git pull` won't work. You need to "Force Sync" the server.
+
+In the black PuTTY window, run these two commands inside the `wp-content` folder:
+```bash
+git fetch origin
+git reset --hard origin/main
+```
+This will completely overwrite all files on the live site to match exactly what is on GitHub's `main` branch. Use this if you need to "fix" a broken state or roll back.
