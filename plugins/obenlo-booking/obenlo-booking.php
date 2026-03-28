@@ -270,18 +270,7 @@ function obenlo_booking_activate()
 }
 register_activation_hook(__FILE__, 'obenlo_booking_activate');
 
-// Force /listings page to load the directory archive template
-function obenlo_force_listings_archive_template($template)
-{
-    if (is_page('listings')) {
-        $archive_template = locate_template('archive-listing.php');
-        if ($archive_template) {
-            return $archive_template;
-        }
-    }
-    return $template;
-}
-add_filter('template_include', 'obenlo_force_listings_archive_template', 99);
+// Note: Redundant archive override removed in favor of native has_archive slug.
 
 // Force /hosts page to load the Host Directory template
 add_action('init', function() {

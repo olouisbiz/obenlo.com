@@ -452,3 +452,6 @@ add_filter('admin_footer_text', function() {
     return '<span>Management Hub provided by Obenlo Platform.</span>';
 });
 add_filter('update_footer', '__return_empty_string', 11);
+
+// Temporary: Flush rewrite rules to activate the new /listings/ archive slug
+add_action('init', 'flush_rewrite_rules', 999);
