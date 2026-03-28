@@ -138,6 +138,7 @@ get_header(); ?>
         <div class="front-page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
             <?php
             $stay_args = array(
+                'post_parent'    => 0,
                 'post_type'      => 'listing',
                 'posts_per_page' => 10,
                 'post_status'    => 'publish',
@@ -178,6 +179,7 @@ get_header(); ?>
         <div class="front-page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
             <?php
             $exp_args = array(
+                'post_parent'    => 0,
                 'post_type'      => 'listing',
                 'posts_per_page' => 10,
                 'post_status'    => 'publish',
@@ -215,6 +217,7 @@ get_header(); ?>
         <div class="front-page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
             <?php
             $srv_args = array(
+                'post_parent'    => 0,
                 'post_type'      => 'listing',
                 'posts_per_page' => 10,
                 'post_status'    => 'publish',
@@ -252,6 +255,7 @@ get_header(); ?>
         <div class="front-page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
             <?php
             $evt_args = array(
+                'post_parent'    => 0,
                 'post_type'      => 'listing',
                 'posts_per_page' => 10,
                 'post_status'    => 'publish',

@@ -366,3 +366,15 @@ add_action('init', function() {
         'page_template' => 'page-welcome.php'
     ));
 });
+
+/**
+ * Filter Listing Visibility: Only show parent listings in standard shop/archive views.
+ * This prevents sub-units (children) from appearing alongside their parent listing.
+ */
+function obenlo_filter_listing_children($query)
+{
+    if (!is_admin() && $query->is_main_query() && (is_post_type_archive('listing') || is_tax('listing_type') || is_search() || is_front_page())) {
+        $query->set('post_parent', 0);
+    }
+}
+add_action('pre_get_posts', 'obenlo_filter_listing_children');
