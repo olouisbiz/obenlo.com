@@ -599,6 +599,41 @@ class Obenlo_Booking_Admin_Dashboard
                             <input type="text" name="pixel_id" value="<?php echo esc_attr($pixel_id); ?>" placeholder="1234567890" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                         </div>
 
+                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px; margin-top:40px;">Haiti Payment Gateways 🇭🇹</h4>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">USD to HTG Exchange Rate</label>
+                            <p style="font-size:0.8em; color:#666; margin-bottom:10px;">Used to convert listing prices to Haitian Gourdes for MonCash/Natcash.</p>
+                            <input type="number" name="htg_exchange_rate" value="<?php echo esc_attr(get_option('obenlo_htg_exchange_rate', '100')); ?>" step="0.01" style="width:150px; padding:10px; border:1px solid #ddd; border-radius:8px;"> <span style="font-weight:600;">HTG = 1 USD</span>
+                        </div>
+                        
+                        <div style="margin-bottom:20px; background:#f9f9f9; padding:15px; border-radius:10px;">
+                            <label style="display:block; font-weight:700; margin-bottom:10px;">MonCash Credentials</label>
+                            <div style="margin-bottom:10px;">
+                                <span style="font-size:0.75rem; color:#888; display:block; margin-bottom:3px;">Sandbox Client ID</span>
+                                <input type="text" name="moncash_sandbox_client_id" value="<?php echo esc_attr(get_option('obenlo_moncash_sandbox_client_id', '')); ?>" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                            </div>
+                            <div style="margin-bottom:10px;">
+                                <span style="font-size:0.75rem; color:#888; display:block; margin-bottom:3px;">Sandbox Secret</span>
+                                <input type="password" name="moncash_sandbox_secret" value="<?php echo esc_attr(get_option('obenlo_moncash_sandbox_secret', '')); ?>" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                            </div>
+                            <div style="margin-bottom:10px; border-top:1px solid #eee; pt-2; mt-2;">
+                                <span style="font-size:0.75rem; color:#888; display:block; margin-bottom:3px;">Live Client ID</span>
+                                <input type="text" name="moncash_live_client_id" value="<?php echo esc_attr(get_option('obenlo_moncash_live_client_id', '')); ?>" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                            </div>
+                            <div>
+                                <span style="font-size:0.75rem; color:#888; display:block; margin-bottom:3px;">Live Secret</span>
+                                <input type="password" name="moncash_live_secret" value="<?php echo esc_attr(get_option('obenlo_moncash_live_secret', '')); ?>" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:15px;">
+                            <label style="display:flex; align-items:center; gap:10px; font-weight:700; margin-bottom:10px;">
+                                <input type="checkbox" name="natcash_enabled" value="yes" <?php checked(get_option('obenlo_natcash_enabled', 'yes'), 'yes'); ?>>
+                                Natcash Configuration
+                            </label>
+                            <input type="text" name="natcash_api_key" value="<?php echo esc_attr(get_option('obenlo_natcash_api_key', '')); ?>" placeholder="API Key" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+
                         <div style="background:#fff3cd; padding:20px; border-radius:12px; border:1px solid #ffeeba; margin-top:40px;">
                             <h4 style="margin-top:0; color:#856404;">Emergency Tools</h4>
                             <p style="font-size:0.85em; color:#856404; margin-bottom:15px;">Use these only if the database fails during an update.</p>
@@ -670,7 +705,10 @@ class Obenlo_Booking_Admin_Dashboard
                 <div style="margin-bottom:25px; border-top:1px solid #eee; padding-top:25px;">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                         <div>
-                            <h4 style="margin-bottom:15px; color:#e61e4d;">Stripe LIVE Keys</h4>
+                            <h4 style="margin-bottom:15px; color:#e61e4d; display:flex; align-items:center; gap:10px;">
+                                <input type="checkbox" name="stripe_enabled" value="yes" <?php checked(get_option('obenlo_stripe_enabled', 'yes'), 'yes'); ?>>
+                                Stripe LIVE Keys
+                            </h4>
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Publishable Key (Live)</label>
                             <input type="text" name="stripe_live_pub" value="<?php echo esc_attr($stripe_live_pub); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
                             
@@ -691,7 +729,10 @@ class Obenlo_Booking_Admin_Dashboard
                 <div style="margin-bottom:25px; border-top:1px solid #eee; padding-top:25px;">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                         <div>
-                            <h4 style="margin-bottom:15px; color:#0070ba;">PayPal LIVE Keys</h4>
+                            <h4 style="margin-bottom:15px; color:#0070ba; display:flex; align-items:center; gap:10px;">
+                                <input type="checkbox" name="paypal_enabled" value="yes" <?php checked(get_option('obenlo_paypal_enabled', 'yes'), 'yes'); ?>>
+                                PayPal LIVE Keys
+                            </h4>
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Client ID (Live)</label>
                             <input type="text" name="paypal_live_id" value="<?php echo esc_attr($paypal_live_id); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
                             
@@ -705,6 +746,28 @@ class Obenlo_Booking_Admin_Dashboard
                             
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret (Test)</label>
                             <input type="password" name="paypal_sandbox_sec" value="<?php echo esc_attr($paypal_sandbox_sec); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                    </div>
+                <div style="margin-bottom:25px; border-top:1px solid #eee; padding-top:25px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
+                        <div>
+                            <h4 style="margin-bottom:15px; color:#c71e1e; display:flex; align-items:center; gap:10px;">
+                                <input type="checkbox" name="moncash_enabled" value="yes" <?php checked(get_option('obenlo_moncash_enabled', 'yes'), 'yes'); ?>>
+                                MonCash LIVE Credentials
+                            </h4>
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Client ID (Live)</label>
+                            <input type="text" name="moncash_live_id" value="<?php echo esc_attr(get_option('obenlo_moncash_live_client_id', '')); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret Key (Live)</label>
+                            <input type="password" name="moncash_live_sec" value="<?php echo esc_attr(get_option('obenlo_moncash_live_secret', '')); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom:15px; color:#666;">MonCash SANDBOX Credentials</h4>
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Client ID (Test)</label>
+                            <input type="text" name="moncash_sandbox_id" value="<?php echo esc_attr(get_option('obenlo_moncash_sandbox_client_id', '')); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret Key (Test)</label>
+                            <input type="password" name="moncash_sandbox_sec" value="<?php echo esc_attr(get_option('obenlo_moncash_sandbox_secret', '')); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                         </div>
                     </div>
                 </div>
@@ -760,8 +823,11 @@ class Obenlo_Booking_Admin_Dashboard
                                 <input type="hidden" name="payout_id" value="<?php echo $payout->ID; ?>">
                                 <input type="hidden" name="payout_status" value="paid">
                                 <?php wp_nonce_field('process_payout_' . $payout->ID, 'security'); ?>
-                                <input type="text" name="transaction_id" placeholder="TX ID" style="width:100px; padding:5px; margin-right:5px; border-radius:4px; border:1px solid #ddd;">
+                                <input type="text" name="transaction_id" placeholder="Manual TX ID" style="width:120px; padding:5px; margin-right:5px; border-radius:4px; border:1px solid #ddd;">
                                 <button type="submit" class="btn-approve" style="background:none; border:none; cursor:pointer;" onclick="return confirm('Confirm you have manually sent this payout?')">Mark as Paid</button>
+                                <?php if ($method === 'moncash'): ?>
+                                    <button type="submit" name="payout_action" value="auto_moncash" style="background:#e61e4d; color:#fff; border:none; padding:5px 10px; border-radius:4px; margin-left:10px; font-size:0.85rem; cursor:pointer;" onclick="return confirm('Send money via MonCash API now?')">🚀 Send via MonCash</button>
+                                <?php endif; ?>
                             </form>
                             | 
                             <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline-block;">
@@ -852,7 +918,25 @@ class Obenlo_Booking_Admin_Dashboard
             update_option('obenlo_meta_pixel_id', sanitize_text_field($_POST['pixel_id']));
         }
 
-
+        // Haiti Payment Settings
+        if (isset($_POST['htg_exchange_rate'])) {
+            update_option('obenlo_htg_exchange_rate', sanitize_text_field($_POST['htg_exchange_rate']));
+        }
+        if (isset($_POST['moncash_sandbox_client_id'])) {
+            update_option('obenlo_moncash_sandbox_client_id', sanitize_text_field($_POST['moncash_sandbox_client_id']));
+        }
+        if (isset($_POST['moncash_sandbox_secret'])) {
+            update_option('obenlo_moncash_sandbox_secret', sanitize_text_field($_POST['moncash_sandbox_secret']));
+        }
+        if (isset($_POST['moncash_live_client_id'])) {
+            update_option('obenlo_moncash_live_client_id', sanitize_text_field($_POST['moncash_live_client_id']));
+        }
+        if (isset($_POST['moncash_live_secret'])) {
+            update_option('obenlo_moncash_live_secret', sanitize_text_field($_POST['moncash_live_secret']));
+        }
+        if (isset($_POST['natcash_api_key'])) {
+            update_option('obenlo_natcash_api_key', sanitize_text_field($_POST['natcash_api_key']));
+        }
 
         error_log('Obenlo Settings: Redirecting to ' . $redirect_url);
         wp_safe_redirect($redirect_url);
@@ -895,6 +979,31 @@ class Obenlo_Booking_Admin_Dashboard
         if (isset($_POST['paypal_sandbox_sec'])) {
             update_option('obenlo_paypal_sandbox_secret', sanitize_text_field($_POST['paypal_sandbox_sec']));
         }
+
+        // MonCash Save
+        if (isset($_POST['moncash_live_id'])) {
+            update_option('obenlo_moncash_live_client_id', sanitize_text_field($_POST['moncash_live_id']));
+        }
+        if (isset($_POST['moncash_live_sec'])) {
+            update_option('obenlo_moncash_live_secret', sanitize_text_field($_POST['moncash_live_sec']));
+        }
+        if (isset($_POST['moncash_sandbox_id'])) {
+            update_option('obenlo_moncash_sandbox_client_id', sanitize_text_field($_POST['moncash_sandbox_id']));
+        }
+        if (isset($_POST['moncash_sandbox_sec'])) {
+            update_option('obenlo_moncash_sandbox_secret', sanitize_text_field($_POST['moncash_sandbox_sec']));
+        }
+
+        // Natcash Save
+        if (isset($_POST['natcash_api_key'])) {
+            update_option('obenlo_natcash_api_key', sanitize_text_field($_POST['natcash_api_key']));
+        }
+
+        // Visibility Toggles Save
+        update_option('obenlo_stripe_enabled', isset($_POST['stripe_enabled']) ? 'yes' : 'no');
+        update_option('obenlo_paypal_enabled', isset($_POST['paypal_enabled']) ? 'yes' : 'no');
+        update_option('obenlo_moncash_enabled', isset($_POST['moncash_enabled']) ? 'yes' : 'no');
+        update_option('obenlo_natcash_enabled', isset($_POST['natcash_enabled']) ? 'yes' : 'no');
 
         wp_safe_redirect(add_query_arg('tab', 'payments', wp_get_referer()));
         exit;

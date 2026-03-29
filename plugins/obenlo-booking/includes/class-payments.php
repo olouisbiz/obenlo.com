@@ -173,6 +173,12 @@ class Obenlo_Booking_Payments
         $guests = isset($_POST['guests']) ? intval($_POST['guests']) : 1;
         $payment_method = isset($_POST['payment_method']) ? sanitize_text_field($_POST['payment_method']) : 'stripe';
 
+        // Verify if payment method is enabled
+        $is_enabled = get_option('obenlo_' . $payment_method . '_enabled', 'yes');
+        if ($is_enabled !== 'yes') {
+            obenlo_redirect_with_error('discontinued_payment');
+        }
+
         if (!$listing_id || !$start_date) {
             obenlo_redirect_with_error('invalid_data');
         }
@@ -412,6 +418,12 @@ class Obenlo_Booking_Payments
         elseif ($payment_method === 'paypal') {
             $this->process_paypal_checkout($booking_id, $total_price, $listing->post_title);
         }
+        elseif ($payment_method === 'moncash') {
+            $this->process_moncash_checkout($booking_id, $total_price);
+        }
+        elseif ($payment_method === 'natcash') {
+            $this->process_natcash_checkout($booking_id, $total_price);
+        }
         else {
             obenlo_redirect_with_error('invalid_payment');
         }
@@ -455,7 +467,26 @@ class Obenlo_Booking_Payments
             }
         }
 
-        // 3. Update Status and Redirect
+        // 3. Handle MonCash Return
+        if (isset($_GET['transactionId']) && isset($_GET['orderId'])) {
+            $transaction_id = sanitize_text_field($_GET['transactionId']);
+            $order_id_raw = sanitize_text_field($_GET['orderId']); // OB-ID-TIMESTAMP
+            $parts = explode('-', $order_id_raw);
+            $booking_id = isset($parts[1]) ? intval($parts[1]) : 0;
+
+            if ($booking_id > 0) {
+                $moncash = new Obenlo_Booking_MonCash();
+                if ($moncash->verify_transaction($transaction_id)) {
+                    $status_updated = true;
+                    update_post_meta($booking_id, '_moncash_transaction_id', $transaction_id);
+                } else {
+                    error_log('Obenlo MonCash Return Verification Failed for Booking #' . $booking_id);
+                    obenlo_redirect_with_error('booking_error');
+                }
+            }
+        }
+
+        // 4. Update Status and Redirect
         if ($status_updated && $booking_id > 0) {
             update_post_meta($booking_id, '_obenlo_booking_status', 'confirmed');
             
@@ -477,6 +508,40 @@ class Obenlo_Booking_Payments
 
         if (is_wp_error($checkout_url)) {
             error_log('Obenlo Stripe Error: ' . $checkout_url->get_error_message());
+            obenlo_redirect_with_error('booking_error');
+        }
+
+        wp_redirect($checkout_url);
+        exit;
+    }
+
+    private function process_moncash_checkout($booking_id, $amount_usd)
+    {
+        $rate = floatval(get_option('obenlo_htg_exchange_rate', '100'));
+        $amount_htg = $amount_usd * $rate;
+
+        $moncash = new Obenlo_Booking_MonCash();
+        $checkout_url = $moncash->create_payment($booking_id, $amount_htg);
+
+        if (is_wp_error($checkout_url)) {
+            error_log('Obenlo MonCash Checkout Error: ' . $checkout_url->get_error_message());
+            obenlo_redirect_with_error('booking_error');
+        }
+
+        wp_redirect($checkout_url);
+        exit;
+    }
+
+    private function process_natcash_checkout($booking_id, $amount_usd)
+    {
+        $rate = floatval(get_option('obenlo_htg_exchange_rate', '100'));
+        $amount_htg = $amount_usd * $rate;
+
+        $natcash = new Obenlo_Booking_Natcash();
+        $checkout_url = $natcash->create_payment($booking_id, $amount_htg);
+
+        if (is_wp_error($checkout_url)) {
+            error_log('Obenlo Natcash Checkout Error: ' . $checkout_url->get_error_message());
             obenlo_redirect_with_error('booking_error');
         }
 
