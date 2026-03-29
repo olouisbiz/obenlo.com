@@ -462,6 +462,9 @@ class Obenlo_Booking_Payments
             // Trigger Notification
             Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'booking_confirmed');
 
+            // Calculate Earnings & Update Host Balance
+            $this->calculate_booking_earnings($booking_id);
+
             wp_safe_redirect(add_query_arg('obenlo_modal', 'booking_confirmed', home_url()));
             exit;
         }
@@ -525,6 +528,40 @@ class Obenlo_Booking_Payments
         update_post_meta($booking_id, '_obenlo_platform_fee_percentage', $fee_percentage);
         update_post_meta($booking_id, '_obenlo_platform_fee_amount', $fee_amount);
 
-        return $fee_amount;
+    }
+
+    /**
+     * Calculate and record earnings/commission for a booking
+     */
+    public function calculate_booking_earnings($booking_id)
+    {
+        $gross_total = floatval(get_post_meta($booking_id, '_obenlo_total_price', true));
+        $host_id = get_post_meta($booking_id, '_obenlo_host_id', true);
+
+        if (!$gross_total || !$host_id) {
+            return;
+        }
+
+        // Get commission percentage (Host override first, otherwise Global)
+        $commission_pct = get_user_meta($host_id, '_obenlo_host_fee_percentage', true);
+        if ($commission_pct === '' || $commission_pct === false) {
+            $commission_pct = get_option('obenlo_global_platform_fee', '10');
+        }
+        $commission_pct = floatval($commission_pct);
+
+        $commission_amount = $gross_total * ($commission_pct / 100);
+        $net_earnings = $gross_total - $commission_amount;
+
+        // Record on booking
+        update_post_meta($booking_id, '_obenlo_booking_commission_pct', $commission_pct);
+        update_post_meta($booking_id, '_obenlo_booking_commission_amount', $commission_amount);
+        update_post_meta($booking_id, '_obenlo_booking_net_earnings', $net_earnings);
+
+        // Update Host Balance
+        $current_balance = floatval(get_user_meta($host_id, '_obenlo_host_balance', true));
+        $new_balance = $current_balance + $net_earnings;
+        update_user_meta($host_id, '_obenlo_host_balance', $new_balance);
+
+        error_log("Obenlo Earnings: Booking #$booking_id confirmed. Host #$host_id earnings updated: +$$net_earnings. Total balance: $$new_balance");
     }
 }
