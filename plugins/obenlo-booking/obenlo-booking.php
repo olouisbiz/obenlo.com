@@ -35,8 +35,7 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-host-verification.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-payout-manager.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-badges.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-wishlist.php';
-require_once OBENLO_BOOKING_DIR . 'includes/class-i18n.php'; // i18n Localization
-require_once OBENLO_BOOKING_DIR . 'includes/class-virtual-security.php'; // Virtual Event Security
+require_once OBENLO_BOOKING_DIR . 'includes/class-virtual-security.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-payments-webhook.php';
 
 // Initialize the plugin
@@ -86,9 +85,7 @@ function obenlo_booking_init()
     $wishlist = new Obenlo_Booking_Wishlist();
     $wishlist->init();
 
-    $i18n = new Obenlo_Booking_i18n();
-    $i18n->init();
-
+    // Note: Legacy i18n removed in favor of standalone 'obenlo-i18n' plugin.
 
     $virtual_security = new Obenlo_Booking_Virtual_Security();
     $virtual_security->init();

@@ -121,16 +121,6 @@
             </form>
         </div>
 
-        <div class="header-language-switcher mobile-hide" id="headerLangSwitcher" style="position: relative; margin-right: 15px;">
-            <button class="lang-dropdown-btn" onclick="document.getElementById('headerLangSwitcher').classList.toggle('active')" style="background:none; border:none; cursor:pointer; padding:8px; border-radius:20px; display:flex; align-items:center; gap:5px; transition:background 0.2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">
-                <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display:block;fill:none;height:16px;width:16px;stroke:currentColor;stroke-width:2;overflow:visible"><circle cx="16" cy="16" r="14"></circle><ellipse cx="16" cy="16" rx="6" ry="14"></ellipse><path d="M2 16h28"></path></svg>
-            </button>
-            <div id="headerLangMenu" class="user-dropdown-menu" style="min-width: 150px; right: 0; left: auto;">
-                <a href="#" class="obenlo-lang-switch" data-lang="en" style="font-weight: <?php echo(!isset($_COOKIE['obenlo_lang']) || $_COOKIE['obenlo_lang'] == 'en') ? 'bold' : 'normal'; ?>">English</a>
-                <a href="#" class="obenlo-lang-switch" data-lang="es" style="font-weight: <?php echo(isset($_COOKIE['obenlo_lang']) && $_COOKIE['obenlo_lang'] == 'es') ? 'bold' : 'normal'; ?>">Español</a>
-                <a href="#" class="obenlo-lang-switch" data-lang="fr" style="font-weight: <?php echo(isset($_COOKIE['obenlo_lang']) && $_COOKIE['obenlo_lang'] == 'fr') ? 'bold' : 'normal'; ?>">Français</a>
-            </div>
-        </div>
 
         <div class="header-user-menu" id="headerUserMenu">
             <?php if (is_user_logged_in()):
