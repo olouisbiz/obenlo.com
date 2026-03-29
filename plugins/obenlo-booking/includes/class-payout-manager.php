@@ -168,9 +168,30 @@ class Obenlo_Booking_Payout_Manager {
         check_admin_referer('process_payout_' . $payout_id, 'security');
 
         $status = sanitize_text_field($_POST['payout_status']);
+        $payout_action = isset($_POST['payout_action']) ? sanitize_text_field($_POST['payout_action']) : '';
         $tx_id = sanitize_text_field($_POST['transaction_id']);
         $host_id = get_post_field('post_author', $payout_id);
-        $amount = get_post_meta($payout_id, '_amount', true);
+        $amount_usd = get_post_meta($payout_id, '_amount', true);
+        $method = get_post_meta($payout_id, '_method', true);
+
+        // Handle Automatic MonCash Disbursement
+        if ($payout_action === 'auto_moncash' && $method === 'moncash') {
+            $details = get_post_meta($payout_id, '_details', true); // Telephone number
+            $rate = floatval(get_option('obenlo_htg_exchange_rate', '100'));
+            $amount_htg = $amount_usd * $rate;
+
+            $moncash = new Obenlo_Booking_MonCash();
+            $result = $moncash->disburse_funds($details, $amount_htg);
+
+            if (is_wp_error($result)) {
+                $error_msg = $result->get_error_message();
+                wp_safe_redirect(add_query_arg(array('sync_status' => 'error', 'sync_msg' => urlencode('MonCash Error: ' . $error_msg)), wp_get_referer()));
+                exit;
+            }
+
+            $tx_id = $result; // MonCash Transaction ID
+            $status = 'paid';
+        }
 
         if ($status === 'paid') {
             update_post_meta($payout_id, '_status', 'paid');
@@ -179,13 +200,13 @@ class Obenlo_Booking_Payout_Manager {
 
             // Deduct from host balance
             $current_bal = self::get_host_balance($host_id);
-            update_user_meta($host_id, '_obenlo_host_balance', max(0, $current_bal - $amount));
+            update_user_meta($host_id, '_obenlo_host_balance', max(0, $current_bal - $amount_usd));
 
             // Notify Host
             Obenlo_Booking_Notifications::send_to_user(
                 $host_id,
                 "Your payout has been sent! 💰",
-                "Hi there! Your payout request for $" . number_format($amount, 2) . " has been processed and sent via " . get_post_meta($payout_id, '_method', true) . ".\n\nTransaction ID: " . ($tx_id ?: 'N/A') . "\n\nThank you for hosting on Obenlo!"
+                "Hi there! Your payout request for $" . number_format($amount_usd, 2) . " has been processed and sent via " . strtoupper($method) . ".\n\nTransaction ID: " . ($tx_id ?: 'N/A') . "\n\nThank you for hosting on Obenlo!"
             );
         } elseif ($status === 'cancelled') {
             update_post_meta($payout_id, '_status', 'cancelled');

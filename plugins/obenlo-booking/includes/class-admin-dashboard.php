@@ -146,55 +146,216 @@ class Obenlo_Booking_Admin_Dashboard
 
     private function render_overview_tab()
     {
-        $user_counts = count_users();
-        $hosts = isset($user_counts['avail_roles']['host']) ? $user_counts['avail_roles']['host'] : 0;
-        $guests = isset($user_counts['avail_roles']['guest']) ? $user_counts['avail_roles']['guest'] : 0;
+        $start_date = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : '';
+        $end_date = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : '';
 
-        $listings_count = wp_count_posts('listing')->publish;
-
-        // Revenue Calculation
-        $bookings = get_posts(array('post_type' => 'booking', 'posts_per_page' => -1));
-        $total_revenue = 0;
-        foreach ($bookings as $booking) {
-            $total_revenue += floatval(get_post_meta($booking->ID, '_obenlo_total_price', true));
+        // Query Args
+        $booking_args = array('post_type' => 'booking', 'posts_per_page' => -1, 'post_status' => 'any');
+        $user_args = array('role__in' => array('host', 'guest'), 'fields' => 'ID');
+        
+        if ($start_date || $end_date) {
+            $date_query = array('inclusive' => true);
+            if ($start_date) $date_query['after'] = $start_date;
+            if ($end_date) $date_query['before'] = $end_date;
+            
+            $booking_args['date_query'] = $date_query;
+            $user_args['date_query'] = $date_query;
         }
 
+        $bookings = get_posts($booking_args);
+        $total_revenue = 0;
+        $site_revenue = 0;
+        $confirmed_count = 0;
+        $pending_count = 0;
+
+        // Chart Data Prep (Last 30 days or selected range)
+        $chart_data = array();
+        
+        foreach ($bookings as $booking) {
+            $price = floatval(get_post_meta($booking->ID, '_obenlo_total_price', true));
+            $comm = floatval(get_post_meta($booking->ID, '_obenlo_booking_commission_amount', true));
+            $status = get_post_meta($booking->ID, '_obenlo_booking_status', true);
+            
+            $total_revenue += $price;
+            $site_revenue += $comm;
+            
+            if ($status === 'confirmed') $confirmed_count++;
+            if ($status === 'pending_payment' || $status === 'pending') $pending_count++;
+
+            $date = get_the_date('Y-m-d', $booking);
+            $chart_data[$date] = ($chart_data[$date] ?? 0) + 1;
+        }
+        ksort($chart_data);
+
+        // User Counts
+        $filtered_users = get_users($user_args);
+        $new_users_count = count($filtered_users);
+
+        // All-time totals for reference
+        $all_hosts = count_users()['avail_roles']['host'] ?? 0;
+        $all_guests = count_users()['avail_roles']['guest'] ?? 0;
 ?>
+        <!-- Date Filter Form -->
+        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #eee; margin-bottom:30px; display:flex; gap:20px; align-items:flex-end;">
+            <form action="" method="GET" style="display:flex; gap:20px; align-items:flex-end; width:100%;">
+                <input type="hidden" name="page" value="obenlo-booking">
+                <input type="hidden" name="tab" value="overview">
+                
+                <div>
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#888; margin-bottom:5px; text-transform:uppercase;">Start Date</label>
+                    <input type="date" name="start_date" value="<?php echo esc_attr($start_date); ?>" style="padding:10px; border:1px solid #ddd; border-radius:8px;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#888; margin-bottom:5px; text-transform:uppercase;">End Date</label>
+                    <input type="date" name="end_date" value="<?php echo esc_attr($end_date); ?>" style="padding:10px; border:1px solid #ddd; border-radius:8px;">
+                </div>
+                <button type="submit" style="background:#222; color:#fff; border:none; padding:10px 25px; border-radius:8px; cursor:pointer; font-weight:600;">Filter Stats</button>
+                <a href="?page=obenlo-booking&tab=overview" style="padding:10px; color:#666; font-size:0.9rem;">Reset</a>
+            </form>
+        </div>
+
         <div class="stats-grid">
             <div class="stat-card">
-                <span class="stat-value"><?php echo number_format($total_revenue, 2); ?></span>
-                <span class="stat-label">Total GTV ($)</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span class="stat-label" style="margin:0;">Total GTV</span>
+                    <span style="font-size:1.2rem;">💰</span>
+                </div>
+                <span class="stat-value">$<?php echo number_format($total_revenue, 2); ?></span>
+                <div style="font-size:0.75rem; color:#888; margin-top:5px;"><?php echo count($bookings); ?> total bookings</div>
             </div>
             <div class="stat-card">
-                <span class="stat-value"><?php echo $listings_count; ?></span>
-                <span class="stat-label">Active Listings</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span class="stat-label" style="margin:0;">Site Earnings</span>
+                    <span style="font-size:1.2rem;">🏦</span>
+                </div>
+                <span class="stat-value" style="color:#10b981;">$<?php echo number_format($site_revenue, 2); ?></span>
+                <div style="font-size:0.75rem; color:#888; margin-top:5px;">Platform commission</div>
             </div>
             <div class="stat-card">
-                <span class="stat-value"><?php echo $hosts; ?></span>
-                <span class="stat-label">Total Hosts</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span class="stat-label" style="margin:0;">Booking Success</span>
+                    <span style="font-size:1.2rem;">✅</span>
+                </div>
+                <span class="stat-value"><?php echo $confirmed_count; ?></span>
+                <div style="font-size:0.75rem; color:#888; margin-top:5px;"><?php echo $pending_count; ?> pending payment</div>
             </div>
             <div class="stat-card">
-                <span class="stat-value"><?php echo $guests; ?></span>
-                <span class="stat-label">Total Guests</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">System Health</span>
-                <span class="stat-value">Good</span>
-                <span style="font-size:0.8rem; color:#10b981; font-weight:600;">All services operational</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span class="stat-label" style="margin:0;">User Growth</span>
+                    <span style="font-size:1.2rem;">👥</span>
+                </div>
+                <span class="stat-value"><?php echo $new_users_count; ?></span>
+                <div style="font-size:0.75rem; color:#888; margin-top:5px;">New regs in period</div>
             </div>
         </div>
+
+        <!-- Chart Section -->
+        <div style="background:#fff; border:1px solid #eee; border-radius:15px; padding:30px; margin-bottom:40px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">Booking Performance</h3>
+                <div style="font-size:0.8rem; color:#888;">Showing: <?php echo $start_date ? esc_html($start_date) : 'Last 30 Days'; ?> to <?php echo $end_date ? esc_html($end_date) : 'Today'; ?></div>
+            </div>
+            
+            <?php
+            // If no search dates provided, default to last 30 days for the chart labels
+            $chart_start = $start_date ? new DateTime($start_date) : new DateTime('-30 days');
+            $chart_end = $end_date ? new DateTime($end_date) : new DateTime('today');
+            
+            // Generate all dates in range to fill with 0s
+            $interval = new DateInterval('P1D');
+            $period = new DatePeriod($chart_start, $interval, $chart_end->modify('+1 day'));
+            
+            $final_chart_data = array();
+            foreach ($period as $dt) {
+                $final_chart_data[$dt->format('Y-m-d')] = 0;
+            }
+            
+            // Merge actual data
+            foreach($chart_data as $date => $count) {
+                if (isset($final_chart_data[$date])) {
+                    $final_chart_data[$date] = $count;
+                }
+            }
+            ksort($final_chart_data);
+            ?>
+
+            <div style="position: relative; height: 350px; width: 100%;">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ctx = document.getElementById('performanceChart').getContext('2d');
+            var chartData = <?php echo json_encode($final_chart_data); ?>;
+            var labels = Object.keys(chartData);
+            var values = Object.values(chartData);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'New Bookings',
+                        data: values,
+                        borderColor: '#e61e4d',
+                        backgroundColor: 'rgba(230, 30, 77, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#e61e4d',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#222',
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 14 },
+                            padding: 12,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            ticks: { stepSize: 1, color: '#999' },
+                            grid: { color: '#f0f0f0' }
+                        },
+                        x: { 
+                            ticks: { color: '#999', maxRotation: 45, minRotation: 45 },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        });
+        </script>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
             <div>
                 <h3>Recent Platform Events</h3>
                 <div style="background:#fff; border:1px solid #eee; border-radius:12px; padding:20px;">
                     <?php
-                    $recent_events = get_posts(array(
+                    $event_args = array(
                         'post_type' => array('booking', 'listing', 'ticket'),
                         'posts_per_page' => 10,
                         'orderby' => 'date',
                         'order' => 'DESC'
-                    ));
+                    );
+                    if ($start_date || $end_date) {
+                        $date_query = array('inclusive' => true);
+                        if ($start_date) $date_query['after'] = $start_date;
+                        if ($end_date) $date_query['before'] = $end_date;
+                        $event_args['date_query'] = $date_query;
+                    }
+                    $recent_events = get_posts($event_args);
                     if (empty($recent_events)): ?>
                         <p style="color:#999;">No recent activity found.</p>
                     <?php else: ?>
@@ -221,11 +382,18 @@ class Obenlo_Booking_Admin_Dashboard
                 <h3>New User Registrations</h3>
                 <div style="background:#fff; border:1px solid #eee; border-radius:12px; padding:20px;">
                     <?php
-                    $recent_users = get_users(array(
+                    $recent_user_args = array(
                         'orderby' => 'registered',
                         'order' => 'DESC',
                         'number' => 10
-                    ));
+                    );
+                    if ($start_date || $end_date) {
+                        $date_query = array('inclusive' => true);
+                        if ($start_date) $date_query['after'] = $start_date;
+                        if ($end_date) $date_query['before'] = $end_date;
+                        $recent_user_args['date_query'] = $date_query;
+                    }
+                    $recent_users = get_users($recent_user_args);
                     ?>
                     <ul style="list-style:none; padding:0; margin:0;">
                     <?php foreach($recent_users as $user): ?>
@@ -275,10 +443,50 @@ class Obenlo_Booking_Admin_Dashboard
 
     private function render_users_tab()
     {
-        $users = get_users(array('role__in' => array('host', 'guest')));
+        $search = isset($_GET['user_search']) ? sanitize_text_field($_GET['user_search']) : '';
+        $role_filter = isset($_GET['user_role']) ? sanitize_text_field($_GET['user_role']) : '';
+
+        $query_args = array(
+            'role__in' => $role_filter ? array($role_filter) : array('host', 'guest'),
+            'orderby' => 'registered',
+            'order' => 'DESC'
+        );
+
+        if ($search) {
+            $query_args['search'] = '*' . $search . '*';
+            $query_args['search_columns'] = array('user_login', 'user_nicename', 'user_email', 'display_name');
+        }
+
+        $users = get_users($query_args);
 
         echo '<h3>Site User Management</h3>';
-        echo '<table class="admin-table">';
+?>
+        <!-- User Filters -->
+        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #eee; margin-bottom:30px;">
+            <form action="" method="GET" style="display:flex; gap:20px; align-items:flex-end;">
+                <input type="hidden" name="page" value="obenlo-booking">
+                <input type="hidden" name="tab" value="users">
+                
+                <div style="flex:1;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#888; margin-bottom:5px; text-transform:uppercase;">Search Users</label>
+                    <input type="text" name="user_search" value="<?php echo esc_attr($search); ?>" placeholder="Name, email, or username..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                </div>
+                
+                <div>
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#888; margin-bottom:5px; text-transform:uppercase;">Role</label>
+                    <select name="user_role" style="padding:10px; border:1px solid #ddd; border-radius:8px; min-width:150px;">
+                        <option value="">All Roles</option>
+                        <option value="host" <?php selected($role_filter, 'host'); ?>>Hosts</option>
+                        <option value="guest" <?php selected($role_filter, 'guest'); ?>>Guests</option>
+                    </select>
+                </div>
+
+                <button type="submit" style="background:#222; color:#fff; border:none; padding:10px 25px; border-radius:8px; cursor:pointer; font-weight:600;">Search</button>
+                <a href="?page=obenlo-booking&tab=users" style="padding:10px; color:#666; font-size:0.9rem;">Reset</a>
+            </form>
+        </div>
+
+        <table class="admin-table">
 ?>
             <tr>
                 <th>User</th>
@@ -391,6 +599,41 @@ class Obenlo_Booking_Admin_Dashboard
                             <input type="text" name="pixel_id" value="<?php echo esc_attr($pixel_id); ?>" placeholder="1234567890" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                         </div>
 
+                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px; margin-top:40px;">Haiti Payment Gateways 🇭🇹</h4>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">USD to HTG Exchange Rate</label>
+                            <p style="font-size:0.8em; color:#666; margin-bottom:10px;">Used to convert listing prices to Haitian Gourdes for MonCash/Natcash.</p>
+                            <input type="number" name="htg_exchange_rate" value="<?php echo esc_attr(get_option('obenlo_htg_exchange_rate', '100')); ?>" step="0.01" style="width:150px; padding:10px; border:1px solid #ddd; border-radius:8px;"> <span style="font-weight:600;">HTG = 1 USD</span>
+                        </div>
+                        
+                        <div style="margin-bottom:20px; background:#f9f9f9; padding:15px; border-radius:10px;">
+                            <label style="display:block; font-weight:700; margin-bottom:10px;">MonCash Credentials</label>
+                            <div style="margin-bottom:10px;">
+                                <span style="font-size:0.75rem; color:#888; display:block; margin-bottom:3px;">Sandbox Client ID</span>
+                                <input type="text" name="moncash_sandbox_client_id" value="<?php echo esc_attr(get_option('obenlo_moncash_sandbox_client_id', '')); ?>" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                            </div>
+                            <div style="margin-bottom:10px;">
+                                <span style="font-size:0.75rem; color:#888; display:block; margin-bottom:3px;">Sandbox Secret</span>
+                                <input type="password" name="moncash_sandbox_secret" value="<?php echo esc_attr(get_option('obenlo_moncash_sandbox_secret', '')); ?>" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                            </div>
+                            <div style="margin-bottom:10px; border-top:1px solid #eee; pt-2; mt-2;">
+                                <span style="font-size:0.75rem; color:#888; display:block; margin-bottom:3px;">Live Client ID</span>
+                                <input type="text" name="moncash_live_client_id" value="<?php echo esc_attr(get_option('obenlo_moncash_live_client_id', '')); ?>" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                            </div>
+                            <div>
+                                <span style="font-size:0.75rem; color:#888; display:block; margin-bottom:3px;">Live Secret</span>
+                                <input type="password" name="moncash_live_secret" value="<?php echo esc_attr(get_option('obenlo_moncash_live_secret', '')); ?>" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:5px;">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:15px;">
+                            <label style="display:flex; align-items:center; gap:10px; font-weight:700; margin-bottom:10px;">
+                                <input type="checkbox" name="natcash_enabled" value="yes" <?php checked(get_option('obenlo_natcash_enabled', 'yes'), 'yes'); ?>>
+                                Natcash Configuration
+                            </label>
+                            <input type="text" name="natcash_api_key" value="<?php echo esc_attr(get_option('obenlo_natcash_api_key', '')); ?>" placeholder="API Key" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+
                         <div style="background:#fff3cd; padding:20px; border-radius:12px; border:1px solid #ffeeba; margin-top:40px;">
                             <h4 style="margin-top:0; color:#856404;">Emergency Tools</h4>
                             <p style="font-size:0.85em; color:#856404; margin-bottom:15px;">Use these only if the database fails during an update.</p>
@@ -462,7 +705,10 @@ class Obenlo_Booking_Admin_Dashboard
                 <div style="margin-bottom:25px; border-top:1px solid #eee; padding-top:25px;">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                         <div>
-                            <h4 style="margin-bottom:15px; color:#e61e4d;">Stripe LIVE Keys</h4>
+                            <h4 style="margin-bottom:15px; color:#e61e4d; display:flex; align-items:center; gap:10px;">
+                                <input type="checkbox" name="stripe_enabled" value="yes" <?php checked(get_option('obenlo_stripe_enabled', 'yes'), 'yes'); ?>>
+                                Stripe LIVE Keys
+                            </h4>
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Publishable Key (Live)</label>
                             <input type="text" name="stripe_live_pub" value="<?php echo esc_attr($stripe_live_pub); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
                             
@@ -483,7 +729,10 @@ class Obenlo_Booking_Admin_Dashboard
                 <div style="margin-bottom:25px; border-top:1px solid #eee; padding-top:25px;">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                         <div>
-                            <h4 style="margin-bottom:15px; color:#0070ba;">PayPal LIVE Keys</h4>
+                            <h4 style="margin-bottom:15px; color:#0070ba; display:flex; align-items:center; gap:10px;">
+                                <input type="checkbox" name="paypal_enabled" value="yes" <?php checked(get_option('obenlo_paypal_enabled', 'yes'), 'yes'); ?>>
+                                PayPal LIVE Keys
+                            </h4>
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Client ID (Live)</label>
                             <input type="text" name="paypal_live_id" value="<?php echo esc_attr($paypal_live_id); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
                             
@@ -497,6 +746,28 @@ class Obenlo_Booking_Admin_Dashboard
                             
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret (Test)</label>
                             <input type="password" name="paypal_sandbox_sec" value="<?php echo esc_attr($paypal_sandbox_sec); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                    </div>
+                <div style="margin-bottom:25px; border-top:1px solid #eee; padding-top:25px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
+                        <div>
+                            <h4 style="margin-bottom:15px; color:#c71e1e; display:flex; align-items:center; gap:10px;">
+                                <input type="checkbox" name="moncash_enabled" value="yes" <?php checked(get_option('obenlo_moncash_enabled', 'yes'), 'yes'); ?>>
+                                MonCash LIVE Credentials
+                            </h4>
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Client ID (Live)</label>
+                            <input type="text" name="moncash_live_id" value="<?php echo esc_attr(get_option('obenlo_moncash_live_client_id', '')); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret Key (Live)</label>
+                            <input type="password" name="moncash_live_sec" value="<?php echo esc_attr(get_option('obenlo_moncash_live_secret', '')); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom:15px; color:#666;">MonCash SANDBOX Credentials</h4>
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Client ID (Test)</label>
+                            <input type="text" name="moncash_sandbox_id" value="<?php echo esc_attr(get_option('obenlo_moncash_sandbox_client_id', '')); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            
+                            <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret Key (Test)</label>
+                            <input type="password" name="moncash_sandbox_sec" value="<?php echo esc_attr(get_option('obenlo_moncash_sandbox_secret', '')); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                         </div>
                     </div>
                 </div>
@@ -552,8 +823,11 @@ class Obenlo_Booking_Admin_Dashboard
                                 <input type="hidden" name="payout_id" value="<?php echo $payout->ID; ?>">
                                 <input type="hidden" name="payout_status" value="paid">
                                 <?php wp_nonce_field('process_payout_' . $payout->ID, 'security'); ?>
-                                <input type="text" name="transaction_id" placeholder="TX ID" style="width:100px; padding:5px; margin-right:5px; border-radius:4px; border:1px solid #ddd;">
+                                <input type="text" name="transaction_id" placeholder="Manual TX ID" style="width:120px; padding:5px; margin-right:5px; border-radius:4px; border:1px solid #ddd;">
                                 <button type="submit" class="btn-approve" style="background:none; border:none; cursor:pointer;" onclick="return confirm('Confirm you have manually sent this payout?')">Mark as Paid</button>
+                                <?php if ($method === 'moncash'): ?>
+                                    <button type="submit" name="payout_action" value="auto_moncash" style="background:#e61e4d; color:#fff; border:none; padding:5px 10px; border-radius:4px; margin-left:10px; font-size:0.85rem; cursor:pointer;" onclick="return confirm('Send money via MonCash API now?')">🚀 Send via MonCash</button>
+                                <?php endif; ?>
                             </form>
                             | 
                             <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline-block;">
@@ -644,7 +918,25 @@ class Obenlo_Booking_Admin_Dashboard
             update_option('obenlo_meta_pixel_id', sanitize_text_field($_POST['pixel_id']));
         }
 
-
+        // Haiti Payment Settings
+        if (isset($_POST['htg_exchange_rate'])) {
+            update_option('obenlo_htg_exchange_rate', sanitize_text_field($_POST['htg_exchange_rate']));
+        }
+        if (isset($_POST['moncash_sandbox_client_id'])) {
+            update_option('obenlo_moncash_sandbox_client_id', sanitize_text_field($_POST['moncash_sandbox_client_id']));
+        }
+        if (isset($_POST['moncash_sandbox_secret'])) {
+            update_option('obenlo_moncash_sandbox_secret', sanitize_text_field($_POST['moncash_sandbox_secret']));
+        }
+        if (isset($_POST['moncash_live_client_id'])) {
+            update_option('obenlo_moncash_live_client_id', sanitize_text_field($_POST['moncash_live_client_id']));
+        }
+        if (isset($_POST['moncash_live_secret'])) {
+            update_option('obenlo_moncash_live_secret', sanitize_text_field($_POST['moncash_live_secret']));
+        }
+        if (isset($_POST['natcash_api_key'])) {
+            update_option('obenlo_natcash_api_key', sanitize_text_field($_POST['natcash_api_key']));
+        }
 
         error_log('Obenlo Settings: Redirecting to ' . $redirect_url);
         wp_safe_redirect($redirect_url);
@@ -687,6 +979,31 @@ class Obenlo_Booking_Admin_Dashboard
         if (isset($_POST['paypal_sandbox_sec'])) {
             update_option('obenlo_paypal_sandbox_secret', sanitize_text_field($_POST['paypal_sandbox_sec']));
         }
+
+        // MonCash Save
+        if (isset($_POST['moncash_live_id'])) {
+            update_option('obenlo_moncash_live_client_id', sanitize_text_field($_POST['moncash_live_id']));
+        }
+        if (isset($_POST['moncash_live_sec'])) {
+            update_option('obenlo_moncash_live_secret', sanitize_text_field($_POST['moncash_live_sec']));
+        }
+        if (isset($_POST['moncash_sandbox_id'])) {
+            update_option('obenlo_moncash_sandbox_client_id', sanitize_text_field($_POST['moncash_sandbox_id']));
+        }
+        if (isset($_POST['moncash_sandbox_sec'])) {
+            update_option('obenlo_moncash_sandbox_secret', sanitize_text_field($_POST['moncash_sandbox_sec']));
+        }
+
+        // Natcash Save
+        if (isset($_POST['natcash_api_key'])) {
+            update_option('obenlo_natcash_api_key', sanitize_text_field($_POST['natcash_api_key']));
+        }
+
+        // Visibility Toggles Save
+        update_option('obenlo_stripe_enabled', isset($_POST['stripe_enabled']) ? 'yes' : 'no');
+        update_option('obenlo_paypal_enabled', isset($_POST['paypal_enabled']) ? 'yes' : 'no');
+        update_option('obenlo_moncash_enabled', isset($_POST['moncash_enabled']) ? 'yes' : 'no');
+        update_option('obenlo_natcash_enabled', isset($_POST['natcash_enabled']) ? 'yes' : 'no');
 
         wp_safe_redirect(add_query_arg('tab', 'payments', wp_get_referer()));
         exit;
