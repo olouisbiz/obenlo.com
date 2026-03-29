@@ -870,6 +870,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 $duration_val = get_post_meta($listing_id, '_obenlo_duration_val', true);
                 $duration_unit = get_post_meta($listing_id, '_obenlo_duration_unit', true) ?: 'hours';
                 $requires_slots = get_post_meta($listing_id, '_obenlo_requires_slots', true) ?: 'no';
+                $listing_country = get_post_meta($listing_id, '_obenlo_listing_country', true) ?: 'usa';
 
                 $type_terms = wp_get_post_terms($listing_id, 'listing_type');
                 if (!empty($type_terms) && !is_wp_error($type_terms)) {
@@ -892,6 +893,7 @@ class Obenlo_Booking_Frontend_Dashboard
             $duration_val = '';
             $duration_unit = 'hours';
             $requires_slots = 'no';
+            $listing_country = 'usa';
         }
 
         $is_child = ($parent_id > 0);
@@ -1028,9 +1030,19 @@ class Obenlo_Booking_Frontend_Dashboard
                             </select>
                         </div>
 
-                        <div style="margin-bottom:20px;" id="generic_location_wrapper">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Location</label>
-                            <input type="text" name="listing_location" value="<?php echo esc_attr($location); ?>" placeholder="e.g. Tulum, Mexico" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <div class="grid-row" style="margin-bottom:20px;">
+                            <div id="generic_location_wrapper" style="flex:2;">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Address / Location</label>
+                                <input type="text" name="listing_location" value="<?php echo esc_attr($location); ?>" placeholder="e.g. Tulum, Mexico" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Country</label>
+                                <select name="listing_country" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
+                                    <option value="usa" <?php selected($listing_country, 'usa'); ?>>United States (USA)</option>
+                                    <option value="haiti" <?php selected($listing_country, 'haiti'); ?>>Haiti 🇭🇹</option>
+                                    <option value="other" <?php selected($listing_country, 'other'); ?>>Other / International</option>
+                                </select>
+                            </div>
                         </div>
                     <?php endif; ?>
 
@@ -1754,11 +1766,17 @@ class Obenlo_Booking_Frontend_Dashboard
                 update_post_meta($new_post_id, '_obenlo_location', sanitize_text_field($_POST['listing_location']));
             } elseif (isset($_POST['listing_event_address']) && !empty($_POST['listing_event_address'])) {
                 update_post_meta($new_post_id, '_obenlo_location', sanitize_text_field($_POST['listing_event_address']));
-            } elseif ($parent_id > 0) {
-                // Inherit from parent if no specific address is provided for the child
-                $parent_location = get_post_meta($parent_id, '_obenlo_location', true);
                 if ($parent_location) {
                     update_post_meta($new_post_id, '_obenlo_location', $parent_location);
+                }
+            }
+
+            if (isset($_POST['listing_country'])) {
+                update_post_meta($new_post_id, '_obenlo_listing_country', sanitize_text_field($_POST['listing_country']));
+            } elseif ($parent_id > 0) {
+                $parent_country = get_post_meta($parent_id, '_obenlo_listing_country', true);
+                if ($parent_country) {
+                    update_post_meta($new_post_id, '_obenlo_listing_country', $parent_country);
                 }
             }
             if (isset($_POST['virtual_link'])) {
