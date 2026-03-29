@@ -55,6 +55,9 @@ get_header(); ?>
                     break;
                 case 'booking_error':
                     $error_message = 'There was an error processing your booking. Please try again.';
+                    if (current_user_can('administrator')) {
+                        $error_message .= ' (Admin: Check your API Keys/Logs in WordPress Settings)';
+                    }
                     break;
                 case 'invalid_payment':
                     $error_message = 'Invalid payment method selected.';
