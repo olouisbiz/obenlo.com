@@ -278,28 +278,30 @@ class Obenlo_I18N_Engine
     public function inject_google_translate_script()
     {
         if (get_option('obenlo_enable_google_translate', '0') !== '1') return;
+        
+        // Use Native Obenlo Cookie for UI state to avoid confusion with Google's state
+        $lang_code = isset($_COOKIE['obenlo_lang']) ? $_COOKIE['obenlo_lang'] : 'en';
         $current_lang = 'English';
-        $googtrans = isset($_COOKIE['googtrans']) ? $_COOKIE['googtrans'] : '';
-        if (strpos($googtrans, '/es') !== false) $current_lang = 'Español';
-        if (strpos($googtrans, '/fr') !== false) $current_lang = 'Français';
+        if ($lang_code === 'es') $current_lang = 'Español';
+        if ($lang_code === 'fr') $current_lang = 'Français';
         ?>
         <!-- HIDDEN ENGINE -->
         <div id="google_translate_element_isolated" style="display:none !important;"></div>
 
-        <!-- SOVEREIGN SWITCHER -->
-        <div class="obenlo-lang-switcher" id="obenloLangSwitcher">
+        <!-- SOVEREIGN SWITCHER (Shielded from Google auto-translation) -->
+        <div class="obenlo-lang-switcher notranslate" id="obenloLangSwitcher">
             <div class="obenlo-lang-trigger" id="obenloLangTrigger">
                 <span class="obenlo-lang-label"><?php echo esc_html($current_lang); ?></span>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
             </div>
             <div class="obenlo-lang-menu">
-                <div class="obenlo-lang-item <?php echo $current_lang === 'English' ? 'active' : ''; ?>" data-lang="en">
+                <div class="obenlo-lang-item <?php echo $lang_code === 'en' ? 'active' : ''; ?>" data-lang="en">
                     <div class="obenlo-lang-dot"></div> English
                 </div>
-                <div class="obenlo-lang-item <?php echo $current_lang === 'Español' ? 'active' : ''; ?>" data-lang="es">
+                <div class="obenlo-lang-item <?php echo $lang_code === 'es' ? 'active' : ''; ?>" data-lang="es">
                     <div class="obenlo-lang-dot"></div> Español
                 </div>
-                <div class="obenlo-lang-item <?php echo $current_lang === 'Français' ? 'active' : ''; ?>" data-lang="fr">
+                <div class="obenlo-lang-item <?php echo $lang_code === 'fr' ? 'active' : ''; ?>" data-lang="fr">
                     <div class="obenlo-lang-dot"></div> Français
                 </div>
             </div>
