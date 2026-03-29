@@ -381,8 +381,10 @@ class Obenlo_I18N_Engine
                         }
 
                         // 2. REDIRECT: Server will confirm and clean up URL
+                        // Adding a 'v' timestamp to force PWA cache-busting for the header menu
                         const url = new URL(window.location.href);
                         url.searchParams.set('lang', langGroup);
+                        url.searchParams.set('v', new Date().getTime());
                         window.location.href = url.toString();
                     });
                 });
@@ -456,8 +458,9 @@ class Obenlo_I18N_Engine
                 $goog_args['domain'] = '';
                 setcookie('googtrans', $goog_val, $goog_args);
 
-                // Redirect to clean up the URL and trigger engine with new cookies
+                // Redirect with cache-buster to ensure PWA gets a fresh server-rendered menu
                 $redirect_url = remove_query_arg('lang');
+                $redirect_url = add_query_arg('v', time(), $redirect_url);
                 wp_safe_redirect($redirect_url);
                 exit;
             }
