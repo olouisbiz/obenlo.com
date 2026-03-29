@@ -438,7 +438,7 @@ class Obenlo_Booking_Payments
             obenlo_redirect_with_error('booking_error');
         }
 
-        wp_safe_redirect($checkout_url);
+        wp_redirect($checkout_url);
         exit;
     }
 
@@ -462,7 +462,7 @@ class Obenlo_Booking_Payments
             obenlo_redirect_with_error('booking_error');
         }
 
-        wp_safe_redirect($checkout_url);
+        wp_redirect($checkout_url);
         exit;
     }
 
