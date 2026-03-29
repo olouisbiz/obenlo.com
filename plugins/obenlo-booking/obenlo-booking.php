@@ -37,6 +37,7 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-badges.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-wishlist.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-i18n.php'; // i18n Localization
 require_once OBENLO_BOOKING_DIR . 'includes/class-virtual-security.php'; // Virtual Event Security
+require_once OBENLO_BOOKING_DIR . 'includes/class-payments-webhook.php';
 
 // Initialize the plugin
 function obenlo_booking_init()
@@ -91,6 +92,9 @@ function obenlo_booking_init()
 
     $virtual_security = new Obenlo_Booking_Virtual_Security();
     $virtual_security->init();
+
+    $webhook = new Obenlo_Booking_Payments_Webhook();
+    add_action('rest_api_init', array($webhook, 'register_routes'));
 
     // Check if we need to run DB updates
     obenlo_booking_update_check();

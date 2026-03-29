@@ -29,18 +29,100 @@ class Obenlo_Booking_PayPal {
         return get_option( 'obenlo_paypal_sandbox_secret', '' );
     }
 
-    /**
-     * placeholder for PayPal logic
-     */
-    public function process_payment( $booking_id, $amount, $currency = 'USD' ) {
+    public static function get_api_url() {
+        $mode = get_option( 'obenlo_payment_mode', 'sandbox' );
+        return ( $mode === 'live' ) ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
+    }
+
+    private static function get_access_token() {
         $client_id = self::get_client_id();
-        if ( empty( $client_id ) ) {
-            return new WP_Error( 'missing_key', 'PayPal Client ID is not configured.' );
+        $secret = self::get_secret();
+
+        if ( empty( $client_id ) || empty( $secret ) ) {
+            return new WP_Error( 'missing_keys', 'PayPal API Keys are not configured.' );
         }
 
-        // Logic to interact with PayPal API
-        // ...
+        $response = wp_remote_post( self::get_api_url() . '/v1/oauth2/token', array(
+            'headers' => array(
+                'Authorization' => 'Basic ' . base64_encode( $client_id . ':' . $secret ),
+                'Content-Type'  => 'application/x-www-form-urlencoded',
+            ),
+            'body' => array(
+                'grant_type' => 'client_credentials',
+            ),
+        ) );
 
-        return true;
+        if ( is_wp_error( $response ) ) return $response;
+
+        $body = json_decode( wp_remote_retrieve_body( $response ), true );
+        return isset( $body['access_token'] ) ? $body['access_token'] : new WP_Error( 'auth_failed', 'Failed to get PayPal access token.' );
+    }
+
+    /**
+     * Create a PayPal Order
+     */
+    public function create_order( $booking_id, $amount, $currency = 'USD' ) {
+        $token = self::get_access_token();
+        if ( is_wp_error( $token ) ) return $token;
+
+        $response = wp_remote_post( self::get_api_url() . '/v2/checkout/orders', array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type'  => 'application/json',
+            ),
+            'body' => json_encode( array(
+                'intent' => 'CAPTURE',
+                'purchase_units' => array(
+                    array(
+                        'reference_id' => 'booking_' . $booking_id,
+                        'amount' => array(
+                            'currency_code' => $currency,
+                            'value' => number_format( (float)$amount, 2, '.', '' ),
+                        ),
+                        'description' => 'Obenlo Booking #' . $booking_id,
+                    ),
+                ),
+                'application_context' => array(
+                    'return_url' => add_query_arg( 'obenlo_paypal_return', $booking_id, home_url( '/' ) ),
+                    'cancel_url' => add_query_arg( 'obenlo_payment_cancel', '1', get_permalink( get_post_meta( $booking_id, '_obenlo_listing_id', true ) ) ),
+                    'shipping_preference' => 'NO_SHIPPING',
+                    'user_action' => 'PAY_NOW',
+                ),
+            ) ),
+        ) );
+
+        if ( is_wp_error( $response ) ) return $response;
+
+        $body = json_decode( wp_remote_retrieve_body( $response ), true );
+        
+        if ( isset( $body['links'] ) ) {
+            foreach ( $body['links'] as $link ) {
+                if ( $link['rel'] === 'approve' ) {
+                    return $link['href'];
+                }
+            }
+        }
+
+        return new WP_Error( 'order_failed', 'Failed to create PayPal Order.' );
+    }
+
+    /**
+     * Capture a PayPal Order
+     */
+    public function capture_order( $order_id ) {
+        $token = self::get_access_token();
+        if ( is_wp_error( $token ) ) return $token;
+
+        $response = wp_remote_post( self::get_api_url() . "/v2/checkout/orders/{$order_id}/capture", array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type'  => 'application/json',
+            ),
+        ) );
+
+        if ( is_wp_error( $response ) ) return $response;
+
+        $body = json_decode( wp_remote_retrieve_body( $response ), true );
+        return ( isset( $body['status'] ) && $body['status'] === 'COMPLETED' );
     }
 }
