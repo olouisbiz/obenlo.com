@@ -442,7 +442,15 @@ class Obenlo_Booking_Payments
         $checkout_url = $paypal->create_order($booking_id, $amount);
 
         if (is_wp_error($checkout_url)) {
-            error_log('Obenlo PayPal Error: ' . $checkout_url->get_error_message());
+            $error_msg = $checkout_url->get_error_message();
+            error_log('Obenlo PayPal Error: ' . $error_msg);
+            
+            if (current_user_can('administrator')) {
+                $redirect_url = add_query_arg('obenlo_debug', urlencode($error_msg), wp_get_referer());
+                wp_safe_redirect(add_query_arg('obenlo_error', 'booking_error', $redirect_url));
+                exit;
+            }
+
             obenlo_redirect_with_error('booking_error');
         }
 

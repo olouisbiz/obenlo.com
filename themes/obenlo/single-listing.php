@@ -70,6 +70,13 @@ get_header(); ?>
                 echo '<div style="background:#fff1f2; border:1px solid #fda4af; color:#9f1239; padding:20px; border-radius:12px; margin-bottom:30px; font-weight:700; display:flex; align-items:center; gap:10px; box-shadow:0 4px 6px rgba(0,0,0,0.05);">';
                 echo '<svg style="width:24px; height:24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
                 echo esc_html($error_message);
+
+                if (current_user_can('administrator') && isset($_GET['obenlo_debug'])) {
+                    echo '<div style="margin-top:10px; font-size:0.85rem; border-top:1px solid #fda4af; padding-top:10px; color:#7f1d1d;">';
+                    echo '<strong>Debug Info (Admins Only):</strong> ' . esc_html(urldecode($_GET['obenlo_debug']));
+                    echo '</div>';
+                }
+
                 echo '</div>';
             }
         }
