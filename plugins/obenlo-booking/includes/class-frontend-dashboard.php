@@ -926,7 +926,7 @@ class Obenlo_Booking_Frontend_Dashboard
                     $category_flag = 'stay';
                 elseif (strpos($name_lower, 'experience') !== false || strpos($name_lower, 'tour') !== false)
                     $category_flag = 'experience';
-                elseif (in_array($slug, ['event', 'show']) || strpos($name_lower, 'event') !== false)
+                elseif (in_array($slug, ['event', 'show', 'class']) || strpos($name_lower, 'event') !== false)
                     $category_flag = 'event';
                 elseif (strpos($name_lower, 'service') !== false || in_array($slug, ['chauffeur', 'cook', 'barbershop', 'hairdresser', 'concierge', 'personal-assistant', 'babysitter', 'dogsitter']))
                     $category_flag = 'service';
@@ -1350,7 +1350,7 @@ class Obenlo_Booking_Frontend_Dashboard
                     $type_map[$type->term_id] = 'celebration';
                 elseif (in_array($slug, ['donation-giving']) || strpos($name_lower, 'donation') !== false)
                     $type_map[$type->term_id] = 'donation';
-                elseif (in_array($slug, ['event', 'show']) || strpos($name_lower, 'event') !== false)
+                elseif (in_array($slug, ['event', 'show', 'class']) || strpos($name_lower, 'event') !== false)
                     $type_map[$type->term_id] = 'event';
                 elseif (strpos($name_lower, 'service') !== false || in_array($slug, ['chauffeur', 'cook', 'barbershop', 'hairdresser', 'concierge', 'personal-assistant', 'babysitter', 'dogsitter']))
                     $type_map[$type->term_id] = 'service';
