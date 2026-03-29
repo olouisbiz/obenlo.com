@@ -370,15 +370,11 @@ class Obenlo_I18N_Engine
                         
                         document.cookie = `obenlo_lang=${langGroup}; path=/; max-age=${expiry}; samesite=Lax${secure}`;
                         
-                        if (langGroup === 'en') {
-                            // Clear cookies properly to reset to English
-                            document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; samesite=Lax${secure}`;
-                            document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${window.location.hostname}; samesite=Lax${secure}`;
-                        } else {
-                            // Set for both root and specific domain to ensure Google Translate sees it
-                            document.cookie = `googtrans=${googVal}; path=/; max-age=${expiry}; samesite=Lax${secure}`;
-                            document.cookie = `googtrans=${googVal}; path=/; max-age=${expiry}; domain=.${window.location.hostname}; samesite=Lax${secure}`;
-                        }
+                        // Set for both root and specific domain to ensure Google Translate sees it
+                        // For English, we use /en/en instead of empty to force a hard reset on cached PWA pages
+                        const finalGoogVal = (langGroup === 'en') ? '/en/en' : googVal;
+                        document.cookie = `googtrans=${finalGoogVal}; path=/; max-age=${expiry}; samesite=Lax${secure}`;
+                        document.cookie = `googtrans=${finalGoogVal}; path=/; max-age=${expiry}; domain=.${window.location.hostname}; samesite=Lax${secure}`;
 
                         // 2. REDIRECT: Server will confirm and clean up URL
                         // Adding a 'v' timestamp to force PWA cache-busting for the header menu
@@ -440,7 +436,8 @@ class Obenlo_I18N_Engine
                 ));
 
                 // Set Google Translate Cookie (googtrans)
-                $goog_val = ($lang === 'en') ? '' : '/en/' . $lang;
+                // Using /en/en instead of empty string for English to force PWA cache-busting
+                $goog_val = ($lang === 'en') ? '/en/en' : '/en/' . $lang;
                 $domain = '.' . $_SERVER['HTTP_HOST'];
                 
                 $goog_args = array(
