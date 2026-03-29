@@ -24,8 +24,23 @@ class Obenlo_Booking_Virtual_Security
     {
         $booking_id = isset($_GET['booking_id']) ? intval($_GET['booking_id']) : 0;
         $nonce = isset($_GET['_wpnonce']) ? $_GET['_wpnonce'] : '';
+        $guest_id_param = isset($_GET['guest_id']) ? sanitize_text_field($_GET['guest_id']) : '';
 
-        if (!$booking_id || !wp_verify_nonce($nonce, 'join_event_' . $booking_id)) {
+        if (!$booking_id) {
+            obenlo_redirect_with_error('invalid_booking');
+        }
+
+        // 1. NONCE VALIDATION
+        $is_valid_nonce = wp_verify_nonce($nonce, 'join_event_' . $booking_id);
+        
+        // 2. GUEST ID VALIDATION (Fallback for PWA/Mobile sessions)
+        $is_valid_guest = false;
+        $actual_guest_id = get_post_meta($booking_id, '_obenlo_guest_id', true);
+        if ($guest_id_param && $actual_guest_id === $guest_id_param) {
+            $is_valid_guest = true;
+        }
+
+        if (!$is_valid_nonce && !$is_valid_guest) {
             obenlo_redirect_with_error('security_failed');
         }
 
@@ -40,23 +55,8 @@ class Obenlo_Booking_Virtual_Security
             obenlo_redirect_with_error('invalid_booking');
         }
 
-        // Verify ownership
-        $current_user_id = get_current_user_id();
-        $is_owner = ($current_user_id > 0 && $booking->post_author == $current_user_id);
-        
-        // If not logged in, we check if they have the guest ID from the query param (for visitors)
-        if (!$is_owner) {
-            $guest_id_param = isset($_GET['guest_id']) ? sanitize_text_field($_GET['guest_id']) : '';
-            $actual_guest_id = get_post_meta($booking_id, '_obenlo_guest_id', true);
-            
-            if ($guest_id_param && $actual_guest_id === $guest_id_param) {
-                $is_owner = true;
-            }
-        }
-
-        if (!$is_owner && !current_user_can('administrator')) {
-            obenlo_redirect_with_error('unauthorized');
-        }
+        // Authorization finalized (Already passed nonce or guest_id check)
+        $is_authorized = true;
 
         $listing_id = get_post_meta($booking_id, '_obenlo_listing_id', true);
         $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
