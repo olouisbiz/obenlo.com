@@ -179,6 +179,14 @@ class Obenlo_Booking_Payments
             obenlo_redirect_with_error('discontinued_payment');
         }
 
+        // Verify country restriction for Haitian methods
+        if (in_array($payment_method, ['moncash', 'natcash'])) {
+            $listing_country = get_post_meta($listing_id, '_obenlo_listing_country', true) ?: 'usa';
+            if ($listing_country !== 'haiti') {
+                obenlo_redirect_with_error('localized_payment_only');
+            }
+        }
+
         if (!$listing_id || !$start_date) {
             obenlo_redirect_with_error('invalid_data');
         }
