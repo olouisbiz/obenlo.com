@@ -286,8 +286,10 @@ class Obenlo_Booking_Payments
             }
         }
 
-        // 3. Double-Booking Prevention
+        // 3. Double-Booking Prevention (with Multi-Unit Capacity and Ghost Timeout)
         if ($duration_mins > 0 || $pricing_model === 'per_night' || $pricing_model === 'per_day') {
+            $available_units = intval(get_post_meta($listing_id, '_obenlo_available_units', true)) ?: 1;
+
             $existing_bookings = get_posts(array(
                 'post_type' => 'booking',
                 'meta_query' => array(
@@ -296,36 +298,56 @@ class Obenlo_Booking_Payments
                         'value' => $listing_id
                     )
                 ),
-                'post_status' => array('publish', 'draft'), // Including pending
+                'post_status' => 'publish', 
                 'posts_per_page' => -1
             ));
 
-            foreach ($existing_bookings as $b) {
-                $b_start = get_post_meta($b->ID, '_obenlo_start_date', true);
-                if (!$b_start)
-                    continue;
+            $active_booking_count = 0;
+            $expiry_threshold = strtotime('-30 minutes'); // 30 minute grace period for pending
 
+            foreach ($existing_bookings as $b) {
+                $b_status = get_post_meta($b->ID, '_obenlo_booking_status', true);
+                $b_created = strtotime($b->post_date);
+
+                // Skip "Ghost Bookings" (pending and older than 30 mins)
+                if ($b_status === 'pending' && $b_created < $expiry_threshold) {
+                    continue; 
+                }
+
+                // Skip cancelled
+                if ($b_status === 'cancelled' || $b_status === 'failed') {
+                    continue;
+                }
+
+                $b_start = get_post_meta($b->ID, '_obenlo_start_date', true);
+                if (!$b_start) continue;
+
+                $b_start_time = strtotime($b_start);
                 if ($pricing_model === 'per_night' || $pricing_model === 'per_day') {
                     $b_end = get_post_meta($b->ID, '_obenlo_end_date', true);
-                    $b_start_time = strtotime($b_start);
                     $b_end_time = $b_end ? strtotime($b_end) : $b_start_time;
 
                     if ($booking_start_time < $b_end_time && $b_start_time < $booking_end_time) {
-                        obenlo_redirect_with_error('already_booked');
+                        $active_booking_count++;
                     }
-                }
-                else {
+                } else {
                     $b_dur = get_post_meta($b->ID, '_obenlo_duration_mins', true);
                     if ($b_dur) {
-                        $b_start_time = strtotime($b_start);
                         $b_end_time = $b_start_time + ($b_dur * 60);
                         $proposed_end_time = $booking_start_time + ($duration_mins * 60);
 
                         if ($booking_start_time < $b_end_time && $proposed_end_time > $b_start_time) {
-                            obenlo_redirect_with_error('already_booked');
+                            $active_booking_count++;
                         }
                     }
                 }
+            }
+
+            if ($active_booking_count >= $available_units) {
+                if ($available_units > 1) {
+                    error_log("Obenlo Availability: Slot full. Count ($active_booking_count) >= Units ($available_units)");
+                }
+                obenlo_redirect_with_error('already_booked');
             }
         }
 

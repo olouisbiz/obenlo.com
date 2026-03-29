@@ -56,7 +56,7 @@ class Obenlo_Booking_Stripe {
                                 'name' => $listing_title,
                                 'description' => 'Booking #' . $booking_id . ' on Obenlo',
                             ),
-                            'unit_amount' => round( $amount * 100 ), // Stripe expects cents
+                            'unit_amount' => round( (float)$amount * 100 ), // Stripe expects cents
                         ),
                         'quantity' => 1,
                     ),
@@ -69,9 +69,13 @@ class Obenlo_Booking_Stripe {
                     'booking_id' => $booking_id,
                 ),
             ) ),
+            'sslverify' => ( wp_get_environment_type() !== 'local' ),
         ) );
 
-        if ( is_wp_error( $response ) ) return $response;
+        if ( is_wp_error( $response ) ) {
+            error_log( 'Obenlo Stripe API Error: ' . $response->get_error_message() );
+            return $response;
+        }
 
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
 
@@ -79,6 +83,7 @@ class Obenlo_Booking_Stripe {
             return $body['url'];
         }
 
+        error_log( 'Obenlo Stripe Session Failed Body: ' . wp_remote_retrieve_body( $response ) );
         return new WP_Error( 'stripe_error', isset( $body['error']['message'] ) ? $body['error']['message'] : 'Failed to create Stripe Checkout Session.' );
     }
 }
