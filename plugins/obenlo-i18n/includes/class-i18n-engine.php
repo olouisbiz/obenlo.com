@@ -48,18 +48,22 @@ class Obenlo_I18N_Engine
         add_action('wp_ajax_obenlo_set_language', array($this, 'handle_set_language'));
         add_action('wp_ajax_nopriv_obenlo_set_language', array($this, 'handle_set_language'));
 
-        // Google Translate Integration
-        if (get_option('obenlo_enable_google_translate', '0') === '1') {
-            add_action('wp_enqueue_scripts', array($this, 'enqueue_google_translate'));
-            add_action('wp_head', array($this, 'inject_google_translate_css'), 1);
-            add_action('wp_footer', array($this, 'inject_google_translate_script'), 999); // Highest priority to avoid being stripped
-        }
+        // Google Translate & Obenlo Switcher (Unconditional Registration for Resilience)
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_google_translate'));
+        add_action('wp_head', array($this, 'inject_google_translate_css'), 1);
+        add_action('wp_footer', array($this, 'inject_google_translate_script'), 999);
     }
 
     private function maybe_auto_populate_dictionaries()
     {
         $es_opt = get_option('obenlo_i18n_es');
         $fr_opt = get_option('obenlo_i18n_fr');
+        $gt_enabled = get_option('obenlo_enable_google_translate', '0');
+
+        // Force Enable Widget if missing or pulled from dev
+        if ($gt_enabled !== '1') {
+            update_option('obenlo_enable_google_translate', '1');
+        }
 
         // Check for empty or default placeholder
         if (!$es_opt || $es_opt === '[]' || (is_array($es_opt) && empty($es_opt))) {
@@ -122,6 +126,7 @@ class Obenlo_I18N_Engine
 
     public function inject_google_translate_css()
     {
+        if (get_option('obenlo_enable_google_translate', '0') !== '1') return;
         ?>
         <style id="obenlo-pure-proxy-suppression">
             /* THE SHIELD: Total suppression of all Google-injected UI */
@@ -272,6 +277,7 @@ class Obenlo_I18N_Engine
 
     public function inject_google_translate_script()
     {
+        if (get_option('obenlo_enable_google_translate', '0') !== '1') return;
         $current_lang = 'English';
         $googtrans = isset($_COOKIE['googtrans']) ? $_COOKIE['googtrans'] : '';
         if (strpos($googtrans, '/es') !== false) $current_lang = 'Español';
