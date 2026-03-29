@@ -322,6 +322,28 @@ class Obenlo_I18N_Engine
                 const switcher = document.getElementById('obenloLangSwitcher');
                 const items = document.querySelectorAll('.obenlo-lang-item');
 
+                // 1. INSTANT LABEL SYNC: Defeats PWA Caching by matching UI to actual Cookie
+                const matchLabel = () => {
+                    const cookies = document.cookie.split('; ');
+                    const langCookie = cookies.find(row => row.startsWith('obenlo_lang='));
+                    if (langCookie) {
+                        const lang = langCookie.split('=')[1];
+                        const label = document.querySelector('.obenlo-lang-label');
+                        if (label) {
+                            if (lang === 'en') label.textContent = 'English';
+                            if (lang === 'es') label.textContent = 'Español';
+                            if (lang === 'fr') label.textContent = 'Français';
+                        }
+                        
+                        // Also sync active class in menu
+                        items.forEach(i => {
+                            if (i.getAttribute('data-lang') === lang) i.classList.add('active');
+                            else i.classList.remove('active');
+                        });
+                    }
+                };
+                matchLabel();
+
                 // Robust Initialization Check
                 const checkGoogle = setInterval(() => {
                     if (window.google && google.translate) {
