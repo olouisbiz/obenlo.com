@@ -2182,7 +2182,55 @@ class Obenlo_Booking_Frontend_Dashboard
         $min_payout = 20.00;
         $currency = '$';
 
-        // Get Payout History
+        $start_date = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : '';
+        $end_date = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : '';
+
+        // Query Bookings for this host in date range
+        $booking_args = array(
+            'post_type' => 'booking',
+            'posts_per_page' => -1,
+            'post_status' => 'any',
+            'meta_query' => array(
+                array('key' => '_obenlo_host_id', 'value' => $user_id)
+            )
+        );
+
+        if ($start_date || $end_date) {
+            $date_query = array('inclusive' => true);
+            if ($start_date) $date_query['after'] = $start_date;
+            if ($end_date) $date_query['before'] = $end_date;
+            $booking_args['date_query'] = $date_query;
+        }
+
+        $bookings = get_posts($booking_args);
+        $total_earned_net = 0;
+        $period_bookings_count = 0;
+        $chart_data_raw = array();
+
+        foreach ($bookings as $booking) {
+            $status = get_post_meta($booking->ID, '_obenlo_booking_status', true);
+            if ($status !== 'confirmed') continue;
+
+            $net = floatval(get_post_meta($booking->ID, '_obenlo_booking_net_earnings', true));
+            $total_earned_net += $net;
+            $period_bookings_count++;
+
+            $date = get_the_date('Y-m-d', $booking);
+            $chart_data_raw[$date] = ($chart_data_raw[$date] ?? 0) + $net;
+        }
+
+        // Prepare Chart Data (Zero filling)
+        $chart_start = $start_date ? new DateTime($start_date) : new DateTime('-30 days');
+        $chart_end = $end_date ? new DateTime($end_date) : new DateTime('today');
+        $interval = new DateInterval('P1D');
+        $period = new DatePeriod($chart_start, $interval, $chart_end->modify('+1 day'));
+        
+        $final_chart_data = array();
+        foreach ($period as $dt) { $final_chart_data[$dt->format('Y-m-d')] = 0; }
+        foreach ($chart_data_raw as $date => $val) { if (isset($final_chart_data[$date])) $final_chart_data[$date] = $val; }
+        ksort($final_chart_data);
+
+        // Get Payout History (Existing logic)
         $history = get_posts(array(
             'post_type' => 'obenlo_payout_req',
             'author' => $user_id,
@@ -2191,22 +2239,99 @@ class Obenlo_Booking_Frontend_Dashboard
             'order' => 'DESC'
         ));
 
-        echo '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:40px;">';
-            echo '<div style="background:#fff; padding:30px; border-radius:15px; border:1px solid #eee; box-shadow:0 4px 6px rgba(0,0,0,0.02);">';
-                echo '<div style="font-size:0.8rem; text-transform:uppercase; color:#888; letter-spacing:1px; font-weight:700; margin-bottom:10px;">Available Balance</div>';
-                echo '<div style="font-size:2.5rem; font-weight:900; color:#10b981;">' . $currency . number_format($balance, 2) . '</div>';
+        echo '<div style="margin-bottom:40px;">';
+            echo '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">';
+                echo '<h2 style="font-size:1.5rem; font-weight:800; margin:0;">Business Performance</h2>';
+                echo '<div style="font-size:0.8rem; color:#888;">' . ($start_date ? esc_html($start_date) . ' to ' . esc_html($end_date) : 'Last 30 Days') . '</div>';
             echo '</div>';
 
-            echo '<div style="background:#fff; padding:30px; border-radius:15px; border:1px solid #eee; box-shadow:0 4px 6px rgba(0,0,0,0.02); display:flex; align-items:center; justify-content:center;">';
+            // Filter Form
+            echo '<form action="' . esc_url(add_query_arg('tab', 'payouts')) . '" method="GET" style="background:#fff; padding:20px; border-radius:15px; border:1px solid #eee; margin-bottom:30px; display:flex; gap:15px; align-items:flex-end;">';
+                echo '<input type="hidden" name="tab" value="payouts">';
+                echo '<div>';
+                    echo '<label style="display:block; font-size:0.75rem; font-weight:700; color:#888; margin-bottom:5px; text-transform:uppercase;">From</label>';
+                    echo '<input type="date" name="start_date" value="' . esc_attr($start_date) . '" style="padding:10px; border:1px solid #ddd; border-radius:8px;">';
+                echo '</div>';
+                echo '<div>';
+                    echo '<label style="display:block; font-size:0.75rem; font-weight:700; color:#888; margin-bottom:5px; text-transform:uppercase;">To</label>';
+                    echo '<input type="date" name="end_date" value="' . esc_attr($end_date) . '" style="padding:10px; border:1px solid #ddd; border-radius:8px;">';
+                echo '</div>';
+                echo '<button type="submit" class="btn-primary" style="padding:12px 20px; border-radius:8px; height:45px;">Filter Stats</button>';
+                echo '<a href="' . esc_url(add_query_arg(array('start_date'=>false, 'end_date'=>false), remove_query_arg(array('start_date','end_date')))) . '" style="padding:12px; font-size:0.9rem; color:#666;">Reset</a>';
+            echo '</form>';
+
+            // Stats Row
+            echo '<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; margin-bottom:30px;">';
+                echo '<div style="background:#fff; padding:25px; border-radius:15px; border:1px solid #eee;">';
+                    echo '<div style="font-size:0.7rem; text-transform:uppercase; color:#888; letter-spacing:1px; font-weight:700; margin-bottom:5px;">Available Balance</div>';
+                    echo '<div style="font-size:1.8rem; font-weight:900; color:#10b981;">' . $currency . number_format($balance, 2) . '</div>';
+                    echo '<div style="font-size:0.75rem; color:#888; margin-top:5px;">Ready for withdrawal</div>';
+                echo '</div>';
+                echo '<div style="background:#fff; padding:25px; border-radius:15px; border:1px solid #eee;">';
+                    echo '<div style="font-size:0.7rem; text-transform:uppercase; color:#888; letter-spacing:1px; font-weight:700; margin-bottom:5px;">Period Earnings (Net)</div>';
+                    echo '<div style="font-size:1.8rem; font-weight:900; color:#222;">' . $currency . number_format($total_earned_net, 2) . '</div>';
+                    echo '<div style="font-size:0.75rem; color:#888; margin-top:5px;">After platform commission</div>';
+                echo '</div>';
+                echo '<div style="background:#fff; padding:25px; border-radius:15px; border:1px solid #eee;">';
+                    echo '<div style="font-size:0.7rem; text-transform:uppercase; color:#888; letter-spacing:1px; font-weight:700; margin-bottom:5px;">Completed Bookings</div>';
+                    echo '<div style="font-size:1.8rem; font-weight:900; color:#222;">' . $period_bookings_count . '</div>';
+                    echo '<div style="font-size:0.75rem; color:#888; margin-top:5px;">In selected period</div>';
+                echo '</div>';
+            echo '</div>';
+
+            // Chart
+            echo '<div style="background:#fff; border:1px solid #eee; border-radius:20px; padding:30px; margin-bottom:40px;">';
+                echo '<div style="margin-bottom:20px; font-weight:800; font-size:1.1rem;">Revenue Growth Trend</div>';
+                echo '<div style="position: relative; height: 350px; width: 100%;">';
+                    echo '<canvas id="hostPerformanceChart"></canvas>';
+                echo '</div>';
+            echo '</div>';
+            
+            echo '<div style="text-align:center; margin-bottom:50px;">';
                 if ($balance >= $min_payout) {
-                    echo '<button id="request-payout-btn" class="btn-primary" style="padding:15px 30px; font-size:1.1rem; width:100%;">Withdraw Earnings</button>';
+                    echo '<button id="request-payout-btn" class="btn-primary" style="padding:15px 40px; font-size:1.1rem; border-radius:12px;">Withdraw Available Balance (' . $currency . number_format($balance, 2) . ')</button>';
                 } else {
-                    echo '<div style="text-align:center; color:#888; font-size:0.9rem;">';
-                        echo '<button disabled style="background:#ccc; color:#fff; border:none; padding:15px 30px; font-size:1.1rem; border-radius:12px; cursor:not-allowed; width:100%; margin-bottom:10px;">Withdraw Earnings</button>';
-                        echo 'Minimum balance of ' . $currency . $min_payout . ' required to withdraw.';
-                    echo '</div>';
+                    echo '<button disabled style="background:#eee; color:#aaa; border:none; padding:15px 40px; font-size:1.1rem; border-radius:12px; cursor:not-allowed;">Minimum ' . $currency . $min_payout . ' required to withdraw</button>';
                 }
             echo '</div>';
+
+            echo '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>';
+            echo '<script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var ctx = document.getElementById("hostPerformanceChart").getContext("2d");
+                var chartData = ' . json_encode($final_chart_data) . ';
+                var labels = Object.keys(chartData);
+                var values = Object.values(chartData);
+
+                new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: "Earnings (Net)",
+                            data: values,
+                            borderColor: "#10b981",
+                            backgroundColor: "rgba(16, 185, 129, 0.1)",
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: "#10b981",
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: "#999" }, grid: { color: "#f5f5f5" } },
+                            x: { ticks: { color: "#999", maxRotation: 45, minRotation: 45 }, grid: { display: false } }
+                        }
+                    }
+                });
+            });
+            </script>';
+
         echo '</div>';
 
         if (!empty($history)) {
