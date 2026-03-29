@@ -824,6 +824,7 @@ class Obenlo_Booking_Frontend_Dashboard
         $content = '';
         $price = '';
         $capacity = '';
+        $available_units = 1;
         $addons = array();
         $location = '';
         $policy_type = 'global';
@@ -849,6 +850,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 $parent_id = $post->post_parent;
                 $price = get_post_meta($listing_id, '_obenlo_price', true);
                 $capacity = get_post_meta($listing_id, '_obenlo_capacity', true);
+                $available_units = get_post_meta($listing_id, '_obenlo_available_units', true) ?: 1;
                 $location = get_post_meta($listing_id, '_obenlo_location', true);
                 $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
                 $event_is_fixed = get_post_meta($listing_id, '_obenlo_event_is_fixed', true) ?: 'no';
@@ -1119,6 +1121,14 @@ class Obenlo_Booking_Frontend_Dashboard
                                 <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Max Capacity (Guests/Tickets)</label>
                                 <input type="number" name="listing_capacity" value="<?php echo esc_attr($capacity); ?>" placeholder="Leave blank if not applicable" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
                             </div>
+                            <div id="units_wrapper" class="grid-col-1-2">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Available Units (Concurrent Slots)</label>
+                                <input type="number" name="available_units" value="<?php echo esc_attr($available_units); ?>" min="1" step="1" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
+                                <p style="font-size:0.75rem; color:#888; margin-top:4px;">How many times can this be booked at once?</p>
+                            </div>
+                        </div>
+
+                        <div class="grid-row" style="margin-bottom:20px;">
                             <div id="duration_wrapper" class="grid-col-1-2" style="display:flex; gap:10px;">
                                 <div style="flex:1;">
                                     <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;">Duration</label>
@@ -1736,6 +1746,9 @@ class Obenlo_Booking_Frontend_Dashboard
             }
             if (isset($_POST['listing_capacity'])) {
                 update_post_meta($new_post_id, '_obenlo_capacity', sanitize_text_field($_POST['listing_capacity']));
+            }
+            if (isset($_POST['available_units'])) {
+                update_post_meta($new_post_id, '_obenlo_available_units', intval($_POST['available_units']));
             }
             if (isset($_POST['listing_location']) && !empty($_POST['listing_location'])) {
                 update_post_meta($new_post_id, '_obenlo_location', sanitize_text_field($_POST['listing_location']));

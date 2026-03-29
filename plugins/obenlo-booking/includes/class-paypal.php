@@ -50,12 +50,21 @@ class Obenlo_Booking_PayPal {
             'body' => array(
                 'grant_type' => 'client_credentials',
             ),
+            'sslverify' => ( wp_get_environment_type() !== 'local' ),
         ) );
 
-        if ( is_wp_error( $response ) ) return $response;
+        if ( is_wp_error( $response ) ) {
+            error_log( 'Obenlo PayPal Token Error: ' . $response->get_error_message() );
+            return $response;
+        }
 
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
-        return isset( $body['access_token'] ) ? $body['access_token'] : new WP_Error( 'auth_failed', 'Failed to get PayPal access token.' );
+        if ( ! isset( $body['access_token'] ) ) {
+            error_log( 'Obenlo PayPal Token Failed Body: ' . wp_remote_retrieve_body( $response ) );
+            return new WP_Error( 'auth_failed', 'Failed to get PayPal access token.' );
+        }
+
+        return $body['access_token'];
     }
 
     /**
@@ -89,17 +98,24 @@ class Obenlo_Booking_PayPal {
                     'user_action' => 'PAY_NOW',
                 ),
             ) ),
+            'sslverify' => ( wp_get_environment_type() !== 'local' ),
         ) );
 
-        if ( is_wp_error( $response ) ) return $response;
+        if ( is_wp_error( $response ) ) {
+            error_log( 'Obenlo PayPal Order API Error: ' . $response->get_error_message() );
+            return $response;
+        }
 
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
         
-        if ( isset( $body['links'] ) ) {
-            foreach ( $body['links'] as $link ) {
-                if ( $link['rel'] === 'approve' ) {
-                    return $link['href'];
-                }
+        if ( ! isset( $body['links'] ) ) {
+            error_log( 'Obenlo PayPal Order Failed Body: ' . wp_remote_retrieve_body( $response ) );
+            return new WP_Error( 'order_failed', 'Failed to create PayPal Order.' );
+        }
+
+        foreach ( $body['links'] as $link ) {
+            if ( $link['rel'] === 'approve' ) {
+                return $link['href'];
             }
         }
 

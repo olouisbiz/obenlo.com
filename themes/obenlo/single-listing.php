@@ -5,6 +5,21 @@
 
 get_header(); ?>
 
+<style>
+    .loading-spinner {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: obenlo-spin 0.8s linear infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+    @keyframes obenlo-spin { to { transform: rotate(360deg); } }
+</style>
+
 <div class="obenlo-container">
     <?php while (have_posts()):
     the_post(); ?>
@@ -828,7 +843,12 @@ get_header(); ?>
                                 <span>$<span id="live-total"><?php echo esc_html($price); ?></span></span>
                             </div>
 
-                            <button type="submit" class="reserve-btn" style="background:#e61e4d; color:white; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:1.1rem; border:none; cursor:pointer; transition:all 0.2s ease-in-out; box-shadow:0 4px 15px rgba(230,30,77,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(230,30,77,0.4)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(230,30,77,0.3)';">
+                            <div style="margin: 15px 0; text-align: center; color: #666; font-size: 0.85em; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                SECURE CHECKOUT: You will be redirected.
+                            </div>
+
+                            <button type="submit" class="reserve-btn" id="obenlo-reserve-btn" style="background:#e61e4d; color:white; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:1.1rem; border:none; cursor:pointer; transition:all 0.2s ease-in-out; box-shadow:0 4px 15px rgba(230,30,77,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(230,30,77,0.4)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(230,30,77,0.3)';">
                                 <?php echo in_array($booking_mode, ['event_datetime']) ? 'Buy Tickets' : 'Book Instantly'; ?>
                             </button>
                         </form>
@@ -852,6 +872,17 @@ get_header(); ?>
                             var liveTotalEl = document.getElementById('live-total');
                             var basePrice = parseFloat(<?php echo json_encode($price); ?>) || 0;
                             var bookingMode = "<?php echo esc_js($booking_mode); ?>";
+                            
+                            form.addEventListener('submit', function(e) {
+                                var btn = document.getElementById('obenlo-reserve-btn');
+                                var method = form.querySelector('select[name="payment_method"]').value;
+                                var methodLabel = method === 'stripe' ? 'Stripe' : 'PayPal';
+                                
+                                btn.disabled = true;
+                                btn.style.opacity = '0.7';
+                                btn.innerHTML = '<span class="loading-spinner"></span> Redirecting to ' + methodLabel + '...';
+                                btn.style.cursor = 'wait';
+                            });
 
                             function calculateTotal() {
                                 var total = basePrice;
