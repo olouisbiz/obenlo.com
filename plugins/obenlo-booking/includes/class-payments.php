@@ -446,7 +446,9 @@ class Obenlo_Booking_Payments
             error_log('Obenlo PayPal Error: ' . $error_msg);
             
             if (current_user_can('administrator')) {
-                $redirect_url = add_query_arg('obenlo_debug', urlencode($error_msg), wp_get_referer());
+                $l_id = get_post_meta($booking_id, '_obenlo_listing_id', true);
+                $redirect_url = get_permalink($l_id);
+                $redirect_url = add_query_arg('obenlo_debug', urlencode($error_msg), $redirect_url);
                 wp_safe_redirect(add_query_arg('obenlo_error', 'booking_error', $redirect_url));
                 exit;
             }
