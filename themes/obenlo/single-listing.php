@@ -817,16 +817,20 @@ get_header(); ?>
                             <div class="form-row" style="margin-top: 10px;">
                                 <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;">Payment Method</label>
                                 <select name="payment_method" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                                    <?php 
+                                    $listing_country = get_post_meta($listing_id, '_obenlo_listing_country', true) ?: 'usa';
+                                    $is_haiti = ($listing_country === 'haiti');
+                                    ?>
                                     <?php if(get_option('obenlo_stripe_enabled', 'yes') === 'yes'): ?>
                                         <option value="stripe">Credit Card (Stripe)</option>
                                     <?php endif; ?>
                                     <?php if(get_option('obenlo_paypal_enabled', 'yes') === 'yes'): ?>
                                         <option value="paypal">PayPal</option>
                                     <?php endif; ?>
-                                    <?php if(get_option('obenlo_moncash_enabled', 'yes') === 'yes'): ?>
+                                    <?php if($is_haiti && get_option('obenlo_moncash_enabled', 'yes') === 'yes'): ?>
                                         <option value="moncash">MonCash (Haiti Mobile Money)</option>
                                     <?php endif; ?>
-                                    <?php if(get_option('obenlo_natcash_enabled', 'yes') === 'yes'): ?>
+                                    <?php if($is_haiti && get_option('obenlo_natcash_enabled', 'yes') === 'yes'): ?>
                                         <option value="natcash">Natcash (Haiti Mobile Money)</option>
                                     <?php endif; ?>
                                 </select>
