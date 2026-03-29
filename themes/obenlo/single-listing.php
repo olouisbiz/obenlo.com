@@ -817,8 +817,18 @@ get_header(); ?>
                             <div class="form-row" style="margin-top: 10px;">
                                 <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;">Payment Method</label>
                                 <select name="payment_method" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
-                                    <option value="stripe">Credit Card (Stripe)</option>
-                                    <option value="paypal">PayPal</option>
+                                    <?php if(get_option('obenlo_stripe_enabled', 'yes') === 'yes'): ?>
+                                        <option value="stripe">Credit Card (Stripe)</option>
+                                    <?php endif; ?>
+                                    <?php if(get_option('obenlo_paypal_enabled', 'yes') === 'yes'): ?>
+                                        <option value="paypal">PayPal</option>
+                                    <?php endif; ?>
+                                    <?php if(get_option('obenlo_moncash_enabled', 'yes') === 'yes'): ?>
+                                        <option value="moncash">MonCash (Haiti Mobile Money)</option>
+                                    <?php endif; ?>
+                                    <?php if(get_option('obenlo_natcash_enabled', 'yes') === 'yes'): ?>
+                                        <option value="natcash">Natcash (Haiti Mobile Money)</option>
+                                    <?php endif; ?>
                                 </select>
                             </div>
 
@@ -879,7 +889,8 @@ get_header(); ?>
                             form.addEventListener('submit', function(e) {
                                 var btn = document.getElementById('obenlo-reserve-btn');
                                 var method = form.querySelector('select[name="payment_method"]').value;
-                                var methodLabel = method === 'stripe' ? 'Stripe' : 'PayPal';
+                                var methodLabels = { 'stripe': 'Stripe', 'paypal': 'PayPal', 'moncash': 'MonCash', 'natcash': 'Natcash' };
+                                var methodLabel = methodLabels[method] || 'Gateway';
                                 
                                 btn.disabled = true;
                                 btn.style.opacity = '0.7';
