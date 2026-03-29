@@ -62,7 +62,7 @@ class Obenlo_Booking_Stripe {
                     ),
                 ),
                 'mode' => 'payment',
-                'success_url' => add_query_arg( 'obenlo_stripe_success', $booking_id, home_url( '/' ) ),
+                'success_url' => add_query_arg( array( 'obenlo_stripe_success' => $booking_id, 'session_id' => '{CHECKOUT_SESSION_ID}' ), home_url( '/' ) ),
                 'cancel_url' => add_query_arg( 'obenlo_payment_cancel', '1', get_permalink( $listing_id ) ),
                 'client_reference_id' => $booking_id,
                 'metadata' => array(
@@ -85,5 +85,26 @@ class Obenlo_Booking_Stripe {
 
         error_log( 'Obenlo Stripe Session Failed Body: ' . wp_remote_retrieve_body( $response ) );
         return new WP_Error( 'stripe_error', isset( $body['error']['message'] ) ? $body['error']['message'] : 'Failed to create Stripe Checkout Session.' );
+    }
+
+    /**
+     * Verify a Stripe Checkout Session
+     */
+    public function verify_checkout_session( $session_id ) {
+        $secret_key = self::get_secret_key();
+        if ( empty( $secret_key ) ) return false;
+
+        $response = wp_remote_get( "https://api.stripe.com/v1/checkout/sessions/{$session_id}", array(
+            'headers' => array(
+                'Authorization' => 'Basic ' . base64_encode( $secret_key . ':' ),
+            ),
+            'sslverify' => ( wp_get_environment_type() !== 'local' ),
+        ) );
+
+        if ( is_wp_error( $response ) ) return false;
+
+        $body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+        return ( isset( $body['payment_status'] ) && $body['payment_status'] === 'paid' );
     }
 }

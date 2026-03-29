@@ -422,7 +422,46 @@ class Obenlo_Booking_Payments
      */
     public function handle_payment_return()
     {
-        if (isset($_GET['obenlo_stripe_success']) || isset($_GET['obenlo_paypal_return'])) {
+        $status_updated = false;
+        $booking_id = 0;
+
+        // 1. Handle Stripe Return
+        if (isset($_GET['obenlo_stripe_success']) && isset($_GET['session_id'])) {
+            $booking_id = intval($_GET['obenlo_stripe_success']);
+            $session_id = sanitize_text_field($_GET['session_id']);
+            
+            $stripe = new Obenlo_Booking_Stripe();
+            if ($stripe->verify_checkout_session($session_id)) {
+                $status_updated = true;
+            } else {
+                error_log('Obenlo Stripe Return Verification Failed for Booking #' . $booking_id);
+                obenlo_redirect_with_error('booking_error');
+            }
+        }
+
+        // 2. Handle PayPal Return
+        if (isset($_GET['obenlo_paypal_return']) && isset($_GET['token'])) {
+            $booking_id = intval($_GET['obenlo_paypal_return']);
+            $order_id = sanitize_text_field($_GET['token']);
+            
+            $paypal = new Obenlo_Booking_PayPal();
+            $capture = $paypal->capture_order($order_id);
+            
+            if ($capture === true) {
+                $status_updated = true;
+            } else {
+                error_log('Obenlo PayPal Return Capture Failed for Booking #' . $booking_id);
+                obenlo_redirect_with_error('booking_error');
+            }
+        }
+
+        // 3. Update Status and Redirect
+        if ($status_updated && $booking_id > 0) {
+            update_post_meta($booking_id, '_obenlo_booking_status', 'confirmed');
+            
+            // Trigger Notification
+            Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'booking_confirmed');
+
             wp_safe_redirect(add_query_arg('obenlo_modal', 'booking_confirmed', home_url()));
             exit;
         }
