@@ -338,6 +338,24 @@ class Obenlo_I18N_Engine
                 items.forEach(item => {
                     item.addEventListener('click', function() {
                         const langGroup = this.getAttribute('data-lang');
+                        
+                        // 1. SET COOKIES IN JAVASCRIPT: Immediate effect for PWA/Standalone
+                        const expiry = 60 * 60 * 24 * 365; // 1 year
+                        const secure = window.location.protocol === 'https:' ? '; secure' : '';
+                        const googVal = (langGroup === 'en') ? '' : '/en/' . langGroup;
+                        
+                        document.cookie = `obenlo_lang=${langGroup}; path=/; max-age=${expiry}; samesite=Lax${secure}`;
+                        
+                        if (langGroup === 'en') {
+                            document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; samesite=Lax${secure}`;
+                            document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${window.location.hostname}; samesite=Lax${secure}`;
+                        } else {
+                            const googVal = `/en/${langGroup}`;
+                            document.cookie = `googtrans=${googVal}; path=/; max-age=${expiry}; samesite=Lax${secure}`;
+                            document.cookie = `googtrans=${googVal}; path=/; max-age=${expiry}; domain=.${window.location.hostname}; samesite=Lax${secure}`;
+                        }
+
+                        // 2. REDIRECT: Server will confirm and clean up URL
                         const url = new URL(window.location.href);
                         url.searchParams.set('lang', langGroup);
                         window.location.href = url.toString();
@@ -382,18 +400,36 @@ class Obenlo_I18N_Engine
             $lang = sanitize_text_field($_GET['lang']);
             if (in_array($lang, array('en', 'es', 'fr'))) {
                 $expiry = time() + (365 * 24 * 60 * 60);
+                $is_secure = is_ssl();
                 
-                // Set Obenlo Native Cookie
-                setcookie('obenlo_lang', $lang, $expiry, '/');
+                // Set Obenlo Native Cookie (PHP 7.3+ Array Format for PWA/Lax compatibility)
+                setcookie('obenlo_lang', $lang, array(
+                    'expires' => $expiry,
+                    'path' => '/',
+                    'domain' => '',
+                    'secure' => $is_secure,
+                    'httponly' => false,
+                    'samesite' => 'Lax'
+                ));
 
                 // Set Google Translate Cookie (googtrans)
-                // Format: /source/target (e.g., /en/es)
                 $goog_val = ($lang === 'en') ? '' : '/en/' . $lang;
                 $domain = '.' . $_SERVER['HTTP_HOST'];
                 
-                // Set for both root domain and current domain for max compatibility
-                setcookie('googtrans', $goog_val, $expiry, '/', $domain);
-                setcookie('googtrans', $goog_val, $expiry, '/');
+                $goog_args = array(
+                    'expires' => $expiry,
+                    'path' => '/',
+                    'domain' => $domain,
+                    'secure' => $is_secure,
+                    'httponly' => false,
+                    'samesite' => 'Lax'
+                );
+
+                setcookie('googtrans', $goog_val, $goog_args);
+                
+                // Also set for current domain for max compatibility
+                $goog_args['domain'] = '';
+                setcookie('googtrans', $goog_val, $goog_args);
 
                 // Redirect to clean up the URL and trigger engine with new cookies
                 $redirect_url = remove_query_arg('lang');
@@ -408,7 +444,12 @@ class Obenlo_I18N_Engine
         if (isset($_POST['lang'])) {
             $lang = sanitize_text_field($_POST['lang']);
             if (in_array($lang, array('en', 'es', 'fr'))) {
-                setcookie('obenlo_lang', $lang, time() + (365 * 24 * 60 * 60), '/');
+                setcookie('obenlo_lang', $lang, array(
+                    'expires' => time() + (365 * 24 * 60 * 60),
+                    'path' => '/',
+                    'secure' => is_ssl(),
+                    'samesite' => 'Lax'
+                ));
                 wp_send_json_success(array('lang' => $lang));
             }
         }
