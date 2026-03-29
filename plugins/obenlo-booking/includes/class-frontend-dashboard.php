@@ -2177,11 +2177,67 @@ class Obenlo_Booking_Frontend_Dashboard
 
     private function render_payout_tab()
     {
-        echo '<div class="dashboard-header"><h2 class="dashboard-title">Payout Settings</h2></div>';
-        echo '<div class="form-section">';
-        echo '<p style="margin-bottom:20px; color:#666;">Manage how you would like to receive your earnings from Obenlo.</p>';
-
         $user_id = get_current_user_id();
+        $balance = Obenlo_Booking_Payout_Manager::get_host_balance($user_id);
+        $min_payout = 20.00;
+        $currency = '$';
+
+        // Get Payout History
+        $history = get_posts(array(
+            'post_type' => 'obenlo_payout_req',
+            'author' => $user_id,
+            'posts_per_page' => 10,
+            'orderby' => 'date',
+            'order' => 'DESC'
+        ));
+
+        echo '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:40px;">';
+            echo '<div style="background:#fff; padding:30px; border-radius:15px; border:1px solid #eee; box-shadow:0 4px 6px rgba(0,0,0,0.02);">';
+                echo '<div style="font-size:0.8rem; text-transform:uppercase; color:#888; letter-spacing:1px; font-weight:700; margin-bottom:10px;">Available Balance</div>';
+                echo '<div style="font-size:2.5rem; font-weight:900; color:#10b981;">' . $currency . number_format($balance, 2) . '</div>';
+            echo '</div>';
+
+            echo '<div style="background:#fff; padding:30px; border-radius:15px; border:1px solid #eee; box-shadow:0 4px 6px rgba(0,0,0,0.02); display:flex; align-items:center; justify-content:center;">';
+                if ($balance >= $min_payout) {
+                    echo '<button id="request-payout-btn" class="btn-primary" style="padding:15px 30px; font-size:1.1rem; width:100%;">Withdraw Earnings</button>';
+                } else {
+                    echo '<div style="text-align:center; color:#888; font-size:0.9rem;">';
+                        echo '<button disabled style="background:#ccc; color:#fff; border:none; padding:15px 30px; font-size:1.1rem; border-radius:12px; cursor:not-allowed; width:100%; margin-bottom:10px;">Withdraw Earnings</button>';
+                        echo 'Minimum balance of ' . $currency . $min_payout . ' required to withdraw.';
+                    echo '</div>';
+                }
+            echo '</div>';
+        echo '</div>';
+
+        if (!empty($history)) {
+            echo '<h3 style="font-size:1.2rem; font-weight:800; margin-bottom:20px;">Payout History</h3>';
+            echo '<div style="background:#fff; border-radius:15px; border:1px solid #eee; overflow:hidden; margin-bottom:40px;">';
+                echo '<table style="width:100%; border-collapse:collapse;">';
+                    echo '<thead style="background:#f9f9fb;"><tr>';
+                        echo '<th style="padding:15px; text-align:left; font-size:0.8rem; color:#666;">Date</th>';
+                        echo '<th style="padding:15px; text-align:left; font-size:0.8rem; color:#666;">Amount</th>';
+                        echo '<th style="padding:15px; text-align:left; font-size:0.8rem; color:#666;">Status</th>';
+                    echo '</tr></thead>';
+                    echo '<tbody>';
+                    foreach ($history as $req) {
+                        $amt = get_post_meta($req->ID, '_amount', true);
+                        $stat = get_post_meta($req->ID, '_status', true);
+                        $stat_color = '#f59e0b';
+                        if ($stat === 'paid') $stat_color = '#10b981';
+                        if ($stat === 'cancelled') $stat_color = '#ef4444';
+
+                        echo '<tr style="border-top:1px solid #eee;">';
+                            echo '<td style="padding:15px; font-size:0.9rem;">' . get_the_date('', $req) . '</td>';
+                            echo '<td style="padding:15px; font-size:0.9rem; font-weight:700;">' . $currency . number_format($amt, 2) . '</td>';
+                            echo '<td style="padding:15px;"><span style="background:' . $stat_color . '22; color:' . $stat_color . '; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; text-transform:uppercase;">' . $stat . '</span></td>';
+                        echo '</tr>';
+                    }
+                    echo '</tbody>';
+                echo '</table>';
+            echo '</div>';
+        }
+
+        echo '<div class="dashboard-header"><h3 style="font-size:1.2rem; font-weight:800;">Payout Preferences</h3></div>';
         $current_method = get_user_meta($user_id, 'obenlo_payout_method', true);
         $current_details = get_user_meta($user_id, 'obenlo_payout_details', true);
         $methods = Obenlo_Booking_Payout_Manager::get_methods();
@@ -2255,6 +2311,42 @@ class Obenlo_Booking_Frontend_Dashboard
                     btn.innerText = 'Save Payout Preferences';
                 });
             });
+
+            // Handle Payout Request
+            var reqBtn = document.getElementById('request-payout-btn');
+            if(reqBtn) {
+                reqBtn.addEventListener('click', function() {
+                    if(!confirm('Are you sure you want to request a payout of your entire available balance?')) return;
+                    
+                    reqBtn.disabled = true;
+                    reqBtn.innerText = 'Processing...';
+
+                    var formData = new FormData();
+                    formData.append('action', 'obenlo_request_payout');
+                    formData.append('security', '<?php echo wp_create_nonce("obenlo_payout_nonce"); ?>');
+
+                    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if(data.success) {
+                            alert(data.data.message);
+                            window.location.reload();
+                        } else {
+                            alert('❌ ' + data.data);
+                            reqBtn.disabled = false;
+                            reqBtn.innerText = 'Withdraw Earnings';
+                        }
+                    })
+                    .catch(err => {
+                        alert('Error submitting request. Please try again.');
+                        reqBtn.disabled = false;
+                        reqBtn.innerText = 'Withdraw Earnings';
+                    });
+                });
+            }
         });
         </script>
         <?php

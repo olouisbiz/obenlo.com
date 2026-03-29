@@ -504,6 +504,111 @@ class Obenlo_Booking_Admin_Dashboard
                 <button type="submit" style="background:#e61e4d; color:#fff; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:700;">Save Payment Settings</button>
             </form>
         </div>
+
+        <h3 style="margin-top:50px;">Pending Payout Requests</h3>
+        <?php
+        $pending_payouts = get_posts(array(
+            'post_type' => 'obenlo_payout_req',
+            'meta_key' => '_status',
+            'meta_value' => 'pending',
+            'posts_per_page' => -1
+        ));
+
+        if (empty($pending_payouts)):
+            echo '<p style="color:#666; font-style:italic;">No pending payout requests at this time.</p>';
+        else: ?>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Host</th>
+                        <th>Amount</th>
+                        <th>Method / Details</th>
+                        <th>Date Requested</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($pending_payouts as $payout): 
+                        $host_id = $payout->post_author;
+                        $host = get_userdata($host_id);
+                        $amount = get_post_meta($payout->ID, '_amount', true);
+                        $method = get_post_meta($payout->ID, '_method', true);
+                        $details = get_post_meta($payout->ID, '_details', true);
+                    ?>
+                    <tr>
+                        <td>
+                            <strong><?php echo esc_html($host->display_name); ?></strong><br>
+                            <small><?php echo esc_html($host->user_email); ?></small>
+                        </td>
+                        <td style="font-size:1.2em; font-weight:700; color:#10b981;">$<?php echo number_format($amount, 2); ?></td>
+                        <td>
+                            <span class="badge badge-guest" style="text-transform:uppercase;"><?php echo esc_html($method); ?></span><br>
+                            <code><?php echo esc_html($details); ?></code>
+                        </td>
+                        <td><?php echo get_the_date('', $payout); ?></td>
+                        <td>
+                            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline-block;">
+                                <input type="hidden" name="action" value="obenlo_process_payout">
+                                <input type="hidden" name="payout_id" value="<?php echo $payout->ID; ?>">
+                                <input type="hidden" name="payout_status" value="paid">
+                                <?php wp_nonce_field('process_payout_' . $payout->ID, 'security'); ?>
+                                <input type="text" name="transaction_id" placeholder="TX ID" style="width:100px; padding:5px; margin-right:5px; border-radius:4px; border:1px solid #ddd;">
+                                <button type="submit" class="btn-approve" style="background:none; border:none; cursor:pointer;" onclick="return confirm('Confirm you have manually sent this payout?')">Mark as Paid</button>
+                            </form>
+                            | 
+                            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline-block;">
+                                <input type="hidden" name="action" value="obenlo_process_payout">
+                                <input type="hidden" name="payout_id" value="<?php echo $payout->ID; ?>">
+                                <input type="hidden" name="payout_status" value="cancelled">
+                                <?php wp_nonce_field('process_payout_' . $payout->ID, 'security'); ?>
+                                <button type="submit" class="btn-reject" style="background:none; border:none; cursor:pointer;" onclick="return confirm('Reject this payout request?')">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+
+        <h3 style="margin-top:50px;">Recent Processed Payouts</h3>
+        <?php
+        $recent_payouts = get_posts(array(
+            'post_type' => 'obenlo_payout_req',
+            'meta_key' => '_status',
+            'meta_value' => 'paid',
+            'posts_per_page' => 10,
+            'orderby' => 'date',
+            'order' => 'DESC'
+        ));
+
+        if (empty($recent_payouts)):
+            echo '<p style="color:#666; font-style:italic;">No recently processed payouts.</p>';
+        else: ?>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Host</th>
+                        <th>Amount</th>
+                        <th>Details</th>
+                        <th>Date Paid</th>
+                        <th>TX ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($recent_payouts as $payout): 
+                        $host = get_userdata($payout->post_author);
+                    ?>
+                    <tr>
+                        <td><?php echo esc_html($host ? $host->display_name : 'Unknown'); ?></td>
+                        <td style="font-weight:700;">$<?php echo number_format(get_post_meta($payout->ID, '_amount', true), 2); ?></td>
+                        <td><?php echo esc_html(strtoupper(get_post_meta($payout->ID, '_method', true))); ?></td>
+                        <td><?php echo get_post_meta($payout->ID, '_paid_date', true); ?></td>
+                        <td><code><?php echo esc_html(get_post_meta($payout->ID, '_transaction_id', true)); ?></code></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
         <?php
     }
 
