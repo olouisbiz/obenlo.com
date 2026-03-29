@@ -385,7 +385,7 @@ class Obenlo_Booking_Payments
         update_post_meta($booking_id, '_obenlo_guests', $guests);
         update_post_meta($booking_id, '_obenlo_total_price', $total_price);
         update_post_meta($booking_id, '_obenlo_payment_method', $payment_method);
-        update_post_meta($booking_id, '_obenlo_booking_status', 'pending_payment');
+        update_post_meta($booking_id, '_obenlo_booking_status', ($total_price <= 0) ? 'confirmed' : 'pending_payment');
         update_post_meta($booking_id, '_obenlo_confirmation_code', $confirmation_code);
         update_post_meta($booking_id, '_obenlo_guest_id', $guest_id_val);
         
@@ -400,6 +400,12 @@ class Obenlo_Booking_Payments
         Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'new_booking');
 
         // Redirect to appropriate payment gateway
+        if ($total_price <= 0) {
+            // Free Booking: Skip payment and redirect to success modal
+            wp_safe_redirect(add_query_arg('obenlo_modal', 'booking_confirmed', home_url()));
+            exit;
+        }
+
         if ($payment_method === 'stripe') {
             $this->process_stripe_checkout($booking_id, $total_price, $listing->post_title);
         }

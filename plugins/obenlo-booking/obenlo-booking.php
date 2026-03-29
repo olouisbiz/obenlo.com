@@ -110,7 +110,7 @@ function obenlo_redirect_with_error($error_code) {
     
     // Default fallback if referer is missing or invalid
     if (!$redirect_url) {
-        $redirect_url = home_url('/host-dashboard');
+        $redirect_url = home_url('/');
     }
 
     $redirect_url = add_query_arg('obenlo_error', $error_code, $redirect_url);
