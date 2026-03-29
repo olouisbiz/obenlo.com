@@ -19,6 +19,9 @@ class Obenlo_Booking_Payments
         // Handle timeslot generation
         add_action('wp_ajax_nopriv_obenlo_get_timeslots', array($this, 'handle_get_timeslots'));
         add_action('wp_ajax_obenlo_get_timeslots', array($this, 'handle_get_timeslots'));
+
+        // Handle payment returns
+        add_action('template_redirect', array($this, 'handle_payment_return'));
     }
 
     public function handle_get_timeslots()
@@ -386,41 +389,45 @@ class Obenlo_Booking_Payments
         }
     }
 
+    /**
+     * Handle the return from payment gateways (Stripe/PayPal)
+     */
+    public function handle_payment_return()
+    {
+        if (isset($_GET['obenlo_stripe_success']) || isset($_GET['obenlo_paypal_return'])) {
+            wp_safe_redirect(add_query_arg('obenlo_modal', 'booking_confirmed', home_url()));
+            exit;
+        }
+    }
+
     private function process_stripe_checkout($booking_id, $amount, $item_name)
     {
-        $stripe_secret = Obenlo_Booking_Stripe::get_secret_key();
-        $mode = get_option('obenlo_payment_mode', 'sandbox');
+        $stripe = new Obenlo_Booking_Stripe();
+        $checkout_url = $stripe->create_checkout_session($booking_id, $amount);
 
-        if (empty($stripe_secret)) {
-            error_log('Obenlo: Stripe Secret Key missing in ' . $mode . ' mode. Falling back to simulation.');
+        if (is_wp_error($checkout_url)) {
+            error_log('Obenlo Stripe Error: ' . $checkout_url->get_error_message());
+            obenlo_redirect_with_error('booking_error');
         }
 
-        // Environment-aware logging
-        error_log("Obenlo Payment: Processing Stripe Checkout in $mode mode for Booking #$booking_id");
-
-        update_post_meta($booking_id, '_obenlo_booking_status', 'confirmed');
-        Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'booking_confirmed');
-        wp_safe_redirect(add_query_arg('obenlo_modal', 'booking_confirmed', home_url()));
+        wp_safe_redirect($checkout_url);
         exit;
     }
 
     private function process_paypal_checkout($booking_id, $amount, $item_name)
     {
-        $paypal_id = Obenlo_Booking_PayPal::get_client_id();
-        $mode = get_option('obenlo_payment_mode', 'sandbox');
+        $paypal = new Obenlo_Booking_PayPal();
+        $checkout_url = $paypal->create_order($booking_id, $amount);
 
-        if (empty($paypal_id)) {
-            error_log('Obenlo: PayPal Client ID missing in ' . $mode . ' mode. Falling back to simulation.');
+        if (is_wp_error($checkout_url)) {
+            error_log('Obenlo PayPal Error: ' . $checkout_url->get_error_message());
+            obenlo_redirect_with_error('booking_error');
         }
 
-        error_log("Obenlo Payment: Processing PayPal Checkout in $mode mode for Booking #$booking_id");
-
-        // Simulate success redirect
-        update_post_meta($booking_id, '_obenlo_booking_status', 'confirmed');
-        Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'booking_confirmed');
-        wp_safe_redirect(add_query_arg('obenlo_modal', 'booking_confirmed', home_url()));
+        wp_safe_redirect($checkout_url);
         exit;
     }
+
     public function calculate_platform_fee($booking_id)
     {
         $host_id = get_post_meta($booking_id, '_obenlo_host_id', true);
