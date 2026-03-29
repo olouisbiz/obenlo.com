@@ -68,8 +68,71 @@ class Obenlo_Booking_Virtual_Security
         // Log the join event (optional)
         error_log("Obenlo: Guest joined virtual event for booking #$booking_id");
 
-        // Secure Redirect
-        wp_redirect(esc_url_raw($virtual_link));
+        // Mobile-Friendly Bridge Page
+        // Silent PHP redirects are often blocked by mobile browsers/PWAs
+        // We use a bridge page with a manual button to force the deep-link to Google Meet app
+        ?>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            <title><?php echo __('Joining Event...', 'obenlo'); ?></title>
+            <style>
+                body {
+                    margin: 0; padding: 0;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    background: #fff; color: #333;
+                    display: flex; align-items: center; justify-content: center;
+                    height: 100vh; text-align: center;
+                }
+                .container { max-width: 90%; padding: 30px; }
+                .logo { font-size: 2rem; font-weight: 800; color: #e61e4d; letter-spacing: -1px; margin-bottom: 40px; }
+                .status-icon { font-size: 50px; margin-bottom: 20px; animation: bounce 2s infinite; }
+                h1 { margin: 0 0 15px 0; font-size: 1.5rem; color: #222; }
+                p { margin: 0 0 40px 0; color: #666; line-height: 1.5; }
+                .join-btn {
+                    display: inline-block;
+                    background: #e61e4d; color: #fff;
+                    padding: 18px 40px; border-radius: 14px;
+                    text-decoration: none; font-weight: 700; font-size: 1.1rem;
+                    box-shadow: 0 10px 20px rgba(230, 30, 77, 0.2);
+                    transition: transform 0.2s;
+                }
+                .join-btn:active { transform: scale(0.96); }
+                .footer { margin-top: 60px; font-size: 0.8rem; color: #999; }
+                @keyframes bounce {
+                    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+                    40% {transform: translateY(-10px);}
+                    60% {transform: translateY(-5px);}
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="logo">Obenlo</div>
+                <div class="status-icon">🚀</div>
+                <h1><?php echo __('Joining Your Event...', 'obenlo'); ?></h1>
+                <p><?php echo __('Please click the button below if your meeting doesn\'t open automatically.', 'obenlo'); ?></p>
+                
+                <a href="<?php echo esc_url($virtual_link); ?>" target="_blank" class="join-btn" id="joinBtn">
+                    <?php echo __('Join Event Now', 'obenlo'); ?>
+                </a>
+
+                <div class="footer">
+                    <?php echo __('Secure Redirect by Obenlo', 'obenlo'); ?>
+                </div>
+            </div>
+
+            <script type="text/javascript">
+                setTimeout(function() {
+                    // Try auto-redirect first
+                    window.location.href = "<?php echo esc_js($virtual_link); ?>";
+                }, 1000);
+            </script>
+        </body>
+        </html>
+        <?php
         exit;
     }
 
