@@ -138,9 +138,18 @@ class Obenlo_Booking_PayPal {
             ),
         ) );
 
-        if ( is_wp_error( $response ) ) return $response;
+        if ( is_wp_error( $response ) ) {
+            error_log( 'Obenlo PayPal Capture Error: ' . $response->get_error_message() );
+            return $response;
+        }
 
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
-        return ( isset( $body['status'] ) && $body['status'] === 'COMPLETED' );
+        
+        if ( isset( $body['status'] ) && $body['status'] === 'COMPLETED' ) {
+            return true;
+        }
+
+        error_log( 'Obenlo PayPal Capture Failed Body: ' . wp_remote_retrieve_body( $response ) );
+        return false;
     }
 }
