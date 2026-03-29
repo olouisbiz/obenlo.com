@@ -109,8 +109,10 @@ class Obenlo_Booking_PayPal {
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
         
         if ( ! isset( $body['links'] ) ) {
-            error_log( 'Obenlo PayPal Order Failed Body: ' . wp_remote_retrieve_body( $response ) );
-            return new WP_Error( 'order_failed', 'Failed to create PayPal Order.' );
+            $full_body = wp_remote_retrieve_body( $response );
+            error_log( 'Obenlo PayPal Order Failed Body: ' . $full_body );
+            $error_msg = isset($body['message']) ? $body['message'] : 'Failed to create PayPal Order.';
+            return new WP_Error( 'order_failed', $error_msg );
         }
 
         foreach ( $body['links'] as $link ) {
