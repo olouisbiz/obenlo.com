@@ -342,15 +342,16 @@ class Obenlo_I18N_Engine
                         // 1. SET COOKIES IN JAVASCRIPT: Immediate effect for PWA/Standalone
                         const expiry = 60 * 60 * 24 * 365; // 1 year
                         const secure = window.location.protocol === 'https:' ? '; secure' : '';
-                        const googVal = (langGroup === 'en') ? '' : '/en/' . langGroup;
+                        const googVal = (langGroup === 'en') ? '' : '/en/' + langGroup;
                         
                         document.cookie = `obenlo_lang=${langGroup}; path=/; max-age=${expiry}; samesite=Lax${secure}`;
                         
                         if (langGroup === 'en') {
+                            // Clear cookies properly to reset to English
                             document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; samesite=Lax${secure}`;
                             document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${window.location.hostname}; samesite=Lax${secure}`;
                         } else {
-                            const googVal = `/en/${langGroup}`;
+                            // Set for both root and specific domain to ensure Google Translate sees it
                             document.cookie = `googtrans=${googVal}; path=/; max-age=${expiry}; samesite=Lax${secure}`;
                             document.cookie = `googtrans=${googVal}; path=/; max-age=${expiry}; domain=.${window.location.hostname}; samesite=Lax${secure}`;
                         }
