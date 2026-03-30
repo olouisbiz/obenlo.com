@@ -20,6 +20,7 @@ class Obenlo_Booking_Frontend_Dashboard
         add_action('admin_post_obenlo_dashboard_save_availability', array($this, 'handle_save_availability'));
         add_action('admin_post_obenlo_dashboard_delete_listing', array($this, 'handle_delete_listing'));
         add_action('admin_post_obenlo_export_bookings', array($this, 'handle_export_bookings'));
+        add_action('admin_post_obenlo_reply_review', array($this, 'handle_reply_review'));
         add_action('init', array($this, 'handle_global_location_fix'));
     }
 
@@ -783,7 +784,7 @@ class Obenlo_Booking_Frontend_Dashboard
         }
 
         $comments = get_comments(array(
-            'post_author__not_in' => array($user_id), // Exclude host's own replies
+            'author__not_in' => array($user_id), // Exclude host's own comments from main list
             'post_id__in' => $listing_ids,
             'status' => 'approve',
             'parent' => 0 // Only top-level reviews
@@ -793,25 +794,85 @@ class Obenlo_Booking_Frontend_Dashboard
             echo '<p>' . __('You have not received any reviews yet.', 'obenlo') . '</p>';
         }
         else {
-            echo '<div class="reviews-list" style="display:flex; flex-direction:column; gap:20px;">';
+            echo '<div class="reviews-list" style="display:flex; flex-direction:column; gap:25px;">';
             foreach ($comments as $comment) {
                 $rating = get_comment_meta($comment->comment_ID, '_obenlo_rating', true);
                 $listing_title = get_the_title($comment->comment_post_ID);
                 $listing_url = get_permalink($comment->comment_post_ID);
+                
+                // Get host replies
+                $replies = get_comments(array(
+                    'parent' => $comment->comment_ID,
+                    'status' => 'approve',
+                    'order'  => 'ASC'
+                ));
 
-                echo '<div class="review-item" style="border:1px solid #eee; padding:20px; border-radius:12px; background:#fff;">';
-                echo '<div style="display:flex; justify-content:space-between; margin-bottom:10px;">';
-                echo '<div><strong>' . esc_html($comment->comment_author) . '</strong> ' . __('on', 'obenlo') . ' <a href="' . esc_url($listing_url) . '">' . esc_html($listing_title) . '</a></div>';
-                echo '<div style="font-size:0.85em; color:#666;">' . get_comment_date('', $comment->comment_ID) . '</div>';
+                echo '<div class="review-item" style="border:1px solid #eee; padding:25px; border-radius:15px; background:#fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);">';
+                echo '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">';
+                echo '<div>';
+                echo '<div style="font-weight:800; font-size:1.1rem; color:#111;">' . esc_html($comment->comment_author) . '</div>';
+                echo '<div style="font-size:0.85rem; color:#666; margin-top:2px;">' . sprintf(__('Reviewed %s', 'obenlo'), '<a href="' . esc_url($listing_url) . '" style="color:#e61e4d; font-weight:600; text-decoration:none;">' . esc_html($listing_title) . '</a>') . ' • ' . get_comment_date('', $comment->comment_ID) . '</div>';
+                echo '</div>';
+                
+                if ($rating) {
+                    echo '<div style="background:#fff7ed; padding:5px 12px; border-radius:8px; border:1px solid #ffedd5; display:flex; align-items:center; gap:5px;">';
+                    echo '<span style="color:#f59e0b; font-size:1.1rem;">★</span>';
+                    echo '<span style="color:#9a3412; font-weight:800; font-size:0.95rem;">' . intval($rating) . '</span>';
+                    echo '</div>';
+                }
                 echo '</div>';
 
-                if ($rating) {
-                    $stars = str_repeat('★', intval($rating)) . str_repeat('☆', 5 - intval($rating));
-                    echo '<div style="color:#FFD700; font-size:1.2em; margin-bottom:10px;">' . $stars . ' (' . intval($rating) . '/5)</div>';
+                echo '<div style="line-height:1.7; color:#4b5563; font-size:1rem; margin-bottom:20px; font-style: italic;">"' . esc_html($comment->comment_content) . '"</div>';
+
+                // Display existing replies
+                if (!empty($replies)) {
+                    echo '<div class="review-replies" style="margin-top:20px; padding-left:20px; border-left:3px solid #f3f4f6;">';
+                    foreach ($replies as $reply) {
+                        echo '<div style="background:#f9fafb; padding:15px; border-radius:12px; margin-bottom:10px;">';
+                        echo '<div style="font-weight:700; font-size:0.85rem; color:#374151; margin-bottom:5px; display:flex; align-items:center; gap:8px;">';
+                        echo '<span style="background:#374151; color:#fff; font-size:0.65rem; padding:2px 6px; border-radius:4px; text-transform:uppercase;">' . __('Host Reply', 'obenlo') . '</span>';
+                        echo '<span>' . get_comment_date('', $reply->comment_ID) . '</span>';
+                        echo '</div>';
+                        echo '<div style="font-size:0.95rem; color:#4b5563; line-height:1.5;">' . esc_html($reply->comment_content) . '</div>';
+                        echo '</div>';
+                    }
+                    echo '</div>';
                 }
 
-                echo '<div style="line-height:1.6; color:#333;">' . wpautop(esc_html($comment->comment_content)) . '</div>';
-                echo '</div>';
+                // Reply Form Toggle
+                $has_replied = false;
+                foreach($replies as $r) { if($r->user_id == $user_id) $has_replied = true; }
+
+                if (!$has_replied) {
+                    $reply_form_id = 'reply-form-' . $comment->comment_ID;
+                    echo '<div style="margin-top:20px;">';
+                    echo '<button onclick="document.getElementById(\'' . $reply_form_id . '\').style.display=\'block\'; this.style.display=\'none\';" style="background:none; border:none; color:#e61e4d; font-weight:700; cursor:pointer; padding:0; font-size:0.9rem; display:flex; align-items:center; gap:5px;">';
+                    echo '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>';
+                    echo __('Write a Reply', 'obenlo') . '</button>';
+                    
+                    echo '<div id="' . $reply_form_id . '" style="display:none; margin-top:15px; background:#fdf2f8; padding:20px; border-radius:15px; border:1px solid #fbcfe8;">';
+                    echo '<form action="' . admin_url('admin-post.php') . '" method="POST">';
+                    echo '<input type="hidden" name="action" value="obenlo_reply_review">';
+                    echo '<input type="hidden" name="comment_id" value="' . $comment->comment_ID . '">';
+                    echo '<input type="hidden" name="listing_id" value="' . $comment->comment_post_ID . '">';
+                    wp_nonce_field('obenlo_reply_review_' . $comment->comment_ID);
+                    
+                    echo '<div style="margin-bottom:15px;">';
+                    echo '<label style="display:block; font-weight:700; font-size:0.85rem; color:#9d174d; margin-bottom:8px; text-transform:uppercase;">' . __('Your Public Response', 'obenlo') . '</label>';
+                    echo '<textarea name="reply_content" required style="width:100%; padding:12px; border-radius:10px; border:1px solid #f9a8d4; min-height:100px; font-family:inherit; font-size:0.95rem;" placeholder="' . __('Thank your guest or address their feedback...', 'obenlo') . '"></textarea>';
+                    echo '</div>';
+                    
+                    echo '<div style="display:flex; gap:10px;">';
+                    echo '<button type="submit" class="btn-primary" style="background:#e61e4d; border:none; color:#fff; padding:10px 25px; border-radius:10px; font-weight:700; cursor:pointer;">' . __('Post Reply', 'obenlo') . '</button>';
+                    echo '<button type="button" onclick="document.getElementById(\'' . $reply_form_id . '\').style.display=\'none\'; this.parentElement.previousElementSibling.previousElementSibling.style.display=\'flex\';" style="background:none; border:none; color:#666; font-weight:600; cursor:pointer;">' . __('Cancel', 'obenlo') . '</button>';
+                    echo '</div>';
+                    
+                    echo '</form>';
+                    echo '</div>';
+                    echo '</div>';
+                }
+
+                echo '</div>'; // End review-item
             }
             echo '</div>';
         }
@@ -2792,6 +2853,57 @@ class Obenlo_Booking_Frontend_Dashboard
 
         fclose($output);
         exit;
+    }
+
+    /**
+     * Handle Host Reply to Review
+     */
+    public function handle_reply_review()
+    {
+        if (!is_user_logged_in()) {
+            wp_die('Unauthorized');
+        }
+
+        $comment_id = isset($_POST['comment_id']) ? intval($_POST['comment_id']) : 0;
+        $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
+        $reply_content = isset($_POST['reply_content']) ? sanitize_textarea_field($_POST['reply_content']) : '';
+
+        if (!$comment_id || !$listing_id || empty($reply_content)) {
+            $this->redirect_with_error('invalid_data');
+        }
+
+        check_admin_referer('obenlo_reply_review_' . $comment_id);
+
+        $user_id = get_current_user_id();
+        $listing = get_post($listing_id);
+
+        // Security: Ensure host owns the listing
+        if (!$listing || ($listing->post_author != $user_id && !current_user_can('administrator'))) {
+            $this->redirect_with_error('unauthorized');
+        }
+
+        $user = wp_get_current_user();
+        
+        $comment_data = array(
+            'comment_post_ID'      => $listing_id,
+            'comment_author'       => $user->display_name,
+            'comment_author_email' => $user->user_email,
+            'comment_author_url'   => esc_url(get_author_posts_url($user_id)),
+            'comment_content'      => $reply_content,
+            'comment_type'         => 'comment',
+            'comment_parent'       => $comment_id,
+            'user_id'              => $user_id,
+            'comment_approved'     => 1,
+        );
+
+        $reply_id = wp_insert_comment($comment_data);
+
+        if ($reply_id) {
+            wp_safe_redirect(add_query_arg(array('action' => 'reviews', 'message' => 'saved'), home_url('/host-dashboard')));
+            exit;
+        } else {
+            $this->redirect_with_error('booking_error'); // Reusing generic error
+        }
     }
 
     /**
