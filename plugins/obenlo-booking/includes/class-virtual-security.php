@@ -56,7 +56,53 @@ class Obenlo_Booking_Virtual_Security
         }
 
         // Authorization finalized (Already passed nonce or guest_id check)
-        $is_authorized = true;
+        $listing_id = get_post_meta($booking_id, '_obenlo_listing_id', true);
+
+        // 3. TIME WINDOW VALIDATION
+        $event_is_fixed = get_post_meta($listing_id, '_obenlo_event_is_fixed', true);
+        if ($event_is_fixed === 'yes') {
+            $event_date = get_post_meta($listing_id, '_obenlo_event_date', true); // YYYY-MM-DD
+            $start_time = get_post_meta($listing_id, '_obenlo_event_start_time', true); // HH:MM
+            $end_time = get_post_meta($listing_id, '_obenlo_event_end_time', true); // HH:MM
+
+            if ($event_date && $start_time) {
+                $start_ts = strtotime($event_date . ' ' . $start_time);
+                $end_ts = $end_time ? strtotime($event_date . ' ' . $end_time) : ($start_ts + 7200); // Default 2h if no end
+                
+                $now = current_time('timestamp');
+                $buffer_before = 1800; // 30 minutes
+                $buffer_after = 3600;  // 1 hour grace after end
+
+                if ($now < ($start_ts - $buffer_before)) {
+                    obenlo_redirect_with_error('event_not_started');
+                }
+                if ($now > ($end_ts + $buffer_after)) {
+                    obenlo_redirect_with_error('event_expired');
+                }
+            }
+        }
+
+        // 4. IP FINGERPRINTING & DEVICE LIMIT
+        $user_ip = $_SERVER['REMOTE_ADDR'];
+        $allowed_quantity = intval(get_post_meta($booking_id, '_obenlo_guests', true)) ?: 1;
+        $joined_ips = get_post_meta($booking_id, '_obenlo_joined_ips', true);
+        if (!is_array($joined_ips)) {
+            $joined_ips = array();
+        }
+
+        if (!in_array($user_ip, $joined_ips)) {
+            // Allow 2 unique IPs per ticket (to account for phone-to-computer switches)
+            if (count($joined_ips) < ($allowed_quantity * 2)) {
+                $joined_ips[] = $user_ip;
+                update_post_meta($booking_id, '_obenlo_joined_ips', $joined_ips);
+            } else {
+                // If the user is an admin or host of the event, let them in anyway
+                $is_host = (get_current_user_id() == get_post_meta($booking_id, '_obenlo_host_id', true));
+                if (!current_user_can('administrator') && !$is_host) {
+                    obenlo_redirect_with_error('too_many_devices');
+                }
+            }
+        }
 
         $listing_id = get_post_meta($booking_id, '_obenlo_listing_id', true);
         $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
