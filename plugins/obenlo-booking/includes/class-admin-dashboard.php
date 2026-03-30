@@ -21,6 +21,7 @@ class Obenlo_Booking_Admin_Dashboard
         add_action('admin_post_obenlo_update_user_fee', array($this, 'handle_update_user_fee'));
         add_action('admin_post_obenlo_transfer_demo', array($this, 'handle_transfer_demo'));
         add_action('admin_post_obenlo_save_translation', array($this, 'handle_save_translation'));
+        add_action('admin_post_obenlo_admin_review_action', array($this, 'handle_review_action'));
     }
 
     public function add_admin_menu()
@@ -83,6 +84,7 @@ class Obenlo_Booking_Admin_Dashboard
                     <a href="<?php echo $base_url; ?>verifications" class="<?php echo $tab === 'verifications' ? 'active' : ''; ?>">Verifications</a>
                     <a href="<?php echo $base_url; ?>bookings" class="<?php echo $tab === 'bookings' ? 'active' : ''; ?>">Bookings</a>
                     <a href="<?php echo $base_url; ?>payments" class="<?php echo $tab === 'payments' ? 'active' : ''; ?>">Payments</a>
+                    <a href="<?php echo $base_url; ?>reviews" class="<?php echo $tab === 'reviews' ? 'active' : ''; ?>">Reviews</a>
                     <a href="<?php echo $base_url; ?>messaging" class="<?php echo $tab === 'messaging' ? 'active' : ''; ?>">Messaging</a>
                 <?php
         endif; ?>
@@ -138,6 +140,9 @@ class Obenlo_Booking_Admin_Dashboard
                 break;
             case 'demo_manager':
                 $this->render_demo_manager_tab();
+                break;
+            case 'reviews':
+                $this->render_reviews_tab();
                 break;
             default:
                 $this->render_overview_tab();
@@ -1601,6 +1606,110 @@ class Obenlo_Booking_Admin_Dashboard
         }
 
         wp_safe_redirect($redirect_url);
+        exit;
+    }
+
+    private function render_reviews_tab()
+    {
+        $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : 'all';
+        
+        $args = array(
+            'post_type' => 'listing',
+            'status'    => $status_filter === 'all' ? '' : $status_filter,
+            'parent'    => 0, // Top-level reviews only
+        );
+
+        $comments = get_comments($args);
+
+        echo '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">';
+        echo '<h3>Manage Platform Reviews</h3>';
+        echo '<div>';
+        echo '<a href="?page=obenlo-admin-dashboard&tab=reviews&status=all" class="badge ' . ($status_filter === 'all' ? 'badge-host' : '') . '" style="text-decoration:none; margin-right:5px; border:1px solid #eee; color:' . ($status_filter === 'all' ? '#fff' : '#666') . ';">All</a>';
+        echo '<a href="?page=obenlo-admin-dashboard&tab=reviews&status=hold" class="badge ' . ($status_filter === 'hold' ? 'badge-host' : '') . '" style="text-decoration:none; margin-right:5px; border:1px solid #eee; color:' . ($status_filter === 'hold' ? '#fff' : '#666') . ';">Pending</a>';
+        echo '<a href="?page=obenlo-admin-dashboard&tab=reviews&status=approve" class="badge ' . ($status_filter === 'approve' ? 'badge-host' : '') . '" style="text-decoration:none; margin-right:5px; border:1px solid #eee; color:' . ($status_filter === 'approve' ? '#fff' : '#666') . ';">Approved</a>';
+        echo '<a href="?page=obenlo-admin-dashboard&tab=reviews&status=trash" class="badge ' . ($status_filter === 'trash' ? 'badge-host' : '') . '" style="text-decoration:none; border:1px solid #eee; color:' . ($status_filter === 'trash' ? '#fff' : '#666') . ';">Trash</a>';
+        echo '</div>';
+        echo '</div>';
+
+        if (empty($comments)) {
+            echo '<p style="padding:40px; text-align:center; background:#fff; border-radius:12px; border:1px solid #eee; color:#999;">No reviews found.</p>';
+            return;
+        }
+
+        echo '<table class="admin-table">';
+        echo '<tr><th>Author</th><th>Rating</th><th>Listing</th><th>Review</th><th>Date</th><th>Actions</th></tr>';
+        
+        foreach ($comments as $comment) {
+            $rating = get_comment_meta($comment->comment_ID, '_obenlo_rating', true);
+            $stars = str_repeat('★', $rating) . str_repeat('☆', 5 - $rating);
+            $listing = get_post($comment->comment_post_ID);
+            
+            $status_label = '';
+            $status_color = '#666';
+            if ($comment->comment_approved === '0') { $status_label = ' [PENDING]'; $status_color = '#f97316'; }
+            if ($comment->comment_approved === 'trash') { $status_label = ' [TRASH]'; $status_color = '#ef4444'; }
+
+            echo '<tr>';
+            echo '<td><strong>' . esc_html($comment->comment_author) . '</strong><br><small>' . esc_html($comment->comment_author_email) . '</small></td>';
+            echo '<td><span style="color:#FFD700; font-weight:bold; font-size:1.1em;">' . $stars . '</span><br><small>(' . $rating . '/5)</small></td>';
+            echo '<td><a href="' . get_permalink($listing->ID) . '" target="_blank" style="color:#222; font-weight:600; text-decoration:none;">' . esc_html($listing->post_title) . '</a></td>';
+            echo '<td style="max-width:300px;"><div style="font-size:0.9em; line-height:1.4; color:#444;">' . esc_html($comment->comment_content) . ' <span style="color:'.$status_color.'; font-weight:bold; font-size:0.75rem;">' . $status_label . '</span></div></td>';
+            echo '<td>' . date('M j, Y', strtotime($comment->comment_date)) . '</td>';
+            echo '<td>';
+            echo '<div style="display:flex; gap:10px; align-items:center;">';
+            
+            $base_action_url = admin_url('admin-post.php?action=obenlo_admin_review_action&comment_id=' . $comment->comment_ID);
+            $nonce = wp_create_nonce('obenlo_admin_review_' . $comment->comment_ID);
+            
+            if ($comment->comment_approved === '0') {
+                echo '<a href="' . wp_nonce_url($base_action_url . '&do=approve', 'obenlo_admin_review_' . $comment->comment_ID, 'nonce') . '" style="color:#10b981; font-weight:700; text-decoration:none; font-size:0.85rem;">Approve</a>';
+            } else if ($comment->comment_approved === '1') {
+                echo '<a href="' . wp_nonce_url($base_action_url . '&do=unapprove', 'obenlo_admin_review_' . $comment->comment_ID, 'nonce') . '" style="color:#f97316; font-weight:700; text-decoration:none; font-size:0.85rem;">Unapprove</a>';
+            }
+
+            if ($comment->comment_approved !== 'trash') {
+                echo '<a href="' . wp_nonce_url($base_action_url . '&do=trash', 'obenlo_admin_review_' . $comment->comment_ID, 'nonce') . '" style="color:#ef4444; font-weight:700; text-decoration:none; font-size:0.85rem;">Trash</a>';
+            } else {
+                echo '<a href="' . wp_nonce_url($base_action_url . '&do=approve', 'obenlo_admin_review_' . $comment->comment_ID, 'nonce') . '" style="color:#10b981; font-weight:700; text-decoration:none; font-size:0.85rem;">Restore</a>';
+                echo '<a href="' . wp_nonce_url($base_action_url . '&do=delete', 'obenlo_admin_review_' . $comment->comment_ID, 'nonce') . '" style="color:#000; font-weight:700; text-decoration:none; font-size:0.85rem;" onclick="return confirm(\'Permanently delete this review?\')">Delete</a>';
+            }
+            
+            echo '</div>';
+            echo '</td>';
+            echo '</tr>';
+        }
+        echo '</table>';
+    }
+
+    public function handle_review_action()
+    {
+        if (!current_user_can('administrator')) {
+            obenlo_redirect_with_error('unauthorized');
+        }
+
+        $comment_id = isset($_GET['comment_id']) ? intval($_GET['comment_id']) : 0;
+        $action = isset($_GET['do']) ? sanitize_text_field($_GET['do']) : '';
+        
+        check_admin_referer('obenlo_admin_review_' . $comment_id, 'nonce');
+
+        if ($comment_id && $action) {
+            switch ($action) {
+                case 'approve':
+                    wp_set_comment_status($comment_id, 'approve');
+                    break;
+                case 'unapprove':
+                    wp_set_comment_status($comment_id, 'hold');
+                    break;
+                case 'trash':
+                    wp_set_comment_status($comment_id, 'trash');
+                    break;
+                case 'delete':
+                    wp_delete_comment($comment_id, true);
+                    break;
+            }
+        }
+
+        wp_safe_redirect(add_query_arg(['tab' => 'reviews', 'status' => isset($_GET['status']) ? $_GET['status'] : 'all'], wp_get_referer()));
         exit;
     }
 }
