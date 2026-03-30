@@ -21,6 +21,7 @@ class Obenlo_Booking_Frontend_Dashboard
         add_action('admin_post_obenlo_dashboard_delete_listing', array($this, 'handle_delete_listing'));
         add_action('admin_post_obenlo_export_bookings', array($this, 'handle_export_bookings'));
         add_action('admin_post_obenlo_reply_review', array($this, 'handle_reply_review'));
+        add_action('admin_post_obenlo_approve_review', array($this, 'handle_approve_review'));
         add_action('init', array($this, 'handle_global_location_fix'));
     }
 
@@ -321,8 +322,8 @@ class Obenlo_Booking_Frontend_Dashboard
         }
 
         $reviews = get_comments(array(
-            'post_author__not_in' => array($user_id),
-            'post_id__in' => get_posts(array('post_type' => 'listing', 'author' => $user_id, 'fields' => 'ids', 'posts_per_page' => -1, 'suppress_filters' => false)),
+            'author__not_in' => array($user_id),
+            'post__in' => get_posts(array('post_type' => 'listing', 'author' => $user_id, 'fields' => 'ids', 'posts_per_page' => -1, 'post_status' => 'any', 'post_parent' => null, 'suppress_filters' => true)),
             'status' => 'approve',
             'parent' => 0
         ));
@@ -762,36 +763,44 @@ class Obenlo_Booking_Frontend_Dashboard
         <?php
         endif;
     }
-
     private function render_reviews_list()
     {
+        global $wpdb;
         $user_id = get_current_user_id();
-
-        // Get all listings for this host
-        $args = array(
-            'post_type' => 'listing',
-            'author' => $user_id,
-            'fields' => 'ids',
-            'posts_per_page' => -1
-        );
-        $listing_ids = get_posts($args);
 
         echo '<h3>' . __('My Reviews', 'obenlo') . '</h3>';
 
+        // Bypass all potential WP_Query / get_posts filters using direct SQL
+        $listing_ids = $wpdb->get_col( $wpdb->prepare( 
+            "SELECT ID FROM $wpdb->posts 
+             WHERE post_author = %d 
+             AND post_type = 'listing' 
+             AND post_status IN ('publish', 'pending', 'draft', 'private', 'future')", 
+            $user_id 
+        ));
+
         if (empty($listing_ids)) {
-            echo '<p>' . __('You have no listings yet, so no reviews can be shown.', 'obenlo') . '</p>';
+            // Check if there are ANY listings for this host at all
+            $any_listing = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_author = %d AND post_type = 'listing' LIMIT 1", $user_id ) );
+            if (!$any_listing) {
+                echo '<p>' . __('You have no listings yet, so no reviews can be shown.', 'obenlo') . '</p>';
+            } else {
+                echo '<p>' . __('No reviews found for your listings.', 'obenlo') . '</p>';
+            }
             return;
         }
 
+        // Broad query for comments on these posts
         $comments = get_comments(array(
-            'author__not_in' => array($user_id), // Exclude host's own comments from main list
-            'post_id__in' => $listing_ids,
-            'status' => 'approve',
-            'parent' => 0 // Only top-level reviews
+            'post__in'       => $listing_ids,
+            'status'         => 'all', // Include unapproved and pending ones
+            'author__not_in' => array($user_id), // Don't show host responses as separate review items
+            'parent'         => 0, // Show only top-level reviews (replies are handled inside the loop)
         ));
 
         if (empty($comments)) {
             echo '<p>' . __('You have not received any reviews yet.', 'obenlo') . '</p>';
+            return;
         }
         else {
             echo '<div class="reviews-list" style="display:flex; flex-direction:column; gap:25px;">';
@@ -820,6 +829,10 @@ class Obenlo_Booking_Frontend_Dashboard
                     echo '<span style="color:#9a3412; font-weight:800; font-size:0.95rem;">' . intval($rating) . '</span>';
                     echo '</div>';
                 }
+                
+                if ($comment->comment_approved == '0') {
+                    echo '<div style="background:#fef2f2; padding:5px 12px; border-radius:8px; border:1px solid #fee2e2; color:#991b1b; font-weight:800; font-size:0.8rem; text-transform:uppercase; margin-left:10px;">' . __('Pending Approval', 'obenlo') . '</div>';
+                }
                 echo '</div>';
 
                 echo '<div style="line-height:1.7; color:#4b5563; font-size:1rem; margin-bottom:20px; font-style: italic;">"' . esc_html($comment->comment_content) . '"</div>';
@@ -843,7 +856,15 @@ class Obenlo_Booking_Frontend_Dashboard
                 $has_replied = false;
                 foreach($replies as $r) { if($r->user_id == $user_id) $has_replied = true; }
 
-                if (!$has_replied) {
+                    if ($comment->comment_approved == '0') {
+                        $approve_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_approve_review&comment_id=' . $comment->comment_ID), 'obenlo_approve_review_' . $comment->comment_ID);
+                        echo '<a href="' . esc_url($approve_url) . '" class="btn-primary" style="background:#059669; color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:8px; font-size:0.9rem; margin-top:10px;">';
+                        echo '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg>';
+                        echo __('Approve Review', 'obenlo');
+                        echo '</a>';
+                    }
+
+                    if (!$has_replied && $comment->comment_approved == '1') {
                     $reply_form_id = 'reply-form-' . $comment->comment_ID;
                     echo '<div style="margin-top:20px;">';
                     echo '<button onclick="document.getElementById(\'' . $reply_form_id . '\').style.display=\'block\'; this.style.display=\'none\';" style="background:none; border:none; color:#e61e4d; font-weight:700; cursor:pointer; padding:0; font-size:0.9rem; display:flex; align-items:center; gap:5px;">';
@@ -2904,6 +2925,43 @@ class Obenlo_Booking_Frontend_Dashboard
         } else {
             $this->redirect_with_error('booking_error'); // Reusing generic error
         }
+    }
+
+    /**
+     * Handle Host Approve Review
+     */
+    public function handle_approve_review()
+    {
+        if (!is_user_logged_in()) {
+            wp_die('Unauthorized');
+        }
+
+        $comment_id = isset($_GET['comment_id']) ? intval($_GET['comment_id']) : 0;
+
+        if (!$comment_id) {
+            $this->redirect_with_error('invalid_data');
+        }
+
+        check_admin_referer('obenlo_approve_review_' . $comment_id);
+
+        $comment = get_comment($comment_id);
+        if (!$comment) {
+            $this->redirect_with_error('invalid_data');
+        }
+
+        $user_id = get_current_user_id();
+        $listing = get_post($comment->comment_post_ID);
+
+        // Security: Ensure host owns the listing or is admin
+        if (!$listing || ($listing->post_author != $user_id && !current_user_can('administrator'))) {
+            $this->redirect_with_error('unauthorized');
+        }
+
+        // Approve the comment
+        wp_set_comment_status($comment_id, 'approve');
+
+        wp_safe_redirect(add_query_arg(array('action' => 'reviews', 'message' => 'approved'), home_url('/host-dashboard')));
+        exit;
     }
 
     /**

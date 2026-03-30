@@ -15,6 +15,27 @@ class Obenlo_Booking_Reviews {
         
         // Add rating to comment text in admin/backend if needed
         add_filter( 'comment_text', array( $this, 'display_rating_in_comment' ), 10, 2 );
+
+        // Customize review notifications
+        add_filter( 'comment_notification_subject', array( $this, 'custom_review_notification_subject' ), 10, 2 );
+        add_filter( 'comment_notification_text', array( $this, 'custom_review_notification_text' ), 10, 2 );
+
+        // Disable default synchronous review notifications for listing authors
+        add_filter( 'notify_postauthor', array( $this, 'maybe_disable_core_review_notification' ), 10, 2 );
+    }
+
+    /**
+     * Disable the default WordPress synchronous email for reviews.
+     */
+    public function maybe_disable_core_review_notification( $notify, $comment_id ) {
+        $comment = get_comment( $comment_id );
+        if ( $comment ) {
+            $post = get_post( $comment->comment_post_ID );
+            if ( $post && $post->post_type === 'listing' ) {
+                return false; // Skip core sync email
+            }
+        }
+        return $notify;
     }
 
     /**
@@ -25,6 +46,9 @@ class Obenlo_Booking_Reviews {
             $rating = intval( $_POST['rating'] );
             add_comment_meta( $comment_id, '_obenlo_rating', $rating );
         }
+
+        // Trigger our background notification (asynchronous)
+        Obenlo_Booking_Notifications::schedule_review_notification( $comment_id );
     }
 
     /**
@@ -142,5 +166,52 @@ class Obenlo_Booking_Reviews {
             $count += self::get_listing_review_count( $listing_id );
         }
         return $count;
+    }
+
+    /**
+     * Customize the subject for review notifications
+     */
+    public function custom_review_notification_subject( $subject, $comment_id ) {
+        $comment = get_comment( $comment_id );
+        if ( ! $comment ) return $subject;
+
+        $post = get_post( $comment->comment_post_ID );
+        if ( $post && $post->post_type === 'listing' ) {
+            return sprintf( '[Obenlo] New Review on "%s"', $post->post_title );
+        }
+        return $subject;
+    }
+
+    /**
+     * Customize the text/body for review notifications
+     * Removes WP branding and wp-admin links.
+     */
+    public function custom_review_notification_text( $text, $comment_id ) {
+        $comment = get_comment( $comment_id );
+        if ( ! $comment ) return $text;
+
+        $post = get_post( $comment->comment_post_ID );
+        if ( ! $post || $post->post_type !== 'listing' ) {
+            return $text;
+        }
+
+        $author  = $comment->comment_author;
+        $content = $comment->comment_content;
+        $rating  = get_comment_meta( $comment_id, '_obenlo_rating', true );
+        $stars   = $rating ? str_repeat( '★', $rating ) . str_repeat( '☆', 5 - $rating ) : '';
+        
+        $new_text  = "<p>Hi,</p>";
+        $new_text .= "<p>You have received a new review on your listing: <strong>" . esc_html( $post->post_title ) . "</strong></p>";
+        $new_text .= "<p><strong>Author:</strong> " . esc_html( $author ) . "<br>";
+        
+        if ( $rating ) {
+            $new_text .= "<strong>Rating:</strong> " . $stars . " (" . $rating . "/5)<br>";
+        }
+        
+        $new_text .= "<strong>Review Content:</strong><br>" . nl2br( esc_html( $content ) ) . "</p>";
+        $new_text .= "<p>You can view all reviews for this listing here:<br><a href='" . esc_url( get_permalink( $post->ID ) ) . "#comments' style='color:#e61e4d;'>" . esc_html( get_permalink( $post->ID ) ) . "#comments</a></p>";
+        
+        // Note: The global wp_mail filter in Obenlo_Booking_Notifications will wrap this in the HTML template.
+        return $new_text;
     }
 }
