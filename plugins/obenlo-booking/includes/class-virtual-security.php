@@ -128,7 +128,7 @@ class Obenlo_Booking_Virtual_Security
                 setTimeout(function() {
                     // Try auto-redirect first
                     window.location.href = "<?php echo esc_js($virtual_link); ?>";
-                }, 1000);
+                }, 3000);
             </script>
         </body>
         </html>
