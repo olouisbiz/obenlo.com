@@ -4,6 +4,7 @@
  * Description: Standalone translation system for Obenlo (English, French, Spanish).
  * Version: 1.0.0
  * Author: Obenlo
+ * Author URI: https://obenlo.com
  */
 
 if (!defined('ABSPATH')) {
