@@ -95,10 +95,21 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
     </h1>
 
     <?php if ( ! $has_results ) : ?>
-        <div style="text-align: center; padding: 60px 20px; background: #fafafa; border-radius: 12px;">
-            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="fill:none; height:48px; width:48px; stroke:#ccc; stroke-width:2; margin-bottom: 20px; display:inline-block;"><circle cx="14" cy="14" r="10"></circle><path d="m21 21 8 8"></path></svg>
-            <h2>No results found</h2>
-            <p style="color: #666; font-size: 1.1em;">We couldn't find anything matching "<?php echo esc_html( $clean_query ); ?>". Try searching for a different host, location, or keyword.</p>
+        <div style="text-align: center; padding: 60px 40px; background: #fff; border: 1px solid #eee; border-radius: 20px; box-shadow: 0 4px 30px rgba(0,0,0,0.03); max-width: 1000px; margin: 0 auto;">
+            <div style="font-size: 3rem; margin-bottom: 20px;">🌎</div>
+            <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 15px;">No local results found</h2>
+            <p style="color: #666; font-size: 1.1rem; line-height: 1.6; margin-bottom: 40px;">
+                We couldn't find any local Obenlo hosts matching "<strong><?php echo esc_html( $clean_query ); ?></strong>".<br>
+                However, you can explore 1,000+ global hotels and flights below:
+            </p>
+            
+            <!-- Travelpayouts Metasearch Widget -->
+            <div id="tpwl-search" style="margin-bottom: 40px; min-height: 100px;"></div>
+            <div id="tpwl-tickets"></div>
+
+            <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #eee;">
+                <p style="font-size: 0.9rem; color: #999;">Or try a different local keyword (e.g. "Villa", "Photography", "Chef")</p>
+            </div>
         </div>
     <?php else: ?>
 
@@ -148,7 +159,10 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
             <div class="search-section">
                 <h2 style="font-size: 1.5em; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Listings & Locations</h2>
                 <div class="listings-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
-                    <?php while ( $final_listings_query->have_posts() ) : $final_listings_query->the_post(); 
+                    <?php 
+                    $counter = 0;
+                    while ( $final_listings_query->have_posts() ) : $final_listings_query->the_post(); 
+                        $counter++;
                         $price = get_post_meta( get_the_ID(), '_listing_price', true ) ?: get_post_meta( get_the_ID(), '_obenlo_price', true );
                         $location = get_post_meta( get_the_ID(), '_listing_location', true );
                         $type_terms = wp_get_post_terms( get_the_ID(), 'listing_type', array( 'fields' => 'names' ) );
@@ -157,6 +171,7 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
                         <article class="listing-card" style="border: 1px solid #eee; border-radius: 12px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; background: #fff;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.05)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                             <a href="<?php the_permalink(); ?>" style="text-decoration: none; color: inherit; display: block;">
                                 <div class="listing-thumbnail" style="height: 220px; background: #f0f0f0; position: relative;">
+                                    <div class="native-badge" style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.95); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #222; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10;">Native Obenlo Listing</div>
                                     <?php 
                                     if ( has_post_thumbnail() ) {
                                         the_post_thumbnail( 'medium', array( 'style' => 'width: 100%; height: 100%; object-fit: cover; display: block;' ) );
@@ -164,6 +179,9 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
                                         echo '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#ccc;">No Image</div>';
                                     }
                                     ?>
+                                    <div class="verified-badge" style="position: absolute; bottom: 12px; left: 12px; background: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #222; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                        <svg viewBox="0 0 24 24" fill="#e61e4d" style="width:14px;height:14px;"><path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3zm-2 16l-4-4 1.41-1.41L10 15.17l7.59-7.59L19 9l-9 9z"/></svg> Verified Local Host
+                                    </div>
                                 </div>
                                 <div class="listing-info" style="padding: 20px;">
                                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
@@ -176,12 +194,42 @@ $has_results = !empty($hosts) || !empty($categories) || ( $final_listings_query 
                                         <div style="font-size: 0.85em; color: #888; margin-bottom: 8px;"><?php echo esc_html($type); ?></div>
                                     <?php endif; ?>
                                     
-                                    <div style="font-weight: bold; color: #222; margin-top: 10px; font-size: 1.1em;">
-                                       $<?php echo esc_html( $price ?: '0' ); ?> <span style="font-weight: normal; color: #666; font-size: 0.8em;">total</span>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                                        <div style="font-weight: bold; color: #222; font-size: 1.1em;">
+                                            $<?php echo esc_html( $price ?: '0' ); ?> <span style="font-weight: normal; color: #666; font-size: 0.8em;">per night</span>
+                                        </div>
+                                        <div style="background: #e61e4d; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700;">Request to Book</div>
                                     </div>
                                 </div>
                             </a>
                         </article>
+
+                        <?php if ( $counter == 6 ) : ?>
+                            <!-- Global Partner Injection Point -->
+                            <div class="partner-row-wrapper" style="grid-column: 1 / -1; margin: 40px 0; padding: 40px; background: #f9f9f9; border-radius: 24px; border: 1px solid #eee;">
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 30px;">
+                                    <div style="height: 1px; background: #ddd; flex-grow: 1;"></div>
+                                    <div style="display: flex; align-items: center; gap: 8px; color: #666; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">
+                                        🌎 Recommended Global Partners
+                                    </div>
+                                    <div style="height: 1px; background: #ddd; flex-grow: 1;"></div>
+                                </div>
+                                
+                                <!-- Travelpayouts Tickets Container (Interleaved) -->
+                                <div id="tpwl-tickets-interleaved" class="partner-results-grid"></div>
+                                
+                                <script>
+                                    window.addEventListener('load', function() {
+                                        // Move the results to this position if they loaded elsewhere, or wait for them here
+                                        const tickets = document.getElementById('tpwl-tickets');
+                                        const target = document.getElementById('tpwl-tickets-interleaved');
+                                        if (tickets && target) {
+                                            target.appendChild(tickets);
+                                        }
+                                    });
+                                </script>
+                            </div>
+                        <?php endif; ?>
                     <?php endwhile; wp_reset_postdata(); ?>
                 </div>
             </div>

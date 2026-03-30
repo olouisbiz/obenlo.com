@@ -73,6 +73,10 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'profile';
         <a href="?tab=support" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'support' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'support' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='support')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='support')this.style.background='transparent'">
             Help & Support
         </a>
+        <a href="https://travel.obenlo.com" target="_blank" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: #e61e4d; background: transparent; transition: all 0.2s; display: flex; align-items: center; gap: 8px; border: 1px dashed #e61e4d; margin-top: 10px;" onmouseover="this.style.background='#fff0f3'" onmouseout="this.style.background='transparent'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 18px; height: 18px;"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            Global Stays & Flights
+        </a>
         
         <?php if ( in_array('host', (array)$user->roles) ) : ?>
             <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">

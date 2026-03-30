@@ -7,15 +7,7 @@ get_header(); ?>
 
 <main id="primary" class="site-main site-content" style="max-width: 1400px; margin: 0 auto; padding: 20px 40px;">
 
-    <!-- Supply-First Hero Section -->
-    <section class="marketplace-hero" style="text-align: center; padding: 80px 20px; background: linear-gradient(135deg, #fff1f3 0%, #eff6ff 100%); border-radius: 32px; margin-bottom: 60px;">
-        <h1 style="font-size: 3rem; font-weight: 800; color: #111; margin-bottom: 20px; line-height: 1.2;"><?php esc_html_e( 'Get booked and paid by local customers — instantly.', 'obenlo' ); ?></h1>
-        <p style="font-size: 1.2rem; color: #444; max-width: 600px; margin: 0 auto 40px auto; line-height: 1.5;"><?php esc_html_e( 'List your services, accept bookings, and get paid securely without the back-and-forth.', 'obenlo' ); ?></p>
-        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-            <a href="<?php echo esc_url( home_url('/become-a-host') ); ?>" style="padding: 16px 32px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(230,30,77,0.3)';" onmouseout="this.style.transform='';this.style.boxShadow='';"><?php esc_html_e( 'Start offering services', 'obenlo' ); ?></a>
-            <a href="#services-explore" style="padding: 16px 32px; background: #fff; color: #222; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; border: 2px solid #222; transition: all 0.2s;" onmouseover="this.style.background='#222';this.style.color='#fff';" onmouseout="this.style.background='#fff';this.style.color='#222';"><?php esc_html_e( 'Book a service', 'obenlo' ); ?></a>
-        </div>
-    </section>
+    <!-- Hero Section Removed -->
 
     <!-- Category Filter Bar -->
     <div class="category-filters" style="display: flex; gap: 40px; justify-content: center; margin-bottom: 40px; overflow-x: auto; padding: 20px 0; border-bottom: 1px solid #ebebeb; -webkit-overflow-scrolling: touch; white-space: nowrap;">
@@ -77,7 +69,7 @@ get_header(); ?>
     <!-- Explore Categories -->
     <section style="margin-bottom: 60px; margin-top: 10px; text-align: center;">
         <h2 style="font-size: 1.5rem; font-weight: 800; color: #222; margin-bottom: 24px; text-align: center;"><?php esc_html_e( 'Explore Categories', 'obenlo' ); ?></h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; max-width: 1300px; margin: 0 auto; padding: 0 20px;">
 
             <?php
             $categories = array(
@@ -109,10 +101,30 @@ get_header(); ?>
                     'color' => '#e61e4d',
                     'bg'    => '#fff1f3',
                 ),
+                'global-stays' => array(
+                    'label' => __( 'Global Stays', 'obenlo' ),
+                    'desc'  => __( '1,000+ top-rated hotels worldwide', 'obenlo' ),
+                    'icon'  => '<svg viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M7 14c-1.105 0-2 .895-2 2s.895 2 2 2s2-.895 2-2s-.895-2-2-2zm0-4c-1.105 0-2 .895-2 2s.895 2 2 2s2-.895 2-2s-.895-2-2-2zm0-4c-1.105 0-2 .895-2 2s.895 2 2 2s2-.895 2-2s-.895-2-2-2zm10 0c-1.105 0-2 .895-2 2s.895 2 2 2s2-.895 2-2s-.895-2-2-2zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8s8 3.589 8 8s-3.589 8-8 8z"/></svg>',
+                    'color' => '#8b5cf6',
+                    'bg'    => '#f5f3ff',
+                    'anchor' => '#tpwl-search'
+                ),
+                'global-flights' => array(
+                    'label' => __( 'Global Flights', 'obenlo' ),
+                    'desc'  => __( 'Cheap flights to any destination', 'obenlo' ),
+                    'icon'  => '<svg viewBox="0 0 24 24" fill="currentColor" style="width:32px;height:32px;"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1l3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>',
+                    'color' => '#0ea5e9',
+                    'bg'    => '#f0f9ff',
+                    'anchor' => '#tpwl-search'
+                ),
             );
             foreach ( $categories as $slug => $cat ) :
-                $link = get_term_link( $slug, 'listing_type' );
-                $link = is_wp_error($link) ? home_url('/') : $link;
+                if ( isset($cat['anchor']) ) {
+                    $link = $cat['anchor'];
+                } else {
+                    $link = get_term_link( $slug, 'listing_type' );
+                    $link = is_wp_error($link) ? home_url('/') : $link;
+                }
             ?>
                 <a href="<?php echo esc_url($link); ?>" style="display:flex; flex-direction:column; gap:16px; padding:24px; background:<?php echo $cat['bg']; ?>; border-radius:20px; text-decoration:none; color:inherit; text-align:left; transition:transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
                     <div style="color:<?php echo $cat['color']; ?>; width:52px;height:52px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,0.06);"><?php echo $cat['icon']; ?></div>
@@ -123,6 +135,20 @@ get_header(); ?>
                 </a>
             <?php endforeach; ?>
         </div>
+    </section>
+
+    <!-- Global Travel Hub (Native Metasearch) -->
+    <section class="global-travel-hub" style="margin-bottom: 80px; text-align: center; background: #fff; padding: 60px 20px; border: 1px solid #eee; border-radius: 32px; box-shadow: 0 4px 30px rgba(0,0,0,0.02);">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: #222; margin-bottom: 10px;">World-Class Stays & Flights</h2>
+        <p style="color: #666; margin-bottom: 40px; font-size: 1.1rem;">Search 1,000+ top-rated hotels and flights from our global partners.</p>
+        
+        <!-- Travelpayouts Search Widget -->
+        <div id="tpwl-search" style="max-width: 900px; margin: 0 auto 40px auto; min-height: 100px;">
+            <div style="padding: 20px; color: #999; border: 2px dashed #eee; border-radius: 12px;">Loading Global Search Engine...</div>
+        </div>
+
+        <!-- Travelpayouts Results Container -->
+        <div id="tpwl-tickets" style="max-width: 1100px; margin: 0 auto; text-align: left;"></div>
     </section>
 
     <!-- Featured Stays (Top 10) -->

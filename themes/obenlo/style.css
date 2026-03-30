@@ -1210,4 +1210,71 @@ body {
         font-size: 2.2rem !important;
         line-height: 1.1 !important;
     }
-}
+}
+/* --- Travelpayouts Unified Grid & Partner Branding --- */
+
+.native-badge, .verified-badge, .partner-badge {
+    pointer-events: none;
+    font-family: "Inter", sans-serif;
+    letter-spacing: -0.01em;
+}
+
+.partner-badge {
+    background: #f7f7f7;
+    color: #222;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+#tpwl-tickets-interleaved, #tpwl-tickets {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    gap: 30px !important;
+    width: 100% !important;
+}
+
+#tpwl-tickets-interleaved .tp-search-form,
+#tpwl-tickets-interleaved .tp-filters-wrap,
+#tpwl-tickets-interleaved .tp-search-header {
+    display: none !important;
+}
+
+#tpwl-tickets-interleaved .tp-ticket-card,
+#tpwl-tickets-interleaved .tpwl-ticket,
+#tpwl-tickets-interleaved .tp-hotel-card {
+    border: 1px solid #eee !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+#tpwl-tickets-interleaved .tp-ticket-card:hover,
+#tpwl-tickets-interleaved .tp-hotel-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
+}
+
+.external-booking-btn {
+    color: #222;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.external-booking-btn::after {
+    content: "↗";
+    font-size: 1.2rem;
+}

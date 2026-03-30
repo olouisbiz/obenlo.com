@@ -65,6 +65,41 @@
 
     <link rel="profile" href="https://gmpg.org/xfn/11">
     <link rel="icon" type="image/png" href="<?php echo esc_url(get_template_directory_uri() . '/assets/images/logo-social-profile.png'); ?>">
+    
+    <!-- Travelpayouts Main White Label Code -->
+    <script nowprocket data-noptimize="1" data-cfasync="false" data-wpfc-render="false" seraph-accel-crit="1" data-no-defer="1">
+      (function () {
+            var script = document.createElement("script");
+            script.async = 1;
+            script.type = "module";
+            script.src = "https://tpwdgt.com/wl_web/main.js?wl_id=15668";
+            document.head.appendChild(script);
+          })();
+    </script>
+
+    <!-- Travelpayouts Search Query Sync -->
+    <script>
+      (function() {
+        window.addEventListener('load', function() {
+          const params = new URLSearchParams(window.location.search);
+          const query = params.get('s');
+          if (query && document.getElementById('tpwl-search')) {
+            // Setting the global search value in the widget 
+            // This assumes the widget script is loaded and watching for changes
+            const checkWidget = setInterval(() => {
+              const searchInput = document.querySelector('.tp-search-input'); // Standard TP class
+              if (searchInput) {
+                searchInput.value = query;
+                searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                clearInterval(checkWidget);
+              }
+            }, 500);
+            setTimeout(() => clearInterval(checkWidget), 5000); // Stop after 5s
+          }
+        });
+      })();
+    </script>
+
     <?php wp_head(); ?>
 
     <?php if ($ga_id): ?>
@@ -128,9 +163,11 @@
     $is_host = in_array('host', (array)$user->roles) || in_array('administrator', (array)$user->roles);
 ?>
                 <?php if (!$is_host): ?>
+                    <a href="https://travel.obenlo.com" class="become-host-link" target="_blank"><?php esc_html_e('Travel', 'obenlo-booking'); ?></a>
                     <a href="<?php echo esc_url(home_url('/become-a-host')); ?>" class="become-host-link"><?php esc_html_e('Offer a Service', 'obenlo-booking'); ?></a>
                 <?php
     else: ?>
+                    <a href="https://travel.obenlo.com" class="become-host-link" target="_blank"><?php esc_html_e('Travel', 'obenlo-booking'); ?></a>
                     <a href="<?php echo esc_url(home_url('/host-dashboard')); ?>" class="become-host-link"><?php esc_html_e('Switch to hosting', 'obenlo-booking'); ?></a>
                 <?php
     endif; ?>
@@ -159,6 +196,7 @@
                     <a href="<?php echo esc_url(home_url('/account')); ?>"><?php esc_html_e('Account', 'obenlo-booking'); ?></a>
                     <a href="<?php echo esc_url(home_url('/messages')); ?>"><?php esc_html_e('Messages', 'obenlo-booking'); ?></a>
                     <a href="<?php echo esc_url(home_url('/support')); ?>"><?php esc_html_e('Support / Dispute', 'obenlo-booking'); ?></a>
+                    <a href="https://travel.obenlo.com" target="_blank" style="color: #e61e4d; font-weight: bold;"><?php esc_html_e('Global Stays & Flights', 'obenlo-booking'); ?></a>
                     <div class="menu-divider"></div>
                     <a href="<?php echo esc_url(wp_logout_url(home_url())); ?>"><?php esc_html_e('Log out', 'obenlo-booking'); ?></a>
                 </div>
@@ -166,6 +204,7 @@
             <?php
 else: ?>
                 
+                <a href="https://travel.obenlo.com" class="become-host-link" target="_blank"><?php esc_html_e('Travel', 'obenlo-booking'); ?></a>
                 <a href="<?php echo esc_url(home_url('/become-a-host')); ?>" class="become-host-link"><?php esc_html_e('Offer a Service', 'obenlo-booking'); ?></a>
                 
                 <button class="user-dropdown-btn" onclick="document.getElementById('headerUserMenu').classList.toggle('active')">
@@ -180,6 +219,7 @@ else: ?>
                     <a href="<?php echo esc_url(home_url('/login#signup')); ?>"><?php esc_html_e('Sign up', 'obenlo-booking'); ?></a>
                     <div class="menu-divider"></div>
                     <a href="<?php echo esc_url(home_url('/become-a-host')); ?>"><?php esc_html_e('Offer a Service', 'obenlo-booking'); ?></a>
+                    <a href="https://travel.obenlo.com" target="_blank" style="color: #e61e4d; font-weight: bold;"><?php esc_html_e('Global Stays & Flights', 'obenlo-booking'); ?></a>
                     <a href="<?php echo esc_url(home_url('/support')); ?>"><?php esc_html_e('Help / Support', 'obenlo-booking'); ?></a>
                 </div>
 

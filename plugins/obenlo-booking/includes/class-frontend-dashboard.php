@@ -181,6 +181,10 @@ class Obenlo_Booking_Frontend_Dashboard
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                     <span><?php echo __('Help Center', 'obenlo'); ?></span>
                 </a>
+                <a href="https://travel.obenlo.com" target="_blank" class="sidebar-link" style="color: #e61e4d;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="stroke: #e61e4d;"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    <span><?php echo __('Global Stays & Flights', 'obenlo'); ?></span>
+                </a>
 
                 <div style="margin-top:auto; padding-top:20px; border-top:1px solid #eee;">
                     <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" class="sidebar-link" style="opacity:0.8;">
