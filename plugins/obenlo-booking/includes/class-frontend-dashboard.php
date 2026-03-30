@@ -1058,52 +1058,54 @@ class Obenlo_Booking_Frontend_Dashboard
                         <textarea name="listing_content" rows="6" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;" placeholder="<?php echo $is_child ? esc_attr(__('Describe this specific unit, room, or session...', 'obenlo')) : esc_attr(__('Describe your overall business, property, or service group...', 'obenlo')); ?>"><?php echo esc_textarea($content); ?></textarea>
                     </div>
 
-                    <!-- Event Specific Configuration -->
-                    <div id="event_config_wrapper" style="margin-top:20px; display:none; padding:20px; background:#f9f9f9; border-radius:12px; border:1px solid #eee;">
-                        <h4 style="margin-top:0; margin-bottom:15px; color:#333;"><?php echo __('Event Schedule & Location', 'obenlo'); ?></h4>
-                        
-                        <div style="margin-bottom:15px;">
-                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:700;">
-                                <input type="checkbox" name="event_is_fixed" value="yes" id="event_is_fixed_toggle" <?php checked($event_is_fixed, 'yes'); ?>>
-                                <?php echo __('Specific Scheduled Time (e.g., Monday 8 April, 4pm-10pm)', 'obenlo'); ?>
-                            </label>
-                        </div>
+                    <?php if ($is_child): ?>
+                        <!-- Event Specific Configuration -->
+                        <div id="event_config_wrapper" style="margin-top:20px; display:none; padding:20px; background:#f9f9f9; border-radius:12px; border:1px solid #eee;">
+                            <h4 style="margin-top:0; margin-bottom:15px; color:#333;"><?php echo __('Event Schedule & Location', 'obenlo'); ?></h4>
+                            
+                            <div style="margin-bottom:15px;">
+                                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:700;">
+                                    <input type="checkbox" name="event_is_fixed" value="yes" id="event_is_fixed_toggle" <?php checked($event_is_fixed, 'yes'); ?>>
+                                    <?php echo __('Specific Scheduled Time (e.g., Monday 8 April, 4pm-10pm)', 'obenlo'); ?>
+                                </label>
+                            </div>
 
-                        <div id="fixed_time_fields" style="display:<?php echo ($event_is_fixed === 'yes') ? 'block' : 'none'; ?>; margin-bottom:20px;">
-                            <div class="grid-row">
-                                <div class="grid-col-1-3">
-                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('Event Date', 'obenlo'); ?></label>
-                                    <input type="date" name="event_date" value="<?php echo esc_attr($event_date); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                </div>
-                                <div class="grid-col-1-3">
-                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('Start Time', 'obenlo'); ?></label>
-                                    <input type="time" name="event_start_time" value="<?php echo esc_attr($event_start_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                </div>
-                                <div class="grid-col-1-3">
-                                    <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('End Time', 'obenlo'); ?></label>
-                                    <input type="time" name="event_end_time" value="<?php echo esc_attr($event_end_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                            <div id="fixed_time_fields" style="display:<?php echo ($event_is_fixed === 'yes') ? 'block' : 'none'; ?>; margin-bottom:20px;">
+                                <div class="grid-row">
+                                    <div class="grid-col-1-3">
+                                        <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('Event Date', 'obenlo'); ?></label>
+                                        <input type="date" name="event_date" value="<?php echo esc_attr($event_date); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                    </div>
+                                    <div class="grid-col-1-3">
+                                        <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('Start Time', 'obenlo'); ?></label>
+                                        <input type="time" name="event_start_time" value="<?php echo esc_attr($event_start_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                    </div>
+                                    <div class="grid-col-1-3">
+                                        <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('End Time', 'obenlo'); ?></label>
+                                        <input type="time" name="event_end_time" value="<?php echo esc_attr($event_end_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div style="margin-bottom:15px;">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Event Type', 'obenlo'); ?></label>
-                            <select name="event_location_type" id="event_location_type_select" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                <option value="virtual" <?php selected($event_location_type, 'virtual'); ?>><?php echo __('Virtual (Zoom, Google Meet, etc.)', 'obenlo'); ?></option>
-                                <option value="in_person" <?php selected($event_location_type, 'in_person'); ?>><?php echo __('In-Person (Physical Address)', 'obenlo'); ?></option>
-                            </select>
-                        </div>
+                            <div style="margin-bottom:15px;">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Event Type', 'obenlo'); ?></label>
+                                <select name="event_location_type" id="event_location_type_select" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
+                                    <option value="virtual" <?php selected($event_location_type, 'virtual'); ?>><?php echo __('Virtual (Zoom, Google Meet, etc.)', 'obenlo'); ?></option>
+                                    <option value="in_person" <?php selected($event_location_type, 'in_person'); ?>><?php echo __('In-Person (Physical Address)', 'obenlo'); ?></option>
+                                </select>
+                            </div>
 
-                        <div id="virtual_link_wrapper" style="display:<?php echo ($event_location_type === 'virtual') ? 'block' : 'none'; ?>;">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Virtual Meeting Link', 'obenlo'); ?></label>
-                            <input type="url" name="virtual_link" value="<?php echo esc_url($virtual_link); ?>" placeholder="<?php echo esc_attr(__('https://zoom.us/j/...', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
-                        </div>
+                            <div id="virtual_link_wrapper" style="display:<?php echo ($event_location_type === 'virtual') ? 'block' : 'none'; ?>;">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Virtual Meeting Link', 'obenlo'); ?></label>
+                                <input type="url" name="virtual_link" value="<?php echo esc_url($virtual_link); ?>" placeholder="<?php echo esc_attr(__('https://zoom.us/j/...', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                            </div>
 
-                        <div id="in_person_address_wrapper" style="display:<?php echo ($event_location_type === 'in_person') ? 'block' : 'none'; ?>;">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Event Address', 'obenlo'); ?></label>
-                            <input type="text" name="listing_event_address" value="<?php echo esc_attr($location); ?>" placeholder="<?php echo esc_attr(__('Enter physical address...', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                            <div id="in_person_address_wrapper" style="display:<?php echo ($event_location_type === 'in_person') ? 'block' : 'none'; ?>;">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Event Address', 'obenlo'); ?></label>
+                                <input type="text" name="listing_event_address" value="<?php echo esc_attr($location); ?>" placeholder="<?php echo esc_attr(__('Enter physical address...', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                            </div>
                         </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Pricing, Model & Capacity -->
@@ -1434,8 +1436,8 @@ class Obenlo_Booking_Frontend_Dashboard
                         });
                     }
                     if (slotsWrapper) slotsWrapper.style.display = 'none';
-                    if (eventConfigWrapper) eventConfigWrapper.style.display = 'block';
-                    if (genericLocationWrapper) genericLocationWrapper.style.display = 'none';
+                    if (eventConfigWrapper) eventConfigWrapper.style.display = isChild ? 'block' : 'none';
+                    if (genericLocationWrapper) genericLocationWrapper.style.display = isChild ? 'none' : 'block';
                     if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__("What's Included", 'obenlo')); ?>';
                 } else if (category === 'service') {
                     if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Hour/Session)', 'obenlo')); ?>';
