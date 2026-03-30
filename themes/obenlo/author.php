@@ -326,6 +326,15 @@ if ($is_demo_preview) $hosting_since = 2024;
                     Contact Host
                 </button>
 
+                <?php 
+                if ($is_demo_preview && get_post_meta($demo_listing_id, '_obenlo_claim_pending', true) !== 'yes') {
+                    $claim_url = home_url('/login?claim_id=' . $demo_listing_id . '#signup');
+                    echo '<a href="' . esc_url($claim_url) . '" style="display:inline-block; margin-top: 15px; background: transparent; color: #e61e4d; border: 2px solid #e61e4d; padding: 10px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; transition: all 0.2s ease;">';
+                    echo 'Is this your profile? Claim it';
+                    echo '</a>';
+                }
+                ?>
+
                 <?php if($specialties): ?>
                     <div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">
                         <div style="font-size:0.7rem; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; font-weight:700;">Host Specialties</div>

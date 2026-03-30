@@ -455,3 +455,48 @@ add_filter('update_footer', '__return_empty_string', 11);
 
 // Temporary: Flush rewrite rules to activate the new /listings/ archive slug
 add_action('init', 'flush_rewrite_rules', 999);
+
+/**
+ * --- DEMO PROFILE CLAIM LOGIC ---
+ */
+
+// Inject hidden field on the WP Registration form if 'claim_id' is in the URL
+add_action('register_form', function() {
+    $claim_id = isset($_GET['claim_id']) ? intval($_GET['claim_id']) : 0;
+    if ($claim_id > 0) {
+        echo '<input type="hidden" name="obenlo_claim_id" value="' . esc_attr($claim_id) . '">';
+    }
+});
+
+// Process the claim when a new user registers
+add_action('user_register', function($user_id) {
+    if (isset($_POST['obenlo_claim_id']) && intval($_POST['obenlo_claim_id']) > 0) {
+        $claim_listing_id = intval($_POST['obenlo_claim_id']);
+        
+        // 1. Mark the demo listing as "claim pending" so the button disappears
+        update_post_meta($claim_listing_id, '_obenlo_claim_pending', 'yes');
+        
+        // 2. Fetch the newly registered user's metadata
+        $user = get_userdata($user_id);
+        
+        // 3. Send email to the Admin
+        $to = 'admin@obenlo.com';
+        $subject = 'New Profile Claim Request - Obenlo Platform';
+        
+        $message = "A new user has requested to claim a demo profile/listing.\n\n";
+        $message .= "User Details:\n";
+        $message .= "Email: " . $user->user_email . "\n";
+        $message .= "Username: " . $user->user_login . "\n\n";
+        
+        $message .= "Listing/Profile Details:\n";
+        $message .= "Listing Title: " . get_the_title($claim_listing_id) . "\n";
+        $message .= "Demo Host Name: " . get_post_meta($claim_listing_id, '_obenlo_demo_host_name', true) . "\n";
+        $message .= "Listing URL: " . get_permalink($claim_listing_id) . "\n\n";
+        
+        $message .= "Please review this request in the backend to transfer ownership of the listing/profile to this user.";
+        
+        $headers = array('Content-Type: text/plain; charset=UTF-8');
+        
+        wp_mail($to, $subject, $message, $headers);
+    }
+});

@@ -65,6 +65,13 @@ get_header();
                 <form action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="POST">
                     <input type="hidden" name="action" value="obenlo_bespoke_register">
                     <?php wp_nonce_field( 'obenlo_register', 'register_nonce' ); ?>
+                    
+                    <?php 
+                    $claim_id = isset($_GET['claim_id']) ? intval($_GET['claim_id']) : 0;
+                    if ($claim_id > 0) {
+                        echo '<input type="hidden" name="obenlo_claim_id" value="' . esc_attr($claim_id) . '">';
+                    }
+                    ?>
 
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: bold; color: #444;">Username</label>

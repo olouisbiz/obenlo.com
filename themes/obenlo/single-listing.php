@@ -86,12 +86,40 @@ get_header(); ?>
     if (!is_array($addons))
         $addons = array();
 
-    $type_terms = wp_get_post_terms($listing_id, 'listing_type', array('fields' => 'names'));
+    $type_terms = wp_get_post_terms($listing_id, 'listing_type');
     if ((is_wp_error($type_terms) || empty($type_terms)) && $parent_id) {
-        $type_terms = wp_get_post_terms($parent_id, 'listing_type', array('fields' => 'names'));
+        $type_terms = wp_get_post_terms($parent_id, 'listing_type');
     }
-    $type = (!is_wp_error($type_terms) && !empty($type_terms)) ? implode(', ', $type_terms) : 'Listing';
-    $category = (!is_wp_error($type_terms) && !empty($type_terms)) ? strtolower($type_terms[0]) : '';
+
+    $main_cat = '';
+    $sub_cat = '';
+    if (!is_wp_error($type_terms) && !empty($type_terms)) {
+        foreach($type_terms as $b_term) {
+            if($b_term->parent != 0) {
+                $sub_cat = $b_term->name;
+                $p_term = get_term($b_term->parent, 'listing_type');
+                if(!is_wp_error($p_term) && $p_term) {
+                    $main_cat = $p_term->name;
+                }
+                break;
+            } else {
+                if(empty($main_cat)) {
+                    $main_cat = $b_term->name;
+                }
+            }
+        }
+    }
+
+    if($main_cat && $sub_cat) {
+        $type = $main_cat . ' | ' . $sub_cat;
+        $category = strtolower($main_cat);
+    } elseif ($main_cat) {
+        $type = $main_cat;
+        $category = strtolower($main_cat);
+    } else {
+        $type = 'Listing';
+        $category = '';
+    }
 
     // Fetch amenities from parent if this is a child
     $amenity_source_id = $parent_id ? $parent_id : $listing_id;
@@ -632,6 +660,17 @@ get_header(); ?>
                                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                                 Contact Host
                             </button>
+                            
+                            <!-- Claim Demo Listing Button -->
+                            <?php 
+                            $is_demo_listing = get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes';
+                            if ($is_demo_listing && get_post_meta($listing_id, '_obenlo_claim_pending', true) !== 'yes') {
+                                $claim_url = home_url('/login?claim_id=' . $listing_id . '#signup');
+                                echo '<a href="' . esc_url($claim_url) . '" style="display:block; text-align:center; width: 100%; margin-top: 15px; background: transparent; color: #e61e4d; border: 2px solid #e61e4d; padding: 12px; border-radius: 12px; font-weight: 700; text-decoration: none; transition: all 0.2s ease;">';
+                                echo 'Is this your listing? Claim it';
+                                echo '</a>';
+                            }
+                            ?>
                         </div>
                     <?php else: ?>
                         <!-- Child Listing: Show Booking Form -->

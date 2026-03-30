@@ -32,6 +32,39 @@ if(empty($location)){
             </div>
         <?php endif; ?>
         
+        <!-- Category Badge -->
+        <?php 
+        $badge_terms = wp_get_post_terms( get_the_ID(), 'listing_type' );
+        $badge_text = '';
+        if( ! is_wp_error( $badge_terms ) && ! empty( $badge_terms ) ) {
+            $main_cat = '';
+            $sub_cat = '';
+            foreach($badge_terms as $b_term) {
+                if($b_term->parent != 0) {
+                    $sub_cat = $b_term->name;
+                    $p_term = get_term($b_term->parent, 'listing_type');
+                    if(!is_wp_error($p_term) && $p_term) {
+                        $main_cat = $p_term->name;
+                    }
+                    break;
+                } else {
+                    if(empty($main_cat)) {
+                        $main_cat = $b_term->name;
+                    }
+                }
+            }
+            if($main_cat && $sub_cat) {
+                $badge_text = $main_cat . ' | ' . $sub_cat;
+            } elseif ($main_cat) {
+                $badge_text = $main_cat;
+            }
+        }
+        if($badge_text):
+        ?>
+        <div style="position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.95); padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: #222; box-shadow: 0 2px 6px rgba(0,0,0,0.08); z-index: 10; text-transform: uppercase; letter-spacing: 0.5px;">
+            <?php echo esc_html($badge_text); ?>
+        </div>
+        <?php endif; ?>
         <!-- Wishlist Heart Toggle -->
         <?php 
         $is_saved = false;
