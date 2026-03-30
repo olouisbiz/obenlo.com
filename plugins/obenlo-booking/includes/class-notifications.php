@@ -16,7 +16,13 @@ class Obenlo_Booking_Notifications
         add_filter('wp_mail_from_name', array($this, 'set_mail_from_name'));
         add_filter('wp_mail_content_type', array($this, 'set_mail_content_type'));
         
-        // Cron hook for delayed messages
+        // Global mail wrapping to ensure all emails (including WP core) are branded
+        add_filter('wp_mail', array($this, 'global_wrap_mail'), 99);
+        
+        // Cron hook for background emails
+        add_action('obenlo_send_background_mail', array($this, 'do_send_background_mail'), 10, 4);
+        
+        // Cron hook for delayed messages (Chat)
         add_action('obenlo_delayed_message_notification', array($this, 'process_delayed_notification'), 10, 2);
     }
 
@@ -33,6 +39,27 @@ class Obenlo_Booking_Notifications
     public function set_mail_content_type()
     {
         return 'text/html';
+    }
+
+    /**
+     * Globally wrap all emails in the Obenlo template.
+     */
+    public function global_wrap_mail($args)
+    {
+        // Check if message is already wrapped (prevent double wrapping)
+        if (strpos($args['message'], '<!DOCTYPE html>') !== false) {
+            return $args;
+        }
+
+        $body_html = $args['message'];
+        
+        // If it doesn't contain structural HTML tags, use wpautop to preserve line breaks
+        if (strpos($body_html, '<p') === false && strpos($body_html, '<div') === false) {
+            $body_html = wpautop($body_html);
+        }
+
+        $args['message'] = self::wrap_template($args['subject'], $body_html);
+        return $args;
     }
 
     /**
@@ -137,26 +164,47 @@ class Obenlo_Booking_Notifications
     /**
      * Send email to a user (Host or Guest)
      */
-    public static function send_to_user($user_id, $subject, $message, $cta_label = '', $cta_url = '')
+    public static function send_to_user($user_id, $subject, $message, $cta_label = '', $cta_url = '', $background = false)
     {
         $user = get_userdata($user_id);
         if ($user) {
             $body_html = self::text_to_html($message);
             $html      = self::wrap_template($subject, $body_html, $cta_label, $cta_url);
-            wp_mail($user->user_email, $subject, $html);
+            if ($background) {
+                self::schedule_mail($user->user_email, $subject, $html);
+            } else {
+                wp_mail($user->user_email, $subject, $html);
+            }
         }
     }
 
     /**
      * Send raw HTML email to a user
      */
-    public static function send_html_to_user($user_id, $subject, $body_html, $cta_label = '', $cta_url = '')
+    public static function send_html_to_user($user_id, $subject, $body_html, $cta_label = '', $cta_url = '', $background = false)
     {
         $user = get_userdata($user_id);
         if ($user) {
             $html = self::wrap_template($subject, $body_html, $cta_label, $cta_url);
-            wp_mail($user->user_email, $subject, $html);
+            if ($background) {
+                self::schedule_mail($user->user_email, $subject, $html);
+            } else {
+                wp_mail($user->user_email, $subject, $html);
+            }
         }
+    }
+
+    /**
+     * Background Mailer Helpers
+     */
+    public static function schedule_mail($to, $subject, $message, $headers = array())
+    {
+        wp_schedule_single_event(time(), 'obenlo_send_background_mail', array($to, $subject, $message, $headers));
+    }
+
+    public function do_send_background_mail($to, $subject, $message, $headers)
+    {
+        wp_mail($to, $subject, $message, $headers);
     }
 
     /**
@@ -177,8 +225,12 @@ class Obenlo_Booking_Notifications
                     $subject = "[TEST MODE] " . $subject;
                 }
                 $msg     = "A new booking has been requested for your listing: <strong>$listing_title</strong>.<br>Total: <strong>\$$total</strong>";
-                self::send_html_to_user($host_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Bookings', home_url('/host-dashboard/?action=bookings'));
-                self::send_to_admin("New Platform Booking #$booking_id", "A new booking request for $listing_title (\$$total) has been made.");
+                self::send_html_to_user($host_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Bookings', home_url('/host-dashboard/?action=bookings'), true);
+                
+                $admin_email = get_option('obenlo_admin_email', 'info@obenlo.com');
+                $admin_msg   = "A new booking request for $listing_title (\$$total) has been made.";
+                $admin_html  = self::wrap_template("New Platform Booking #$booking_id", self::text_to_html($admin_msg));
+                self::schedule_mail($admin_email, "New Platform Booking #$booking_id", $admin_html);
                 break;
 
             case 'booking_confirmed':
@@ -214,14 +266,14 @@ class Obenlo_Booking_Notifications
 
                 $body_html .= '<p style="margin:0 0 16px 0;">Total paid: <strong>$' . esc_html($total) . '</strong></p>';
 
-                self::send_html_to_user($guest_id, $subject, $body_html, 'View My Trips', home_url('/account?tab=trips'));
+                self::send_html_to_user($guest_id, $subject, $body_html, 'View My Trips', home_url('/account?tab=trips'), true);
                 break;
 
             case 'booking_cancelled':
                 $subject = "Booking Cancelled – $listing_title";
                 $msg     = "The booking for <strong>$listing_title</strong> has been cancelled.<br>Refund amount: <strong>\$$total</strong>";
-                self::send_html_to_user($guest_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Account', home_url('/account'));
-                self::send_html_to_user($host_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Dashboard', home_url('/host-dashboard/?action=bookings'));
+                self::send_html_to_user($guest_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Account', home_url('/account'), true);
+                self::send_html_to_user($host_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Dashboard', home_url('/host-dashboard/?action=bookings'), true);
                 break;
         }
     }
@@ -236,7 +288,10 @@ class Obenlo_Booking_Notifications
         $type         = get_post_meta($ticket_id, '_obenlo_ticket_type', true);
 
         if ($event === 'new_ticket') {
-            self::send_to_admin("New Support Ticket: $ticket_title", "Type: $type\nUser ID: $user_id\nView in Admin Dashboard.");
+            $admin_email = get_option('obenlo_admin_email', 'info@obenlo.com');
+            $admin_msg   = "Type: $type\nUser ID: $user_id\nView in Admin Dashboard.";
+            $admin_html  = self::wrap_template("New Support Ticket: $ticket_title", self::text_to_html($admin_msg));
+            self::schedule_mail($admin_email, "New Support Ticket: $ticket_title", $admin_html);
         } elseif ($event === 'ticket_reply') {
             $last_reply = get_posts(array(
                 'post_type'      => 'obenlo_message',
@@ -249,11 +304,15 @@ class Obenlo_Booking_Notifications
             if (!empty($last_reply)) {
                 $author_id = $last_reply[0]->post_author;
                 if (user_can($author_id, 'administrator')) {
-                    self::send_to_user($user_id, "New Update on Support Ticket: $ticket_title", "Obenlo Support has replied to your ticket.", 'View Ticket', home_url('/support?ticket_id=' . $ticket_id));
+                    $body_html = self::text_to_html("Obenlo Support has replied to your ticket.");
+                    self::send_html_to_user($user_id, "New Update on Support Ticket: $ticket_title", $body_html, 'View Ticket', home_url('/support?ticket_id=' . $ticket_id), true);
                 } else {
                     $author      = get_userdata($author_id);
                     $author_name = $author ? $author->display_name : "User #$author_id";
-                    self::send_to_admin("New Reply on Ticket: $ticket_title", "$author_name has replied to ticket #$ticket_id.");
+                    $admin_email = get_option('obenlo_admin_email', 'info@obenlo.com');
+                    $admin_msg   = "$author_name has replied to ticket #$ticket_id.";
+                    $admin_html  = self::wrap_template("New Reply on Ticket: $ticket_title", self::text_to_html($admin_msg));
+                    self::schedule_mail($admin_email, "New Reply on Ticket: $ticket_title", $admin_html);
                 }
             }
         }
@@ -326,7 +385,7 @@ class Obenlo_Booking_Notifications
         $body_html = '<p style="margin:0 0 16px 0;">' . wp_kses_post(wpautop($content)) . '</p>';
 
         foreach ($users as $user_id) {
-            self::send_html_to_user($user_id, $subject, $body_html, 'View Dashboard', home_url('/account'));
+            self::send_html_to_user($user_id, $subject, $body_html, 'View Dashboard', home_url('/account'), true);
         }
     }
 
@@ -349,7 +408,7 @@ class Obenlo_Booking_Notifications
                 <p style="margin:0 0 16px 0;">To start hosting and earning, please complete your identity verification in your dashboard.</p>
                 <p style="margin:0 0 16px 0; color:#666; font-size:0.9rem;">If you have any questions, our support team is always here to help.</p>
                 <p style="margin:0;">Let\'s create amazing experiences together!<br><strong>Team Obenlo</strong></p>';
-                self::send_html_to_user($user_id, $subject, $body_html, 'Complete Verification', home_url('/host-onboarding'));
+                self::send_html_to_user($user_id, $subject, $body_html, 'Complete Verification', home_url('/host-onboarding'), true);
                 break;
 
             case 'host_verified':
@@ -359,7 +418,7 @@ class Obenlo_Booking_Notifications
                 <p style="margin:0 0 16px 0;">Great news! Your identity verification has been approved.</p>
                 <p style="margin:0 0 16px 0;">Your listings are now eligible for <strong>instant bookings</strong> and featured placement on the platform.</p>
                 <p style="margin:0;">Happy hosting! 🏡</p>';
-                self::send_html_to_user($user_id, $subject, $body_html, 'Go to Dashboard', home_url('/host-dashboard'));
+                self::send_html_to_user($user_id, $subject, $body_html, 'Go to Dashboard', home_url('/host-dashboard'), true);
                 break;
 
             case 'host_rejected':
@@ -369,7 +428,7 @@ class Obenlo_Booking_Notifications
                 <p style="margin:0 0 16px 0;">We were unable to verify your identity with the document provided.</p>
                 <p style="margin:0 0 16px 0;">Please log in to your dashboard to review the requirements and re-upload a clear document.</p>
                 <p style="margin:0; font-size:0.9rem; color:#666;">If you believe this was an error, please contact <a href="mailto:support@obenlo.com" style="color:#e61e4d;">support@obenlo.com</a>.</p>';
-                self::send_html_to_user($user_id, $subject, $body_html, 'Re-upload Document', home_url('/host-onboarding'));
+                self::send_html_to_user($user_id, $subject, $body_html, 'Re-upload Document', home_url('/host-onboarding'), true);
                 break;
         }
     }
@@ -461,6 +520,32 @@ class Obenlo_Booking_Notifications
             }
         } catch (\Exception $e) {
             error_log('Obenlo PWA Push Error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Schedule a specialized review notification in the background.
+     */
+    public static function schedule_review_notification($comment_id)
+    {
+        $comment = get_comment($comment_id);
+        if (!$comment) return;
+
+        $post = get_post($comment->comment_post_ID);
+        if (!$post || $post->post_type !== 'listing') return;
+
+        // Use the custom logic from Obenlo_Booking_Reviews to generate the branded content
+        // We'll call the review class methods if they are static, or just replicate the logic here for simplicity/reliability
+        $reviews_class = new Obenlo_Booking_Reviews();
+        $subject = $reviews_class->custom_review_notification_subject('', $comment_id);
+        $body_html = $reviews_class->custom_review_notification_text('', $comment_id);
+
+        $host_id = get_post_field('post_author', $post->ID);
+        $host = get_userdata($host_id);
+
+        if ($host) {
+            $html = self::wrap_template($subject, $body_html);
+            self::schedule_mail($host->user_email, $subject, $html);
         }
     }
 }

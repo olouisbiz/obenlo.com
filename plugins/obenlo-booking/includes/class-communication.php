@@ -128,7 +128,8 @@ class Obenlo_Booking_Communication
             'Reply-To: ' . $name . ' <' . $email . '>',
         );
 
-        $sent = wp_mail($to, $subject, $html, $headers);
+        Obenlo_Booking_Notifications::schedule_mail($to, $subject, $html, $headers);
+        $sent = true; // Assume scheduled successfully
 
         if ($sent) {
             wp_send_json_success(array('message' => "Your message has been sent. We'll get back to you soon!"));
@@ -202,11 +203,8 @@ class Obenlo_Booking_Communication
             'Cc: info@obenlo.com',
         );
 
-        error_log("Obenlo Debug: Headers: " . print_r($headers, true));
-
-        $sent = wp_mail($host->user_email, $subject, $html, $headers);
-
-        error_log("Obenlo Debug: wp_mail result: " . ($sent ? 'TRUE' : 'FALSE'));
+        Obenlo_Booking_Notifications::schedule_mail($host->user_email, $subject, $html, $headers);
+        $sent = true;
 
         // Also record in internal platform messages for monitoring
         global $wpdb;
@@ -1179,7 +1177,7 @@ class Obenlo_Booking_Communication
                 
                 $html = Obenlo_Booking_Notifications::wrap_template($subject, $body);
                 $headers = array('Content-Type: text/html; charset=UTF-8', 'From: Obenlo <info@obenlo.com>');
-                wp_mail($guest_email, $subject, $html, $headers);
+                Obenlo_Booking_Notifications::schedule_mail($guest_email, $subject, $html, $headers);
             } else {
                 // Notifying a registered user
                 $sender_info = get_userdata($sender_id);
