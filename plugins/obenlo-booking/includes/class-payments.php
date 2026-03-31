@@ -421,6 +421,9 @@ class Obenlo_Booking_Payments
         }
 
         if ($payment_method === 'stripe') {
+            if ($total_price < 0.50) {
+                obenlo_redirect_with_error('amount_too_low', 'Stripe requires a minimum payment of $0.50 USD. Please increase the price or duration.');
+            }
             $this->process_stripe_checkout($booking_id, $total_price, $listing->post_title);
         }
         elseif ($payment_method === 'paypal') {

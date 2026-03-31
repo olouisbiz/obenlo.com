@@ -64,6 +64,9 @@ get_header(); ?>
                         }
                     }
                     break;
+                case 'amount_too_low':
+                    $error_message = 'The total booking amount is too low for online payment. Stripe requires a minimum of $0.50 USD.';
+                    break;
                 case 'invalid_payment':
                     $error_message = 'Invalid payment method selected.';
                     break;
