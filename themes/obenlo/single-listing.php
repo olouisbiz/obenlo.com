@@ -56,7 +56,12 @@ get_header(); ?>
                 case 'booking_error':
                     $error_message = 'There was an error processing your booking. Please try again.';
                     if (current_user_can('administrator')) {
-                        $error_message .= ' (Admin: Check your API Keys/Logs in WordPress Settings)';
+                        $obenlo_msg = isset($_GET['obenlo_msg']) ? sanitize_text_field($_GET['obenlo_msg']) : '';
+                        if ($obenlo_msg) {
+                            $error_message .= ' (Stripe: ' . esc_html($obenlo_msg) . ')';
+                        } else {
+                            $error_message .= ' (Admin: Check your API Keys/Logs in WordPress Settings)';
+                        }
                     }
                     break;
                 case 'invalid_payment':

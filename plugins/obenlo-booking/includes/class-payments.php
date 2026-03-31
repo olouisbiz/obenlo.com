@@ -516,7 +516,7 @@ class Obenlo_Booking_Payments
 
         if (is_wp_error($checkout_url)) {
             error_log('Obenlo Stripe Error: ' . $checkout_url->get_error_message());
-            obenlo_redirect_with_error('booking_error');
+            obenlo_redirect_with_error('booking_error', $checkout_url->get_error_message());
         }
 
         wp_redirect($checkout_url);
@@ -533,7 +533,7 @@ class Obenlo_Booking_Payments
 
         if (is_wp_error($checkout_url)) {
             error_log('Obenlo MonCash Checkout Error: ' . $checkout_url->get_error_message());
-            obenlo_redirect_with_error('booking_error');
+            obenlo_redirect_with_error('booking_error', $checkout_url->get_error_message());
         }
 
         wp_redirect($checkout_url);

@@ -720,18 +720,18 @@ class Obenlo_Booking_Admin_Dashboard
                                 Stripe LIVE Keys
                             </h4>
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Publishable Key (Live)</label>
-                            <input type="text" name="stripe_live_pub" value="<?php echo esc_attr($stripe_live_pub); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            <input type="text" name="stripe_live_pub" value="<?php echo esc_attr($stripe_live_pub); ?>" placeholder="pk_live_..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
                             
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret Key (Live)</label>
-                            <input type="password" name="stripe_live_sec" value="<?php echo esc_attr($stripe_live_sec); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                            <input type="password" name="stripe_live_sec" value="<?php echo esc_attr($stripe_live_sec); ?>" placeholder="sk_live_..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                         </div>
                         <div>
                             <h4 style="margin-bottom:15px; color:#666;">Stripe SANDBOX Keys</h4>
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Publishable Key (Test)</label>
-                            <input type="text" name="stripe_sandbox_pub" value="<?php echo esc_attr($stripe_sandbox_pub); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
+                            <input type="text" name="stripe_sandbox_pub" value="<?php echo esc_attr($stripe_sandbox_pub); ?>" placeholder="pk_test_..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px;">
                             
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret Key (Test)</label>
-                            <input type="password" name="stripe_sandbox_sec" value="<?php echo esc_attr($stripe_sandbox_sec); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                            <input type="password" name="stripe_sandbox_sec" value="<?php echo esc_attr($stripe_sandbox_sec); ?>" placeholder="sk_test_..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                         </div>
                     </div>
                 </div>
@@ -757,7 +757,9 @@ class Obenlo_Booking_Admin_Dashboard
                             <label style="display:block; font-weight:600; margin-bottom:5px; font-size:0.85rem;">Secret (Test)</label>
                             <input type="password" name="paypal_sandbox_sec" value="<?php echo esc_attr($paypal_sandbox_sec); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                         </div>
+                        </div>
                     </div>
+                </div>
                 <div style="margin-bottom:25px; border-top:1px solid #eee; padding-top:25px;">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
                         <div>

@@ -62,7 +62,7 @@ class Obenlo_Booking_Stripe {
                     ),
                 ),
                 'mode' => 'payment',
-                'success_url' => add_query_arg( array( 'obenlo_stripe_success' => $booking_id, 'session_id' => '{CHECKOUT_SESSION_ID}' ), home_url( '/' ) ),
+                'success_url' => str_replace( '%7BCHECKOUT_SESSION_ID%7D', '{CHECKOUT_SESSION_ID}', add_query_arg( array( 'obenlo_stripe_success' => $booking_id, 'session_id' => '{CHECKOUT_SESSION_ID}' ), home_url( '/' ) ) ),
                 'cancel_url' => add_query_arg( 'obenlo_payment_cancel', '1', get_permalink( $listing_id ) ),
                 'client_reference_id' => $booking_id,
                 'metadata' => array(
@@ -84,7 +84,8 @@ class Obenlo_Booking_Stripe {
         }
 
         error_log( 'Obenlo Stripe Session Failed Body: ' . wp_remote_retrieve_body( $response ) );
-        return new WP_Error( 'stripe_error', isset( $body['error']['message'] ) ? $body['error']['message'] : 'Failed to create Stripe Checkout Session.' );
+        $error_msg = isset( $body['error']['message'] ) ? $body['error']['message'] : 'Failed to create Stripe Checkout Session. Check your keys and server connectivity.';
+        return new WP_Error( 'stripe_error', $error_msg );
     }
 
     /**

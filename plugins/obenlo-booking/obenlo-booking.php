@@ -103,8 +103,8 @@ add_action('plugins_loaded', 'obenlo_booking_init');
  * Universal Obenlo Whitelabel Redirect
  * Standardizes error handling to prevent users from seeing WordPress-branded screens.
  */
-function obenlo_redirect_with_error($error_code) {
-    $redirect_url = remove_query_arg(array('obenlo_error', 'message'), wp_get_referer());
+function obenlo_redirect_with_error($error_code, $message = '') {
+    $redirect_url = remove_query_arg(array('obenlo_error', 'obenlo_msg'), wp_get_referer());
     
     // Default fallback if referer is missing or invalid
     if (!$redirect_url) {
@@ -112,6 +112,10 @@ function obenlo_redirect_with_error($error_code) {
     }
 
     $redirect_url = add_query_arg('obenlo_error', $error_code, $redirect_url);
+    if ($message) {
+        $redirect_url = add_query_arg('obenlo_msg', urlencode($message), $redirect_url);
+    }
+
     wp_safe_redirect($redirect_url);
     exit;
 }
