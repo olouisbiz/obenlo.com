@@ -640,14 +640,13 @@ class Obenlo_Booking_Frontend_Dashboard
             <table class="admin-table" id="bookings-table">
                 <thead>
                     <tr>
-                        <th><?php echo __('Booking ID', 'obenlo'); ?></th>
+                        <th><?php echo __('ID', 'obenlo'); ?></th>
                         <th><?php echo __('Listing', 'obenlo'); ?></th>
-                        <th><?php echo __('Dates / Details', 'obenlo'); ?></th>
                         <th><?php echo __('Guest', 'obenlo'); ?></th>
+                        <th><?php echo __('Dates', 'obenlo'); ?></th>
                         <th><?php echo __('Total', 'obenlo'); ?></th>
                         <th><?php echo __('Status', 'obenlo'); ?></th>
-                        <?php if ($limit === -1): ?><th><?php echo __('Confirmation Code', 'obenlo'); ?></th><th><?php echo __('Actions', 'obenlo'); ?></th><?php
-            endif; ?>
+                        <th><?php echo __('Actions', 'obenlo'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
