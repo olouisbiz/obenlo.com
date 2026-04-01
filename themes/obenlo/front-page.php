@@ -14,54 +14,67 @@ get_header(); ?>
 
     <!-- Categories Explore Section -->
 
-    <!-- Explore Categories -->
-    <section style="margin-bottom: 60px; margin-top: 10px; text-align: center;">
-        <h2 style="font-size: 1.5rem; font-weight: 800; color: #222; margin-bottom: 24px; text-align: center;"><?php esc_html_e( 'Explore Categories', 'obenlo' ); ?></h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+    <!-- Market Hero: Explore Categories -->
+    <section class="marketplace-hero" style="text-align: center; padding: 100px 20px 80px 20px; background: linear-gradient(135deg, #fff7f8 0%, #f4f9ff 100%); border-radius: 40px; margin-bottom: 60px; position: relative; overflow: hidden;">
+        
+        <!-- Decorative elements -->
+        <div style="position: absolute; top: -10%; right: -5%; width: 300px; height: 300px; background: rgba(230,30,77,0.03); filter: blur(80px); border-radius: 50%;"></div>
+        <div style="position: absolute; bottom: -10%; left: -5%; width: 300px; height: 300px; background: rgba(59,130,246,0.03); filter: blur(80px); border-radius: 50%;"></div>
 
-            <?php
-            $categories = array(
-                'stay' => array(
-                    'label' => __( 'Stays', 'obenlo' ),
-                    'desc'  => __( 'Hotels, guest houses & unique rooms', 'obenlo' ),
-                    'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M28 12H22V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v24h2V18h16v10h2V14h6v14h2V14a2 2 0 0 0-2-2ZM12 14H4v-4h8Zm0-6H4V4h8Zm8 6h-6v-4h6Zm0-6h-6V4h6Z"/></svg>',
-                    'color' => '#3b82f6',
-                    'bg'    => '#eff6ff',
-                ),
-                'experience' => array(
-                    'label' => __( 'Experiences', 'obenlo' ),
-                    'desc'  => __( 'Tours, adventures & local activities', 'obenlo' ),
-                    'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M28 6H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Zm0 18H4V8h24ZM8 16a4 4 0 1 0 4-4 4.005 4.005 0 0 0-4 4Zm4-2a2 2 0 1 1-2 2 2.002 2.002 0 0 1 2-2Zm4 6v-1a4.005 4.005 0 0 0-4-4 4.005 4.005 0 0 0-4 4v1H6v-1a6.007 6.007 0 0 1 6-6 6.007 6.007 0 0 1 6 6v1Zm2-10h8v2h-8Zm0 4h8v2h-8Zm0 4h4v2h-4Z"/></svg>',
-                    'color' => '#10b981',
-                    'bg'    => '#ecfdf5',
-                ),
-                'service' => array(
-                    'label' => __( 'Services', 'obenlo' ),
-                    'desc'  => __( 'Cleaning, Handyman, Barber & Freelance', 'obenlo' ),
-                    'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M18.5 15h-6a4.5 4.5 0 0 0-4.5 4.5V28h2v-8.5A2.503 2.503 0 0 1 12.5 17h6a2.503 2.503 0 0 1 2.5 2.5V28h2v-8.5A4.5 4.5 0 0 0 18.5 15ZM15.5 14A5 5 0 1 0 10.5 9a5.006 5.006 0 0 0 5 5Zm0-8A3 3 0 1 1 12.5 9a3.003 3.003 0 0 1 3-3Z"/></svg>',
-                    'color' => '#f97316',
-                    'bg'    => '#fff7ed',
-                ),
-                'event' => array(
-                    'label' => __( 'Events', 'obenlo' ),
-                    'desc'  => __( 'Shows, live nights & performances', 'obenlo' ),
-                    'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M26 4H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 22H6V12h20Zm0-16H6V6h20ZM13 25a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Zm8 0a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Zm-4 0a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Z"/></svg>',
-                    'color' => '#e61e4d',
-                    'bg'    => '#fff1f3',
-                ),
-            );
-            foreach ( $categories as $slug => $cat ) :
-                $link = get_term_link( $slug, 'listing_type' );
-                $link = is_wp_error($link) ? home_url('/') : $link;
-            ?>
-                <a href="<?php echo esc_url($link); ?>" style="display:flex; flex-direction:column; gap:16px; padding:24px; background:<?php echo $cat['bg']; ?>; border-radius:20px; text-decoration:none; color:inherit; text-align:left; transition:transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='';this.style.boxShadow='';">
-                    <div style="color:<?php echo $cat['color']; ?>; width:52px;height:52px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,0.06);"><?php echo $cat['icon']; ?></div>
-                    <div>
-                        <div style="font-size:1.1rem;font-weight:800;color:#222;margin-bottom:4px;"><?php echo esc_html($cat['label']); ?></div>
-                        <div style="font-size:0.82rem;color:#888;line-height:1.4;"><?php echo esc_html($cat['desc']); ?></div>
-                    </div>
-                </a>
-            <?php endforeach; ?>
+        <div style="position: relative; z-index: 2;">
+            <h1 style="font-size: 3.8rem; font-weight: 900; color: #111; margin-bottom: 16px; letter-spacing: -1.5px; line-height: 1.1;">
+                <?php esc_html_e( 'Discover Local Treasures', 'obenlo' ); ?>
+            </h1>
+            <p style="font-size: 1.3rem; color: #555; max-width: 700px; margin: 0 auto 50px auto; line-height: 1.6; font-weight: 500;">
+                <?php esc_html_e( 'The easiest way to book stays, unique experiences, and professional services in your neighborhood.', 'obenlo' ); ?>
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; padding: 0 10px;">
+
+                <?php
+                $categories = array(
+                    'stay' => array(
+                        'label' => __( 'Stays', 'obenlo' ),
+                        'desc'  => __( 'Hotels, guest houses & unique rooms', 'obenlo' ),
+                        'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M28 12H22V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v24h2V18h16v10h2V14h6v14h2V14a2 2 0 0 0-2-2ZM12 14H4v-4h8Zm0-6H4V4h8Zm8 6h-6v-4h6Zm0-6h-6V4h6Z"/></svg>',
+                        'color' => '#3b82f6',
+                        'bg'    => '#eff6ff',
+                    ),
+                    'experience' => array(
+                        'label' => __( 'Experiences', 'obenlo' ),
+                        'desc'  => __( 'Tours, adventures & local activities', 'obenlo' ),
+                        'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M28 6H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Zm0 18H4V8h24ZM8 16a4 4 0 1 0 4-4 4.005 4.005 0 0 0-4 4Zm4-2a2 2 0 1 1-2 2 2.002 2.002 0 0 1 2-2Zm4 6v-1a4.005 4.005 0 0 0-4-4 4.005 4.005 0 0 0-4 4v1H6v-1a6.007 6.007 0 0 1 6-6 6.007 6.007 0 0 1 6 6v1Zm2-10h8v2h-8Zm0 4h8v2h-8Zm0 4h4v2h-4Z"/></svg>',
+                        'color' => '#10b981',
+                        'bg'    => '#ecfdf5',
+                    ),
+                    'service' => array(
+                        'label' => __( 'Services', 'obenlo' ),
+                        'desc'  => __( 'Cleaning, Handyman, Barber & Freelance', 'obenlo' ),
+                        'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M18.5 15h-6a4.5 4.5 0 0 0-4.5 4.5V28h2v-8.5A2.503 2.503 0 0 1 12.5 17h6a2.503 2.503 0 0 1 2.5 2.5V28h2v-8.5A4.5 4.5 0 0 0 18.5 15ZM15.5 14A5 5 0 1 0 10.5 9a5.006 5.006 0 0 0 5 5Zm0-8A3 3 0 1 1 12.5 9a3.003 3.003 0 0 1 3-3Z"/></svg>',
+                        'color' => '#f97316',
+                        'bg'    => '#fff7ed',
+                    ),
+                    'event' => array(
+                        'label' => __( 'Events', 'obenlo' ),
+                        'desc'  => __( 'Shows, live nights & performances', 'obenlo' ),
+                        'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M26 4H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 22H6V12h20Zm0-16H6V6h20ZM13 25a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Zm8 0a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Zm-4 0a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Z"/></svg>',
+                        'color' => '#e61e4d',
+                        'bg'    => '#fff1f3',
+                    ),
+                );
+                foreach ( $categories as $slug => $cat ) :
+                    $link = get_term_link( $slug, 'listing_type' );
+                    $link = is_wp_error($link) ? home_url('/') : $link;
+                ?>
+                    <a href="<?php echo esc_url($link); ?>" style="display:flex; flex-direction:column; gap:20px; padding:32px; background:#fff; border:1px solid #eee; border-radius:32px; text-decoration:none; color:inherit; text-align:left; transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 20px rgba(0,0,0,0.02);" onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.06)';this.style.borderColor='#ddd';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.02)';this.style.borderColor='#eee';">
+                        <div style="color:<?php echo $cat['color']; ?>; width:60px; height:60px; background:<?php echo $cat['bg']; ?>; border-radius:18px; display:flex; align-items:center; justify-content:center;"><?php echo $cat['icon']; ?></div>
+                        <div>
+                            <div style="font-size:1.3rem; font-weight:800; color:#111; margin-bottom:8px;"><?php echo esc_html($cat['label']); ?></div>
+                            <div style="font-size:0.9rem; color:#666; line-height:1.5; font-weight:500;"><?php echo esc_html($cat['desc']); ?></div>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
         </div>
     </section>
 
