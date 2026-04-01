@@ -22,12 +22,6 @@ get_header(); ?>
         <div style="position: absolute; bottom: -10%; left: -5%; width: 300px; height: 300px; background: rgba(59,130,246,0.03); filter: blur(80px); border-radius: 50%;"></div>
 
         <div style="position: relative; z-index: 2;">
-            <h1 style="font-size: 3.8rem; font-weight: 900; color: #111; margin-bottom: 16px; letter-spacing: -1.5px; line-height: 1.1;">
-                <?php esc_html_e( 'Discover Local Treasures', 'obenlo' ); ?>
-            </h1>
-            <p style="font-size: 1.3rem; color: #555; max-width: 700px; margin: 0 auto 50px auto; line-height: 1.6; font-weight: 500;">
-                <?php esc_html_e( 'The easiest way to book stays, unique experiences, and professional services in your neighborhood.', 'obenlo' ); ?>
-            </p>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; padding: 0 10px;">
 
