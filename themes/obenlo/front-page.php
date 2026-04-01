@@ -7,15 +7,6 @@ get_header(); ?>
 
 <main id="primary" class="site-main site-content" style="max-width: 1400px; margin: 0 auto; padding: 20px 40px;">
 
-    <!-- Supply-First Hero Section -->
-    <section class="marketplace-hero" style="text-align: center; padding: 80px 20px; background: linear-gradient(135deg, #fff1f3 0%, #eff6ff 100%); border-radius: 32px; margin-bottom: 60px;">
-        <h1 style="font-size: 3rem; font-weight: 800; color: #111; margin-bottom: 20px; line-height: 1.2;"><?php esc_html_e( 'Get booked and paid by local customers — instantly.', 'obenlo' ); ?></h1>
-        <p style="font-size: 1.2rem; color: #444; max-width: 600px; margin: 0 auto 40px auto; line-height: 1.5;"><?php esc_html_e( 'List your services, accept bookings, and get paid securely without the back-and-forth.', 'obenlo' ); ?></p>
-        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-            <a href="<?php echo esc_url( home_url('/become-a-host') ); ?>" style="padding: 16px 32px; background: #e61e4d; color: #fff; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(230,30,77,0.3)';" onmouseout="this.style.transform='';this.style.boxShadow='';"><?php esc_html_e( 'Start offering services', 'obenlo' ); ?></a>
-            <a href="#services-explore" style="padding: 16px 32px; background: #fff; color: #222; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; border: 2px solid #222; transition: all 0.2s;" onmouseover="this.style.background='#222';this.style.color='#fff';" onmouseout="this.style.background='#fff';this.style.color='#222';"><?php esc_html_e( 'Book a service', 'obenlo' ); ?></a>
-        </div>
-    </section>
 
     <!-- Category Filter Bar -->
     <div class="category-filters" style="display: flex; gap: 40px; justify-content: center; margin-bottom: 40px; overflow-x: auto; padding: 20px 0; border-bottom: 1px solid #ebebeb; -webkit-overflow-scrolling: touch; white-space: nowrap;">
