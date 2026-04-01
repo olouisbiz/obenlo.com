@@ -649,7 +649,9 @@ class Obenlo_Booking_Frontend_Dashboard
                         <?php if ($limit === -1): ?><th><?php echo __('Confirmation Code', 'obenlo'); ?></th><th><?php echo __('Actions', 'obenlo'); ?></th><?php
             endif; ?>
                     </tr>
-                <                    <?php foreach ($bookings as $booking):
+                </thead>
+                <tbody>
+                    <?php foreach ($bookings as $booking):
                         $listing_id = get_post_meta($booking->ID, '_obenlo_listing_id', true);
                         $listing_title = $listing_id ? get_the_title($listing_id) : __('Unknown Listing', 'obenlo');
                         $listing_thumb = $listing_id ? get_the_post_thumbnail_url($listing_id, 'thumbnail') : '';
@@ -748,6 +750,7 @@ class Obenlo_Booking_Frontend_Dashboard
                                 </div>
                             </td>
                         </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
 
