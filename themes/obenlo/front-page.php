@@ -27,20 +27,6 @@ get_header(); ?>
 
                 <?php
                 $categories = array(
-                    'stay' => array(
-                        'label' => __( 'Stays', 'obenlo' ),
-                        'desc'  => __( 'Hotels, guest houses & unique rooms', 'obenlo' ),
-                        'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M28 12H22V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v24h2V18h16v10h2V14h6v14h2V14a2 2 0 0 0-2-2ZM12 14H4v-4h8Zm0-6H4V4h8Zm8 6h-6v-4h6Zm0-6h-6V4h6Z"/></svg>',
-                        'color' => '#3b82f6',
-                        'bg'    => '#eff6ff',
-                    ),
-                    'experience' => array(
-                        'label' => __( 'Experiences', 'obenlo' ),
-                        'desc'  => __( 'Tours, adventures & local activities', 'obenlo' ),
-                        'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M28 6H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Zm0 18H4V8h24ZM8 16a4 4 0 1 0 4-4 4.005 4.005 0 0 0-4 4Zm4-2a2 2 0 1 1-2 2 2.002 2.002 0 0 1 2-2Zm4 6v-1a4.005 4.005 0 0 0-4-4 4.005 4.005 0 0 0-4 4v1H6v-1a6.007 6.007 0 0 1 6-6 6.007 6.007 0 0 1 6 6v1Zm2-10h8v2h-8Zm0 4h8v2h-8Zm0 4h4v2h-4Z"/></svg>',
-                        'color' => '#10b981',
-                        'bg'    => '#ecfdf5',
-                    ),
                     'service' => array(
                         'label' => __( 'Services', 'obenlo' ),
                         'desc'  => __( 'Cleaning, Handyman, Barber & Freelance', 'obenlo' ),
@@ -54,6 +40,20 @@ get_header(); ?>
                         'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M26 4H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 22H6V12h20Zm0-16H6V6h20ZM13 25a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Zm8 0a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Zm-4 0a1 1 0 0 1-1 1h-2a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1Z"/></svg>',
                         'color' => '#e61e4d',
                         'bg'    => '#fff1f3',
+                    ),
+                    'experience' => array(
+                        'label' => __( 'Experiences', 'obenlo' ),
+                        'desc'  => __( 'Tours, adventures & local activities', 'obenlo' ),
+                        'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M28 6H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Zm0 18H4V8h24ZM8 16a4 4 0 1 0 4-4 4.005 4.005 0 0 0-4 4Zm4-2a2 2 0 1 1-2 2 2.002 2.002 0 0 1 2-2Zm4 6v-1a4.005 4.005 0 0 0-4-4 4.005 4.005 0 0 0-4 4v1H6v-1a6.007 6.007 0 0 1 6-6 6.007 6.007 0 0 1 6 6v1Zm2-10h8v2h-8Zm0 4h8v2h-8Zm0 4h4v2h-4Z"/></svg>',
+                        'color' => '#10b981',
+                        'bg'    => '#ecfdf5',
+                    ),
+                    'stay' => array(
+                        'label' => __( 'Stays', 'obenlo' ),
+                        'desc'  => __( 'Hotels, guest houses & unique rooms', 'obenlo' ),
+                        'icon'  => '<svg viewBox="0 0 32 32" fill="currentColor" style="width:32px;height:32px;"><path d="M28 12H22V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v24h2V18h16v10h2V14h6v14h2V14a2 2 0 0 0-2-2ZM12 14H4v-4h8Zm0-6H4V4h8Zm8 6h-6v-4h6Zm0-6h-6V4h6Z"/></svg>',
+                        'color' => '#3b82f6',
+                        'bg'    => '#eff6ff',
                     ),
                 );
                 foreach ( $categories as $slug => $cat ) :
@@ -69,85 +69,6 @@ get_header(); ?>
                     </a>
                 <?php endforeach; ?>
             </div>
-        </div>
-    </section>
-
-    <!-- Featured Stays (Top 10) -->
-    <section class="featured-stays" style="margin-bottom: 80px;">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 25px;">
-            <h2 style="font-size: 1.8rem; font-weight: 700;"><?php esc_html_e( 'Featured Stays', 'obenlo' ); ?></h2>
-            <?php 
-            $stay_link = get_term_link('stay', 'listing_type');
-            $stay_link = is_wp_error( $stay_link ) ? home_url( '/' ) : $stay_link;
-            ?>
-            <a href="<?php echo esc_url( $stay_link ); ?>" style="color: #222; font-weight: 600; text-decoration: underline; font-size: 0.9rem;"><?php esc_html_e( 'Show all', 'obenlo' ); ?></a>
-        </div>
-        <div class="front-page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
-            <?php
-            $stay_args = array(
-                'post_parent'    => 0,
-                'post_type'      => 'listing',
-                'posts_per_page' => 10,
-                'post_status'    => 'publish',
-                'tax_query'      => array(
-                    array(
-                        'taxonomy' => 'listing_type',
-                        'field'    => 'slug',
-                        'terms'    => 'stay',
-                    ),
-                ),
-                'meta_key'       => '_obenlo_price',
-                'orderby'        => 'meta_value_num',
-                'order'          => 'DESC'
-            );
-            $stay_query = new WP_Query( $stay_args );
-            if ( $stay_query->have_posts() ) :
-                while ( $stay_query->have_posts() ) : $stay_query->the_post();
-                    include locate_template('template-parts/content-listing-card.php');
-                endwhile;
-                wp_reset_postdata();
-            else :
-                echo '<p style="color: #717171;">' . esc_html__( 'Check back soon for featured stays!', 'obenlo' ) . '</p>';
-            endif;
-            ?>
-        </div>
-    </section>
-
-    <!-- Featured Experiences (Top 10) -->
-    <section class="featured-experiences" style="margin-bottom: 80px;">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 25px;">
-            <h2 style="font-size: 1.8rem; font-weight: 700;"><?php esc_html_e( 'Featured Experiences', 'obenlo' ); ?></h2>
-            <?php 
-            $exp_link = get_term_link('experience', 'listing_type');
-            $exp_link = is_wp_error( $exp_link ) ? home_url( '/' ) : $exp_link;
-            ?>
-            <a href="<?php echo esc_url( $exp_link ); ?>" style="color: #222; font-weight: 600; text-decoration: underline; font-size: 0.9rem;"><?php esc_html_e( 'Show all', 'obenlo' ); ?></a>
-        </div>
-        <div class="front-page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
-            <?php
-            $exp_args = array(
-                'post_parent'    => 0,
-                'post_type'      => 'listing',
-                'posts_per_page' => 10,
-                'post_status'    => 'publish',
-                'tax_query'      => array(
-                    array(
-                        'taxonomy' => 'listing_type',
-                        'field'    => 'slug',
-                        'terms'    => 'experience',
-                    ),
-                ),
-            );
-            $exp_query = new WP_Query( $exp_args );
-            if ( $exp_query->have_posts() ) :
-                while ( $exp_query->have_posts() ) : $exp_query->the_post();
-                    include locate_template('template-parts/content-listing-card.php');
-                endwhile;
-                wp_reset_postdata();
-            else :
-                echo '<p style="color: #717171;">' . esc_html__( 'Explore local experiences soon!', 'obenlo' ) . '</p>';
-            endif;
-            ?>
         </div>
     </section>
 
@@ -225,6 +146,85 @@ get_header(); ?>
                 wp_reset_postdata();
             else :
                 echo '<p style="color: #717171;">' . esc_html__( 'No events yet — check back soon! 🎉', 'obenlo' ) . '</p>';
+            endif;
+            ?>
+        </div>
+    </section>
+
+    <!-- Featured Experiences (Top 10) -->
+    <section class="featured-experiences" style="margin-bottom: 80px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 25px;">
+            <h2 style="font-size: 1.8rem; font-weight: 700;"><?php esc_html_e( 'Featured Experiences', 'obenlo' ); ?></h2>
+            <?php 
+            $exp_link = get_term_link('experience', 'listing_type');
+            $exp_link = is_wp_error( $exp_link ) ? home_url( '/' ) : $exp_link;
+            ?>
+            <a href="<?php echo esc_url( $exp_link ); ?>" style="color: #222; font-weight: 600; text-decoration: underline; font-size: 0.9rem;"><?php esc_html_e( 'Show all', 'obenlo' ); ?></a>
+        </div>
+        <div class="front-page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
+            <?php
+            $exp_args = array(
+                'post_parent'    => 0,
+                'post_type'      => 'listing',
+                'posts_per_page' => 10,
+                'post_status'    => 'publish',
+                'tax_query'      => array(
+                    array(
+                        'taxonomy' => 'listing_type',
+                        'field'    => 'slug',
+                        'terms'    => 'experience',
+                    ),
+                ),
+            );
+            $exp_query = new WP_Query( $exp_args );
+            if ( $exp_query->have_posts() ) :
+                while ( $exp_query->have_posts() ) : $exp_query->the_post();
+                    include locate_template('template-parts/content-listing-card.php');
+                endwhile;
+                wp_reset_postdata();
+            else :
+                echo '<p style="color: #717171;">' . esc_html__( 'Explore local experiences soon!', 'obenlo' ) . '</p>';
+            endif;
+            ?>
+        </div>
+    </section>
+
+    <!-- Featured Stays (Top 10) -->
+    <section class="featured-stays" style="margin-bottom: 80px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 25px;">
+            <h2 style="font-size: 1.8rem; font-weight: 700;"><?php esc_html_e( 'Featured Stays', 'obenlo' ); ?></h2>
+            <?php 
+            $stay_link = get_term_link('stay', 'listing_type');
+            $stay_link = is_wp_error( $stay_link ) ? home_url( '/' ) : $stay_link;
+            ?>
+            <a href="<?php echo esc_url( $stay_link ); ?>" style="color: #222; font-weight: 600; text-decoration: underline; font-size: 0.9rem;"><?php esc_html_e( 'Show all', 'obenlo' ); ?></a>
+        </div>
+        <div class="front-page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
+            <?php
+            $stay_args = array(
+                'post_parent'    => 0,
+                'post_type'      => 'listing',
+                'posts_per_page' => 10,
+                'post_status'    => 'publish',
+                'tax_query'      => array(
+                    array(
+                        'taxonomy' => 'listing_type',
+                        'field'    => 'slug',
+                        'terms'    => 'stay',
+                    ),
+                ),
+                'meta_key'       => '_obenlo_price',
+                'orderby'        => 'meta_value_num',
+                'order'          => 'DESC'
+            );
+            $stay_query = new WP_Query( $stay_args );
+            if ( $stay_query->have_posts() ) :
+                while ( $stay_query->have_posts() ) : $stay_query->the_post();
+                    include locate_template('template-parts/content-listing-card.php');
+                endwhile;
+                wp_reset_postdata();
+            else :
+                echo '<p style="color: #717171;">' . esc_html__( 'Check back soon for featured stays!', 'obenlo' ) . '</p>';
             endif;
             ?>
         </div>
