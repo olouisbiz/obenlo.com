@@ -70,72 +70,83 @@ class Obenlo_Booking_Frontend_Dashboard
         <div class="obenlo-dashboard-container">
             <style>
                 .obenlo-dashboard-container { display: flex; min-height: 800px; background: #fff; font-family: 'Inter', sans-serif; gap: 0; }
-                .dashboard-sidebar { width: 260px; background: #f9f9f9; border-right: 1px solid #eee; padding: 40px 20px; display: flex; flex-direction: column; gap: 5px; }
-                .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; text-decoration: none; color: #555; font-weight: 600; border-radius: 12px; transition: all 0.2s; font-size: 0.95rem; }
-                .sidebar-link:hover { background: #f0f0f0; color: #e61e4d; }
-                .sidebar-link.active { background: #e61e4d; color: #fff; box-shadow: 0 4px 12px rgba(230,30,77,0.2); }
-                .sidebar-link svg { width: 20px; height: 20px; }
+                .dashboard-sidebar { width: 260px; background: #fdfdfd; border-right: 1px solid #f0f0f0; padding: 40px 20px; display: flex; flex-direction: column; gap: 5px; position: sticky; top: 0; height: 100vh; }
+                .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; text-decoration: none; color: #666; font-weight: 600; border-radius: 14px; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); font-size: 0.95rem; }
+                .sidebar-link:hover { background: #f7f7f7; color: #222; }
+                .sidebar-link.active { background: #222; color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+                .sidebar-link svg { width: 20px; height: 20px; stroke-width: 2.2; }
                 
-                .dashboard-content { flex-grow: 1; padding: 40px 50px; background: #fff; }
+                .dashboard-content { flex-grow: 1; padding: 50px 60px; background: #fff; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
                 .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-                .dashboard-title { font-size: 2rem; font-weight: 800; color: #222; margin: 0; }
+                .dashboard-title { font-size: 2.4rem; font-weight: 800; color: #222; margin: 0; letter-spacing: -0.5px; }
                 
-                .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; margin-bottom: 50px; }
-                .stat-card { background: #fff; border: 1px solid #eee; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); text-align: left; transition: transform 0.3s; }
-                .stat-card:hover { transform: translateY(-5px); }
-                .stat-value { display: block; font-size: 2.2rem; font-weight: 800; color: #222; margin-bottom: 5px; }
-                .stat-label { color: #888; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1.2px; }
+                .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px; margin-bottom: 50px; }
+                .stat-card { background: #fff; border: 1px solid #eee; padding: 35px; border-radius: 24px; box-shadow: 0 4px 25px rgba(0,0,0,0.02); text-align: left; transition: all 0.3s; position: relative; overflow: hidden; }
+                .stat-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); border-color: #ddd; }
+                .stat-value { display: block; font-size: 2.4rem; font-weight: 800; color: #222; margin-bottom: 8px; line-height: 1; }
+                .stat-label { color: #888; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1.5px; opacity: 0.8; }
                 
-                .admin-table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; border-radius: 16px; overflow: hidden; border: 1px solid #eee; margin-top: 20px; }
-                .admin-table th { background: #fcfcfc; padding: 20px; text-align: left; font-weight: 700; color: #444; border-bottom: 2px solid #f5f5f5; font-size: 0.9rem; }
-                .admin-table td { padding: 20px; border-bottom: 1px solid #f5f5f5; color: #666; font-size: 0.95rem; vertical-align: middle; }
-                .admin-table tr:last-child td { border-bottom: none; }
+                .admin-table { width: 100%; border-collapse: separate; border-spacing: 0 12px; background: transparent; margin-top: 10px; }
+                .admin-table th { background: transparent; padding: 15px 25px; text-align: left; font-weight: 700; color: #888; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+                .admin-table td { background: #fff; padding: 25px; color: #444; font-size: 0.95rem; vertical-align: middle; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; transition: all 0.2s; }
+                .admin-table td:first-child { border-left: 1px solid #f0f0f0; border-top-left-radius: 20px; border-bottom-left-radius: 20px; }
+                .admin-table td:last-child { border-right: 1px solid #f0f0f0; border-top-right-radius: 20px; border-bottom-right-radius: 20px; }
+                .admin-table tr:hover td { background: #fcfcfc; border-color: #e0e0e0; transform: scale(1.002); }
                 
-                .badge { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-                .badge-success { background: #ecfdf5; color: #10b981; }
-                .badge-warning { background: #fff7ed; color: #f97316; }
-                .badge-danger { background: #fef2f2; color: #ef4444; }
-                .badge-info { background: #eff6ff; color: #3b82f6; }
+                .avatar-stack { display: flex; align-items: center; gap: 12px; }
+                .avatar-circle { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
                 
-                .btn-primary { background: #e61e4d; color: #fff; border: none; padding: 12px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
-                .btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
-                .form-section { background: #fff; border: 1px solid #eee; padding: 35px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); margin-top: 30px; }
+                .badge { padding: 8px 16px; border-radius: 30px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: inline-flex; align-items: center; gap: 6px; }
+                .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+                .badge-success { background: #ecfdf5; color: #059669; } .badge-success::before { background: #10b981; }
+                .badge-warning { background: #fff7ed; color: #d97706; } .badge-warning::before { background: #f97316; }
+                .badge-danger { background: #fef2f2; color: #dc2626; } .badge-danger::before { background: #ef4444; }
+                .badge-info { background: #eff6ff; color: #2563eb; } .badge-info::before { background: #3b82f6; }
                 
-                @media (max-width: 900px) {
+                .btn-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #eee; color: #666; transition: all 0.2s; cursor: pointer; }
+                .btn-icon:hover { background: #222; color: #fff; border-color: #222; transform: translateY(-2px); }
+                
+                .btn-primary { background: #222; color: #fff; border: none; padding: 14px 28px; border-radius: 16px; font-weight: 700; cursor: pointer; transition: all 0.25s; text-decoration: none; display: inline-block; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); background: #333; }
+                
+                .btn-outline { background: #fff; color: #222; border: 1.5px solid #222; padding: 12px 25px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; font-size: 0.9rem; }
+                .btn-outline:hover { background: #222; color: #fff; }
+
+                .search-container { position: relative; background: #f9f9f9; border: 1.5px solid #eee; border-radius: 18px; padding: 5px 15px; display: flex; align-items: center; gap: 10px; transition: all 0.2s; max-width: 450px; width: 100%; }
+                .search-container:focus-within { background: #fff; border-color: #222; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+                .search-input { border: none; background: transparent; padding: 10px; font-size: 0.95rem; width: 100%; outline: none; font-weight: 500; color: #222; }
+
+                @media (max-width: 1024px) {
+                    .dashboard-sidebar { width: 80px; padding: 40px 10px; }
+                    .sidebar-link span { display: none; }
+                    .sidebar-link { justify-content: center; padding: 15px; }
+                    .dashboard-content { padding: 40px 25px; }
+                }
+
+                @media (max-width: 768px) {
                     .obenlo-dashboard-container { flex-direction: column; }
                     .dashboard-sidebar { 
                         width: 100%; 
+                        height: auto;
+                        position: relative;
                         border-right: none; 
                         border-bottom: 1px solid #eee; 
                         padding: 10px 15px; 
                         overflow-x: auto; 
-                        overflow-y: hidden; 
                         flex-direction: row; 
-                        flex-wrap: nowrap; 
                         gap: 10px; 
-                        -webkit-overflow-scrolling: touch;
                         scrollbar-width: none;
+                        top: 0;
                     }
                     .dashboard-sidebar::-webkit-scrollbar { display: none; }
-                    .dashboard-sidebar a { 
-                        padding: 8px 15px; 
-                        font-size: 0.85rem; 
-                        white-space: nowrap;
-                        flex-shrink: 0;
-                    }
-                    .dashboard-content { padding: 20px 15px; overflow-x: hidden; width: 100%; box-sizing: border-box; }
-                    .stats-grid { grid-template-columns: 1fr; gap: 15px; }
-                    
-                    /* Responsive Grid System */
-                    .grid-row { flex-direction: column !important; gap: 15px !important; }
-                    .grid-col-1-2, .grid-col-1-3, .grid-col-2-3 { width: 100% !important; flex: none !important; }
-                    
-                    /* Form Section Refinement */
-                    .form-section { padding: 25px 20px !important; }
-                    
-                    /* Restore visibility for previously hidden elements */
-                    .mobile-hide { display: table-cell !important; }
-                    th.mobile-hide { display: table-cell !important; }
+                    .sidebar-link { white-space: nowrap; border-radius: 10px; }
+                    .dashboard-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+                    .admin-table, .admin-table tr, .admin-table td { display: block; width: 100%; }
+                    .admin-table thead { display: none; }
+                    .admin-table td { border: none; padding: 15px; text-align: right; position: relative; border-radius: 0 !important; }
+                    .admin-table td::before { content: attr(data-label); position: absolute; left: 15px; font-weight: 700; color: #888; text-transform: uppercase; font-size: 0.7rem; }
+                    .admin-table td:first-child { padding-top: 25px; border-top-left-radius: 20px !important; border-top-right-radius: 20px !important; }
+                    .admin-table td:last-child { border-bottom-left-radius: 20px !important; border-bottom-right-radius: 20px !important; border-bottom: 1px solid #f0f0f0; }
                 }
             </style>
 
@@ -596,24 +607,26 @@ class Obenlo_Booking_Frontend_Dashboard
             </div>
 
             <!-- ── Confirmation Code Search ── -->
-            <div style="margin-bottom:24px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-                <div style="position:relative; flex:1; min-width:260px; max-width:420px;">
-                    <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#aaa;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    </span>
-                    <input type="text" id="booking-code-search" placeholder="<?php echo esc_attr(__('Search by confirmation code or last 4 digits…', 'obenlo')); ?>" style="width:100%; padding:11px 14px 11px 40px; border:2px solid #eee; border-radius:12px; font-size:0.92rem; outline:none; transition:border-color 0.2s; box-sizing:border-box;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#eee'">
+            <!-- ── Modern Search & Export Bar ── -->
+            <div style="margin-bottom:32px; display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;">
+                <div class="search-container">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;color:#888;margin-left:5px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="booking-code-search" class="search-input" placeholder="<?php echo esc_attr(__('Filter by ID or Conf. Code...', 'obenlo')); ?>">
+                    <span id="booking-search-count" style="font-size:0.8rem; color:#888; font-weight:600; white-space:nowrap; margin-right:10px;"></span>
                 </div>
-                <span id="booking-search-count" style="font-size:0.85rem; color:#888;"></span>
-                <button onclick="document.getElementById('booking-code-search').value=''; filterBookings();" style="background:none; border:1px solid #eee; border-radius:10px; padding:10px 16px; color:#666; cursor:pointer; font-size:0.85rem;"><?php echo __('Clear', 'obenlo'); ?></button>
                 
-                <!-- ── Booking Export Form ── -->
-                <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="display:flex; gap:10px; align-items:center; margin-left:auto;">
-                    <input type="hidden" name="action" value="obenlo_export_bookings">
-                    <?php wp_nonce_field('obenlo_export_bookings'); ?>
-                    <label style="font-size:0.85rem; font-weight:700; color:#666;"><?php echo __('Export date:', 'obenlo'); ?></label>
-                    <input type="date" name="export_date" value="<?php echo date('Y-m-d'); ?>" style="padding:8px; border:2px solid #eee; border-radius:10px; font-size:0.9rem;">
-                    <button type="submit" class="btn-primary" style="padding:10px 20px; font-size:0.85rem;"><?php echo __('Export CSV', 'obenlo'); ?></button>
-                </form>
+                <div style="display:flex; gap:15px; align-items:center;">
+                    <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="display:flex; gap:12px; align-items:center; background:#f9f9f9; padding:6px 15px; border-radius:18px; border:1.5px solid #eee;">
+                        <input type="hidden" name="action" value="obenlo_export_bookings">
+                        <?php wp_nonce_field('obenlo_export_bookings'); ?>
+                        <span style="font-size:0.8rem; font-weight:700; color:#888; text-transform:uppercase;"><?php echo __('Date:', 'obenlo'); ?></span>
+                        <input type="date" name="export_date" value="<?php echo date('Y-m-d'); ?>" style="border:none; background:transparent; font-weight:700; color:#222; outline:none; font-family:inherit;">
+                        <button type="submit" class="btn-icon" title="<?php echo esc_attr(__('Export CSV', 'obenlo')); ?>">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        </button>
+                    </form>
+                    <button onclick="document.getElementById('booking-code-search').value=''; filterBookings();" class="btn-outline" style="padding:10px 20px; font-size:0.85rem; border-color:#eee; color:#666;"><?php echo __('Reset Filters', 'obenlo'); ?></button>
+                </div>
             </div>
         <?php
         endif; ?>
@@ -636,98 +649,105 @@ class Obenlo_Booking_Frontend_Dashboard
                         <?php if ($limit === -1): ?><th><?php echo __('Confirmation Code', 'obenlo'); ?></th><th><?php echo __('Actions', 'obenlo'); ?></th><?php
             endif; ?>
                     </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($bookings as $booking):
-                $listing_id = get_post_meta($booking->ID, '_obenlo_listing_id', true);
-                $listing_title = $listing_id ? get_the_title($listing_id) : __('Unknown Listing', 'obenlo');
-                $start_date = get_post_meta($booking->ID, '_obenlo_start_date', true);
-                $end_date = get_post_meta($booking->ID, '_obenlo_end_date', true);
-                $guests = get_post_meta($booking->ID, '_obenlo_guests', true);
-                $total = get_post_meta($booking->ID, '_obenlo_total_price', true);
-                $status = get_post_meta($booking->ID, '_obenlo_booking_status', true);
-                $conf_code = get_post_meta($booking->ID, '_obenlo_confirmation_code', true);
-                $guest_id = get_post_meta($booking->ID, '_obenlo_guest_id', true);
-                $checked_in = get_post_meta($booking->ID, '_obenlo_checked_in', true) === 'yes';
+                <                    <?php foreach ($bookings as $booking):
+                        $listing_id = get_post_meta($booking->ID, '_obenlo_listing_id', true);
+                        $listing_title = $listing_id ? get_the_title($listing_id) : __('Unknown Listing', 'obenlo');
+                        $listing_thumb = $listing_id ? get_the_post_thumbnail_url($listing_id, 'thumbnail') : '';
+                        
+                        $start_date = get_post_meta($booking->ID, '_obenlo_start_date', true);
+                        $end_date = get_post_meta($booking->ID, '_obenlo_end_date', true);
+                        $guests = get_post_meta($booking->ID, '_obenlo_guests', true);
+                        $total = get_post_meta($booking->ID, '_obenlo_total_price', true);
+                        $status = get_post_meta($booking->ID, '_obenlo_booking_status', true);
+                        $conf_code = get_post_meta($booking->ID, '_obenlo_confirmation_code', true);
+                        $guest_id_meta = get_post_meta($booking->ID, '_obenlo_guest_id', true);
+                        $checked_in = get_post_meta($booking->ID, '_obenlo_checked_in', true) === 'yes';
 
-                $guest_user = get_user_by('id', $booking->post_author);
-                $guest_info = $guest_user ? $guest_user->display_name : 'Guest #' . $booking->post_author;
+                        $guest_user = get_user_by('id', $booking->post_author);
+                        $guest_name = $guest_user ? $guest_user->display_name : 'Guest #' . $booking->post_author;
+                        $guest_avatar = $guest_user ? get_avatar_url($guest_user->ID) : '';
 
-                $status_badge = 'badge-info';
-                if ($status === 'confirmed' || $status === 'approved' || $status === 'completed')
-                    $status_badge = 'badge-success';
-                if ($status === 'declined' || $status === 'cancelled')
-                    $status_badge = 'badge-danger';
-                if ($status === 'pending_payment')
-                    $status_badge = 'badge-warning';
-?>
-                        <tr>
-                            <td data-label="<?php echo esc_attr(__('Booking ID', 'obenlo')); ?>"><span style="font-family:monospace; color:#888;">#<?php echo $booking->ID; ?></span></td>
-                            <td data-label="<?php echo esc_attr(__('Listing', 'obenlo')); ?>"><strong><?php echo esc_html($listing_title); ?></strong></td>
-                            <td data-label="<?php echo esc_attr(__('Details', 'obenlo')); ?>">
-                                <div><?php echo esc_html($start_date); ?><?php echo $end_date ? ' → ' . esc_html($end_date) : ''; ?></div>
-                                <div style="font-size:0.75rem; color:#888;"><?php echo sprintf(__('%s guests', 'obenlo'), esc_html($guests)); ?></div>
+                        $status_badge = 'badge-info';
+                        if (in_array($status, ['confirmed', 'approved', 'completed'])) $status_badge = 'badge-success';
+                        if (in_array($status, ['declined', 'cancelled'])) $status_badge = 'badge-danger';
+                        if ($status === 'pending_payment') $status_badge = 'badge-warning';
+                    ?>
+                        <tr class="booking-row">
+                            <td data-label="<?php echo esc_attr(__('Booking ID', 'obenlo')); ?>">
+                                <span style="font-family:monospace; color:#888; font-weight:600; font-size:0.85rem;">#<?php echo $booking->ID; ?></span>
                             </td>
-                                                 <div style="display:flex; align-items:center; gap:10px; justify-content: flex-end;">
-                                    <strong><?php echo esc_html($guest_info); ?></strong>
+                            <td data-label="<?php echo esc_attr(__('Listing', 'obenlo')); ?>">
+                                <div style="display:flex; align-items:center; gap:16px;">
+                                    <?php if ($listing_thumb): ?>
+                                        <img src="<?php echo esc_url($listing_thumb); ?>" style="width:50px; height:50px; border-radius:12px; object-fit:cover;">
+                                    <?php else: ?>
+                                        <div style="width:50px; height:50px; border-radius:12px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; color:#ccc;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+                                    <?php endif; ?>
+                                    <div>
+                                        <div style="font-weight:700; color:#222; font-size:1rem; margin-bottom:2px;"><?php echo esc_html($listing_title); ?></div>
+                                        <div style="font-size:0.75rem; color:#888; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;"><?php echo esc_html($conf_code ?: '───'); ?></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="<?php echo esc_attr(__('Guest', 'obenlo')); ?>">
+                                <div class="avatar-stack">
+                                    <img src="<?php echo esc_url($guest_avatar ?: get_avatar_url(0)); ?>" class="avatar-circle">
+                                    <div>
+                                        <div style="font-weight:700; color:#222;"><?php echo esc_html($guest_name); ?></div>
+                                        <div style="font-size:0.75rem; color:#888;"><?php echo sprintf(__('%s Guests', 'obenlo'), esc_html($guests)); ?></div>
+                                    </div>
                                     <?php if ($guest_user) : ?>
-                                        <button onclick="window.obenloStartChatWith(<?php echo $guest_user->ID; ?>, '<?php echo esc_js($guest_user->display_name); ?>', '<?php echo esc_url(get_avatar_url($guest_user->ID)); ?>')" style="padding:5px; border:1px solid #eee; background:#f9f9f9; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all 0.2s;" title="<?php echo esc_attr(__('Message Guest', 'obenlo')); ?>">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                        <button onclick="window.obenloStartChatWith(<?php echo $guest_user->ID; ?>, '<?php echo esc_js($guest_user->display_name); ?>', '<?php echo esc_url(get_avatar_url($guest_user->ID)); ?>')" class="btn-icon" style="width:28px; height:28px; margin-left:5px;" title="<?php echo esc_attr(__('Message Guest', 'obenlo')); ?>">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px; height:14px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                                         </button>
                                     <?php endif; ?>
-                                </div>                                </div>
-                                <?php if ($guest_id) : ?>
-                                    <div class="guest-id-val" style="font-size:0.75rem; color:#888; font-family:monospace; margin-top:2px;">ID: <?php echo esc_html($guest_id); ?></div>
+                                </div>
+                            </td>
+                            <td data-label="<?php echo esc_attr(__('Dates', 'obenlo')); ?>">
+                                <div style="font-weight:700; color:#222; display:flex; align-items:center; gap:8px;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px; height:14px; color:#e61e4d;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    <?php echo esc_html($start_date); ?>
+                                </div>
+                                <?php if ($end_date && $end_date !== $start_date): ?>
+                                    <div style="font-size:0.8rem; color:#888; padding-left:22px;"><?php echo __('to', 'obenlo'); ?> <?php echo esc_html($end_date); ?></div>
                                 <?php endif; ?>
                             </td>
-                            <td data-label="<?php echo esc_attr(__('Total', 'obenlo')); ?>"><span style="font-weight:700; color:#222;">$<?php echo number_format(floatval($total), 2); ?></span></td>
-                            <td data-label="<?php echo esc_attr(__('Status', 'obenlo')); ?>"><span class="badge <?php echo $status_badge; ?>"><?php echo esc_html(__(str_replace('_', ' ', $status), 'obenlo')); ?></span></td>
-                             <?php if ($limit === -1): ?>
-                            <td data-label="<?php echo esc_attr(__('Conf. Code', 'obenlo')); ?>">
-                                <?php if ($conf_code): ?>
-                                    <code class="conf-code-val" style="background:#f9f9f9; border:1px solid #eee; padding:4px 8px; border-radius:6px; font-family:monospace; font-weight:700; color:#e61e4d; font-size:0.85rem;"><?php echo esc_html($conf_code); ?></code>
-                                <?php else: ?>
-                                    <span style="color:#ccc;">—</span>
-                                <?php endif; ?>
-
+                            <td data-label="<?php echo esc_attr(__('Price', 'obenlo')); ?>">
+                                <div style="font-size:1.1rem; font-weight:800; color:#222;">$<?php echo number_format(floatval($total), 2); ?></div>
+                            </td>
+                            <td data-label="<?php echo esc_attr(__('Status', 'obenlo')); ?>">
+                                <span class="badge <?php echo esc_attr($status_badge); ?>">
+                                    <?php echo esc_html(__(str_replace('_', ' ', $status), 'obenlo')); ?>
+                                </span>
                                 <?php if ($checked_in) : ?>
-                                    <div style="margin-top:8px;"><span class="badge badge-success" style="font-size:0.7rem; padding:3px 8px;">✓ <?php echo __('CHECKED IN', 'obenlo'); ?></span></div>
+                                    <div style="margin-top:8px;"><span class="badge badge-success" style="font-size:0.65rem; padding:4px 10px;">✓ IN HOUSE</span></div>
                                 <?php endif; ?>
                             </td>
                             <td data-label="<?php echo esc_attr(__('Actions', 'obenlo')); ?>">
-                                <div style="display:flex; gap:10px;">
+                                <div style="display:flex; gap:8px; align-items:center; justify-content:flex-end;">
                                     <?php
-                    if (!in_array($status, ['declined', 'cancelled', 'completed'])) {
-                        $approve_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=approve'), 'booking_action_' . $booking->ID);
-                        $decline_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=decline'), 'booking_action_' . $booking->ID);
-                        $complete_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=complete'), 'booking_action_' . $booking->ID);
+                                    if (!in_array($status, ['declined', 'cancelled', 'completed'])) {
+                                        $approve_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=approve'), 'booking_action_' . $booking->ID);
+                                        $decline_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=decline'), 'booking_action_' . $booking->ID);
+                                        $complete_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=complete'), 'booking_action_' . $booking->ID);
 
-                        if (!in_array($status, ['approved', 'confirmed'])) {
-                            echo '<a href="' . esc_url($approve_url) . '" onclick="return confirm(\'' . esc_js(__('Approve this booking?', 'obenlo')) . '\')" style="color:#10b981; font-weight:700; text-decoration:none;">' . __('Approve', 'obenlo') . '</a>';
-                        }
-                        else {
-                            echo '<a href="' . esc_url($complete_url) . '" onclick="return confirm(\'' . esc_js(__('Mark as completed?', 'obenlo')) . '\')" style="color:#3b82f6; font-weight:700; text-decoration:none;">' . __('Complete', 'obenlo') . '</a>';
-                        }
-                        
-                        // Check-in Action
-                        if (($status === 'approved' || $status === 'confirmed' || $status === 'completed') && !$checked_in) {
-                            $checkin_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=checkin'), 'booking_action_' . $booking->ID);
-                            echo '<a href="' . esc_url($checkin_url) . '" onclick="return confirm(\'' . esc_js(__('Check in this guest?', 'obenlo')) . '\')" style="background:#e61e4d; color:#fff; padding:4px 10px; border-radius:8px; font-weight:700; text-decoration:none; font-size:0.8rem;">' . __('Check In', 'obenlo') . '</a>';
-                        }
-
-                        echo '<a href="' . esc_url($decline_url) . '" onclick="return confirm(\'' . esc_js(__('Decline this booking?', 'obenlo')) . '\')" style="color:#ef4444; font-weight:700; text-decoration:none;">' . __('Decline', 'obenlo') . '</a>';
-                    }
-                    else {
-                        echo '<span style="color:#ccc; font-size:0.85rem;">' . __('No actions', 'obenlo') . '</span>';
-                    }
-?>
+                                        if (!in_array($status, ['approved', 'confirmed'])) {
+                                            echo '<a href="' . esc_url($approve_url) . '" class="btn-primary" style="padding:8px 16px; font-size:0.8rem; background:#10b981; box-shadow:none;" onclick="return confirm(\'' . esc_js(__('Approve this booking?', 'obenlo')) . '\')">' . __('Approve', 'obenlo') . '</a>';
+                                            echo '<a href="' . esc_url($decline_url) . '" class="btn-outline" style="padding:7px 15px; font-size:0.8rem; border-color:#fee2e2; color:#ef4444;" onclick="return confirm(\'' . esc_js(__('Decline this booking?', 'obenlo')) . '\')">' . __('Decline', 'obenlo') . '</a>';
+                                        } else {
+                                            if (!$checked_in) {
+                                                $checkin_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=checkin'), 'booking_action_' . $booking->ID);
+                                                echo '<a href="' . esc_url($checkin_url) . '" class="btn-primary" style="padding:8px 16px; font-size:0.8rem; background:#e61e4d; box-shadow:none;" onclick="return confirm(\'' . esc_js(__('Check in this guest?', 'obenlo')) . '\')">' . __('Check In', 'obenlo') . '</a>';
+                                            }
+                                            echo '<a href="' . esc_url($complete_url) . '" class="btn-outline" style="padding:7px 15px; font-size:0.8rem;" onclick="return confirm(\'' . esc_js(__('Mark as completed?', 'obenlo')) . '\')">' . __('Complete', 'obenlo') . '</a>';
+                                        }
+                                    } else {
+                                        echo '<span style="color:#bbb; font-weight:600; font-size:0.8rem; text-transform:uppercase;">Archived</span>';
+                                    }
+                                    ?>
                                 </div>
                             </td>
-                            <?php
-                endif; ?>
                         </tr>
-                    <?php
-            endforeach; ?>
                 </tbody>
             </table>
 
@@ -740,10 +760,8 @@ class Obenlo_Booking_Frontend_Dashboard
                 var count = 0;
 
                 for (var i = 1; i < tr.length; i++) {
-                    var confCode = tr[i].querySelector('.conf-code-val') ? tr[i].querySelector('.conf-code-val').textContent : '';
-                    var guestId = tr[i].querySelector('.guest-id-val') ? tr[i].querySelector('.guest-id-val').textContent : '';
-                    
-                    if (confCode.toUpperCase().indexOf(filter) > -1 || guestId.toUpperCase().indexOf(filter) > -1) {
+                    var rowText = tr[i].textContent.toUpperCase();
+                    if (rowText.indexOf(filter) > -1) {
                         tr[i].style.display = "";
                         count++;
                     } else {
