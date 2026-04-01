@@ -8,58 +8,7 @@ get_header(); ?>
 <main id="primary" class="site-main site-content" style="max-width: 1400px; margin: 0 auto; padding: 20px 40px;">
 
 
-    <!-- Category Filter Bar -->
-    <div class="category-filters" style="display: flex; gap: 40px; justify-content: center; margin-bottom: 40px; overflow-x: auto; padding: 20px 0; border-bottom: 1px solid #ebebeb; -webkit-overflow-scrolling: touch; white-space: nowrap;">
-        
-        <?php
-        $current_cat = '';
-        if ( is_tax('listing_type') ) {
-            $current_cat = get_queried_object()->slug;
-        } elseif ( isset($_GET['listing_type']) ) {
-            $current_cat = $_GET['listing_type'];
-        }
-        
-        $taxonomies = array();
-        if ( taxonomy_exists( 'listing_type' ) ) {
-            $terms = get_terms( array(
-                'taxonomy'   => 'listing_type',
-                'hide_empty' => false,
-                'parent'     => 0,
-            ) );
-            if ( ! is_wp_error( $terms ) ) {
-                $taxonomies = $terms;
-            }
-        }
-        
-        // Output an "All" button
-        $all_active = empty($current_cat) ? 'active' : '';
-        $all_style = empty($current_cat) ? 'border-bottom: 2px solid #222; color: #222; font-weight: 600;' : 'border-bottom: 2px solid transparent; color: #717171;';
-        
-        echo '<a href="' . esc_url( home_url( '/' ) ) . '" class="cat-filter ' . $all_active . '" style="display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; min-width: 60px; padding-bottom: 5px; ' . $all_style . '">';
-        echo '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display:block;height:24px;width:24px;fill:currentColor"><path d="M16 2a14 14 0 1 0 14 14A14.016 14.016 0 0 0 16 2Zm0 26a12 12 0 1 1 12-12 12.014 12.014 0 0 1-12 12Z"/><path d="M16 8a8 8 0 1 0 8 8 8.009 8.009 0 0 0-8-8Zm0 14a6 6 0 1 1 6-6 6.007 6.007 0 0 1-6 6Z"/></svg>';
-        echo '<span style="font-size: 0.8em;">' . esc_html__( 'All', 'obenlo' ) . '</span>';
-        echo '</a>';
 
-        foreach ( $taxonomies as $tax ) {
-            $is_active = ($current_cat == $tax->slug);
-            $active_class = $is_active ? 'active' : '';
-            $cat_style = $is_active ? 'border-bottom: 2px solid #222; color: #222; font-weight: 600;' : 'border-bottom: 2px solid transparent; color: #717171;';
-            
-            $icon = '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display:block;height:24px;width:24px;fill:currentColor"><path d="M26 4H6a2.006 2.006 0 0 0-2 2v20a2.006 2.006 0 0 0 2 2h20a2.006 2.006 0 0 0 2-2V6a2.006 2.006 0 0 0-2-2Zm0 22H6V6h20Z"/><path d="M16 14a4 4 0 1 0 4 4 4.005 4.005 0 0 0-4-4Zm0 6a2 2 0 1 1 2-2 2.002 2.002 0 0 1-2 2Z"/></svg>';
-            
-            // USE CLEAN URL
-            $cat_url = get_term_link($tax);
-            if ( is_wp_error( $cat_url ) ) {
-                $cat_url = home_url( '/' );
-            }
-            
-            echo '<a href="' . esc_url( $cat_url ) . '" class="cat-filter ' . $active_class . '" style="display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; min-width: 60px; transition: color 0.2s; padding-bottom: 5px; ' . $cat_style . '" onmouseover="if(!this.classList.contains(\'active\')) this.style.color=\'#222\';" onmouseout="if(!this.classList.contains(\'active\')) this.style.color=\'#717171\';">';
-            echo $icon;
-            echo '<span style="font-size: 0.8em;">' . esc_html( __( $tax->name, 'obenlo' ) ) . '</span>';
-            echo '</a>';
-        }
-        ?>
-    </div>
 
     <div id="services-explore" style="padding-top: 20px;"></div>
 
