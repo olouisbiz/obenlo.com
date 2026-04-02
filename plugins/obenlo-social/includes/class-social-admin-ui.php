@@ -51,19 +51,15 @@ class Obenlo_Social_Admin_UI {
     }
 
     public static function enqueue_admin_scripts( $hook ) {
-        if ( ! current_user_can( 'manage_options' ) ) return;
-        
-        $is_edit_screen = in_array( $hook, array( 'post.php', 'post-new.php' ), true );
-        $is_admin_dash = ($hook === 'toplevel_page_obenlo-admin-dashboard' || (isset($_GET['page']) && $_GET['page'] === 'obenlo-admin-dashboard'));
-
-        if ( $is_edit_screen || $is_admin_dash ) {
+        // Broaden the check: If user is admin, load the small sharing script on all admin pages
+        // This ensures the custom "Obenlo Dash" and other admin areas are covered.
+        if ( current_user_can( 'manage_options' ) ) {
             wp_enqueue_script( 'obenlo-social-admin', OBENLO_SOCIAL_URL . 'assets/admin-social.js', array('jquery'), OBENLO_SOCIAL_VERSION, true );
             
-            // Pass the templates and essential data directly to JS
             wp_localize_script( 'obenlo-social-admin', 'obenloSocialObj', array(
                 'listing_template' => get_option('obenlo_social_listing_template'),
                 'post_template'    => get_option('obenlo_social_post_template'),
-                'is_admin'         => current_user_can('manage_options')
+                'is_admin'         => true
             ) );
         }
     }
