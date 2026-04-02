@@ -39,9 +39,9 @@ class Obenlo_Social {
     }
 
     private function init_hooks() {
+        Obenlo_Social_Admin_UI::init();
         if( is_admin() || wp_doing_ajax() ) {
             Obenlo_Social_Settings::init();
-            Obenlo_Social_Admin_UI::init();
         }
     }
 }

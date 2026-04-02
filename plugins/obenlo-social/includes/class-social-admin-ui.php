@@ -5,7 +5,8 @@ class Obenlo_Social_Admin_UI {
 
     public static function init() {
         add_action( 'add_meta_boxes', array( __CLASS__, 'add_social_meta_boxes' ) );
-        add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_scripts' ) );
+        add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_social_scripts' ) );
+        add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_social_scripts' ) );
     }
 
     public static function add_social_meta_boxes() {
