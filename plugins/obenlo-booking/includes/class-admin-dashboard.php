@@ -24,6 +24,7 @@ class Obenlo_Booking_Admin_Dashboard
         add_action('admin_post_obenlo_admin_review_action', array($this, 'handle_review_action'));
         add_action('admin_post_obenlo_toggle_listing_suspension', array($this, 'handle_toggle_listing_suspension'));
         add_action('admin_post_obenlo_toggle_user_suspension', array($this, 'handle_toggle_user_suspension'));
+        add_action('admin_post_obenlo_trash_listing', array($this, 'handle_trash_listing'));
     }
 
     public function add_admin_menu()
@@ -493,6 +494,7 @@ class Obenlo_Booking_Admin_Dashboard
             if (current_user_can('manage_options')) {
                 $location = get_post_meta($listing->ID, '_obenlo_location', true);
                 if(empty($location)) $location = 'Toronto';
+                $image = get_the_post_thumbnail_url($listing->ID, 'large');
                 $template = get_option('obenlo_social_listing_template', "New on Obenlo!\n\n{title} in {location}\nJust ${price}!");
                 $caption = str_replace( array('{title}', '${price}', '{location}'), array($listing->post_title, $price, $location), $template );
                 $share_url = 'https://www.facebook.com/sharer/sharer.php?u=' . urlencode(get_permalink($listing->ID)) . '&quote=' . urlencode($caption);
@@ -504,9 +506,15 @@ class Obenlo_Booking_Admin_Dashboard
                     data-location="' . esc_attr($location) . '" 
                     data-url="' . esc_url(get_permalink($listing->ID)) . '" 
                     data-type="listing" 
+                    data-image="' . esc_url($image) . '" 
                     style="color:#e61e4d; font-weight:bold;">Push to Social</a> | ';
             }
-            echo '<a href="#" class="btn-reject">Trash</a> | ';
+            echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to trash this listing?\');">';
+            echo '<input type="hidden" name="action" value="obenlo_trash_listing">';
+            echo '<input type="hidden" name="listing_id" value="' . $listing->ID . '">';
+            wp_nonce_field('trash_listing_' . $listing->ID, 'trash_nonce');
+            echo '<button type="submit" class="btn-reject" style="background:none; border:none; cursor:pointer; padding:0; font:inherit; text-decoration:underline;">Trash</button>';
+            echo '</form> | ';
             echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline;" onsubmit="if(!\'' . $is_suspended . '\') { var r = prompt(\'Reason for suspension:\'); if(r===null) return false; this.reason.value=r; } return confirm(\'Are you sure?\');">';
             echo '<input type="hidden" name="action" value="obenlo_toggle_listing_suspension">';
             echo '<input type="hidden" name="listing_id" value="' . $listing->ID . '">';
@@ -1840,6 +1848,23 @@ class Obenlo_Booking_Admin_Dashboard
             update_user_meta($user_id, '_obenlo_suspension_reason', sanitize_text_field($_POST['reason']));
         }
         wp_safe_redirect(add_query_arg('tab', 'users', wp_get_referer()));
+        exit;
+    }
+
+    public function handle_trash_listing()
+    {
+        if (!current_user_can('administrator')) {
+            obenlo_redirect_with_error('unauthorized');
+        }
+
+        $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
+        check_admin_referer('trash_listing_' . $listing_id, 'trash_nonce');
+
+        if ($listing_id) {
+            wp_trash_post($listing_id);
+        }
+
+        wp_safe_redirect(add_query_arg('tab', 'listings', wp_get_referer()));
         exit;
     }
 
