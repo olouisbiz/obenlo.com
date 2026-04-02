@@ -32,12 +32,18 @@ class Obenlo_Social_Admin_UI {
             $price = get_post_meta($post->ID, '_obenlo_price', true);
             $location = get_post_meta($post->ID, '_obenlo_location', true);
             if(empty($location)) $location = 'Toronto';
+            $template = get_option('obenlo_social_listing_template', "New on Obenlo!\n\n{title} in {location}\nJust ${price}!");
+            $caption = str_replace( array('{title}', '${price}', '{location}'), array($title, $price, $location), $template );
         } else {
             $excerpt = $post->post_excerpt ? $post->post_excerpt : wp_trim_words( $post->post_content, 20 );
+            $template = get_option('obenlo_social_post_template', "Latest on Obenlo:\n\n{title}\n\n{excerpt}");
+            $caption = str_replace( array('{title}', '{excerpt}'), array($title, $excerpt), $template );
         }
+
+        $share_url = 'https://www.facebook.com/sharer/sharer.php?u=' . urlencode($url) . '&quote=' . urlencode($caption);
         ?>
-        <p>Open the native share-sheet for this <?php echo esc_html($post->post_type); ?>.</p>
-        <button type="button" class="button button-primary button-large obenlo-social-push-btn" 
+        <p>Open the native share-sheet (mobile) or Facebook link (desktop).</p>
+        <a href="<?php echo esc_url($share_url); ?>" target="_blank" class="button button-primary button-large obenlo-social-push-btn" 
             data-post-id="<?php echo esc_attr($post->ID); ?>"
             data-title="<?php echo esc_attr($title); ?>"
             data-url="<?php echo esc_url($url); ?>"
@@ -45,9 +51,9 @@ class Obenlo_Social_Admin_UI {
             data-location="<?php echo esc_attr($location); ?>"
             data-excerpt="<?php echo esc_attr(isset($excerpt) ? $excerpt : ''); ?>"
             data-type="<?php echo esc_attr($post->post_type); ?>"
-            style="width:100%;">
-            Open Share Dialog
-        </button>
+            style="width:100%; text-align:center;">
+            Push to Social
+        </a>
         <?php
     }
 
