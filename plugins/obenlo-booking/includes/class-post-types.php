@@ -328,11 +328,22 @@ class Obenlo_Booking_Post_Types {
     public function block_suspended_single_listing() {
         if ( is_singular('listing') ) {
             global $post;
-            if ( get_post_meta( $post->ID, '_obenlo_is_suspended', true ) === 'yes' ) {
+            $is_listing_suspended = get_post_meta( $post->ID, '_obenlo_is_suspended', true ) === 'yes';
+            $is_author_suspended  = get_user_meta( $post->post_author, '_obenlo_is_suspended', true ) === 'yes';
+
+            if ( $is_listing_suspended || $is_author_suspended ) {
                 if ( current_user_can('administrator') ) return;
                 if ( is_user_logged_in() && $post->post_author == get_current_user_id() ) return;
                 
                 wp_die( 'This listing is temporarily unavailable.', 'Listing Unavailable', array('response' => 404) );
+            }
+        } elseif ( is_author() ) {
+            $author = get_queried_object();
+            if ( $author && isset($author->ID) && get_user_meta( $author->ID, '_obenlo_is_suspended', true ) === 'yes' ) {
+                if ( current_user_can('administrator') ) return;
+                if ( is_user_logged_in() && $author->ID == get_current_user_id() ) return;
+                
+                wp_die( 'This profile is temporarily unavailable.', 'Profile Unavailable', array('response' => 404) );
             }
         }
     }
@@ -349,6 +360,15 @@ class Obenlo_Booking_Post_Types {
 
         $user_id = get_current_user_id();
         if ( $user_id && $query->get('author') == $user_id ) return;
+
+        // Exclude suspended hosts logic
+        global $wpdb;
+        $suspended_hosts = $wpdb->get_col( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '_obenlo_is_suspended' AND meta_value = 'yes'" );
+        if ( !empty($suspended_hosts) ) {
+            $author_not_in = (array) $query->get('author__not_in');
+            $author_not_in = array_unique(array_merge($author_not_in, $suspended_hosts));
+            $query->set('author__not_in', $author_not_in);
+        }
 
         $meta_query = (array) $query->get('meta_query');
         $meta_query[] = array(
