@@ -1,5 +1,5 @@
 jQuery(document).ready(function($) {
-    console.log('Obenlo Social Sharing v1.2.8 - Pro Workflow Loaded');
+    console.log('Obenlo Social Sharing v1.2.9 - Universal Save Loaded');
 
     var currentBtnData = {};
 
@@ -39,7 +39,7 @@ jQuery(document).ready(function($) {
         closePicker();
     });
 
-    // Instagram "PRO" Workflow
+    // Instagram "Universal Save" Workflow
     $(document).on('click', '#share-to-ig', function() {
         var type = currentBtnData.type || 'listing';
         var template = (type === 'listing') ? obenloSocialObj.listing_template : obenloSocialObj.post_template;
@@ -58,33 +58,54 @@ jQuery(document).ready(function($) {
         document.execCommand("copy");
         document.body.removeChild(dummy);
         
-        // 2. Download Image (Pro Trick)
-        if (currentBtnData.image) {
-            var link = document.createElement('a');
-            link.href = currentBtnData.image;
-            link.download = 'obenlo-post.jpg';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        // 2. Open Native "Save Image" Dialog (Reliable for Gallery)
+        if (currentBtnData.image && navigator.share) {
+            saveImageAndLaunch(caption);
+        } else {
+            showToast("Caption copied! Opening Instagram...");
+            launchInstagram();
         }
-
-        // 3. Notify User
-        showToast("📸 Photo Saved to Gallery<br>📋 Caption Copied!<br><br>Opening Instagram...");
-
-        // 4. Open Instagram after a short delay
-        setTimeout(function() {
-            window.location.href = "instagram://camera"; // Open IG Camera/Post screen directly
-            // Fallback if app doesn't open
-            setTimeout(function() {
-                if (!document.hidden) {
-                    window.location.href = "https://www.instagram.com/";
-                }
-            }, 500);
-            closePicker();
-        }, 2000);
     });
 
-    // Native Share Fallback (Other Apps)
+    async function saveImageAndLaunch(caption) {
+        try {
+            const response = await fetch(currentBtnData.image);
+            const blob = await response.blob();
+            const file = new File([blob], 'Obenlo-Listing.jpg', { type: 'image/jpeg' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                // This triggers the OS share sheet where user can tap "Save Image"
+                showToast("Step 1: Tap 'Save Image' below<br>Step 2: We'll open Instagram!");
+                
+                await navigator.share({
+                    files: [file]
+                });
+                
+                // After they close the share sheet, wait then open IG
+                setTimeout(function() {
+                    launchInstagram();
+                }, 1500);
+            } else {
+                launchInstagram();
+            }
+        } catch (err) {
+            console.log('Universal Save failed', err);
+            launchInstagram();
+        }
+    }
+
+    function launchInstagram() {
+        showToast("Caption copied! Opening Instagram...");
+        setTimeout(function() {
+            window.location.href = "instagram://camera";
+            setTimeout(function() {
+                if (!document.hidden) window.location.href = "https://www.instagram.com/";
+            }, 500);
+            closePicker();
+        }, 1000);
+    }
+
+    // Native Share Fallback
     $(document).on('click', '#share-to-native', function() {
         if (navigator.share) {
            navigator.share({
