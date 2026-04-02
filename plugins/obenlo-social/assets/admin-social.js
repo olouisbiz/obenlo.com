@@ -1,11 +1,17 @@
 jQuery(document).ready(function($) {
-    console.log('Obenlo Social Sharing v1.2.6 - Center/Scale Fix Loaded');
+    console.log('Obenlo Social Sharing v1.2.7 - Media-First Loaded');
 
     var currentBtnData = {};
 
     function closePicker() {
         $('#obenlo-social-picker').fadeOut(150);
         $('#obenlo-social-picker-overlay').fadeOut(150);
+    }
+
+    function showToast(msg) {
+        var $toast = $('<div style="position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:30px; z-index:10000000; font-size:14px; font-weight:600; box-shadow:0 5px 15px rgba(0,0,0,0.3);">' + msg + '</div>');
+        $('body').append($toast);
+        setTimeout(function() { $toast.fadeOut(400, function() { $(this).remove(); }); }, 2500);
     }
 
     // Handle "Push to Social" clicks
@@ -25,8 +31,6 @@ jQuery(document).ready(function($) {
         // Phone: Show Centered Modal
         e.preventDefault();
         $('#share-to-fb').attr('href', $btn.attr('href'));
-        
-        // Instant Show (No animations to prevent "stuck" states)
         $('#obenlo-social-picker-overlay').show();
         $('#obenlo-social-picker').show();
     });
@@ -36,7 +40,7 @@ jQuery(document).ready(function($) {
         closePicker();
     });
 
-    // Handle Instagram Share
+    // Handle Instagram Share (Media-First)
     $(document).on('click', '#share-to-ig', function() {
         var type = currentBtnData.type || 'listing';
         var template = (type === 'listing') ? obenloSocialObj.listing_template : obenloSocialObj.post_template;
@@ -47,23 +51,43 @@ jQuery(document).ready(function($) {
         if (currentBtnData.location) caption = caption.replace('{location}', currentBtnData.location);
         if (currentBtnData.excerpt) caption = caption.replace('{excerpt}', currentBtnData.excerpt);
 
+        // 1. Copy to Clipboard
+        var dummy = document.createElement("textarea");
+        document.body.appendChild(dummy);
+        dummy.value = caption;
+        dummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dummy);
+        
+        showToast("Caption copied! Paste it in Instagram.");
+
+        // 2. Share ONLY Image to force Feed/Stories
         if (navigator.share) {
-            shareToIG(caption);
+            shareOnlyImage();
         }
     });
 
-    async function shareToIG(caption) {
+    async function shareOnlyImage() {
         try {
-            var shareData = { title: currentBtnData.title, text: caption };
             if (currentBtnData.image) {
                 const response = await fetch(currentBtnData.image);
                 const blob = await response.blob();
-                const file = new File([blob], 'post.jpg', { type: 'image/jpeg' });
+                // Use a descriptive but standard filename
+                const file = new File([blob], 'Obenlo-Listing.jpg', { type: 'image/jpeg' });
+                
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    shareData.files = [file];
+                    // Sharing ONLY the file is the key for Instagram Feed
+                    await navigator.share({
+                        files: [file]
+                    });
+                } else {
+                    // Fallback if files can't be shared
+                    showToast("Direct image share not supported. Using standard share.");
+                    await navigator.share({ title: currentBtnData.title, url: currentBtnData.url });
                 }
+            } else {
+                await navigator.share({ title: currentBtnData.title, url: currentBtnData.url });
             }
-            await navigator.share(shareData);
             closePicker();
         } catch (err) {
             console.log('Share error:', err);
@@ -71,7 +95,7 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // Native Share Fallback
+    // Native Share Fallback (Other Apps)
     $(document).on('click', '#share-to-native', function() {
         if (navigator.share) {
            navigator.share({
