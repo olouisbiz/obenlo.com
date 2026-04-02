@@ -1,5 +1,5 @@
 jQuery(document).ready(function($) {
-    console.log('Obenlo Social Sharing v1.2.7 - Media-First Loaded');
+    console.log('Obenlo Social Sharing v1.2.8 - Pro Workflow Loaded');
 
     var currentBtnData = {};
 
@@ -8,10 +8,11 @@ jQuery(document).ready(function($) {
         $('#obenlo-social-picker-overlay').fadeOut(150);
     }
 
-    function showToast(msg) {
-        var $toast = $('<div style="position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:30px; z-index:10000000; font-size:14px; font-weight:600; box-shadow:0 5px 15px rgba(0,0,0,0.3);">' + msg + '</div>');
+    function showToast(msg, duration = 3000) {
+        $('.obenlo-toast').remove();
+        var $toast = $('<div class="obenlo-toast" style="position:fixed; top:20%; left:50%; transform:translateX(-50%); background:#e61e4d; color:#fff; padding:15px 25px; border-radius:12px; z-index:10000001; font-size:16px; font-weight:700; box-shadow:0 10px 30px rgba(0,0,0,0.4); text-align:center; width:80%; max-width:300px; border:2px solid #fff;">' + msg + '</div>');
         $('body').append($toast);
-        setTimeout(function() { $toast.fadeOut(400, function() { $(this).remove(); }); }, 2500);
+        setTimeout(function() { $toast.fadeOut(400, function() { $(this).remove(); }); }, duration);
     }
 
     // Handle "Push to Social" clicks
@@ -23,12 +24,10 @@ jQuery(document).ready(function($) {
         var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         var isMacDesktop = navigator.userAgent.includes('Macintosh') && (!navigator.maxTouchPoints || navigator.maxTouchPoints === 0);
 
-        // Desktops: Standard Facebook Direct Link
         if (!isMobile || isMacDesktop) {
             return true; 
         }
 
-        // Phone: Show Centered Modal
         e.preventDefault();
         $('#share-to-fb').attr('href', $btn.attr('href'));
         $('#obenlo-social-picker-overlay').show();
@@ -40,7 +39,7 @@ jQuery(document).ready(function($) {
         closePicker();
     });
 
-    // Handle Instagram Share (Media-First)
+    // Instagram "PRO" Workflow
     $(document).on('click', '#share-to-ig', function() {
         var type = currentBtnData.type || 'listing';
         var template = (type === 'listing') ? obenloSocialObj.listing_template : obenloSocialObj.post_template;
@@ -51,7 +50,7 @@ jQuery(document).ready(function($) {
         if (currentBtnData.location) caption = caption.replace('{location}', currentBtnData.location);
         if (currentBtnData.excerpt) caption = caption.replace('{excerpt}', currentBtnData.excerpt);
 
-        // 1. Copy to Clipboard
+        // 1. Copy Caption to Clipboard
         var dummy = document.createElement("textarea");
         document.body.appendChild(dummy);
         dummy.value = caption;
@@ -59,41 +58,31 @@ jQuery(document).ready(function($) {
         document.execCommand("copy");
         document.body.removeChild(dummy);
         
-        showToast("Caption copied! Paste it in Instagram.");
-
-        // 2. Share ONLY Image to force Feed/Stories
-        if (navigator.share) {
-            shareOnlyImage();
+        // 2. Download Image (Pro Trick)
+        if (currentBtnData.image) {
+            var link = document.createElement('a');
+            link.href = currentBtnData.image;
+            link.download = 'obenlo-post.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
-    });
 
-    async function shareOnlyImage() {
-        try {
-            if (currentBtnData.image) {
-                const response = await fetch(currentBtnData.image);
-                const blob = await response.blob();
-                // Use a descriptive but standard filename
-                const file = new File([blob], 'Obenlo-Listing.jpg', { type: 'image/jpeg' });
-                
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    // Sharing ONLY the file is the key for Instagram Feed
-                    await navigator.share({
-                        files: [file]
-                    });
-                } else {
-                    // Fallback if files can't be shared
-                    showToast("Direct image share not supported. Using standard share.");
-                    await navigator.share({ title: currentBtnData.title, url: currentBtnData.url });
+        // 3. Notify User
+        showToast("📸 Photo Saved to Gallery<br>📋 Caption Copied!<br><br>Opening Instagram...");
+
+        // 4. Open Instagram after a short delay
+        setTimeout(function() {
+            window.location.href = "instagram://camera"; // Open IG Camera/Post screen directly
+            // Fallback if app doesn't open
+            setTimeout(function() {
+                if (!document.hidden) {
+                    window.location.href = "https://www.instagram.com/";
                 }
-            } else {
-                await navigator.share({ title: currentBtnData.title, url: currentBtnData.url });
-            }
+            }, 500);
             closePicker();
-        } catch (err) {
-            console.log('Share error:', err);
-            closePicker();
-        }
-    }
+        }, 2000);
+    });
 
     // Native Share Fallback (Other Apps)
     $(document).on('click', '#share-to-native', function() {
