@@ -40,6 +40,7 @@ class Obenlo_Social_Admin_UI {
             $caption = str_replace( array('{title}', '{excerpt}'), array($title, $excerpt), $template );
         }
 
+        $image = get_the_post_thumbnail_url($post->ID, 'large');
         $share_url = 'https://www.facebook.com/sharer/sharer.php?u=' . urlencode($url) . '&quote=' . urlencode($caption);
         ?>
         <p>Open the native share-sheet (mobile) or Facebook link (desktop).</p>
@@ -51,6 +52,7 @@ class Obenlo_Social_Admin_UI {
             data-location="<?php echo esc_attr($location); ?>"
             data-excerpt="<?php echo esc_attr(isset($excerpt) ? $excerpt : ''); ?>"
             data-type="<?php echo esc_attr($post->post_type); ?>"
+            data-image="<?php echo esc_url($image); ?>"
             style="width:100%; text-align:center;">
             Push to Social
         </a>
