@@ -1,11 +1,14 @@
 jQuery(document).ready(function($) {
-    console.log('Obenlo Social Sharing v1.2.4 - Pre-rendered Menu Loaded');
+    console.log('Obenlo Social Sharing v1.2.5 - Bottom Sheet Loaded');
 
     var currentBtnData = {};
 
     function closePicker() {
-        $('#obenlo-social-picker').fadeOut(100);
-        $('#obenlo-social-picker-overlay').fadeOut(100);
+        $('#obenlo-social-picker').css('transform', 'translateY(100%)');
+        setTimeout(function() {
+            $('#obenlo-social-picker').hide();
+            $('#obenlo-social-picker-overlay').fadeOut(150);
+        }, 300);
     }
 
     // Handle "Push to Social" clicks
@@ -13,23 +16,27 @@ jQuery(document).ready(function($) {
         var $btn = $(this);
         currentBtnData = $btn.data();
         
-        // Detection Logic
+        // Detection
         var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         var isMacDesktop = navigator.userAgent.includes('Macintosh') && (!navigator.maxTouchPoints || navigator.maxTouchPoints === 0);
 
-        // On Desktops: Let the native <a> link work (opens Facebook)
+        // Desktops: Standard Facebook Direct Link
         if (!isMobile || isMacDesktop) {
-            console.log('Desktop detected: Opening direct link.');
             return true; 
         }
 
-        // On Phone: Show the pre-rendered Menu
+        // Phone: Show Bottom Sheet
         e.preventDefault();
         $('#share-to-fb').attr('href', $btn.attr('href'));
         
-        // Ensure the overlay and picker are shown properly
-        $('#obenlo-social-picker-overlay').show();
-        $('#obenlo-social-picker').show().css('opacity', '0').animate({'opacity': '1'}, 200);
+        // Reset and Show
+        $('#obenlo-social-picker').css({'display': 'block', 'transform': 'translateY(100%)'});
+        $('#obenlo-social-picker-overlay').fadeIn(150);
+        
+        // Slide up animation
+        setTimeout(function() {
+            $('#obenlo-social-picker').css('transform', 'translateY(0)');
+        }, 10);
     });
 
     // Close Actions
@@ -39,10 +46,6 @@ jQuery(document).ready(function($) {
 
     // Handle Instagram Share
     $(document).on('click', '#share-to-ig', function() {
-        performIGShare();
-    });
-
-    async function performIGShare() {
         var type = currentBtnData.type || 'listing';
         var template = (type === 'listing') ? obenloSocialObj.listing_template : obenloSocialObj.post_template;
         var caption = template;
@@ -53,26 +56,30 @@ jQuery(document).ready(function($) {
         if (currentBtnData.excerpt) caption = caption.replace('{excerpt}', currentBtnData.excerpt);
 
         if (navigator.share) {
-            try {
-                var shareData = { title: currentBtnData.title, text: caption };
-                if (currentBtnData.image) {
-                    const response = await fetch(currentBtnData.image);
-                    const blob = await response.blob();
-                    const file = new File([blob], 'post.jpg', { type: 'image/jpeg' });
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        shareData.files = [file];
-                    }
+            shareToIG(caption);
+        }
+    });
+
+    async function shareToIG(caption) {
+        try {
+            var shareData = { title: currentBtnData.title, text: caption };
+            if (currentBtnData.image) {
+                const response = await fetch(currentBtnData.image);
+                const blob = await response.blob();
+                const file = new File([blob], 'post.jpg', { type: 'image/jpeg' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    shareData.files = [file];
                 }
-                await navigator.share(shareData);
-                closePicker();
-            } catch (err) {
-                console.log('Share error:', err);
-                closePicker();
             }
+            await navigator.share(shareData);
+            closePicker();
+        } catch (err) {
+            console.log('Share error:', err);
+            closePicker();
         }
     }
 
-    // Native Share Fallback (Other Apps)
+    // Native Share Fallback
     $(document).on('click', '#share-to-native', function() {
         if (navigator.share) {
            navigator.share({
