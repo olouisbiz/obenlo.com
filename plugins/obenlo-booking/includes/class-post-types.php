@@ -16,6 +16,11 @@ class Obenlo_Booking_Post_Types {
         // Demo Listing Configuration Meta Box
         add_action( 'add_meta_boxes', array( $this, 'add_demo_meta_box' ) );
         add_action( 'save_post_listing', array( $this, 'save_demo_meta_box' ) );
+
+        // Suspension Filtering
+        add_action( 'pre_get_posts', array( $this, 'hide_suspended_listings' ) );
+        add_action( 'pre_get_users', array( $this, 'hide_suspended_hosts' ) );
+        add_action( 'template_redirect', array( $this, 'block_suspended_single_listing' ) );
     }
 
     public function register_custom_post_types() {
@@ -318,5 +323,70 @@ class Obenlo_Booking_Post_Types {
             delete_post_meta( $post_id, '_obenlo_demo_host_location' );
             delete_post_meta( $post_id, '_obenlo_demo_host_bio' );
         }
+    }
+
+    public function block_suspended_single_listing() {
+        if ( is_singular('listing') ) {
+            global $post;
+            if ( get_post_meta( $post->ID, '_obenlo_is_suspended', true ) === 'yes' ) {
+                if ( current_user_can('administrator') ) return;
+                if ( is_user_logged_in() && $post->post_author == get_current_user_id() ) return;
+                
+                wp_die( 'This listing is temporarily unavailable.', 'Listing Unavailable', array('response' => 404) );
+            }
+        }
+    }
+
+    public function hide_suspended_listings( $query ) {
+        if ( is_admin() ) return;
+        
+        $pt = $query->get('post_type');
+        $is_listing_query = ( $pt === 'listing' ) || ( is_array($pt) && in_array('listing', $pt) ) || is_post_type_archive('listing') || is_tax('listing_type') || is_tax('listing_amenity');
+        if ( ! $is_listing_query ) return;
+
+        if ( $query->is_singular('listing') ) return;
+        if ( current_user_can('administrator') ) return;
+
+        $user_id = get_current_user_id();
+        if ( $user_id && $query->get('author') == $user_id ) return;
+
+        $meta_query = (array) $query->get('meta_query');
+        $meta_query[] = array(
+            'relation' => 'OR',
+            array(
+                'key' => '_obenlo_is_suspended',
+                'compare' => 'NOT EXISTS'
+            ),
+            array(
+                'key' => '_obenlo_is_suspended',
+                'value' => 'yes',
+                'compare' => '!='
+            )
+        );
+        $query->set('meta_query', $meta_query);
+    }
+
+    public function hide_suspended_hosts( $query ) {
+        if ( is_admin() ) return;
+        if ( current_user_can('administrator') ) return;
+
+        $user_id = get_current_user_id();
+        $includes = $query->get('include');
+        if ( $user_id && !empty($includes) && in_array($user_id, (array)$includes) ) return;
+        
+        $meta_query = (array) $query->get('meta_query');
+        $meta_query[] = array(
+            'relation' => 'OR',
+            array(
+                'key' => '_obenlo_is_suspended',
+                'compare' => 'NOT EXISTS'
+            ),
+            array(
+                'key' => '_obenlo_is_suspended',
+                'value' => 'yes',
+                'compare' => '!='
+            )
+        );
+        $query->set('meta_query', $meta_query);
     }
 }

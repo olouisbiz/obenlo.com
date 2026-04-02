@@ -481,6 +481,9 @@ class Obenlo_Booking_Frontend_Dashboard
     private function render_listings_list()
     {
         $user_id = get_current_user_id();
+        $is_host_suspended = get_user_meta($user_id, '_obenlo_is_suspended', true) === 'yes';
+        $host_suspension_reason = get_user_meta($user_id, '_obenlo_suspension_reason', true);
+
         $args = array(
             'post_type' => 'listing',
             'author' => $user_id,
@@ -495,6 +498,20 @@ class Obenlo_Booking_Frontend_Dashboard
             <h2 class="dashboard-title"><?php echo __('My Listings', 'obenlo'); ?></h2>
             <a href="?action=add" class="btn-primary">+ <?php echo __('Add New Listing', 'obenlo'); ?></a>
         </div>
+
+        <?php if ($is_host_suspended): ?>
+            <div style="background:#fef2f2; border:1px solid #fee2e2; border-left:4px solid #ef4444; padding:20px; border-radius:12px; margin-bottom:30px;">
+                <h3 style="margin-top:0; color:#991b1b; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+                    ⚠️ Your Host Account is Suspended
+                </h3>
+                <p style="color:#7f1d1d; margin-bottom:0;">
+                    Your account has been suspended due to a policy violation. Your listings are currently hidden from the public.
+                    <?php if ($host_suspension_reason): ?>
+                        <br><br><strong>Reason:</strong> <?php echo esc_html($host_suspension_reason); ?>
+                    <?php endif; ?>
+                </p>
+            </div>
+        <?php endif; ?>
 
         <?php if (empty($listings)): ?>
             <div class="form-section" style="text-align:center; padding: 60px;">
@@ -535,7 +552,20 @@ class Obenlo_Booking_Frontend_Dashboard
                                 </div>
                             </td>
                             <td data-label="<?php echo esc_attr(__('Category', 'obenlo')); ?>"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
-                            <td data-label="<?php echo esc_attr(__('Status', 'obenlo')); ?>"><span class="badge badge-success"><?php echo ucfirst($listing->post_status); ?></span></td>
+                            <td data-label="<?php echo esc_attr(__('Status', 'obenlo')); ?>">
+                                <span class="badge badge-success"><?php echo ucfirst($listing->post_status); ?></span>
+                                <?php
+                                $is_suspended = get_post_meta($listing->ID, '_obenlo_is_suspended', true) === 'yes';
+                                $sus_reason = get_post_meta($listing->ID, '_obenlo_suspension_reason', true);
+                                if ($is_suspended): ?>
+                                    <div style="margin-top:8px;">
+                                        <span class="badge" style="background:#e61e4d; color:#fff;">Suspended</span>
+                                        <?php if ($sus_reason): ?>
+                                            <div style="font-size:0.7rem; color:#e61e4d; margin-top:4px; font-weight:600; line-height:1.2;">Reason: <?php echo esc_html($sus_reason); ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
                             <td data-label="<?php echo esc_attr(__('Units', 'obenlo')); ?>">
                                 <span style="font-weight:600; color:#444;"><?php echo sprintf(__('%d units', 'obenlo'), count($children)); ?></span>
                                 <a href="?action=add&parent_id=<?php echo $listing->ID; ?>" style="display:block; font-size:0.75rem; color:#e61e4d; text-decoration:none;">+ <?php echo __('Add unit', 'obenlo'); ?></a>

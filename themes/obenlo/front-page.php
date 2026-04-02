@@ -3,7 +3,33 @@
  * The front page template file
  */
 
-get_header(); ?>
+get_header(); 
+
+$hide_demo_content = get_option('obenlo_hide_demo_frontpage', 'no') === 'yes';
+$user_can_see_demo = false;
+if ( is_user_logged_in() ) {
+    $user = wp_get_current_user();
+    if ( in_array('administrator', (array) $user->roles) || in_array('host', (array) $user->roles) || $user->user_login === 'demo' ) {
+        $user_can_see_demo = true;
+    }
+}
+
+$demo_meta_query = array();
+if ( $hide_demo_content && ! $user_can_see_demo ) {
+    $demo_meta_query = array(
+        'relation' => 'OR',
+        array(
+            'key' => '_obenlo_is_demo',
+            'compare' => 'NOT EXISTS'
+        ),
+        array(
+            'key' => '_obenlo_is_demo',
+            'value' => 'yes',
+            'compare' => '!='
+        )
+    );
+}
+?>
 
 <main id="primary" class="site-main site-content" style="max-width: 1400px; margin: 0 auto; padding: 20px 40px;">
 
@@ -97,6 +123,9 @@ get_header(); ?>
                     ),
                 ),
             );
+            if ( ! empty( $demo_meta_query ) ) {
+                $srv_args['meta_query'] = array( $demo_meta_query );
+            }
             $srv_query = new WP_Query( $srv_args );
             if ( $srv_query->have_posts() ) :
                 while ( $srv_query->have_posts() ) : $srv_query->the_post();
@@ -138,6 +167,9 @@ get_header(); ?>
                 'orderby' => 'date',
                 'order'   => 'DESC',
             );
+            if ( ! empty( $demo_meta_query ) ) {
+                $evt_args['meta_query'] = array( $demo_meta_query );
+            }
             $evt_query = new WP_Query( $evt_args );
             if ( $evt_query->have_posts() ) :
                 while ( $evt_query->have_posts() ) : $evt_query->the_post();
@@ -176,6 +208,9 @@ get_header(); ?>
                     ),
                 ),
             );
+            if ( ! empty( $demo_meta_query ) ) {
+                $exp_args['meta_query'] = array( $demo_meta_query );
+            }
             $exp_query = new WP_Query( $exp_args );
             if ( $exp_query->have_posts() ) :
                 while ( $exp_query->have_posts() ) : $exp_query->the_post();
@@ -217,6 +252,9 @@ get_header(); ?>
                 'orderby'        => 'meta_value_num',
                 'order'          => 'DESC'
             );
+            if ( ! empty( $demo_meta_query ) ) {
+                $stay_args['meta_query'] = array( $demo_meta_query );
+            }
             $stay_query = new WP_Query( $stay_args );
             if ( $stay_query->have_posts() ) :
                 while ( $stay_query->have_posts() ) : $stay_query->the_post();
@@ -259,7 +297,14 @@ get_header(); ?>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px;">
             <?php
-            $hosts = get_users( array( 'role' => 'host', 'number' => 10, 'orderby' => 'post_count', 'order' => 'DESC' ) );
+            $host_args = array( 'role' => 'host', 'number' => 10, 'orderby' => 'post_count', 'order' => 'DESC' );
+            if ( $hide_demo_content && ! $user_can_see_demo ) {
+                $demo_user = get_user_by('login', 'demo');
+                if ( $demo_user ) {
+                    $host_args['exclude'] = array( $demo_user->ID );
+                }
+            }
+            $hosts = get_users( $host_args );
             if ( empty($hosts) ) {
                 $hosts = get_users( array( 'role' => 'administrator', 'number' => 10 ) ); // Fallback
             }

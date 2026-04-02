@@ -22,6 +22,8 @@ class Obenlo_Booking_Admin_Dashboard
         add_action('admin_post_obenlo_transfer_demo', array($this, 'handle_transfer_demo'));
         add_action('admin_post_obenlo_save_translation', array($this, 'handle_save_translation'));
         add_action('admin_post_obenlo_admin_review_action', array($this, 'handle_review_action'));
+        add_action('admin_post_obenlo_toggle_listing_suspension', array($this, 'handle_toggle_listing_suspension'));
+        add_action('admin_post_obenlo_toggle_user_suspension', array($this, 'handle_toggle_user_suspension'));
     }
 
     public function add_admin_menu()
@@ -437,14 +439,29 @@ class Obenlo_Booking_Admin_Dashboard
         foreach ($listings as $listing) {
             $host = get_userdata($listing->post_author);
             $price = get_post_meta($listing->ID, '_obenlo_price', true);
+            $is_suspended = get_post_meta($listing->ID, '_obenlo_is_suspended', true) === 'yes';
+            $sus_text = $is_suspended ? 'Restore' : 'Suspend';
+            $sus_class = $is_suspended ? 'btn-approve' : 'btn-reject';
+            $display_status = ucfirst($listing->post_status);
+            if ($is_suspended) {
+                $display_status = '<span style="color:#e61e4d; font-weight:bold;">Suspended</span>';
+            }
+
             echo '<tr>';
             echo '<td><strong>' . esc_html($listing->post_title) . '</strong></td>';
             echo '<td>' . ($host ? esc_html($host->display_name) : 'Unknown') . '</td>';
-            echo '<td>' . esc_html(ucfirst($listing->post_status)) . '</td>';
+            echo '<td>' . $display_status . '</td>';
             echo '<td>$' . esc_html($price) . '</td>';
             echo '<td>';
             echo '<a href="' . get_permalink($listing->ID) . '" target="_blank">View</a> | ';
-            echo '<a href="#" class="btn-reject">Trash</a>';
+            echo '<a href="#" class="btn-reject">Trash</a> | ';
+            echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline;" onsubmit="if(!\'' . $is_suspended . '\') { var r = prompt(\'Reason for suspension:\'); if(r===null) return false; this.reason.value=r; } return confirm(\'Are you sure?\');">';
+            echo '<input type="hidden" name="action" value="obenlo_toggle_listing_suspension">';
+            echo '<input type="hidden" name="listing_id" value="' . $listing->ID . '">';
+            echo '<input type="hidden" name="reason" value="">';
+            wp_nonce_field('suspend_listing_' . $listing->ID, 'suspend_nonce');
+            echo '<button type="submit" class="' . $sus_class . '" style="background:none; border:none; cursor:pointer; padding:0; font:inherit; text-decoration:underline;">' . $sus_text . '</button>';
+            echo '</form>';
             echo '</td>';
             echo '</tr>';
         }
@@ -522,17 +539,32 @@ class Obenlo_Booking_Admin_Dashboard
                         <div style="font-size:0.8rem; color:#888;"><?php echo esc_html($user->user_email); ?></div>
                     </td>
                     <td><span class="badge badge-info"><?php echo ucfirst($user->roles[0]); ?></span></td>
-                    <td><span class="badge badge-success">Active</span></td>
+                    <?php 
+                    $is_suspended = get_user_meta($user->ID, '_obenlo_is_suspended', true) === 'yes';
+                    if ($is_suspended): ?>
+                        <td><span class="badge" style="background:#e61e4d; color:#fff;">Suspended</span></td>
+                    <?php else: ?>
+                        <td><span class="badge badge-success">Active</span></td>
+                    <?php endif; ?>
                     <td><span class="badge <?php echo $v_badge; ?>"><?php echo ucfirst($status); ?></span></td>
                     <td><?php echo date('M d, Y', strtotime($user->user_registered)); ?></td>
                     <td>
-                        <?php if (in_array('host', $user->roles)): ?>
-                            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:flex; gap:5px;">
+                        <?php if (in_array('host', $user->roles)): 
+                            $sus_text = $is_suspended ? 'Restore Host' : 'Suspend Host';
+                        ?>
+                            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:flex; gap:5px; margin-bottom:5px;">
                                 <input type="hidden" name="action" value="obenlo_update_user_fee">
                                 <input type="hidden" name="user_id" value="<?php echo $user->ID; ?>">
                                 <?php wp_nonce_field('update_user_fee_' . $user->ID, 'fee_nonce'); ?>
                                 <input type="number" name="fee_percentage" value="<?php echo esc_attr(get_user_meta($user->ID, '_obenlo_host_fee_percentage', true)); ?>" placeholder="Global" step="0.1" style="width:70px; padding:5px; border:1px solid #ddd; border-radius:4px;">
                                 <button type="submit" style="padding:5px 10px; background:#222; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:0.8em;">Save Fee</button>
+                            </form>
+                            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline;" onsubmit="if(!'<?php echo $is_suspended ? '1' : ''; ?>') { var r = prompt('Reason for suspension:'); if(r===null) return false; this.reason.value=r; } return confirm('Are you sure?');">
+                                <input type="hidden" name="action" value="obenlo_toggle_user_suspension">
+                                <input type="hidden" name="user_id" value="<?php echo $user->ID; ?>">
+                                <input type="hidden" name="reason" value="">
+                                <?php wp_nonce_field('suspend_user_' . $user->ID, 'suspend_nonce'); ?>
+                                <button type="submit" style="background:none; border:none; color:#e61e4d; cursor:pointer; text-decoration:underline; padding:0;"><?php echo $sus_text; ?></button>
                             </form>
                         <?php
             else: ?>
@@ -581,6 +613,14 @@ class Obenlo_Booking_Admin_Dashboard
                             <label style="display:block; font-weight:700; margin-bottom:5px;">Global Platform Fee (%)</label>
                             <p style="font-size:0.8em; color:#666; margin-bottom:10px;">Default percentage taken from each booking.</p>
                             <input type="number" name="global_fee" value="<?php echo esc_attr($global_fee); ?>" step="0.1" required style="width:100px; padding:10px; border:1px solid #ddd; border-radius:8px;"> <span style="font-weight:600;">%</span>
+                        </div>
+
+                        <div style="margin-bottom:25px; background:#fff3cd; padding:15px; border-radius:10px; border:1px solid #ffeeba;">
+                            <label style="display:flex; align-items:center; gap:10px; font-weight:700; margin-bottom:5px;">
+                                <input type="checkbox" name="hide_demo_frontpage" value="yes" <?php checked(get_option('obenlo_hide_demo_frontpage', 'no'), 'yes'); ?>>
+                                Hide Demo Content from Public Frontpage
+                            </label>
+                            <p style="font-size:0.85em; color:#856404; margin-bottom:0px; margin-left: 24px;">Visitor guests will not see demo listings/hosts on the home page. Admins and Hosts will still see them.</p>
                         </div>
 
                         <h4 style="border-bottom:2px solid #eee; padding-bottom:10px; margin-top:40px;">Email & Notifications</h4>
@@ -929,6 +969,8 @@ class Obenlo_Booking_Admin_Dashboard
         if (isset($_POST['pixel_id'])) {
             update_option('obenlo_meta_pixel_id', sanitize_text_field($_POST['pixel_id']));
         }
+
+        update_option('obenlo_hide_demo_frontpage', isset($_POST['hide_demo_frontpage']) ? 'yes' : 'no');
 
         // Haiti Payment Settings
         if (isset($_POST['htg_exchange_rate'])) {
@@ -1714,4 +1756,39 @@ class Obenlo_Booking_Admin_Dashboard
         wp_safe_redirect(add_query_arg(['tab' => 'reviews', 'status' => isset($_GET['status']) ? $_GET['status'] : 'all'], wp_get_referer()));
         exit;
     }
+
+    public function handle_toggle_listing_suspension() {
+        if (!current_user_can('administrator')) return;
+        $listing_id = intval($_POST['listing_id']);
+        check_admin_referer('suspend_listing_' . $listing_id, 'suspend_nonce');
+
+        $is_suspended = get_post_meta($listing_id, '_obenlo_is_suspended', true) === 'yes';
+        if ($is_suspended) {
+            delete_post_meta($listing_id, '_obenlo_is_suspended');
+            delete_post_meta($listing_id, '_obenlo_suspension_reason');
+        } else {
+            update_post_meta($listing_id, '_obenlo_is_suspended', 'yes');
+            update_post_meta($listing_id, '_obenlo_suspension_reason', sanitize_text_field($_POST['reason']));
+        }
+        wp_safe_redirect(add_query_arg('tab', 'listings', wp_get_referer()));
+        exit;
+    }
+
+    public function handle_toggle_user_suspension() {
+        if (!current_user_can('administrator')) return;
+        $user_id = intval($_POST['user_id']);
+        check_admin_referer('suspend_user_' . $user_id, 'suspend_nonce');
+
+        $is_suspended = get_user_meta($user_id, '_obenlo_is_suspended', true) === 'yes';
+        if ($is_suspended) {
+            delete_user_meta($user_id, '_obenlo_is_suspended');
+            delete_user_meta($user_id, '_obenlo_suspension_reason');
+        } else {
+            update_user_meta($user_id, '_obenlo_is_suspended', 'yes');
+            update_user_meta($user_id, '_obenlo_suspension_reason', sanitize_text_field($_POST['reason']));
+        }
+        wp_safe_redirect(add_query_arg('tab', 'users', wp_get_referer()));
+        exit;
+    }
+
 }
