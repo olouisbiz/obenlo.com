@@ -63,7 +63,7 @@ class Obenlo_Social_Admin_UI {
         // Broaden the check: If user is admin, load the small sharing script on all admin pages
         // This ensures the custom "Obenlo Dash" and other admin areas are covered.
         if ( current_user_can( 'manage_options' ) ) {
-            wp_enqueue_script( 'obenlo-social-admin', OBENLO_SOCIAL_URL . 'assets/admin-social.js', array('jquery'), OBENLO_SOCIAL_VERSION, true );
+            wp_enqueue_script( 'obenlo-social-admin', OBENLO_SOCIAL_URL . 'assets/admin-social.js', array('jquery'), time(), true );
             
             wp_localize_script( 'obenlo-social-admin', 'obenloSocialObj', array(
                 'listing_template' => get_option('obenlo_social_listing_template'),
