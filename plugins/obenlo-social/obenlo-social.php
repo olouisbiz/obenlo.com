@@ -34,7 +34,6 @@ class Obenlo_Social {
     }
 
     private function load_dependencies() {
-        require_once OBENLO_SOCIAL_DIR . 'includes/class-social-api-client.php';
         require_once OBENLO_SOCIAL_DIR . 'includes/class-social-settings.php';
         require_once OBENLO_SOCIAL_DIR . 'includes/class-social-admin-ui.php';
     }
