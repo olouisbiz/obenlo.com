@@ -1,0 +1,151 @@
+/* Obenlo PWA Standalone App Styles */
+/* These styles ONLY apply when the website is added to the home screen and running as an app */
+
+@media (display-mode: standalone), (display-mode: minimal-ui) {
+    /* Global App Settings */
+    body {
+        overscroll-behavior-y: none;
+        -webkit-tap-highlight-color: transparent;
+        background: #fdfdfd !important;
+    }
+
+    #wpadminbar {
+        display: none !important;
+    }
+    html {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* HOST DASHBOARD: Transform Layout into Native App */
+    .obenlo-dashboard-container {
+        display: block !important;
+        padding-bottom: 90px !important; /* Space for bottom nav */
+        background: #fdfdfd !important;
+    }
+
+    /* Sticky Top Header */
+    .dashboard-header {
+        position: sticky !important;
+        top: 0 !important;
+        background: rgba(255,255,255,0.95) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        z-index: 1000 !important;
+        padding: 15px 20px !important;
+        margin: 0 -20px 20px -20px !important;
+        border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    .dashboard-title {
+        font-size: 1.6rem !important;
+    }
+
+    .dashboard-content {
+        padding: 20px !important;
+    }
+
+    /* Transform Sidebar into Fixed Bottom Navigation */
+    .dashboard-sidebar {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: auto !important;
+        height: auto !important;
+        width: 100% !important;
+        background: #fff !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-around !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        padding: 10px 5px calc(10px + env(safe-area-inset-bottom)) 5px !important;
+        border-top: 1px solid #ebebeb !important;
+        border-bottom: none !important;
+        box-shadow: 0 -5px 25px rgba(0,0,0,0.06) !important;
+        z-index: 9999 !important;
+        scrollbar-width: none; /* Hide scrollbar */
+    }
+    
+    .dashboard-sidebar::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    /* Hide less critical items in Bottom Nav */
+    .dashboard-sidebar > div,
+    .dashboard-sidebar > h1,
+    .sidebar-link[href="?action=guide"],
+    .sidebar-link[href="?action=payouts"],
+    .sidebar-link[href="?action=support"] {
+        display: none !important;
+    }
+
+    .sidebar-link {
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 5px !important;
+        margin: 0 !important;
+        gap: 6px !important;
+        color: #888 !important;
+        background: transparent !important;
+        border-radius: 0 !important;
+        min-width: 65px !important;
+    }
+
+    .sidebar-link.active {
+        color: #e61e4d !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        transform: translateY(-2px);
+    }
+
+    .sidebar-link svg {
+        width: 24px !important;
+        height: 24px !important;
+        display: block !important;
+        margin: 0 auto !important;
+        stroke-width: 2.5 !important;
+    }
+
+    .sidebar-link span {
+        display: block !important;
+        font-size: 0.65rem !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+    }
+
+    /* Polish Cards and UI Elements */
+    .stat-card {
+        padding: 20px !important;
+        border-radius: 16px !important;
+    }
+    
+    .stats-grid {
+        gap: 15px !important;
+    }
+    
+    /* Make inputs larger for easier tapping and prevent iOS zoom */
+    input[type="text"], input[type="number"], input[type="email"], select, textarea {
+        font-size: 16px !important;
+        padding: 14px !important;
+        border-radius: 12px !important;
+    }
+    
+    .btn-primary {
+        width: 100% !important;
+        text-align: center !important;
+        padding: 16px !important;
+        border-radius: 14px !important;
+        font-size: 1.1rem !important;
+    }
+    
+    .search-container {
+        max-width: 100% !important;
+    }
+}

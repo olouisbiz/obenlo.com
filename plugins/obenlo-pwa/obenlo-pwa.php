@@ -21,6 +21,7 @@ class Obenlo_PWA
         add_action('wp_head', array($this, 'inject_meta_tags'), 1);
         add_action('parse_request', array($this, 'serve_pwa_assets'), 1);
         add_action('wp_head', array($this, 'inject_pwa_script'), 2);
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_pwa_styles'));
 
         // AJAX for PWA subscriptions
         add_action('wp_ajax_obenlo_save_pwa_subscription', array($this, 'handle_save_subscription'));
@@ -294,6 +295,14 @@ class Obenlo_PWA
         });
         </script>
         <?php
+    }
+
+    /**
+     * Enqueue Standalone PWA CSS
+     */
+    public function enqueue_pwa_styles()
+    {
+        wp_enqueue_style('obenlo-pwa-standalone', OBENLO_PWA_URL . 'assets/pwa.css', array(), '1.0.0');
     }
 
     /**
