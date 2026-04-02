@@ -7,6 +7,8 @@ class Obenlo_Social_Admin_UI {
         add_action( 'add_meta_boxes', array( __CLASS__, 'add_social_meta_boxes' ) );
         add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_social_scripts' ) );
         add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_social_scripts' ) );
+        add_action( 'admin_footer', array( __CLASS__, 'render_social_picker_html' ) );
+        add_action( 'wp_footer', array( __CLASS__, 'render_social_picker_html' ) );
     }
 
     public static function add_social_meta_boxes() {
@@ -60,8 +62,6 @@ class Obenlo_Social_Admin_UI {
     }
 
     public static function enqueue_social_scripts( $hook = '' ) {
-        // Broaden the check: If user is admin, load the small sharing script on all admin pages
-        // This ensures the custom "Obenlo Dash" and other admin areas are covered.
         if ( current_user_can( 'manage_options' ) ) {
             wp_enqueue_script( 'obenlo-social-admin', OBENLO_SOCIAL_URL . 'assets/admin-social.js', array('jquery'), time(), true );
             
@@ -71,5 +71,23 @@ class Obenlo_Social_Admin_UI {
                 'is_admin'         => true
             ) );
         }
+    }
+
+    public static function render_social_picker_html() {
+        if ( ! current_user_can( 'manage_options' ) ) return;
+        ?>
+        <div id="obenlo-social-picker-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999998 !important;"></div>
+        <div id="obenlo-social-picker" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:85%; max-width:320px; background:#ffffff !important; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,0.5); z-index:9999999 !important; padding:24px; border:3px solid #e61e4d; font-family:sans-serif;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <strong style="color:#e61e4d; font-size:20px;">Share Listing</strong>
+                <span id="obenlo-close-picker" style="cursor:pointer; color:#999; font-size:32px; font-weight:300; line-height:1;">&times;</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:14px;">
+                <a id="share-to-fb" href="#" target="_blank" style="padding:16px; border-radius:12px; background:#1877f2; color:#fff; text-decoration:none; text-align:center; font-weight:700; font-size:16px;">Post to Facebook</a>
+                <button id="share-to-ig" style="padding:16px; border-radius:12px; background:linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color:#fff; border:none; cursor:pointer; font-weight:700; font-size:16px;">Instagram Feed / Stories</button>
+                <button id="share-to-native" style="padding:12px; border-radius:12px; background:#f5f5f5; color:#333; border:1px solid #ddd; cursor:pointer; font-weight:600; font-size:14px;">Other Apps (Native)</button>
+            </div>
+        </div>
+        <?php
     }
 }
