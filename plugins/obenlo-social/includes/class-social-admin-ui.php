@@ -36,7 +36,10 @@ class Obenlo_Social_Admin_UI {
     public static function enqueue_admin_scripts( $hook ) {
         if ( ! current_user_can( 'manage_options' ) ) return;
         
-        if ( in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
+        $is_edit_screen = in_array( $hook, array( 'post.php', 'post-new.php' ), true );
+        $is_admin_dash = ($hook === 'toplevel_page_obenlo-admin-dashboard');
+
+        if ( $is_edit_screen || $is_admin_dash ) {
             wp_enqueue_script( 'obenlo-social-admin', OBENLO_SOCIAL_URL . 'assets/admin-social.js', array('jquery'), OBENLO_SOCIAL_VERSION, true );
             wp_localize_script( 'obenlo-social-admin', 'obenloSocialObj', array(
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
