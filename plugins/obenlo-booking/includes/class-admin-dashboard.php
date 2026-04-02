@@ -426,14 +426,50 @@ class Obenlo_Booking_Admin_Dashboard
 
     private function render_listings_tab()
     {
-        $listings = get_posts(array(
+        $search = isset($_GET['listing_search']) ? sanitize_text_field($_GET['listing_search']) : '';
+        $status_filter = isset($_GET['listing_status']) ? sanitize_text_field($_GET['listing_status']) : '';
+
+        $query_args = array(
             'post_type' => 'listing',
             'posts_per_page' => -1,
-            'post_status' => array('publish', 'pending', 'draft'),
+            'post_status' => $status_filter ? array($status_filter) : array('publish', 'pending', 'draft'),
             'suppress_filters' => false,
-        ));
+        );
+
+        if ($search) {
+            $query_args['s'] = $search;
+        }
+
+        $listings = get_posts($query_args);
 
         echo '<h3>Manage All Listings</h3>';
+        ?>
+        <!-- Listing Filters -->
+        <div style="background:#fff; padding:20px; border-radius:12px; border:1px solid #eee; margin-bottom:30px;">
+            <form action="" method="GET" style="display:flex; gap:20px; align-items:flex-end;">
+                <input type="hidden" name="page" value="obenlo-booking">
+                <input type="hidden" name="tab" value="listings">
+                
+                <div style="flex:1;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#888; margin-bottom:5px; text-transform:uppercase;">Search Listings</label>
+                    <input type="text" name="listing_search" value="<?php echo esc_attr($search); ?>" placeholder="Title or keyword..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                </div>
+                
+                <div>
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#888; margin-bottom:5px; text-transform:uppercase;">Status</label>
+                    <select name="listing_status" style="padding:10px; border:1px solid #ddd; border-radius:8px; min-width:150px;">
+                        <option value="">All Statuses</option>
+                        <option value="publish" <?php selected($status_filter, 'publish'); ?>>Published</option>
+                        <option value="pending" <?php selected($status_filter, 'pending'); ?>>Pending</option>
+                        <option value="draft" <?php selected($status_filter, 'draft'); ?>>Draft</option>
+                    </select>
+                </div>
+
+                <button type="submit" style="background:#222; color:#fff; border:none; padding:10px 25px; border-radius:8px; cursor:pointer; font-weight:600;">Search</button>
+                <a href="?page=obenlo-booking&tab=listings" style="padding:10px; color:#666; font-size:0.9rem; text-decoration:none;">Reset</a>
+            </form>
+        </div>
+        <?php
         echo '<table class="admin-table">';
         echo '<tr><th>Title</th><th>Host</th><th>Status</th><th>Price</th><th>Actions</th></tr>';
         foreach ($listings as $listing) {
