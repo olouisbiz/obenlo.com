@@ -1,5 +1,5 @@
 jQuery(document).ready(function($) {
-    console.log('Obenlo Social Sharing v1.2.9 - Universal Save Loaded');
+    console.log('Obenlo Social Sharing v1.3.0 - Visual Mode Loaded');
 
     var currentBtnData = {};
 
@@ -29,6 +29,12 @@ jQuery(document).ready(function($) {
         }
 
         e.preventDefault();
+        
+        // Set Preview Image
+        if (currentBtnData.image) {
+            $('#obenlo-social-preview-img').attr('src', currentBtnData.image);
+        }
+        
         $('#share-to-fb').attr('href', $btn.attr('href'));
         $('#obenlo-social-picker-overlay').show();
         $('#obenlo-social-picker').show();
@@ -39,7 +45,7 @@ jQuery(document).ready(function($) {
         closePicker();
     });
 
-    // Instagram "Universal Save" Workflow
+    // Instagram Button Logic
     $(document).on('click', '#share-to-ig', function() {
         var type = currentBtnData.type || 'listing';
         var template = (type === 'listing') ? obenloSocialObj.listing_template : obenloSocialObj.post_template;
@@ -50,7 +56,7 @@ jQuery(document).ready(function($) {
         if (currentBtnData.location) caption = caption.replace('{location}', currentBtnData.location);
         if (currentBtnData.excerpt) caption = caption.replace('{excerpt}', currentBtnData.excerpt);
 
-        // 1. Copy Caption to Clipboard
+        // Copy Caption to Clipboard
         var dummy = document.createElement("textarea");
         document.body.appendChild(dummy);
         dummy.value = caption;
@@ -58,52 +64,17 @@ jQuery(document).ready(function($) {
         document.execCommand("copy");
         document.body.removeChild(dummy);
         
-        // 2. Open Native "Save Image" Dialog (Reliable for Gallery)
-        if (currentBtnData.image && navigator.share) {
-            saveImageAndLaunch(caption);
-        } else {
-            showToast("Caption copied! Opening Instagram...");
-            launchInstagram();
-        }
-    });
-
-    async function saveImageAndLaunch(caption) {
-        try {
-            const response = await fetch(currentBtnData.image);
-            const blob = await response.blob();
-            const file = new File([blob], 'Obenlo-Listing.jpg', { type: 'image/jpeg' });
-
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                // This triggers the OS share sheet where user can tap "Save Image"
-                showToast("Step 1: Tap 'Save Image' below<br>Step 2: We'll open Instagram!");
-                
-                await navigator.share({
-                    files: [file]
-                });
-                
-                // After they close the share sheet, wait then open IG
-                setTimeout(function() {
-                    launchInstagram();
-                }, 1500);
-            } else {
-                launchInstagram();
-            }
-        } catch (err) {
-            console.log('Universal Save failed', err);
-            launchInstagram();
-        }
-    }
-
-    function launchInstagram() {
         showToast("Caption copied! Opening Instagram...");
+
+        // Open Instagram after a short delay
         setTimeout(function() {
             window.location.href = "instagram://camera";
             setTimeout(function() {
                 if (!document.hidden) window.location.href = "https://www.instagram.com/";
             }, 500);
             closePicker();
-        }, 1000);
-    }
+        }, 1200);
+    });
 
     // Native Share Fallback
     $(document).on('click', '#share-to-native', function() {

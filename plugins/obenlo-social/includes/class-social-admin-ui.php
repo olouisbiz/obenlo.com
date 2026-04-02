@@ -84,17 +84,22 @@ class Obenlo_Social_Admin_UI {
         if ( ! current_user_can( 'edit_posts' ) ) return;
         ?>
         <div id="obenlo-social-picker-overlay" style="display:none; position:fixed; top:0; left:0; width:100% !important; height:100% !important; background:rgba(0,0,0,0.7) !important; z-index:9999998 !important;"></div>
-        <div id="obenlo-social-picker" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) !important; width:90% !important; max-width:360px !important; background:#ffffff !important; border-radius:24px !important; box-shadow:0 30px 100px rgba(0,0,0,0.6) !important; z-index:9999999 !important; padding:30px; border:4px solid #e61e4d !important; font-family:sans-serif !important; text-align:center;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-                <strong style="color:#e61e4d; font-size:24px;">Share Listing</strong>
+        <div id="obenlo-social-picker" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) !important; width:90% !important; max-width:360px !important; background:#ffffff !important; border-radius:24px !important; box-shadow:0 30px 100px rgba(0,0,0,0.6) !important; z-index:9999999 !important; padding:24px; border:4px solid #e61e4d !important; font-family:sans-serif !important; text-align:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <strong style="color:#e61e4d; font-size:22px;">Share Listing</strong>
                 <span id="obenlo-close-picker" style="cursor:pointer; color:#999; font-size:40px; line-height:0.5; padding:10px;">&times;</span>
             </div>
-            <div style="display:flex; flex-direction:column; gap:18px;">
-                <a id="share-to-fb" href="#" target="_blank" style="padding:20px; border-radius:15px; background:#1877f2; color:#fff; text-decoration:none; text-align:center; font-weight:800; font-size:18px; display:block;">Post to Facebook</a>
-                <button id="share-to-ig" style="padding:20px; border-radius:15px; background:linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color:#fff; border:none; cursor:pointer; font-weight:800; font-size:18px; width:100%;">Instagram Feed / Stories</button>
-                <div style="margin-top:10px;">
-                    <button id="share-to-native" style="padding:15px; border-radius:12px; background:#f4f4f4; color:#333; border:1px solid #ddd; cursor:pointer; font-weight:600; font-size:14px; width:100%;">Share via Other Apps</button>
-                </div>
+
+            <!-- Visual Image for Manual Saving -->
+            <div id="obenlo-social-image-container" style="margin-bottom:15px; border-radius:12px; overflow:hidden; border:1px solid #eee; background:#f9f9f9;">
+                <img id="obenlo-social-preview-img" src="" style="width:100%; height:auto; display:block; min-height:150px; object-fit:cover;">
+                <p style="margin:8px 0; font-size:12px; color:#666; font-weight:600;">Long-press image to Save to Photos 📸</p>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button id="share-to-ig" style="padding:18px; border-radius:12px; background:linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color:#fff; border:none; cursor:pointer; font-weight:800; font-size:16px; width:100%;">Instagram (Post/Story)</button>
+                <a id="share-to-fb" href="#" target="_blank" style="padding:14px; border-radius:12px; background:#1877f2; color:#fff; text-decoration:none; text-align:center; font-weight:700; font-size:14px; display:block;">Share on Facebook</a>
+                <button id="share-to-native" style="margin-top:5px; padding:10px; border-radius:10px; background:#f4f4f4; color:#333; border:1px solid #ddd; cursor:pointer; font-weight:600; font-size:13px; width:100%;">Other Options</button>
             </div>
         </div>
         <?php
