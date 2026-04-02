@@ -299,6 +299,23 @@ class Obenlo_PWA
                     el.textContent = el.textContent.replace('Welcome back, !', 'Welcome back!');
                 }
             });
+
+            // PWA Bottom Nav Scroll Indicator
+            const sidebar = document.querySelector('.dashboard-sidebar');
+            if (sidebar && sidebar.scrollWidth > sidebar.clientWidth) {
+                const indicator = document.createElement('div');
+                indicator.className = 'pwa-scroll-indicator';
+                indicator.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+                document.body.appendChild(indicator);
+
+                sidebar.addEventListener('scroll', () => {
+                    if (sidebar.scrollLeft > 10) {
+                        indicator.style.opacity = '0';
+                    } else {
+                        indicator.style.opacity = '0.9';
+                    }
+                });
+            }
         });
         </script>
         <?php
