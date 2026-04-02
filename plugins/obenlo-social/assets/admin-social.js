@@ -1,14 +1,11 @@
 jQuery(document).ready(function($) {
-    console.log('Obenlo Social Sharing v1.2.5 - Bottom Sheet Loaded');
+    console.log('Obenlo Social Sharing v1.2.6 - Center/Scale Fix Loaded');
 
     var currentBtnData = {};
 
     function closePicker() {
-        $('#obenlo-social-picker').css('transform', 'translateY(100%)');
-        setTimeout(function() {
-            $('#obenlo-social-picker').hide();
-            $('#obenlo-social-picker-overlay').fadeOut(150);
-        }, 300);
+        $('#obenlo-social-picker').fadeOut(150);
+        $('#obenlo-social-picker-overlay').fadeOut(150);
     }
 
     // Handle "Push to Social" clicks
@@ -25,18 +22,13 @@ jQuery(document).ready(function($) {
             return true; 
         }
 
-        // Phone: Show Bottom Sheet
+        // Phone: Show Centered Modal
         e.preventDefault();
         $('#share-to-fb').attr('href', $btn.attr('href'));
         
-        // Reset and Show
-        $('#obenlo-social-picker').css({'display': 'block', 'transform': 'translateY(100%)'});
-        $('#obenlo-social-picker-overlay').fadeIn(150);
-        
-        // Slide up animation
-        setTimeout(function() {
-            $('#obenlo-social-picker').css('transform', 'translateY(0)');
-        }, 10);
+        // Instant Show (No animations to prevent "stuck" states)
+        $('#obenlo-social-picker-overlay').show();
+        $('#obenlo-social-picker').show();
     });
 
     // Close Actions

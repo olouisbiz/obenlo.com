@@ -9,6 +9,13 @@ class Obenlo_Social_Admin_UI {
         add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_social_scripts' ) );
         add_action( 'admin_footer', array( __CLASS__, 'render_social_picker_html' ) );
         add_action( 'wp_footer', array( __CLASS__, 'render_social_picker_html' ) );
+        add_action( 'wp_head', array( __CLASS__, 'add_viewport_meta' ), 1 );
+    }
+
+    public static function add_viewport_meta() {
+        if ( current_user_can( 'edit_posts' ) ) {
+            echo '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">';
+        }
     }
 
     public static function add_social_meta_boxes() {
@@ -77,15 +84,17 @@ class Obenlo_Social_Admin_UI {
         if ( ! current_user_can( 'edit_posts' ) ) return;
         ?>
         <div id="obenlo-social-picker-overlay" style="display:none; position:fixed; top:0; left:0; width:100% !important; height:100% !important; background:rgba(0,0,0,0.7) !important; z-index:9999998 !important;"></div>
-        <div id="obenlo-social-picker" style="display:none; position:fixed; bottom:0; left:0; width:100% !important; background:#ffffff !important; border-radius:24px 24px 0 0; box-shadow:0 -10px 40px rgba(0,0,0,0.4); z-index:9999999 !important; padding:30px 20px; border-top:4px solid #e61e4d; font-family:sans-serif; transition: transform 0.3s ease-out;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                <strong style="color:#e61e4d; font-size:22px;">Share Listing</strong>
-                <span id="obenlo-close-picker" style="cursor:pointer; color:#999; font-size:36px; line-height:0.5; padding:10px;">&times;</span>
+        <div id="obenlo-social-picker" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) !important; width:90% !important; max-width:360px !important; background:#ffffff !important; border-radius:24px !important; box-shadow:0 30px 100px rgba(0,0,0,0.6) !important; z-index:9999999 !important; padding:30px; border:4px solid #e61e4d !important; font-family:sans-serif !important; text-align:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                <strong style="color:#e61e4d; font-size:24px;">Share Listing</strong>
+                <span id="obenlo-close-picker" style="cursor:pointer; color:#999; font-size:40px; line-height:0.5; padding:10px;">&times;</span>
             </div>
-            <div style="display:flex; flex-direction:column; gap:16px; padding-bottom:10px;">
-                <a id="share-to-fb" href="#" target="_blank" style="padding:18px; border-radius:14px; background:#1877f2; color:#fff; text-decoration:none; text-align:center; font-weight:700; font-size:18px;">Post to Facebook</a>
-                <button id="share-to-ig" style="padding:18px; border-radius:14px; background:linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color:#fff; border:none; cursor:pointer; font-weight:700; font-size:18px;">Instagram Feed / Stories</button>
-                <button id="share-to-native" style="padding:14px; border-radius:14px; background:#f8f8f8; color:#333; border:1px solid #eee; cursor:pointer; font-weight:600; font-size:15px;">Other Sharing Options</button>
+            <div style="display:flex; flex-direction:column; gap:18px;">
+                <a id="share-to-fb" href="#" target="_blank" style="padding:20px; border-radius:15px; background:#1877f2; color:#fff; text-decoration:none; text-align:center; font-weight:800; font-size:18px; display:block;">Post to Facebook</a>
+                <button id="share-to-ig" style="padding:20px; border-radius:15px; background:linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color:#fff; border:none; cursor:pointer; font-weight:800; font-size:18px; width:100%;">Instagram Feed / Stories</button>
+                <div style="margin-top:10px;">
+                    <button id="share-to-native" style="padding:15px; border-radius:12px; background:#f4f4f4; color:#333; border:1px solid #ddd; cursor:pointer; font-weight:600; font-size:14px; width:100%;">Share via Other Apps</button>
+                </div>
             </div>
         </div>
         <?php
