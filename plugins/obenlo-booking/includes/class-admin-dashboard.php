@@ -491,7 +491,15 @@ class Obenlo_Booking_Admin_Dashboard
             echo '<td>';
             echo '<a href="' . get_permalink($listing->ID) . '" target="_blank">View</a> | ';
             if (current_user_can('manage_options')) {
-                echo '<a href="javascript:void(0);" class="obenlo-social-push-btn" data-post-id="' . $listing->ID . '" style="color:#e61e4d; font-weight:bold;">Push to Social</a> | ';
+                $location = get_post_meta($listing->ID, '_obenlo_location', true);
+                if(empty($location)) $location = 'Toronto';
+                echo '<a href="javascript:void(0);" class="obenlo-social-push-btn" 
+                    data-post-id="' . $listing->ID . '" 
+                    data-title="' . esc_attr($listing->post_title) . '" 
+                    data-price="' . esc_attr($price) . '" 
+                    data-location="' . esc_attr($location) . '" 
+                    data-url="' . esc_url(get_permalink($listing->ID)) . '" 
+                    style="color:#e61e4d; font-weight:bold;">Push to Social</a> | ';
             }
             echo '<a href="#" class="btn-reject">Trash</a> | ';
             echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline;" onsubmit="if(!\'' . $is_suspended . '\') { var r = prompt(\'Reason for suspension:\'); if(r===null) return false; this.reason.value=r; } return confirm(\'Are you sure?\');">';
