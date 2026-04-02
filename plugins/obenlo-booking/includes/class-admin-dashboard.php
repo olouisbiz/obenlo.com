@@ -493,12 +493,17 @@ class Obenlo_Booking_Admin_Dashboard
             if (current_user_can('manage_options')) {
                 $location = get_post_meta($listing->ID, '_obenlo_location', true);
                 if(empty($location)) $location = 'Toronto';
-                echo '<a href="javascript:void(0);" class="obenlo-social-push-btn" 
+                $template = get_option('obenlo_social_listing_template', "New on Obenlo!\n\n{title} in {location}\nJust ${price}!");
+                $caption = str_replace( array('{title}', '${price}', '{location}'), array($listing->post_title, $price, $location), $template );
+                $share_url = 'https://www.facebook.com/sharer/sharer.php?u=' . urlencode(get_permalink($listing->ID)) . '&quote=' . urlencode($caption);
+
+                echo '<a href="' . esc_url($share_url) . '" target="_blank" class="obenlo-social-push-btn" 
                     data-post-id="' . $listing->ID . '" 
                     data-title="' . esc_attr($listing->post_title) . '" 
                     data-price="' . esc_attr($price) . '" 
                     data-location="' . esc_attr($location) . '" 
                     data-url="' . esc_url(get_permalink($listing->ID)) . '" 
+                    data-type="listing" 
                     style="color:#e61e4d; font-weight:bold;">Push to Social</a> | ';
             }
             echo '<a href="#" class="btn-reject">Trash</a> | ';
