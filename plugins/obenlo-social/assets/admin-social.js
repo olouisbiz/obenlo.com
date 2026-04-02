@@ -1,5 +1,5 @@
 jQuery(document).ready(function($) {
-    console.log('Obenlo Social Sharing Loaded');
+    console.log('Obenlo Social Sharing Loaded (v1.0.1)');
 
     // Handle "Push to Social" button clicks
     $(document).on('click', '.obenlo-social-push-btn', function(e) {
@@ -23,16 +23,31 @@ jQuery(document).ready(function($) {
             url: data.url
         };
 
-        // 1. Try Native Web Share API (Best for Mobile/PWA)
-        if (navigator.share) {
+        // Detect if we are on a Mobile device
+        var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // 1. On Mobile: Use Native Web Share API (Best for Phone/PWA)
+        if (isMobile && navigator.share) {
             navigator.share(shareData)
                 .then(() => console.log('Successful share'))
-                .catch((error) => console.log('Error sharing:', error));
+                .catch((error) => {
+                    console.log('Error sharing:', error);
+                    // Fallback if native share is cancelled or fails
+                    openSocialPopup(data.url, caption);
+                });
         } 
-        // 2. Fallback for Desktop (Facebook Sharer)
+        // 2. On Desktop (Mac/Windows): Use Social Popups (Reliable & avoids system blocks)
         else {
-            var fbUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(data.url) + '&quote=' + encodeURIComponent(caption);
-            window.open(fbUrl, 'SocialShare', 'width=600,height=400');
+            openSocialPopup(data.url, caption);
+        }
+
+        function openSocialPopup(url, text) {
+            var fbUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '&quote=' + encodeURIComponent(text);
+            var popup = window.open(fbUrl, 'SocialShare', 'width=600,height=500,location=no,menubar=no,status=no,toolbar=no');
+            
+            if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+                alert('Popup blocked! Please allow popups for Obenlo to share to Facebook.');
+            }
         }
     });
 });
