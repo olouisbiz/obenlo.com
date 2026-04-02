@@ -292,6 +292,13 @@ class Obenlo_PWA
             } else {
                 console.warn('Obenlo PWA: Service workers are not supported in this browser.');
             }
+
+            // PWA DOM Polish: Fix empty name strings in welcome headers
+            document.querySelectorAll('h2').forEach(el => {
+                if(el.textContent.includes('Welcome back, !')) {
+                    el.textContent = el.textContent.replace('Welcome back, !', 'Welcome back!');
+                }
+            });
         });
         </script>
         <?php

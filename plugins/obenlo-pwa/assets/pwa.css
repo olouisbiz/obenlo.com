@@ -148,4 +148,26 @@
     .search-container {
         max-width: 100% !important;
     }
+
+    /* FIX: Reposition floating language switcher above the new bottom bar */
+    .obenlo-lang-switcher {
+        bottom: 120px !important;
+    }
+
+    /* FIX: Prevent table cell data overlapping with absolute positioned data-labels */
+    .admin-table td {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding: 15px !important;
+        gap: 6px !important;
+        height: auto !important;
+    }
+    .admin-table td::before {
+        position: static !important;
+        display: block !important;
+        margin-bottom: 2px !important;
+        line-height: 1 !important;
+    }
 }
