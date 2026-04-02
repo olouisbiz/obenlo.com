@@ -51,7 +51,7 @@ class Obenlo_Social_Admin_UI {
         <?php
     }
 
-    public static function enqueue_admin_scripts( $hook ) {
+    public static function enqueue_social_scripts( $hook = '' ) {
         // Broaden the check: If user is admin, load the small sharing script on all admin pages
         // This ensures the custom "Obenlo Dash" and other admin areas are covered.
         if ( current_user_can( 'manage_options' ) ) {
