@@ -309,7 +309,7 @@ class Obenlo_PWA
      */
     public function enqueue_pwa_styles()
     {
-        wp_enqueue_style('obenlo-pwa-standalone', OBENLO_PWA_URL . 'assets/pwa.css', array(), '1.0.0');
+        wp_enqueue_style('obenlo-pwa-standalone', OBENLO_PWA_URL . 'assets/pwa.css', array(), time());
     }
 
     /**
