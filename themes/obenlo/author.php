@@ -130,24 +130,46 @@ if ($is_demo_preview) $hosting_since = 2024;
 
     /* Hero Section */
     .premium-hero {
-        height: 550px;
+        height: 600px;
         position: relative;
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
+        background: #000;
+        padding-top: 60px;
     }
     .hero-banner {
         position: absolute;
         inset: 0;
         background: url('<?php echo esc_url($banner_url); ?>') center/cover no-repeat;
-        filter: brightness(0.85);
+        filter: brightness(0.7);
         transition: transform 0.8s ease-out;
     }
     .hero-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+        background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
+    }
+
+    .hero-back-link {
+        position: absolute;
+        top: 30px;
+        left: 40px;
+        z-index: 100;
+        color: rgba(255,255,255,0.9);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        background: rgba(0,0,0,0.3);
+        padding: 8px 16px;
+        border-radius: 50px;
+        backdrop-filter: blur(10px);
+        transition: all 0.2s;
+    }
+    .hero-back-link:hover {
+        background: rgba(0,0,0,0.5);
+        transform: translateX(-5px);
     }
 
     .hero-container {
@@ -158,51 +180,123 @@ if ($is_demo_preview) $hosting_since = 2024;
         margin: 0 auto;
         padding: 0 40px;
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1.2fr 0.8fr;
         gap: 60px;
         align-items: center;
     }
 
     .hero-text h1 {
-        font-size: 4rem;
+        font-size: 3.2rem;
         font-weight: 900;
         color: white;
         margin: 0;
         line-height: 1.1;
-        text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+        text-shadow: 0 4px 30px rgba(0,0,0,0.5);
     }
     .hero-tagline {
-        font-size: 1.5rem;
-        color: rgba(255,255,255,0.9);
-        margin-top: 20px;
+        font-size: 1.4rem;
+        color: rgba(255,255,255,0.95);
+        margin-top: 15px;
         font-weight: 500;
+        max-width: 500px;
+        line-height: 1.4;
     }
 
     /* Glass Card */
     .host-glass-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
         border-radius: 32px;
         padding: 40px;
-        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
+        position: relative;
     }
 
     .host-logo-large {
-        width: 140px;
-        height: 140px;
+        width: 150px;
+        height: 150px;
         border-radius: 50%;
-        border: 6px solid white;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        margin-top: -110px;
+        border: 4px solid white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        margin-top: -85px;
         margin-bottom: 20px;
         background: white;
         object-fit: cover;
+    }
+
+    /* Social Icons Styling */
+    .social-glass-bubble {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.4);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .social-glass-bubble svg {
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    .social-glass-bubble:hover {
+        background: rgba(255, 255, 255, 0.35);
+        transform: scale(1.15) translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        border-color: #fff;
+    }
+
+    /* Badge/Pill Styling */
+    .specialty-pill {
+        background: rgba(0, 0, 0, 0.05);
+        color: #1a1a1a;
+        padding: 7px 16px;
+        border-radius: 50px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        border: 1px solid rgba(0,0,0,0.02);
+        transition: all 0.25s ease;
+        letter-spacing: 0.3px;
+    }
+    .specialty-pill:hover {
+        background: rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    
+    .contact-host-btn {
+        margin-top: 25px;
+        background: linear-gradient(135deg, #FF385C 0%, #E61E4D 100%);
+        color: #fff !important;
+        border: none;
+        padding: 16px 32px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        box-shadow: 0 8px 25px rgba(230,30,77,0.35);
+        text-decoration: none;
+    }
+    .contact-host-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(230,30,77,0.45);
+        filter: brightness(1.1);
+    }
+    .contact-host-btn:active {
+        transform: translateY(1px);
     }
 
     /* Stats Bar */
@@ -271,12 +365,13 @@ if ($is_demo_preview) $hosting_since = 2024;
     .card-price { position: absolute; bottom: 15px; right: 15px; background: var(--primary-color); color: white; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 1.1rem; }
 
     @media (max-width: 992px) {
-        .premium-hero { height: auto; min-height: 450px; padding: 100px 0 60px; }
+        .premium-hero { height: auto; min-height: 450px; padding: 120px 0 60px; }
+        .hero-back-link { top: 20px; left: 20px; font-size: 0.85rem; padding: 6px 12px; }
         .hero-container { grid-template-columns: 1fr; gap: 80px; padding: 0 24px; }
-        .hero-text h1 { font-size: 2.8rem; text-align: center; }
-        .hero-tagline { text-align: center; font-size: 1.2rem; }
+        .hero-text h1 { font-size: 2.5rem; text-align: center; }
+        .hero-tagline { text-align: center; font-size: 1.1rem; margin: 15px auto 0; }
         .host-glass-card { margin-top: 0; padding: 40px 20px 30px; }
-        .host-logo-large { margin-top: -90px; width: 110px; height: 110px; border-width: 4px; }
+        .host-logo-large { margin-top: -95px; width: 120px; height: 120px; border-width: 4px; }
         .premium-stats { flex-direction: column; gap: 20px; margin-top: 20px; padding: 20px; }
         .stat-item { padding: 0 !important; border: none !important; }
     }
@@ -287,10 +382,12 @@ if ($is_demo_preview) $hosting_since = 2024;
     <div class="premium-hero">
         <div class="hero-banner"></div>
         <div class="hero-overlay"></div>
+        
+        <a href="<?php echo esc_url(home_url('/listings/')); ?>" class="hero-back-link">
+            &larr; Back to Listings
+        </a>
+
         <div class="hero-container">
-            <a href="<?php echo esc_url(home_url('/listings/')); ?>" class="hero-back-link" style="display:inline-block; margin-bottom:20px; color:rgba(255,255,255,0.9); text-decoration:none; font-weight: 500; font-size: 0.95rem; transition: transform 0.2s;">
-                &larr; Back to Listings
-            </a>
             <div class="hero-text">
                 <h1><?php echo esc_html($store_name); ?></h1>
                 <?php if($store_tagline): ?>
@@ -299,12 +396,12 @@ if ($is_demo_preview) $hosting_since = 2024;
                 
                 <div style="margin-top:30px; display:flex; gap:15px;">
                     <?php if($insta): ?>
-                        <a href="https://instagram.com/<?php echo esc_attr(str_replace('@', '', $insta)); ?>" target="_blank" style="background:rgba(255,255,255,0.2); backdrop-filter:blur(10px); width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; border:1px solid rgba(255,255,255,0.3);" title="Instagram">
+                        <a href="https://instagram.com/<?php echo esc_attr(str_replace('@', '', $insta)); ?>" target="_blank" class="social-glass-bubble" title="Instagram">
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.332 3.608 1.308.975.975 1.245 2.242 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.063 1.366-.333 2.633-1.308 3.608-.975.975-2.242 1.245-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.063-2.633-.333-3.608-1.308-.975-.975-1.245-2.242-1.308-3.608-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.332-2.633 1.308-3.608.975-.975 2.242-1.245 3.608-1.308 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.058-1.281.072-1.689.072-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.28-.058-1.688-.072-4.947-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                         </a>
                     <?php endif; ?>
                     <?php if($fb): ?>
-                        <a href="<?php echo esc_url($fb); ?>" target="_blank" style="background:rgba(255,255,255,0.2); backdrop-filter:blur(10px); width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; border:1px solid rgba(255,255,255,0.3);" title="Facebook">
+                        <a href="<?php echo esc_url($fb); ?>" target="_blank" class="social-glass-bubble" title="Facebook">
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                         </a>
                     <?php endif; ?>
@@ -324,8 +421,8 @@ if ($is_demo_preview) $hosting_since = 2024;
                 <?php echo Obenlo_Booking_Badges::render_badges_html($user_id, 'storefront'); ?>
 
                 <button onclick="<?php if(is_user_logged_in()): ?>if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $user_id; ?>, '<?php echo esc_js($store_name); ?>', '<?php echo esc_url($logo_url); ?>');} <?php else: ?>window.obenloOpenGuestContact(<?php echo $user_id; ?>, '<?php echo esc_js($store_name); ?>', '<?php echo esc_url($logo_url); ?>');<?php endif; ?>"
-                        style="margin-top: 25px; background: #e61e4d; color: #fff; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(230,30,77,0.3);">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        class="contact-host-btn">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     Contact Host
                 </button>
 
@@ -339,11 +436,14 @@ if ($is_demo_preview) $hosting_since = 2024;
                 ?>
 
                 <?php if($specialties): ?>
-                    <div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">
-                        <div style="font-size:0.7rem; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; font-weight:700;">Host Specialties</div>
-                        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">
-                            <?php foreach(explode(',', $specialties) as $spec): ?>
-                                <span style="font-size:0.85rem; color:#444; font-weight:600;">• <?php echo esc_html(trim($spec)); ?></span>
+                    <div style="margin-top:25px; padding-top:20px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">
+                        <div style="font-size:0.75rem; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; font-weight:700;">Host Specialties</div>
+                        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;">
+                            <?php 
+                            $spec_list = array_filter(array_map('trim', explode(',', $specialties)));
+                            foreach($spec_list as $spec): 
+                            ?>
+                                <span class="specialty-pill"><?php echo esc_html($spec); ?></span>
                             <?php endforeach; ?>
                         </div>
                     </div>

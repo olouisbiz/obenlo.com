@@ -1,0 +1,29 @@
+# Ignore everything in wp-content
+/*
+
+# But not the themes and plugins directories
+!/themes/
+!/plugins/
+
+# Ignore everything inside themes
+/themes/*
+# But not our custom theme
+!/themes/obenlo/
+
+# Ignore everything inside plugins
+/plugins/*
+!/plugins/obenlo-booking/
+!/plugins/obenlo-i18n/
+!/plugins/obenlo-pwa/
+!/plugins/obenlo-seo/
+# Documentation and ChatGPT Prompts
+!/obenlo_listing_logic.md
+!/obenlo_profile_logic.md
+!/obenlo_chatgpt_prompts.md
+!/README.md
+!/deployment-guide.md
+!/.gitignore
+
+# Ignore zip files
+*.zip
+!/plugins/obenlo-social/
