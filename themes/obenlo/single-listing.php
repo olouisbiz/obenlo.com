@@ -213,7 +213,7 @@ get_header(); ?>
 
                 <?php 
                 $host_id = get_the_author_meta('ID');
-                $store_name = get_user_meta($host_id, '_obenlo_store_name', true);
+                $store_name = get_user_meta($host_id, 'obenlo_store_name', true);
                 $host_name = !empty($store_name) ? $store_name : get_the_author();
                 $host_url = get_author_posts_url($host_id);
 
