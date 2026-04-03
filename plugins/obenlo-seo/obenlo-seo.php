@@ -18,6 +18,7 @@ define('OBENLO_SEO_URL', plugin_dir_url(__FILE__));
 // Include logic classes
 require_once OBENLO_SEO_DIR . 'includes/class-seo-head.php';
 require_once OBENLO_SEO_DIR . 'includes/class-seo-schema.php';
+require_once OBENLO_SEO_DIR . 'includes/class-seo-sitemap.php';
 
 /**
  * Initialize Obenlo SEO
@@ -28,5 +29,8 @@ function obenlo_seo_init() {
 
     $schema = new Obenlo_SEO_Schema();
     $schema->init();
+
+    $sitemap = new Obenlo_SEO_Sitemap();
+    $sitemap->init();
 }
 add_action('plugins_loaded', 'obenlo_seo_init');

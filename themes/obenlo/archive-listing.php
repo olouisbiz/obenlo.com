@@ -6,6 +6,9 @@
 get_header(); ?>
 
 <main id="primary" class="site-main site-content" style="max-width: 1400px; margin: 0 auto; padding: 40px 40px;">
+    <a href="<?php echo esc_url(home_url('/')); ?>" class="archive-back-link" style="display:inline-block; margin-bottom:20px; color:#222; text-decoration:none; font-weight: 600; font-size: 0.95rem; transition: transform 0.2s;">
+        &larr; Back to Explore
+    </a>
     <header class="archive-header" style="margin-bottom: 60px; padding-bottom: 30px; border-bottom: 1px solid #ebebeb;">
         <h1 class="page-title" style="font-size: 2.2rem; font-weight: 800; color: #222; margin: 0;">
             <?php 

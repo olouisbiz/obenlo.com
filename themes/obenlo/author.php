@@ -288,6 +288,9 @@ if ($is_demo_preview) $hosting_since = 2024;
         <div class="hero-banner"></div>
         <div class="hero-overlay"></div>
         <div class="hero-container">
+            <a href="<?php echo esc_url(home_url('/listings/')); ?>" class="hero-back-link" style="display:inline-block; margin-bottom:20px; color:rgba(255,255,255,0.9); text-decoration:none; font-weight: 500; font-size: 0.95rem; transition: transform 0.2s;">
+                &larr; Back to Listings
+            </a>
             <div class="hero-text">
                 <h1><?php echo esc_html($store_name); ?></h1>
                 <?php if($store_tagline): ?>

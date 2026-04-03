@@ -156,11 +156,14 @@ get_header(); ?>
 
         <div class="listing-header">
             <?php if ($parent_id): ?>
-                <a href="<?php echo get_permalink($parent_id); ?>" style="display:inline-block; margin-bottom:15px; color:#666; text-decoration:none;">
+                <a href="<?php echo get_permalink($parent_id); ?>" style="display:inline-block; margin-bottom:15px; color:#666; text-decoration:none; font-weight: 500;">
                     &larr; Back to <?php echo esc_html(get_the_title($parent_id)); ?>
                 </a>
-            <?php
-    endif; ?>
+            <?php else: ?>
+                <a href="<?php echo esc_url(home_url('/listings/')); ?>" style="display:inline-block; margin-bottom:15px; color:#666; text-decoration:none; font-weight: 500;">
+                    &larr; Back to Listings
+                </a>
+            <?php endif; ?>
             
             <h1 class="listing-title" style="margin-bottom: 5px;"><?php the_title(); ?></h1>
             <div style="color: #666; font-size: 0.9em; display: flex; align-items: center; gap: 5px;">

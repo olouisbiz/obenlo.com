@@ -6,12 +6,12 @@
 get_header();
 ?>
 
-<div class="static-page-header" style="background: #f7f7f7; padding: 60px 20px; text-align: center; border-bottom: 1px solid #eee;">
-    <h1 style="font-size: 3em;">Terms of Service</h1>
-    <p style="color: #666; font-size: 1.2em;">The rules and guidelines for using the Obenlo platform.</p>
+<div class="static-page-header" style="background: linear-gradient(135deg, #e61e4d 0%, #ff5a5f 100%); padding: 80px 20px; text-align: center; color: #fff; margin-bottom: 20px;">
+    <h1 style="font-size: 3.5rem; margin-bottom: 10px;"><?php esc_html_e( 'Terms of Service', 'obenlo' ); ?></h1>
+    <p style="font-size: 1.1rem; opacity: 0.9;"><?php esc_html_e( 'Last Updated: April 2026', 'obenlo' ); ?></p>
 </div>
 
-<div class="static-page-content" style="max-width: 800px; margin: 0 auto; padding: 80px 20px; line-height: 1.8; color: #444;">
+<div class="static-page-content" style="max-width: 850px; margin: 0 auto; padding: 60px 20px; line-height: 1.8; color: #444;">
     
     <h2>1. Acceptance of Terms</h2>
     <p>By accessing and using the Obenlo platform, you agree to be bound by these Terms of Service, our Privacy Policy, and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.</p>

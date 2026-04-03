@@ -40,7 +40,6 @@
                 <li><a href="<?php echo home_url('/cancellation-policy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Cancellation Policy', 'obenlo'); ?></a></li>
                 <li><a href="<?php echo home_url('/refund-policy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Refund Policy', 'obenlo'); ?></a></li>
                 <li><a href="<?php echo home_url('/guest-rules'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Guest Rules', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/global-policies'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Global Policies', 'obenlo'); ?></a></li>
             </ul>
         </div>
 

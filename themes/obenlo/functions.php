@@ -51,18 +51,8 @@ remove_action('wp_head', 'wlwmanifest_link');
 remove_action('wp_head', 'wp_shortlink_wp_head');
 
 
-/**
- * Redirect /sitemap.xml to /wp-sitemap.xml
- */
-function obenlo_sitemap_redirect()
-{
-    $request_uri = $_SERVER['REQUEST_URI'] ?? '';
-    if (untrailingslashit($request_uri) === '/sitemap.xml') {
-        wp_redirect(home_url('/wp-sitemap.xml'), 301);
-        exit;
-    }
-}
-add_action('template_redirect', 'obenlo_sitemap_redirect');
+// Redirect /sitemap.xml to /wp-sitemap.xml
+// Removed: Sitemap now handled natively by Obenlo SEO plugin.
 
 /**
  * Add Security and Legitimacy Headers

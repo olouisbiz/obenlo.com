@@ -5,12 +5,12 @@
 
 get_header(); ?>
 
-<div class="static-page-header" style="background: #f7f7f7; padding: 60px 20px; text-align: center; border-bottom: 1px solid #eee;">
-    <h1 style="font-size: 3em; color: #222;"><?php esc_html_e( 'Global Guest Rules', 'obenlo' ); ?></h1>
-    <p style="color: #666; font-size: 1.25rem;"><?php esc_html_e( 'Standard expectations for all guests using Obenlo.', 'obenlo' ); ?></p>
+<div class="static-page-header" style="background: linear-gradient(135deg, #e61e4d 0%, #ff5a5f 100%); padding: 80px 20px; text-align: center; color: #fff; margin-bottom: 20px;">
+    <h1 style="font-size: 3.5rem; margin-bottom: 10px;"><?php esc_html_e( 'Global Guest Rules', 'obenlo' ); ?></h1>
+    <p style="font-size: 1.1rem; opacity: 0.9;"><?php esc_html_e( 'Last Updated: April 2026', 'obenlo' ); ?></p>
 </div>
 
-<div class="static-page-content" style="max-width: 850px; margin: 0 auto; padding: 80px 20px; line-height: 1.8; color: #444;">
+<div class="static-page-content" style="max-width: 850px; margin: 0 auto; padding: 60px 20px; line-height: 1.8; color: #444;">
     
     <h2>1. Respect the Community</h2>
     <p><?php esc_html_e( 'Obenlo is built on mutual respect. Guests are expected to treat hosts, their properties, and the local neighborhood with care and consideration.', 'obenlo' ); ?></p>
