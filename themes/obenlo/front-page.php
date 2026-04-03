@@ -274,15 +274,38 @@ if ( $hide_demo_content && ! $user_can_see_demo ) {
         <p style="color: #666; margin-bottom: 40px;"><?php esc_html_e( 'Obenlo experiences through the eyes of our community.', 'obenlo' ); ?></p>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
             <?php
-            // Mock reviews for now - later can pull from actual comments/meta
-            $mock_reviews = array(
-                array('author' => 'Sarah', 'comment' => 'The mountain experience was breathtaking. The host was so professional!', 'rating' => 5, 'date' => 'March 2026'),
-                array('author' => 'Michael', 'comment' => 'Obenlo made booking our summer stay so simple. Highly recommend this platform.', 'rating' => 5, 'date' => 'February 2026'),
-                array('author' => 'Elena', 'comment' => 'Unique services that I couldnt find anywhere else. A truly casual and friendly vibe.', 'rating' => 4, 'date' => 'January 2026'),
+            $testimony_args = array(
+                'post_type'      => 'testimony',
+                'posts_per_page' => 5,
+                'post_status'    => 'publish',
+                'orderby'        => 'date',
+                'order'          => 'DESC'
             );
-            foreach ( $mock_reviews as $review ) {
-                include locate_template('template-parts/content-review-card.php');
-            }
+            $testimony_query = new WP_Query( $testimony_args );
+
+            if ( $testimony_query->have_posts() ) :
+                while ( $testimony_query->have_posts() ) : $testimony_query->the_post();
+                    $review = array(
+                        'author'  => get_the_author(),
+                        'comment' => get_the_content(),
+                        'rating'  => get_post_meta( get_the_ID(), '_obenlo_testimony_rating', true ),
+                        'date'    => get_the_date('F Y'),
+                        'is_real' => true
+                    );
+                    include locate_template('template-parts/content-review-card.php');
+                endwhile;
+                wp_reset_postdata();
+            else :
+                // Mock fallback
+                $mock_reviews = array(
+                    array('author' => 'Sarah', 'comment' => 'The mountain experience was breathtaking. The host was so professional!', 'rating' => 5, 'date' => 'March 2026'),
+                    array('author' => 'Michael', 'comment' => 'Obenlo made booking our summer stay so simple. Highly recommend this platform.', 'rating' => 5, 'date' => 'February 2026'),
+                    array('author' => 'Elena', 'comment' => 'Unique services that I couldnt find anywhere else. A truly casual and friendly vibe.', 'rating' => 4, 'date' => 'January 2026'),
+                );
+                foreach ( $mock_reviews as $review ) {
+                    include locate_template('template-parts/content-review-card.php');
+                }
+            endif;
             ?>
         </div>
     </section>

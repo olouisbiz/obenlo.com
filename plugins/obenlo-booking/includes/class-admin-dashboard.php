@@ -25,6 +25,7 @@ class Obenlo_Booking_Admin_Dashboard
         add_action('admin_post_obenlo_toggle_listing_suspension', array($this, 'handle_toggle_listing_suspension'));
         add_action('admin_post_obenlo_toggle_user_suspension', array($this, 'handle_toggle_user_suspension'));
         add_action('admin_post_obenlo_trash_listing', array($this, 'handle_trash_listing'));
+        add_action('admin_post_obenlo_admin_testimony_action', array($this, 'handle_testimony_action'));
     }
 
     public function add_admin_menu()
@@ -88,6 +89,7 @@ class Obenlo_Booking_Admin_Dashboard
                     <a href="<?php echo $base_url; ?>bookings" class="<?php echo $tab === 'bookings' ? 'active' : ''; ?>">Bookings</a>
                     <a href="<?php echo $base_url; ?>payments" class="<?php echo $tab === 'payments' ? 'active' : ''; ?>">Payments</a>
                     <a href="<?php echo $base_url; ?>reviews" class="<?php echo $tab === 'reviews' ? 'active' : ''; ?>">Reviews</a>
+                    <a href="<?php echo $base_url; ?>testimonies" class="<?php echo $tab === 'testimonies' ? 'active' : ''; ?>">Testimonies</a>
                     <a href="<?php echo $base_url; ?>messaging" class="<?php echo $tab === 'messaging' ? 'active' : ''; ?>">Messaging</a>
                 <?php
         endif; ?>
@@ -146,6 +148,9 @@ class Obenlo_Booking_Admin_Dashboard
                 break;
             case 'reviews':
                 $this->render_reviews_tab();
+                break;
+            case 'testimonies':
+                $this->render_testimonies_tab();
                 break;
             default:
                 $this->render_overview_tab();
@@ -1865,6 +1870,104 @@ class Obenlo_Booking_Admin_Dashboard
         }
 
         wp_safe_redirect(add_query_arg('tab', 'listings', wp_get_referer()));
+        exit;
+    }
+
+    private function render_testimonies_tab()
+    {
+        $testimonies = get_posts(array(
+            'post_type' => 'testimony',
+            'post_status' => array('pending', 'publish', 'draft'),
+            'posts_per_page' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC'
+        ));
+        ?>
+        <h2>User Testimonies (Obenlo Love)</h2>
+        <p>Moderation queue for platform-wide testimonials. Approved testimonies appear on the homepage.</p>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Testimony</th>
+                    <th>Rating</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($testimonies)): ?>
+                    <tr><td colspan="6" style="text-align:center;">No testimonies found.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($testimonies as $t): 
+                        $user = get_userdata($t->post_author);
+                        $rating = get_post_meta($t->ID, '_obenlo_testimony_rating', true);
+                        $status = $t->post_status;
+                    ?>
+                        <tr>
+                            <td><?php echo get_the_date('', $t->ID); ?></td>
+                            <td>
+                                <strong><?php echo $user ? esc_html($user->display_name) : 'Unknown'; ?></strong><br>
+                                <small><?php echo $user ? esc_html($user->user_email) : ''; ?></small>
+                            </td>
+                            <td style="max-width: 400px;">
+                                <strong><?php echo esc_html($t->post_title); ?></strong><br>
+                                <span style="font-size:0.9em; color:#666;"><?php echo esc_html($t->post_content); ?></span>
+                            </td>
+                            <td>
+                                <div style="color:#f59e0b;">
+                                    <?php for($i=1; $i<=5; $i++) echo ($i <= $rating ? '★' : '☆'); ?>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge <?php echo $status === 'publish' ? 'badge-host' : 'badge-guest'; ?>">
+                                    <?php echo esc_html(strtoupper($status)); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="display:inline;">
+                                    <input type="hidden" name="action" value="obenlo_admin_testimony_action">
+                                    <input type="hidden" name="testimony_id" value="<?php echo $t->ID; ?>">
+                                    <?php wp_nonce_field('testimony_action_' . $t->ID); ?>
+                                    
+                                    <?php if ($status !== 'publish'): ?>
+                                        <button type="submit" name="testimony_status" value="publish" class="btn-approve" style="background:none; border:none; cursor:pointer;">Approve</button>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($status !== 'trash'): ?>
+                                        <button type="submit" name="testimony_status" value="trash" class="btn-reject" style="background:none; border:none; cursor:pointer;" onclick="return confirm('Trash this testimony?')">Trash</button>
+                                    <?php endif; ?>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+        <?php
+    }
+
+    public function handle_testimony_action()
+    {
+        if (!current_user_can('administrator')) {
+            wp_die('Unauthorized');
+        }
+
+        $testimony_id = isset($_POST['testimony_id']) ? intval($_POST['testimony_id']) : 0;
+        $new_status   = isset($_POST['testimony_status']) ? sanitize_text_field($_POST['testimony_status']) : '';
+
+        check_admin_referer('testimony_action_' . $testimony_id);
+
+        if ($testimony_id && in_array($new_status, array('publish', 'trash', 'pending'))) {
+            wp_update_post(array(
+                'ID' => $testimony_id,
+                'post_status' => $new_status
+            ));
+        }
+
+        wp_safe_redirect(add_query_arg('tab', 'testimonies', wp_get_referer()));
         exit;
     }
 

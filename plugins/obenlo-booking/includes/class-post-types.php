@@ -143,6 +143,28 @@ class Obenlo_Booking_Post_Types {
             'has_archive'     => false,
             'show_in_rest'    => true,
         ) );
+
+        // 6. Testimony CPT
+        register_post_type( 'testimony', array(
+            'label'           => __( 'Testimony', 'obenlo-booking' ),
+            'labels'          => array( 
+                'name' => 'Testimonies', 
+                'singular_name' => 'Testimony',
+                'add_new' => 'Add New Testimony',
+                'add_new_item' => 'Add New Testimony',
+                'edit_item' => 'Edit Testimony',
+                'view_item' => 'View Testimony'
+            ),
+            'supports'        => array( 'title', 'editor', 'author', 'thumbnail' ),
+            'public'          => true, // Publicly visible for queries
+            'show_ui'         => true,
+            'show_in_menu'    => true,
+            'menu_icon'       => 'dashicons-heart', // Heart icon for testimonials
+            'capability_type' => 'post',
+            'has_archive'     => false,
+            'show_in_rest'    => true,
+            'exclude_from_search' => true,
+        ) );
     }
 
     public function register_taxonomies() {

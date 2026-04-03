@@ -22,6 +22,7 @@ class Obenlo_Booking_Frontend_Dashboard
         add_action('admin_post_obenlo_export_bookings', array($this, 'handle_export_bookings'));
         add_action('admin_post_obenlo_reply_review', array($this, 'handle_reply_review'));
         add_action('admin_post_obenlo_approve_review', array($this, 'handle_approve_review'));
+        add_action('admin_post_obenlo_save_testimony', array($this, 'handle_save_testimony'));
         add_action('init', array($this, 'handle_global_location_fix'));
     }
 
@@ -60,6 +61,10 @@ class Obenlo_Booking_Frontend_Dashboard
         if (!in_array('host', (array)$user->roles) && !in_array('administrator', (array)$user->roles)) {
             return '<div style="padding: 100px 20px; text-align: center;"><p style="font-size: 1.2rem; color: #666;">You do not have permission to view the host dashboard.</p></div>';
         }
+
+        $is_admin = in_array('administrator', (array)$user->roles);
+        $is_host  = true; // We already checked above
+        $is_guest = false; // This is the HOST dashboard now
 
         $user_id = get_current_user_id();
         $action = isset($_GET['action']) ? sanitize_text_field($_GET['action']) : 'overview';
@@ -156,46 +161,62 @@ class Obenlo_Booking_Frontend_Dashboard
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     <span><?php echo __('Overview', 'obenlo'); ?></span>
                 </a>
-                <a href="?action=list" class="sidebar-link <?php echo($action === 'list' || $action === 'edit') ? 'active' : ''; ?>">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    <span><?php echo __('My Listings', 'obenlo'); ?></span>
-                </a>
-                <a href="?action=bookings" class="sidebar-link <?php echo $action === 'bookings' ? 'active' : ''; ?>">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    <span><?php echo __('Bookings', 'obenlo'); ?></span>
-                </a>
-                <a href="?action=storefront" class="sidebar-link <?php echo $action === 'storefront' ? 'active' : ''; ?>">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <span><?php echo __('Storefront', 'obenlo'); ?></span>
-                </a>
-                <a href="?action=reviews" class="sidebar-link <?php echo $action === 'reviews' ? 'active' : ''; ?>">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <span><?php echo __('Reviews', 'obenlo'); ?></span>
-                </a>
+
+                <?php if ($is_host): ?>
+                    <a href="?action=list" class="sidebar-link <?php echo($action === 'list' || $action === 'edit') ? 'active' : ''; ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span><?php echo __('My Listings', 'obenlo'); ?></span>
+                    </a>
+                    <a href="?action=bookings" class="sidebar-link <?php echo $action === 'bookings' ? 'active' : ''; ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span><?php echo __('Bookings', 'obenlo'); ?></span>
+                    </a>
+                    <a href="?action=storefront" class="sidebar-link <?php echo $action === 'storefront' ? 'active' : ''; ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span><?php echo __('Storefront', 'obenlo'); ?></span>
+                    </a>
+                    <a href="?action=reviews" class="sidebar-link <?php echo $action === 'reviews' ? 'active' : ''; ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <span><?php echo __('Reviews', 'obenlo'); ?></span>
+                    </a>
+                <?php endif; ?>
+
                 <a href="?action=messages" class="sidebar-link <?php echo $action === 'messages' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     <span><?php echo __('Messages', 'obenlo'); ?></span>
                 </a>
-                <a href="?action=broadcasts" class="sidebar-link <?php echo $action === 'broadcasts' ? 'active' : ''; ?>">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                    <span><?php echo __('Broadcasts', 'obenlo'); ?></span>
+
+                <a href="?action=testimony" class="sidebar-link <?php echo $action === 'testimony' ? 'active' : ''; ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    <span><?php echo __('Obenlo Love', 'obenlo'); ?></span>
                 </a>
-                <a href="?action=availability" class="sidebar-link <?php echo $action === 'availability' ? 'active' : ''; ?>">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <span><?php echo __('Availability', 'obenlo'); ?></span>
-                </a>
-                <a href="?action=payouts" class="sidebar-link <?php echo $action === 'payouts' ? 'active' : ''; ?>">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                    <span><?php echo __('Payout Settings', 'obenlo'); ?></span>
-                </a>
+
+                <?php if ($is_host): ?>
+                    <a href="?action=broadcasts" class="sidebar-link <?php echo $action === 'broadcasts' ? 'active' : ''; ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        <span><?php echo __('Broadcasts', 'obenlo'); ?></span>
+                    </a>
+                    <a href="?action=availability" class="sidebar-link <?php echo $action === 'availability' ? 'active' : ''; ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span><?php echo __('Availability', 'obenlo'); ?></span>
+                    </a>
+                    <a href="?action=payouts" class="sidebar-link <?php echo $action === 'payouts' ? 'active' : ''; ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        <span><?php echo __('Payout Settings', 'obenlo'); ?></span>
+                    </a>
+                <?php endif; ?>
+
                 <a href="?action=support" class="sidebar-link <?php echo $action === 'support' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                     <span><?php echo __('Help Center', 'obenlo'); ?></span>
                 </a>
-                <a href="?action=guide" class="sidebar-link <?php echo $action === 'guide' ? 'active' : ''; ?>">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
-                    <span><?php echo __('Host Guide', 'obenlo'); ?></span>
-                </a>
+
+                <?php if ($is_host): ?>
+                    <a href="?action=guide" class="sidebar-link <?php echo $action === 'guide' ? 'active' : ''; ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+                        <span><?php echo __('Host Guide', 'obenlo'); ?></span>
+                    </a>
+                <?php endif; ?>
 
                 <div style="margin-top:auto; padding-top:20px; border-top:1px solid #eee;">
                     <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" class="sidebar-link" style="opacity:0.8;">
@@ -290,12 +311,13 @@ class Obenlo_Booking_Frontend_Dashboard
             echo do_shortcode('[obenlo_messages_page]');
         }
         elseif ($action === 'broadcasts') {
-            echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Platform Broadcasts', 'obenlo') . '</h2></div>';
-            echo '<p style="margin-bottom:30px; color:#666; padding: 0 20px;">' . __('Stay updated with official announcements from the Obenlo team.', 'obenlo') . '</p>';
-            echo '<div style="padding: 0 20px;">' . do_shortcode('[obenlo_broadcasts_page]') . '</div>';
+            $this->render_broadcasts_tab();
         }
         elseif ($action === 'availability') {
             $this->render_availability_tab();
+        }
+        elseif ($action === 'testimony') {
+            $this->render_testimony_section();
         }
         elseif ($action === 'payouts') {
             $this->render_payout_tab();
@@ -3118,6 +3140,244 @@ class Obenlo_Booking_Frontend_Dashboard
         wp_set_comment_status($comment_id, 'approve');
 
         wp_safe_redirect(add_query_arg(array('action' => 'reviews', 'message' => 'approved'), home_url('/host-dashboard')));
+        exit;
+    }
+
+    private function render_broadcasts_tab() {
+        echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Platform Broadcasts', 'obenlo') . '</h2></div>';
+        echo '<p style="margin-bottom:30px; color:#666; padding: 0 20px;">' . __('Stay updated with official announcements from the Obenlo team.', 'obenlo') . '</p>';
+        echo '<div style="padding: 0 20px;">' . do_shortcode('[obenlo_broadcasts_page]') . '</div>';
+    }
+
+    private function render_trips_section() {
+        $user_id = get_current_user_id();
+        $bookings = get_posts( array(
+            'post_type'      => 'booking',
+            'author'         => $user_id,
+            'posts_per_page' => -1,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ) );
+        ?>
+        <div class="dashboard-header">
+            <h2 class="dashboard-title"><?php echo __('My Trips', 'obenlo'); ?></h2>
+        </div>
+        <p style="color:#666; font-size:1.05rem; margin-bottom:40px;"><?php echo __('Your booking history and confirmation codes.', 'obenlo'); ?></p>
+
+        <?php if ( empty( $bookings ) ) : ?>
+            <div style="text-align:center; padding:80px 40px; background:#fff; border:1px dashed #ddd; border-radius:24px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="width:64px; height:64px; margin:0 auto 20px; display:block;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <h3 style="color:#555; font-size:1.3rem; margin:0 0 10px 0;"><?php echo __('No trips yet', 'obenlo'); ?></h3>
+                <p style="color:#888; margin:0 0 30px 0;"><?php echo __('Explore listings and make your first booking!', 'obenlo'); ?></p>
+                <a href="<?php echo esc_url( home_url('/listings') ); ?>" class="btn-primary"><?php echo __('Explore Listings', 'obenlo'); ?></a>
+            </div>
+        <?php else : ?>
+            <div style="display:flex; flex-direction:column; gap:25px;">
+                <?php foreach ( $bookings as $booking ) :
+                    $listing_id   = get_post_meta( $booking->ID, '_obenlo_listing_id', true );
+                    $listing_title = $listing_id ? get_the_title( $listing_id ) : 'Unknown Listing';
+                    $listing_url  = $listing_id ? get_permalink( $listing_id ) : '#';
+                    $start_date   = get_post_meta( $booking->ID, '_obenlo_start_date', true );
+                    $end_date     = get_post_meta( $booking->ID, '_obenlo_end_date', true );
+                    $status       = get_post_meta( $booking->ID, '_obenlo_booking_status', true );
+                    $conf_code    = get_post_meta( $booking->ID, '_obenlo_confirmation_code', true );
+                    $thumb_url    = $listing_id && has_post_thumbnail( $listing_id ) ? get_the_post_thumbnail_url( $listing_id, 'medium' ) : '';
+
+                    $status_class = 'badge-info';
+                    if ( in_array( $status, ['confirmed', 'approved', 'completed'] ) ) { $status_class = 'badge-success'; }
+                    if ( in_array( $status, ['declined', 'cancelled'] ) )               { $status_class = 'badge-danger'; }
+                    if ( $status === 'pending_payment' )                                  { $status_class = 'badge-warning'; }
+                ?>
+                    <div style="background:#fff; border:1px solid #eee; border-radius:24px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.02); display:flex; gap:0; transition:all 0.3s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,0.05)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.02)';" >
+
+                        <?php if ( $thumb_url ) : ?>
+                            <div style="width:200px; flex-shrink:0; background:url('<?php echo esc_url($thumb_url); ?>') center/cover; min-height:160px;"></div>
+                        <?php endif; ?>
+
+                        <div style="padding:30px; flex-grow:1;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
+                                <div>
+                                    <span class="badge <?php echo $status_class; ?>" style="margin-bottom:10px;">
+                                        <?php echo esc_html( ucwords( str_replace('_', ' ', $status) ) ); ?>
+                                    </span>
+                                    <h3 style="margin:0; font-size:1.25rem; font-weight:800; color:#222;">
+                                        <a href="<?php echo esc_url($listing_url); ?>" style="color:inherit; text-decoration:none;"><?php echo esc_html($listing_title); ?></a>
+                                    </h3>
+                                    <div style="color:#888; font-size:0.9rem; margin-top:6px; font-weight:500;">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:5px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                        <?php echo esc_html($start_date); ?>
+                                        <?php echo $end_date ? ' &rarr; ' . esc_html($end_date) : ''; ?>
+                                    </div>
+                                </div>
+                                <?php if ( $conf_code ) : ?>
+                                    <div style="text-align:right;">
+                                        <div style="font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:#e61e4d; margin-bottom:4px; opacity:0.8;"><?php echo __('Code', 'obenlo'); ?></div>
+                                        <div style="font-size:1.4rem; font-weight:900; font-family: 'JetBrains Mono', monospace; color:#222; letter-spacing:1px;"><?php echo esc_html($conf_code); ?></div>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #f9f9f9; padding-top:20px;">
+                                <a href="<?php echo esc_url($listing_url); ?>" class="btn-outline" style="padding:8px 20px; font-size:0.85rem;"><?php echo __('View Listing', 'obenlo'); ?></a>
+                                <a href="?action=messages" class="btn-primary" style="padding:8px 20px; font-size:0.85rem;"><?php echo __('Contact Host', 'obenlo'); ?></a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+        <?php
+    }
+
+    private function render_testimony_section() {
+        $user_id = get_current_user_id();
+        $user = wp_get_current_user();
+        
+        // Fetch existing testimonies by this user
+        $my_testimonies = get_posts(array(
+            'post_type' => 'testimony',
+            'author' => $user_id,
+            'posts_per_page' => -1,
+            'post_status' => array('publish', 'pending', 'draft')
+        ));
+        ?>
+        <div class="dashboard-header">
+            <h2 class="dashboard-title"><?php echo __('Obenlo Love', 'obenlo'); ?></h2>
+        </div>
+        <div style="background:#fffcf2; border:1px solid #fde047; border-left:4px solid #eab308; border-radius:12px; padding:20px; margin-bottom:40px;">
+            <p style="color:#854d0e; font-size:1.05rem; margin:0; line-height:1.6;">
+                <?php echo sprintf(__('Share your experience with %s! We love hearing how our platform helps our community. Hosts and guests can write their own story!', 'obenlo'), '<strong>Obenlo</strong>'); ?>
+            </p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:50px; align-items: start;">
+            
+            <!-- Submission Form -->
+            <div style="background:#fff; border:1px solid #eee; border-radius:24px; padding:40px; box-shadow:0 10px 30px rgba(0,0,0,0.02);">
+                <h4 style="margin-top:0; margin-bottom:25px; font-size:1.2rem; font-weight:800;"><?php echo __('Write a Testimony', 'obenlo'); ?></h4>
+                
+                <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST">
+                    <input type="hidden" name="action" value="obenlo_save_testimony">
+                    <?php wp_nonce_field('save_testimony', 'testimony_nonce'); ?>
+
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block; font-weight:700; margin-bottom:10px; font-size:0.9rem; color:#444;"><?php echo __('How would you sum up your experience?', 'obenlo'); ?></label>
+                        <input type="text" name="testimony_title" placeholder="<?php echo esc_attr(__('e.g. Best platform for local stays!', 'obenlo')); ?>" required style="width:100%; padding:15px; border:1.5px solid #eee; border-radius:14px; outline:none; font-family:inherit; transition:border-color 0.2s;" onfocus="this.style.borderColor='#222'" onblur="this.style.borderColor='#eee'">
+                    </div>
+
+                    <div style="margin-bottom:25px;">
+                        <label style="display:block; font-weight:700; margin-bottom:10px; font-size:0.9rem; color:#444;"><?php echo __('Your Feedback', 'obenlo'); ?></label>
+                        <textarea name="testimony_content" placeholder="<?php echo esc_attr(__('Tell us more details...', 'obenlo')); ?>" required style="width:100%; padding:15px; border:1.5px solid #eee; border-radius:14px; outline:none; font-family:inherit; height:150px; transition:border-color 0.2s;" onfocus="this.style.borderColor='#222'" onblur="this.style.borderColor='#eee'"></textarea>
+                    </div>
+
+                    <div style="margin-bottom:30px;">
+                        <label style="display:block; font-weight:700; margin-bottom:10px; font-size:0.9rem; color:#444;"><?php echo __('Star Rating', 'obenlo'); ?></label>
+                        <div style="display:flex; gap:10px;">
+                            <?php for($i=1; $i<=5; $i++): ?>
+                                <label style="cursor:pointer;">
+                                    <input type="radio" name="testimony_rating" value="<?php echo $i; ?>" <?php checked($i, 5); ?> style="display:none;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dash-rating-star" data-val="<?php echo $i; ?>" style="width:30px; height:30px; transition:all 0.2s; color:#ddd;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                </label>
+                            <?php endfor; ?>
+                        </div>
+                    </div>
+
+                    <script>
+                        document.querySelectorAll('.dash-rating-star').forEach(star => {
+                            star.addEventListener('click', function() {
+                                let val = this.dataset.val;
+                                document.querySelectorAll('.dash-rating-star').forEach(s => {
+                                    if(s.dataset.val <= val) {
+                                        s.style.fill = '#f59e0b';
+                                        s.style.color = '#f59e0b';
+                                    } else {
+                                        s.style.fill = 'none';
+                                        s.style.color = '#ddd';
+                                    }
+                                });
+                            });
+                        });
+                        // Init 5 stars
+                        document.querySelector('.dash-rating-star[data-val="5"]').click();
+                    </script>
+
+                    <button type="submit" class="btn-primary" style="width:100%; padding:16px; border-radius:16px; font-size:1rem;"><?php echo __('Submit My Testimony', 'obenlo'); ?></button>
+                    <p style="text-align:center; color:#888; font-size:0.8rem; margin-top:15px;"><?php echo __('Note: Testimonies are reviewed by our team before going live.', 'obenlo'); ?></p>
+                </form>
+            </div>
+
+            <!-- Previous Testimonies List -->
+            <div>
+                <h4 style="margin-top:0; margin-bottom:25px; font-size:1.2rem; font-weight:800;"><?php echo __('Your Past Feedback', 'obenlo'); ?></h4>
+                <?php if (empty($my_testimonies)): ?>
+                    <div style="background:#fcfcfc; border:1px dashed #ddd; padding:50px 30px; border-radius:24px; text-align:center;">
+                        <p style="color:#aaa; font-size:0.95rem; line-height:1.6;"><?php echo __('You havent written any testimonies yet. Be the first to share the love!', 'obenlo'); ?></p>
+                    </div>
+                <?php else: ?>
+                    <div style="display:flex; flex-direction:column; gap:20px;">
+                        <?php foreach($my_testimonies as $t): 
+                            $status = $t->post_status;
+                            $rating = get_post_meta($t->ID, '_obenlo_testimony_rating', true);
+                            $status_class = 'badge-info';
+                            if($status === 'publish') $status_class = 'badge-success';
+                            if($status === 'pending') $status_class = 'badge-warning';
+                        ?>
+                            <div style="background:#fff; border:1px solid #eee; border-radius:20px; padding:25px;">
+                                <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:12px;">
+                                    <span class="badge <?php echo $status_class; ?>"><?php echo esc_html(strtoupper($status)); ?></span>
+                                    <div style="color:#f59e0b; display:flex; gap:2px;">
+                                        <?php for($i=1; $i<=5; $i++): ?>
+                                            <svg viewBox="0 0 24 24" fill="<?php echo $i <= $rating ? 'currentColor' : 'none'; ?>" stroke="currentColor" stroke-width="2" style="width:14px; height:14px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                        <?php endfor; ?>
+                                    </div>
+                                </div>
+                                <h5 style="margin:0 0 8px 0; font-size:1.05rem; font-weight:700; color:#222;"><?php echo esc_html($t->post_title); ?></h5>
+                                <p style="margin:0; font-size:0.9rem; color:#666; line-height:1.5;"><?php echo wp_trim_words($t->post_content, 30); ?></p>
+                                <div style="margin-top:15px; font-size:0.75rem; color:#aaa; font-weight:500;">
+                                    <?php echo get_the_date('', $t->ID); ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+        </div>
+        <?php
+    }
+
+    public function handle_save_testimony() {
+        if (!is_user_logged_in()) {
+            wp_die('Unauthorized');
+        }
+
+        if (!isset($_POST['testimony_nonce']) || !wp_verify_nonce($_POST['testimony_nonce'], 'save_testimony')) {
+            wp_die('Security check failed');
+        }
+
+        $user_id = get_current_user_id();
+        $title   = sanitize_text_field($_POST['testimony_title']);
+        $content = sanitize_textarea_field($_POST['testimony_content']);
+        $rating  = isset($_POST['testimony_rating']) ? intval($_POST['testimony_rating']) : 5;
+
+        $testimony_id = wp_insert_post(array(
+            'post_type'    => 'testimony',
+            'post_status'  => 'pending', // Admins must approve
+            'post_title'   => $title,
+            'post_content' => $content,
+            'post_author'  => $user_id,
+        ));
+
+        if (!is_wp_error($testimony_id)) {
+            update_post_meta($testimony_id, '_obenlo_testimony_rating', $rating);
+        }
+
+        $user = wp_get_current_user();
+        $is_host = in_array('host', (array)$user->roles);
+        $redir_dashboard = $is_host ? home_url('/host-dashboard') : home_url('/account');
+
+        $redirect_url = add_query_arg(array('action' => 'testimony', 'message' => 'saved'), $redir_dashboard);
+        wp_safe_redirect($redirect_url);
         exit;
     }
 
