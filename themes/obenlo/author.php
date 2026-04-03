@@ -209,7 +209,7 @@ if ($is_demo_preview) $hosting_since = 2024;
         -webkit-backdrop-filter: blur(25px);
         border: 1px solid rgba(255, 255, 255, 0.4);
         border-radius: 32px;
-        padding: 40px;
+        padding: 24px 30px 30px;
         box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
         display: flex;
         flex-direction: column;
@@ -219,13 +219,13 @@ if ($is_demo_preview) $hosting_since = 2024;
     }
 
     .host-logo-large {
-        width: 150px;
-        height: 150px;
+        width: 120px;
+        height: 120px;
         border-radius: 50%;
         border: 4px solid white;
         box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        margin-top: -85px;
-        margin-bottom: 20px;
+        margin-top: -70px;
+        margin-bottom: 15px;
         background: white;
         object-fit: cover;
     }
@@ -260,9 +260,9 @@ if ($is_demo_preview) $hosting_since = 2024;
     .specialty-pill {
         background: rgba(0, 0, 0, 0.05);
         color: #1a1a1a;
-        padding: 7px 16px;
+        padding: 5px 12px;
         border-radius: 50px;
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         font-weight: 700;
         border: 1px solid rgba(0,0,0,0.02);
         transition: all 0.25s ease;
@@ -274,18 +274,18 @@ if ($is_demo_preview) $hosting_since = 2024;
     }
     
     .contact-host-btn {
-        margin-top: 25px;
+        margin-top: 20px;
         background: linear-gradient(135deg, #FF385C 0%, #E61E4D 100%);
         color: #fff !important;
         border: none;
-        padding: 16px 32px;
-        border-radius: 14px;
+        padding: 12px 24px;
+        border-radius: 12px;
         font-weight: 700;
-        font-size: 1.05rem;
+        font-size: 1rem;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         box-shadow: 0 8px 25px rgba(230,30,77,0.35);
         text-decoration: none;
@@ -410,10 +410,10 @@ if ($is_demo_preview) $hosting_since = 2024;
 
             <div class="host-glass-card">
                 <img src="<?php echo esc_url($logo_url); ?>" alt="" class="host-logo-large">
-                <h2 style="margin:0; font-size:1.8rem; font-weight:800; color:#1a1a1a;">
+                <h2 style="margin:0; font-size:1.6rem; font-weight:800; color:#1a1a1a;">
                     <?php echo esc_html($store_name); ?>
                 </h2>
-                <p style="color:#666; margin:10px 0 20px; font-weight:500;">
+                <p style="color:#666; margin:8px 0 15px; font-weight:500; font-size:0.95rem;">
                     <?php if($store_location): ?>
                         📍 <?php echo esc_html($store_location); ?>
                     <?php endif; ?>
@@ -436,8 +436,8 @@ if ($is_demo_preview) $hosting_since = 2024;
                 ?>
 
                 <?php if($specialties): ?>
-                    <div style="margin-top:25px; padding-top:20px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">
-                        <div style="font-size:0.75rem; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; font-weight:700;">Host Specialties</div>
+                    <div style="margin-top:15px; padding-top:15px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">
+                        <div style="font-size:0.7rem; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; font-weight:700;">Host Specialties</div>
                         <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;">
                             <?php 
                             $spec_list = array_filter(array_map('trim', explode(',', $specialties)));
