@@ -489,8 +489,18 @@ class Obenlo_Booking_Admin_Dashboard
                 $display_status = '<span style="color:#e61e4d; font-weight:bold;">Suspended</span>';
             }
 
+            $parent_id = $listing->post_parent;
+            $type_badge = '';
+            if ($parent_id == 0) {
+                $type_badge = '<span class="badge" style="background:#10b981; color:#fff; font-size:0.65rem; margin-left:8px; vertical-align:middle;">PARENT</span>';
+            } else {
+                $parent_title = get_the_title($parent_id);
+                $type_badge = '<span class="badge" style="background:#3b82f6; color:#fff; font-size:0.65rem; margin-left:8px; vertical-align:middle;">UNIT</span>';
+                $type_badge .= '<div style="font-size:0.75rem; color:#888; margin-top:2px;">of ' . esc_html($parent_title) . '</div>';
+            }
+
             echo '<tr>';
-            echo '<td><strong>' . esc_html($listing->post_title) . '</strong></td>';
+            echo '<td><strong>' . esc_html($listing->post_title) . '</strong>' . $type_badge . '</td>';
             echo '<td>' . ($host ? esc_html($host->display_name) : 'Unknown') . '</td>';
             echo '<td>' . $display_status . '</td>';
             echo '<td>$' . esc_html($price) . '</td>';
