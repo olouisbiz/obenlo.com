@@ -21,6 +21,8 @@
 !/obenlo_profile_logic.md
 !/obenlo_chatgpt_prompts.md
 !/README.md
+!/CHANGELOG.md
+!/sync.ps1
 !/deployment-guide.md
 !/.gitignore
 

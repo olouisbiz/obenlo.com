@@ -64,5 +64,31 @@ Obenlo supports multiple global and local payment methods via native class imple
 *   **Real-time Logic**: Uses vanilla JS `setInterval` to ping AJAX endpoints, avoiding the need for heavy socket dependencies.
 
 ---
+
+## 6. Maintenance & Versioning
+
+### 🔄 Repository Synchronization
+To reset your local environment and sync with the latest stable version from GitHub:
+```powershell
+# Run in wp-content directory
+git fetch origin; git reset --hard origin/main; git clean -fd
+```
+
+---
+
+## 📝 Changelog
+
+### [1.3.0] - 2026-04-04
+#### Added
+- **Global Sync**: Unified all plugins and theme to **v1.3.0**.
+- **Admin Visibility**: Added **[PARENT]** and **[UNIT]** badges to the listing management table.
+- **Maintenance**: Standardized centralized version tracking and sync workflows.
+
+#### Fixed
+- **Host Storefront**: Corrected "Hosted by" data key to prioritize custom Store Names.
+- **Data Synchronization**: Fixed specialties overwriting store names in the host dashboard.
+- **PWA**: Refined mobile install prompt sequences.
+
+---
 *Manual Updated: April 2026*
 *Maintained by the Obenlo Development Team*
