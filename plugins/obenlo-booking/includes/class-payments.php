@@ -411,7 +411,7 @@ class Obenlo_Booking_Payments
         }
 
         // Notify for new booking request
-        Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'new_booking');
+        // Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'new_booking');
 
         // Redirect to appropriate payment gateway
         if ($total_price <= 0) {

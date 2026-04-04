@@ -7,7 +7,8 @@ All notable changes to the **Obenlo Platform** will be documented in this file.
 - Unified version synchronization across the entire ecosystem (Theme + 5 Plugins).
 - Introduced `CHANGELOG.md` for professional version tracking.
 - Created `sync.ps1` maintenance script for effortless repository synchronization.
-- **Admin Dashboard**: Visual badges for **[PARENT]** and **[UNIT]** listings to improve inventory oversight.
+- **Host Dashboard**: Visual badges for **[PARENT]** and **[UNIT]** listings to improve inventory oversight.
+- **Notifications**: Refined booking alerts to trigger only upon **payment completion**, eliminating noise from abandoned/unpaid booking attempts.
 
 ### Fixed
 - **Host Storefront**: Synchronized "Hosted by" data key to prioritize the custom Store Name over the internal WordPress username.

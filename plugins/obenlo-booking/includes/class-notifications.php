@@ -267,6 +267,20 @@ class Obenlo_Booking_Notifications
                 $body_html .= '<p style="margin:0 0 16px 0;">Total paid: <strong>$' . esc_html($total) . '</strong></p>';
 
                 self::send_html_to_user($guest_id, $subject, $body_html, 'View My Trips', home_url('/account?tab=trips'), true);
+
+                // Notify Host of confirmed booking
+                $host_subject = "Confirmed Booking: $listing_title";
+                if (get_option('obenlo_payment_mode') === 'sandbox') {
+                    $host_subject = "[TEST MODE] " . $host_subject;
+                }
+                $host_msg = "A new confirmed booking has been received for your listing: <strong>$listing_title</strong>.<br>Total Paid: <strong>\$$total</strong>";
+                self::send_html_to_user($host_id, $host_subject, "<p style='margin:0 0 16px 0;'>$host_msg</p>", 'View Bookings', home_url('/host-dashboard/?action=bookings'), true);
+
+                // Notify Admin of confirmed booking
+                $admin_email = get_option('obenlo_admin_email', 'info@obenlo.com');
+                $admin_msg   = "A new confirmed booking for $listing_title (\$$total) has been processed on the platform.";
+                $admin_html  = self::wrap_template("Confirmed Platform Booking #$booking_id", self::text_to_html($admin_msg));
+                self::schedule_mail($admin_email, "Confirmed Platform Booking #$booking_id", $admin_html);
                 break;
 
             case 'booking_cancelled':
