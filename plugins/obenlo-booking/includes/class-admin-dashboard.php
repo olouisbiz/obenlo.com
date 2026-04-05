@@ -88,16 +88,85 @@ class Obenlo_Booking_Admin_Dashboard
                 .badge-host { background: #e61e4d; color: #fff; }
                 .badge-guest { background: #333; color: #fff; }
 
+                /* Tablet Optimization */
                 @media (max-width: 1024px) {
                     .dashboard-sidebar { width: 80px; padding: 40px 10px; }
                     .sidebar-link span { display: none; }
                     .sidebar-link { justify-content: center; padding: 15px; }
+                    .dashboard-content { padding: 40px 30px; }
+                    .dashboard-title { font-size: 1.8rem; }
                 }
 
+                /* Mobile Optimization - Transform to Bottom Navigation */
                 @media (max-width: 768px) {
-                    .obenlo-dashboard-container { flex-direction: column; }
-                    .dashboard-sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid #eee; padding: 10px 15px; overflow-x: auto; flex-direction: row; gap: 10px; top: 0; }
-                    .sidebar-link { white-space: nowrap; border-radius: 10px; }
+                    .obenlo-dashboard-container { flex-direction: column; min-height: auto; margin-bottom: 80px; }
+                    
+                    .dashboard-sidebar { 
+                        width: 100%; 
+                        height: auto; 
+                        position: fixed; 
+                        bottom: 0; 
+                        left: 0; 
+                        right: 0; 
+                        top: auto !important; 
+                        border-right: none; 
+                        border-top: 1px solid #eee; 
+                        background: #fff;
+                        padding: 10px 5px; 
+                        flex-direction: row; 
+                        justify-content: space-around;
+                        overflow-x: auto; 
+                        gap: 0; 
+                        z-index: 10000;
+                        box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+                    }
+                    
+                    .sidebar-link { 
+                        flex-direction: column; 
+                        gap: 2px; 
+                        padding: 8px 5px; 
+                        min-width: 60px;
+                        background: transparent !important;
+                        color: #999;
+                        border-radius: 0;
+                        white-space: nowrap;
+                    }
+                    
+                    .sidebar-link span { display: block; font-size: 0.65rem; font-weight: 700; opacity: 0.8; }
+                    .sidebar-link svg { width: 22px; height: 22px; }
+                    .sidebar-link.active { color: #e61e4d; box-shadow: none; }
+                    .sidebar-link.active span { opacity: 1; }
+                    
+                    .dashboard-content { padding: 30px 20px; }
+                    .dashboard-header { margin-bottom: 25px; }
+                    
+                    /* Admin Table Mobile Refactor (Card View) */
+                    .admin-table, .admin-table thead, .admin-table tbody, .admin-table th, .admin-table td, .admin-table tr { 
+                        display: block; 
+                    }
+                    .admin-table thead tr { position: absolute; top: -9999px; left: -9999px; }
+                    .admin-table tr { margin-bottom: 15px; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; }
+                    .admin-table td { 
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 15px;
+                        text-align: right;
+                        border-bottom: 1px solid #f9f9f9 !important;
+                        font-size: 0.85rem;
+                        min-height: 45px;
+                    }
+                    .admin-table td:last-child { border-bottom: none !important; }
+                    .admin-table td::before { 
+                        content: attr(data-label); 
+                        font-weight: 700; 
+                        color: #888; 
+                        text-transform: uppercase; 
+                        font-size: 0.7rem; 
+                        margin-right: 15px;
+                        text-align: left;
+                        flex-shrink: 0;
+                    }
                 }
             </style>
 
@@ -502,11 +571,11 @@ class Obenlo_Booking_Admin_Dashboard
             }
 
             echo '<tr>';
-            echo '<td><strong>' . esc_html($listing->post_title) . '</strong>' . $type_badge . '</td>';
-            echo '<td>' . ($host ? esc_html($host->display_name) : 'Unknown') . '</td>';
-            echo '<td>' . $display_status . '</td>';
-            echo '<td>$' . esc_html($price) . '</td>';
-            echo '<td>';
+            echo '<td data-label="Title"><strong>' . esc_html($listing->post_title) . '</strong>' . $type_badge . '</td>';
+            echo '<td data-label="Host">' . ($host ? esc_html($host->display_name) : 'Unknown') . '</td>';
+            echo '<td data-label="Status">' . $display_status . '</td>';
+            echo '<td data-label="Price">$' . esc_html($price) . '</td>';
+            echo '<td data-label="Actions">';
             echo '<a href="' . get_permalink($listing->ID) . '" target="_blank">View</a> | ';
             if (current_user_can('manage_options')) {
                 $location = get_post_meta($listing->ID, '_obenlo_location', true);
@@ -611,21 +680,21 @@ class Obenlo_Booking_Admin_Dashboard
                 $v_badge = 'badge-warning';
 ?>
                 <tr>
-                    <td>
+                    <td data-label="User">
                         <div style="font-weight:700;"><?php echo esc_html($user->display_name); ?></div>
                         <div style="font-size:0.8rem; color:#888;"><?php echo esc_html($user->user_email); ?></div>
                     </td>
-                    <td><span class="badge badge-info"><?php echo ucfirst($user->roles[0]); ?></span></td>
+                    <td data-label="Role"><span class="badge badge-info"><?php echo ucfirst($user->roles[0]); ?></span></td>
                     <?php 
                     $is_suspended = get_user_meta($user->ID, '_obenlo_is_suspended', true) === 'yes';
                     if ($is_suspended): ?>
-                        <td><span class="badge" style="background:#e61e4d; color:#fff;">Suspended</span></td>
+                        <td data-label="Status"><span class="badge" style="background:#e61e4d; color:#fff;">Suspended</span></td>
                     <?php else: ?>
-                        <td><span class="badge badge-success">Active</span></td>
+                        <td data-label="Status"><span class="badge badge-success">Active</span></td>
                     <?php endif; ?>
-                    <td><span class="badge <?php echo $v_badge; ?>"><?php echo ucfirst($status); ?></span></td>
-                    <td><?php echo date('M d, Y', strtotime($user->user_registered)); ?></td>
-                    <td>
+                    <td data-label="Verification"><span class="badge <?php echo $v_badge; ?>"><?php echo ucfirst($status); ?></span></td>
+                    <td data-label="Joined"><?php echo date('M d, Y', strtotime($user->user_registered)); ?></td>
+                    <td data-label="Actions">
                         <?php if (in_array('host', $user->roles)): 
                             $sus_text = $is_suspended ? 'Restore Host' : 'Suspend Host';
                         ?>
@@ -936,17 +1005,17 @@ class Obenlo_Booking_Admin_Dashboard
                         $details = get_post_meta($payout->ID, '_details', true);
                     ?>
                     <tr>
-                        <td>
+                        <td data-label="Host">
                             <strong><?php echo esc_html($host->display_name); ?></strong><br>
                             <small><?php echo esc_html($host->user_email); ?></small>
                         </td>
-                        <td style="font-size:1.2em; font-weight:700; color:#10b981;">$<?php echo number_format($amount, 2); ?></td>
-                        <td>
+                        <td data-label="Amount" style="font-size:1.2em; font-weight:700; color:#10b981;">$<?php echo number_format($amount, 2); ?></td>
+                        <td data-label="Method / Details">
                             <span class="badge badge-guest" style="text-transform:uppercase;"><?php echo esc_html($method); ?></span><br>
                             <code><?php echo esc_html($details); ?></code>
                         </td>
-                        <td><?php echo get_the_date('', $payout); ?></td>
-                        <td>
+                        <td data-label="Date Requested"><?php echo get_the_date('', $payout); ?></td>
+                        <td data-label="Actions">
                             <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline-block;">
                                 <input type="hidden" name="action" value="obenlo_process_payout">
                                 <input type="hidden" name="payout_id" value="<?php echo $payout->ID; ?>">
@@ -1179,12 +1248,12 @@ class Obenlo_Booking_Admin_Dashboard
             $mode_label = ($mode === 'live') ? 'LIVE' : 'TEST';
             
             echo '<tr>';
-            echo '<td>#' . $booking->ID . '</td>';
-            echo '<td>' . get_the_title($listing_id) . '</td>';
-            echo '<td>$' . number_format(floatval($total), 2) . '</td>';
-            echo '<td>' . esc_html($status) . '</td>';
-            echo '<td><span class="badge" style="background:' . $mode_color . '; color:#fff;">' . $mode_label . '</span></td>';
-            echo '<td>' . get_the_date('', $booking->ID) . '</td>';
+            echo '<td data-label="ID">#' . $booking->ID . '</td>';
+            echo '<td data-label="Listing">' . get_the_title($listing_id) . '</td>';
+            echo '<td data-label="Total">$' . number_format(floatval($total), 2) . '</td>';
+            echo '<td data-label="Status">' . esc_html($status) . '</td>';
+            echo '<td data-label="Mode"><span class="badge" style="background:' . $mode_color . '; color:#fff;">' . $mode_label . '</span></td>';
+            echo '<td data-label="Date">' . get_the_date('', $booking->ID) . '</td>';
             echo '</tr>';
         }
         echo '</table>';
@@ -1596,10 +1665,10 @@ class Obenlo_Booking_Admin_Dashboard
                 if ($status === 'rejected') { $status_bg = '#fee2e2'; $status_color = '#991b1b'; }
 
                 echo '<tr>';
-                echo '<td><strong>' . esc_html($user->display_name) . '</strong><br><small><a href="mailto:'.esc_attr($user->user_email).'" style="color:#666;">' . esc_html($user->user_email) . '</a></small></td>';
-                echo '<td><span style="background:'.$status_bg.'; color:'.$status_color.'; padding:4px 10px; border-radius:12px; font-weight:700; font-size:0.8rem; text-transform:uppercase;">' . esc_html($status) . '</span></td>';
+                echo '<td data-label="Host"><strong>' . esc_html($user->display_name) . '</strong><br><small><a href="mailto:'.esc_attr($user->user_email).'" style="color:#666;">' . esc_html($user->user_email) . '</a></small></td>';
+                echo '<td data-label="Status"><span style="background:'.$status_bg.'; color:'.$status_color.'; padding:4px 10px; border-radius:12px; font-weight:700; font-size:0.8rem; text-transform:uppercase;">' . esc_html($status) . '</span></td>';
                 
-                echo '<td>';
+                echo '<td data-label="Document">';
                 if ($doc_url) {
                     echo '<a href="' . esc_url($doc_url) . '" target="_blank" style="color:#1d4ed8; font-weight:600; text-decoration:none;">📄 View Document</a>';
                 } else {
@@ -1607,7 +1676,7 @@ class Obenlo_Booking_Admin_Dashboard
                 }
                 echo '</td>';
                 
-                echo '<td>';
+                echo '<td data-label="Actions">';
                 // Only show approve/reject for pending, but allow overriding if needed
                 if ($status === 'pending' || $status === 'rejected') {
                     echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline-block; margin-right:10px;">';
@@ -1626,6 +1695,7 @@ class Obenlo_Booking_Admin_Dashboard
                     echo '</form>';
                 }
                 echo '</td>';
+                echo '</tr>';
                 
                 echo '</tr>';
             }
@@ -1771,12 +1841,12 @@ class Obenlo_Booking_Admin_Dashboard
             if ($comment->comment_approved === 'trash') { $status_label = ' [TRASH]'; $status_color = '#ef4444'; }
 
             echo '<tr>';
-            echo '<td><strong>' . esc_html($comment->comment_author) . '</strong><br><small>' . esc_html($comment->comment_author_email) . '</small></td>';
-            echo '<td><span style="color:#FFD700; font-weight:bold; font-size:1.1em;">' . $stars . '</span><br><small>(' . $rating . '/5)</small></td>';
-            echo '<td><a href="' . get_permalink($listing->ID) . '" target="_blank" style="color:#222; font-weight:600; text-decoration:none;">' . esc_html($listing->post_title) . '</a></td>';
-            echo '<td style="max-width:300px;"><div style="font-size:0.9em; line-height:1.4; color:#444;">' . esc_html($comment->comment_content) . ' <span style="color:'.$status_color.'; font-weight:bold; font-size:0.75rem;">' . $status_label . '</span></div></td>';
-            echo '<td>' . date('M j, Y', strtotime($comment->comment_date)) . '</td>';
-            echo '<td>';
+            echo '<td data-label="Author"><strong>' . esc_html($comment->comment_author) . '</strong><br><small>' . esc_html($comment->comment_author_email) . '</small></td>';
+            echo '<td data-label="Rating"><span style="color:#FFD700; font-weight:bold; font-size:1.1em;">' . $stars . '</span><br><small>(' . $rating . '/5)</small></td>';
+            echo '<td data-label="Listing"><a href="' . get_permalink($listing->ID) . '" target="_blank" style="color:#222; font-weight:600; text-decoration:none;">' . esc_html($listing->post_title) . '</a></td>';
+            echo '<td data-label="Review" style="max-width:300px;"><div style="font-size:0.9em; line-height:1.4; color:#444;">' . esc_html($comment->comment_content) . ' <span style="color:'.$status_color.'; font-weight:bold; font-size:0.75rem;">' . $status_label . '</span></div></td>';
+            echo '<td data-label="Date">' . date('M j, Y', strtotime($comment->comment_date)) . '</td>';
+            echo '<td data-label="Actions">';
             echo '<div style="display:flex; gap:10px; align-items:center;">';
             
             $base_action_url = admin_url('admin-post.php?action=obenlo_admin_review_action&comment_id=' . $comment->comment_ID);
@@ -1919,26 +1989,26 @@ class Obenlo_Booking_Admin_Dashboard
                         $status = $t->post_status;
                     ?>
                         <tr>
-                            <td><?php echo get_the_date('', $t->ID); ?></td>
-                            <td>
+                            <td data-label="Date"><?php echo get_the_date('', $t->ID); ?></td>
+                            <td data-label="User">
                                 <strong><?php echo $user ? esc_html($user->display_name) : 'Unknown'; ?></strong><br>
                                 <small><?php echo $user ? esc_html($user->user_email) : ''; ?></small>
                             </td>
-                            <td style="max-width: 400px;">
+                            <td data-label="Testimony" style="max-width: 400px;">
                                 <strong><?php echo esc_html($t->post_title); ?></strong><br>
                                 <span style="font-size:0.9em; color:#666;"><?php echo esc_html($t->post_content); ?></span>
                             </td>
-                            <td>
+                            <td data-label="Rating">
                                 <div style="color:#f59e0b;">
                                     <?php for($i=1; $i<=5; $i++) echo ($i <= $rating ? '★' : '☆'); ?>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <span class="badge <?php echo $status === 'publish' ? 'badge-host' : 'badge-guest'; ?>">
                                     <?php echo esc_html(strtoupper($status)); ?>
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Actions">
                                 <form action="<?php echo admin_url('admin-post.php'); ?>" method="POST" style="display:inline;">
                                     <input type="hidden" name="action" value="obenlo_admin_testimony_action">
                                     <input type="hidden" name="testimony_id" value="<?php echo $t->ID; ?>">
@@ -2004,11 +2074,11 @@ class Obenlo_Booking_Admin_Dashboard
                 $guest = get_userdata($refund->post_author);
 
                 echo '<tr>';
-                echo '<td>#' . esc_html($booking_id) . '</td>';
-                echo '<td>' . ($guest ? esc_html($guest->display_name) : 'Unknown') . '</td>';
-                echo '<td>' . esc_html($refund->post_content) . '</td>';
-                echo '<td><span class="badge badge-info" style="background:' . ($status === 'completed' ? '#ecfdf5; color:#059669;' : ($status === 'pending' ? '#fff7ed; color:#d97706;' : '#fef2f2; color:#dc2626;')) . '">' . ucfirst($status) . '</span></td>';
-                echo '<td>';
+                echo '<td data-label="Booking ID">#' . esc_html($booking_id) . '</td>';
+                echo '<td data-label="Guest">' . ($guest ? esc_html($guest->display_name) : 'Unknown') . '</td>';
+                echo '<td data-label="Reason">' . esc_html($refund->post_content) . '</td>';
+                echo '<td data-label="Status"><span class="badge badge-info" style="background:' . ($status === 'completed' ? '#ecfdf5; color:#059669;' : ($status === 'pending' ? '#fff7ed; color:#d97706;' : '#fef2f2; color:#dc2626;')) . '">' . ucfirst($status) . '</span></td>';
+                echo '<td data-label="Actions">';
                 if ($status === 'pending') {
                     echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline;">';
                     echo '<input type="hidden" name="action" value="obenlo_admin_refund_action">';
