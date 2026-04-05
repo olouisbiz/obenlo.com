@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Obenlo Booking
  * Description: Custom 100% bespoke booking platform for Stays, Experiences, and Services.
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: Obenlo
  * Author URI: https://obenlo.com
  */
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-define('OBENLO_BOOKING_VERSION', '1.3.0');
+define('OBENLO_BOOKING_VERSION', '1.4.0');
 define('OBENLO_BOOKING_DIR', plugin_dir_path(__FILE__));
 define('OBENLO_BOOKING_URL', plugin_dir_url(__FILE__));
 
@@ -38,6 +38,7 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-badges.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-wishlist.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-virtual-security.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-payments-webhook.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-refunds.php';
 
 // Initialize the plugin
 function obenlo_booking_init()
@@ -90,6 +91,9 @@ function obenlo_booking_init()
 
     $virtual_security = new Obenlo_Booking_Virtual_Security();
     $virtual_security->init();
+
+    $refunds = new Obenlo_Booking_Refunds();
+    $refunds->init();
 
     $webhook = new Obenlo_Booking_Payments_Webhook();
     add_action('rest_api_init', array($webhook, 'register_routes'));

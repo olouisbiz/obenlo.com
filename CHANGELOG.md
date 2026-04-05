@@ -2,6 +2,18 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.4.0] - 2026-04-05
+### Added
+- **Guest Refund System**: Guests can now request refunds for Confirmed, Declined, or Cancelled (if paid) bookings directly from "My Trips".
+- **Guest Cancellation**: Added ability for guests to cancel Pending and Pending Payment bookings.
+- **Host Refund Management**: Real-time "Approve" and "Reject" actions for hosts within their dashboard.
+- **Automated Financial Sync**: Host balance (`_obenlo_host_balance`) is automatically adjusted on refund approval.
+- **Refund Status Workflow**: Comprehensive backend for tracking refund requests via a new `refund` post type.
+
+### Improved
+- **Dashboard Visibility**: Unified access to booking actions across all device types.
+- **Secure Transaction Handling**: Enhanced nonce-based security for all guest and host financial actions.
+
 ## [1.3.0] - 2026-04-04
 ### Added
 - Unified version synchronization across the entire ecosystem (Theme + 5 Plugins).

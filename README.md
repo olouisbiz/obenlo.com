@@ -78,6 +78,13 @@ git fetch origin; git reset --hard origin/main; git clean -fd
 
 ## 📝 Changelog
 
+### [1.4.0] - 2026-04-05
+#### Added
+- **Refund Ecosystem**: Comprehensive system for Guest refund requests and Host-side approval/rejection.
+- **Financial Sync**: Automated host balance deduction upon refund approval for accounting accuracy.
+- **Self-Service**: Added guest booking cancellation and refund status transparent tracking.
+- **Global Sync**: Unified all platform modules to **v1.4.0**.
+
 ### [1.3.0] - 2026-04-04
 #### Added
 - **Global Sync**: Unified all plugins and theme to **v1.3.0**.

@@ -165,6 +165,27 @@ class Obenlo_Booking_Post_Types {
             'show_in_rest'    => true,
             'exclude_from_search' => true,
         ) );
+
+        // 7. Refund CPT (Request & History)
+        register_post_type( 'refund', array(
+            'label'           => __( 'Refund', 'obenlo-booking' ),
+            'labels'          => array( 
+                'name' => 'Refunds', 
+                'singular_name' => 'Refund',
+                'add_new' => 'Add New Refund',
+                'add_new_item' => 'Add New Refund Request',
+                'edit_item' => 'Edit Refund',
+                'view_item' => 'View Refund'
+            ),
+            'supports'        => array( 'title', 'editor', 'author' ),
+            'public'          => false,
+            'show_ui'         => true,
+            'show_in_menu'    => true,
+            'menu_icon'       => 'dashicons-undo',
+            'capability_type' => 'post',
+            'has_archive'     => false,
+            'show_in_rest'    => true,
+        ) );
     }
 
     public function register_taxonomies() {

@@ -179,7 +179,11 @@ class Obenlo_Booking_Frontend_Dashboard
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                         <span><?php echo __('Reviews', 'obenlo'); ?></span>
                     </a>
-                <?php endif; ?>
+                    <a href="?action=refunds" class="sidebar-link <?php echo $action === 'refunds' ? 'active' : ''; ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span><?php echo __('Refunds', 'obenlo'); ?></span>
+                    </a>
+<?php endif; ?>
 
                 <a href="?action=messages" class="sidebar-link <?php echo $action === 'messages' ? 'active' : ''; ?>">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -305,6 +309,9 @@ class Obenlo_Booking_Frontend_Dashboard
         }
         elseif ($action === 'reviews') {
             $this->render_reviews_list();
+        }
+        elseif ($action === 'refunds') {
+            $this->render_refunds_tab();
         }
         elseif ($action === 'messages') {
             echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Inbox', 'obenlo') . '</h2></div>';
@@ -839,7 +846,19 @@ class Obenlo_Booking_Frontend_Dashboard
                                             }
                                             echo '<a href="' . esc_url($complete_url) . '" class="btn-outline" style="padding:7px 15px; font-size:0.8rem;" onclick="return confirm(\'' . esc_js(__('Mark as completed?', 'obenlo')) . '\')">' . __('Complete', 'obenlo') . '</a>';
                                         }
-                                    } else {
+                                    } 
+                                    
+                                    // Add Refund button for hosts
+                                    if (in_array($status, ['confirmed', 'approved', 'completed'])) {
+                                        echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="margin:0; display:inline;" onsubmit="return confirm(\'' . esc_js(__('Are you sure you want to initiate a refund for this booking?', 'obenlo')) . '\');">';
+                                        echo '<input type="hidden" name="action" value="obenlo_initiate_refund">';
+                                        echo '<input type="hidden" name="booking_id" value="' . $booking->ID . '">';
+                                        wp_nonce_field('initiate_refund', 'refund_nonce');
+                                        echo '<button type="submit" style="background:none; border:none; color:#ef4444; font-weight:700; font-size:0.8rem; cursor:pointer; padding:0; text-decoration:underline; margin-left:8px;">' . __('Refund', 'obenlo') . '</button>';
+                                        echo '</form>';
+                                    }
+
+                                    if (in_array($status, ['declined', 'cancelled', 'completed']) && !in_array($status, ['confirmed', 'approved'])) {
                                         echo '<span style="color:#bbb; font-weight:600; font-size:0.8rem; text-transform:uppercase;">Archived</span>';
                                     }
                                     ?>
@@ -3390,4 +3409,78 @@ class Obenlo_Booking_Frontend_Dashboard
         wp_safe_redirect($redirect_url);
         exit;
     }
+    private function render_refunds_tab()
+    {
+        $user_id = get_current_user_id();
+        $refunds = get_posts(array(
+            'post_type' => 'refund',
+            'meta_query' => array(
+                array(
+                    'key' => '_obenlo_host_id',
+                    'value' => $user_id
+                )
+            ),
+            'posts_per_page' => -1,
+            'post_status' => 'any'
+        ));
+
+        // If no meta match (legacy or host-initiated via author), try author
+        if (empty($refunds)) {
+             $refunds = get_posts(array(
+                'post_type' => 'refund',
+                'author' => $user_id,
+                'posts_per_page' => -1,
+                'post_status' => 'any'
+            ));
+        }
+
+        echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Refunds', 'obenlo') . '</h2></div>';
+        echo '<table class="admin-table">';
+        echo '<thead><tr><th>Booking</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>';
+        echo '<tbody>';
+
+        if (empty($refunds)) {
+            echo '<tr><td colspan="4" style="text-align:center; padding:40px;">' . __('No refund history found.', 'obenlo') . '</td></tr>';
+        } else {
+            foreach ($refunds as $refund) {
+                $booking_id = get_post_meta($refund->ID, '_obenlo_booking_id', true);
+                $status = get_post_meta($refund->ID, '_obenlo_refund_status', true);
+                $amount = get_post_meta($booking_id, '_obenlo_total_price', true);
+
+                echo '<tr>';
+                echo '<td data-label="Booking">#' . esc_html($booking_id) . '</td>';
+                echo '<td data-label="Amount">$' . number_format(floatval($amount), 2) . '</td>';
+                echo '<td data-label="Status"><span class="badge badge-info" style="background:' . ($status === 'completed' ? '#ecfdf5; color:#059669;' : ($status === 'pending' ? '#fff7ed; color:#d97706;' : '#fef2f2; color:#dc2626;')) . '">' . ucfirst($status) . '</span></td>';
+                echo '<td data-label="Date">' . get_the_date('', $refund->ID) . '</td>';
+                echo '<td data-label="Actions">';
+                if ($status === 'pending') {
+                    echo '<div style="display:flex; gap:8px;">';
+                    // Approve Form
+                    echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="margin:0;">';
+                    echo '<input type="hidden" name="action" value="obenlo_host_refund_action">';
+                    echo '<input type="hidden" name="refund_id" value="' . $refund->ID . '">';
+                    echo '<input type="hidden" name="refund_status" value="approved">';
+                    wp_nonce_field('host_refund_action', 'host_refund_nonce');
+                    echo '<button type="submit" class="btn btn-primary" style="background:#10b981; border:none; padding:6px 12px; font-size:12px; border-radius:8px;" onmouseover="this.style.background=\'#059669\'" onmouseout="this.style.background=\'#10b981\'" onclick="return confirm(\'Are you sure you want to approve this refund? This will deduct the amount from your balance.\');">Approve</button>';
+                    echo '</form>';
+                    // Reject Form
+                    echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="margin:0;">';
+                    echo '<input type="hidden" name="action" value="obenlo_host_refund_action">';
+                    echo '<input type="hidden" name="refund_id" value="' . $refund->ID . '">';
+                    echo '<input type="hidden" name="refund_status" value="rejected">';
+                    wp_nonce_field('host_refund_action', 'host_refund_nonce');
+                    echo '<button type="submit" class="btn btn-secondary" style="background:#ef4444; border:none; padding:6px 12px; font-size:12px; border-radius:8px;" onmouseover="this.style.background=\'#dc2626\'" onmouseout="this.style.background=\'#ef4444\'" onclick="return confirm(\'Are you sure you want to reject this refund?\');">Reject</button>';
+                    echo '</form>';
+                    echo '</div>';
+                } else {
+                    echo '<span style="color:#aaa; font-size:12px;">' . __('No actions available', 'obenlo') . '</span>';
+                }
+                echo '</td>';
+                echo '</tr>';
+            }
+        }
+        echo '</tbody></table>';
+    }
+
 }
+

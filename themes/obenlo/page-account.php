@@ -79,6 +79,9 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
         <a href="?tab=guide" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'guide' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'guide' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='guide')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='guide')this.style.background='transparent'">
             Guest Guide
         </a>
+        <a href="?tab=refunds" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'refunds' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'refunds' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='refunds')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='refunds')this.style.background='transparent'">
+            Refunds
+        </a>
         <a href="?tab=testimony" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'testimony' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'testimony' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='testimony')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='testimony')this.style.background='transparent'">
             Obenlo Love
         </a>
@@ -111,7 +114,7 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
                         <div style="width:48px; height:48px; background:#eff6ff; color:#3b82f6; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px; height:24px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         </div>
-                        <h3 style="margin:0 0 8px 0; font-size:1.2rem; font-weight:800;">My Trips</h3>
+                        <h3 style="margin:0 0 8px 0; font-size:1.2rem; font-weight:800;"><?php echo __('My Trips & Bookings', 'obenlo'); ?></h3>
                         <p style="color:#666; font-size:0.95rem; margin:0; line-height:1.5;">View your upcoming bookings and past adventures.</p>
                     </div>
                     <a href="?tab=trips" style="margin-top:20px; display:inline-block; font-weight:700; color:#3b82f6; text-decoration:none;">View Trips &rarr;</a>
@@ -270,6 +273,29 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
                                                     Message Host
                                                 </button>
                                             <?php endif; endif; ?>
+                                        </div>
+                                        
+                                        <div style="margin-top: 15px; display: flex; gap: 12px; justify-content: flex-end; align-items: center;">
+                                            <?php if (in_array($status, ['pending', 'pending_payment'])) : ?>
+                                                <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                                                    <input type="hidden" name="action" value="obenlo_cancel_booking">
+                                                    <input type="hidden" name="booking_id" value="<?php echo $booking->ID; ?>">
+                                                    <?php wp_nonce_field('cancel_booking', 'cancel_nonce'); ?>
+                                                    <button type="submit" style="background: none; border: 1px solid #fee2e2; color: #ef4444; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+                                                        Cancel Booking
+                                                    </button>
+                                                </form>
+                                            <?php elseif (in_array($status, ['confirmed', 'approved', 'completed', 'declined', 'cancelled']) && get_post_meta($booking->ID, '_obenlo_refund_requested', true) !== 'yes') : ?>
+                                                <button onclick="openRefundModal(<?php echo $booking->ID; ?>, '<?php echo esc_js($listing_title); ?>')" 
+                                                        style="background: #f9fafb; border: 1px solid #eee; color: #666; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#ddd'; this.style.background='#f3f4f6'" onmouseout="this.style.borderColor='#eee'; this.style.background='#f9fafb'">
+                                                    Request Refund
+                                                </button>
+                                            <?php elseif (get_post_meta($booking->ID, '_obenlo_refund_requested', true) === 'yes') : ?>
+                                                <span style="font-size: 0.8rem; color: #f97316; font-weight: 700; display: flex; align-items: center; gap: 5px;">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                                    Refund Requested
+                                                </span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -467,8 +493,87 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
                 <?php endif; ?>
             </div>
 
+        <?php elseif ( $tab === 'refunds' ) : ?>
+            <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 30px;">Refund History</h2>
+            <?php
+            $user_refunds = get_posts(array(
+                'post_type' => 'refund',
+                'author' => get_current_user_id(),
+                'posts_per_page' => -1,
+                'post_status' => 'any'
+            ));
+            ?>
+
+            <?php if (empty($user_refunds)) : ?>
+                <div style="text-align: center; padding: 60px 40px; background: #fff; border: 1px solid #eee; border-radius: 20px;">
+                    <h3 style="color: #888;">No refund requests found.</h3>
+                </div>
+            <?php else : ?>
+                <div style="display: grid; gap: 15px;">
+                    <?php foreach ($user_refunds as $refund) : 
+                        $b_id = get_post_meta($refund->ID, '_obenlo_booking_id', true);
+                        $r_status = get_post_meta($refund->ID, '_obenlo_refund_status', true);
+                    ?>
+                        <div style="background: #fff; border: 1px solid #eee; border-radius: 16px; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0;">Booking #<?php echo esc_html($b_id); ?></h4>
+                                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;"><?php echo esc_html($refund->post_content); ?></p>
+                            </div>
+                            <span class="badge badge-info" style="background:<?php echo ($r_status === 'completed' ? '#ecfdf5; color:#059669;' : ($r_status === 'pending' ? '#fff7ed; color:#d97706;' : '#fef2f2; color:#dc2626;')); ?>"><?php echo ucfirst($r_status); ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
         <?php endif; ?>
     </div>
 </div>
+
+<!-- Request Refund Modal -->
+<div id="obenlo-refund-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:24px; width:100%; max-width:500px; padding:40px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); position:relative;">
+        <button onclick="closeRefundModal()" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:24px; color:#aaa; cursor:pointer;">&times;</button>
+        <h3 id="refund-listing-title" style="margin-top:0; font-size:1.5rem; font-weight:900; color:#222;">Request Refund</h3>
+        <p style="color:#666; margin-bottom:25px;">Please provide a reason for your refund request. The host and Obenlo team will review this shortly.</p>
+        
+        <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST">
+            <input type="hidden" name="action" value="obenlo_request_refund">
+            <input type="hidden" id="refund-booking-id" name="booking_id" value="">
+            <?php wp_nonce_field('request_refund', 'refund_nonce'); ?>
+            
+            <label style="display:block; font-weight:700; margin-bottom:10px; color:#444;">Reason for Refund</label>
+            <textarea name="refund_reason" required rows="4" style="width:100%; padding:15px; border:1px solid #eee; border-radius:15px; font-size:1rem; outline:none; transition:all 0.2s; margin-bottom:25px; border: 1.5px solid #eee;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#eee'"></textarea>
+            
+            <div style="display:flex; gap:15px;">
+                <button type="button" onclick="closeRefundModal()" style="flex:1; background:#f9fafb; color:#222; border:none; padding:14px; border-radius:12px; font-weight:700; cursor:pointer;">Cancel</button>
+                <button type="submit" style="flex:1; background:#e61e4d; color:#fff; border:none; padding:14px; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(230,30,77,0.3);">Submit Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openRefundModal(bookingId, listingTitle) {
+    document.getElementById('refund-booking-id').value = bookingId;
+    document.getElementById('refund-listing-title').textContent = 'Refund: ' + listingTitle;
+    const modal = document.getElementById('obenlo-refund-modal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeRefundModal() {
+    const modal = document.getElementById('obenlo-refund-modal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Close on background click
+window.onclick = function(event) {
+    const modal = document.getElementById('obenlo-refund-modal');
+    if (event.target == modal) {
+        closeRefundModal();
+    }
+}
+</script>
 
 <?php get_footer(); ?>

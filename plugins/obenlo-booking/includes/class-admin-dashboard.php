@@ -90,6 +90,7 @@ class Obenlo_Booking_Admin_Dashboard
                     <a href="<?php echo $base_url; ?>payments" class="<?php echo $tab === 'payments' ? 'active' : ''; ?>">Payments</a>
                     <a href="<?php echo $base_url; ?>reviews" class="<?php echo $tab === 'reviews' ? 'active' : ''; ?>">Reviews</a>
                     <a href="<?php echo $base_url; ?>testimonies" class="<?php echo $tab === 'testimonies' ? 'active' : ''; ?>">Testimonies</a>
+                    <a href="<?php echo $base_url; ?>refunds" class="<?php echo $tab === 'refunds' ? 'active' : ''; ?>">Refunds</a>
                     <a href="<?php echo $base_url; ?>messaging" class="<?php echo $tab === 'messaging' ? 'active' : ''; ?>">Messaging</a>
                 <?php
         endif; ?>
@@ -151,6 +152,9 @@ class Obenlo_Booking_Admin_Dashboard
                 break;
             case 'testimonies':
                 $this->render_testimonies_tab();
+                break;
+            case 'refunds':
+                $this->render_refunds_tab();
                 break;
             default:
                 $this->render_overview_tab();
@@ -1979,6 +1983,55 @@ class Obenlo_Booking_Admin_Dashboard
 
         wp_safe_redirect(add_query_arg('tab', 'testimonies', wp_get_referer()));
         exit;
+    }
+
+    private function render_refunds_tab()
+    {
+        $refunds = get_posts(array(
+            'post_type' => 'refund',
+            'posts_per_page' => -1,
+            'post_status' => 'any'
+        ));
+
+        echo '<h3>Refund Management</h3>';
+        echo '<table class="admin-table">';
+        echo '<tr><th>Booking ID</th><th>Guest</th><th>Reason</th><th>Status</th><th>Actions</th></tr>';
+
+        if (empty($refunds)) {
+            echo '<tr><td colspan="5">No refund requests found.</td></tr>';
+        } else {
+            foreach ($refunds as $refund) {
+                $booking_id = get_post_meta($refund->ID, '_obenlo_booking_id', true);
+                $status = get_post_meta($refund->ID, '_obenlo_refund_status', true);
+                $guest = get_userdata($refund->post_author);
+
+                echo '<tr>';
+                echo '<td>#' . esc_html($booking_id) . '</td>';
+                echo '<td>' . ($guest ? esc_html($guest->display_name) : 'Unknown') . '</td>';
+                echo '<td>' . esc_html($refund->post_content) . '</td>';
+                echo '<td><span class="badge badge-info" style="background:' . ($status === 'completed' ? '#ecfdf5; color:#059669;' : ($status === 'pending' ? '#fff7ed; color:#d97706;' : '#fef2f2; color:#dc2626;')) . '">' . ucfirst($status) . '</span></td>';
+                echo '<td>';
+                if ($status === 'pending') {
+                    echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline;">';
+                    echo '<input type="hidden" name="action" value="obenlo_admin_refund_action">';
+                    echo '<input type="hidden" name="refund_id" value="' . $refund->ID . '">';
+                    echo '<input type="hidden" name="refund_status" value="approved">';
+                    echo '<button type="submit" class="btn-approve" style="background:none; border:none; cursor:pointer; padding:0; font:inherit; text-decoration:underline;">Approve</button>';
+                    echo '</form> | ';
+                    echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline;">';
+                    echo '<input type="hidden" name="action" value="obenlo_admin_refund_action">';
+                    echo '<input type="hidden" name="refund_id" value="' . $refund->ID . '">';
+                    echo '<input type="hidden" name="refund_status" value="rejected">';
+                    echo '<button type="submit" class="btn-reject" style="background:none; border:none; cursor:pointer; padding:0; font:inherit; text-decoration:underline;">Reject</button>';
+                    echo '</form>';
+                } else {
+                    echo 'Processed';
+                }
+                echo '</td>';
+                echo '</tr>';
+            }
+        }
+        echo '</table>';
     }
 
 }

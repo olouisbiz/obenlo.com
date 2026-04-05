@@ -8,4 +8,4 @@ git fetch origin
 git reset --hard origin/main
 git clean -fd
 
-Write-Host "Success: Your local environment is now synced with v1.3.0!" -ForegroundColor Green
+Write-Host "Success: Your local environment is now synced with v1.4.0!" -ForegroundColor Green
