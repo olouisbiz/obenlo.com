@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Obenlo Translation
  * Description: Standalone translation system for Obenlo (English, French, Spanish).
- * Version: 1.4.0
+ * Version: 1.5.0
  * Author: Obenlo
  * Author URI: https://obenlo.com
  */

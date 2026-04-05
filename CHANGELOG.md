@@ -2,6 +2,16 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.5.0] - 2026-04-05
+### Added
+- **Premium Mobile Navigation**: Implemented a fixed bottom navigation system for both Site Admin and Frontend Host Dashboards, providing an app-like experience on mobile.
+- **Card-Based Table Logic**: Standardized administrative tables across all dashboards to automatically transform into high-end card layouts on mobile devices.
+- **Responsive Form Layouts**: Added intelligent wrapping for business hours and vacation blocks to ensure a seamless touch experience on smaller screens.
+
+### Improved
+- **UI/UX Consistency**: Unified the design language (Inter typography, Crimson accents, shadow-based interaction feedback) across all administrative interfaces.
+- **Horizontal Stability**: Resolved overlapping content issues in mobile card views by implementing a space-between flexbox layout for labels and data.
+
 ## [1.4.0] - 2026-04-05
 ### Added
 - **Guest Refund System**: Guests can now request refunds for Confirmed, Declined, or Cancelled (if paid) bookings directly from "My Trips".

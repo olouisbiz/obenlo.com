@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Obenlo PWA
  * Description: Standalone Progressive Web App functionality for Obenlo.
- * Version: 1.4.0
+ * Version: 1.5.0
  * Author: Obenlo
  * Author URI: https://obenlo.com
  */
