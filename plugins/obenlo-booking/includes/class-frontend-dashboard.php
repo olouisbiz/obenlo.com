@@ -129,29 +129,75 @@ class Obenlo_Booking_Frontend_Dashboard
                 }
 
                 @media (max-width: 768px) {
-                    .obenlo-dashboard-container { flex-direction: column; }
+                    .obenlo-dashboard-container { flex-direction: column; padding-bottom: 80px; }
                     .dashboard-sidebar { 
                         width: 100%; 
                         height: auto;
-                        position: relative;
+                        position: fixed;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
                         border-right: none; 
-                        border-bottom: 1px solid #eee; 
-                        padding: 10px 15px; 
-                        overflow-x: auto; 
+                        border-top: 1px solid #f0f0f0; 
+                        background: #fff;
+                        padding: 10px 5px; 
                         flex-direction: row; 
-                        gap: 10px; 
-                        scrollbar-width: none;
-                        top: 0;
+                        justify-content: space-around;
+                        overflow-x: auto; 
+                        gap: 0; 
+                        z-index: 10000;
+                        box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+                        top: auto;
                     }
                     .dashboard-sidebar::-webkit-scrollbar { display: none; }
-                    .sidebar-link { white-space: nowrap; border-radius: 10px; }
+                    
+                    .sidebar-link { 
+                        flex-direction: column; 
+                        gap: 2px; 
+                        padding: 8px 5px; 
+                        min-width: 60px;
+                        background: transparent !important;
+                        color: #999;
+                        border-radius: 0;
+                        white-space: nowrap;
+                    }
+                    
+                    .sidebar-link span { display: block; font-size: 0.65rem; font-weight: 700; opacity: 0.8; }
+                    .sidebar-link svg { width: 22px; height: 22px; }
+                    .sidebar-link.active { color: #e61e4d; box-shadow: none; }
+                    .sidebar-link.active span { opacity: 1; }
+                    
+                    .dashboard-content { padding: 30px 20px; }
                     .dashboard-header { flex-direction: column; align-items: flex-start; gap: 20px; }
                     .admin-table, .admin-table tr, .admin-table td { display: block; width: 100%; }
                     .admin-table thead { display: none; }
-                    .admin-table td { border: none; padding: 15px; text-align: right; position: relative; border-radius: 0 !important; }
-                    .admin-table td::before { content: attr(data-label); position: absolute; left: 15px; font-weight: 700; color: #888; text-transform: uppercase; font-size: 0.7rem; }
+                    .admin-table td { 
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 15px;
+                        text-align: right;
+                        border-bottom: 1px solid #f9f9f9 !important;
+                        font-size: 0.85rem;
+                        min-height: 45px;
+                        border-radius: 0 !important;
+                    }
+                    .admin-table td::before { 
+                        content: attr(data-label); 
+                        font-weight: 700; 
+                        color: #888; 
+                        text-transform: uppercase; 
+                        font-size: 0.7rem; 
+                        margin-right: 15px;
+                        text-align: left;
+                        flex-shrink: 0;
+                    }
                     .admin-table td:first-child { padding-top: 25px; border-top-left-radius: 20px !important; border-top-right-radius: 20px !important; }
                     .admin-table td:last-child { border-bottom-left-radius: 20px !important; border-bottom-right-radius: 20px !important; border-bottom: 1px solid #f0f0f0; }
+                    
+                    .grid-row { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+                    .grid-row > label { width: 100% !important; margin-bottom: 5px; }
+                    .grid-row > div { width: 100% !important; display: flex; flex-direction: column; gap: 5px; }
                 }
             </style>
 
@@ -660,10 +706,10 @@ class Obenlo_Booking_Frontend_Dashboard
                         <?php if (!empty($children)): ?>
                             <?php foreach ($children as $child): ?>
                                 <tr style="background:#fafafa;">
-                                    <td data-label="Listing" style="padding-left:30px; font-size:0.85rem; color:#666;">└─ <?php echo get_the_title($child->ID); ?></td>
-                                    <td></td>
-                                    <td data-label="Status"><span class="badge badge-success" style="opacity:0.6; font-size:0.7rem;"><?php echo ucfirst($child->post_status); ?></span></td>
-                                    <td></td>
+                                    <td data-label="<?php echo esc_attr(__('Listing', 'obenlo')); ?>" style="padding-left:30px; font-size:0.85rem; color:#666;">└─ <?php echo get_the_title($child->ID); ?></td>
+                                    <td data-label="<?php echo esc_attr(__('Category', 'obenlo')); ?>"></td>
+                                    <td data-label="<?php echo esc_attr(__('Status', 'obenlo')); ?>"><span class="badge badge-success" style="opacity:0.6; font-size:0.7rem;"><?php echo ucfirst($child->post_status); ?></span></td>
+                                    <td data-label="<?php echo esc_attr(__('Units', 'obenlo')); ?>"></td>
                                     <td data-label="<?php echo esc_attr(__('Actions', 'obenlo')); ?>">
                                         <div style="display:flex; gap:12px; align-items:center;">
                                             <a href="?action=edit&listing_id=<?php echo $child->ID; ?>" style="color:#666; font-size:0.8rem; font-weight:600; text-decoration:none;"><?php echo __('Edit Unit', 'obenlo'); ?></a>
@@ -2643,7 +2689,7 @@ class Obenlo_Booking_Frontend_Dashboard
         if (!empty($history)) {
             echo '<h3 style="font-size:1.2rem; font-weight:800; margin-bottom:20px;">' . __('Payout History', 'obenlo') . '</h3>';
             echo '<div style="background:#fff; border-radius:15px; border:1px solid #eee; overflow:hidden; margin-bottom:40px;">';
-                echo '<table style="width:100%; border-collapse:collapse;">';
+            echo '<table class="admin-table">';
                     echo '<thead style="background:#f9f9fb;"><tr>';
                         echo '<th style="padding:15px; text-align:left; font-size:0.8rem; color:#666;">' . __('Date', 'obenlo') . '</th>';
                         echo '<th style="padding:15px; text-align:left; font-size:0.8rem; color:#666;">' . __('Amount', 'obenlo') . '</th>';
@@ -2658,9 +2704,9 @@ class Obenlo_Booking_Frontend_Dashboard
                         if ($stat === 'cancelled') $stat_color = '#ef4444';
 
                         echo '<tr style="border-top:1px solid #eee;">';
-                            echo '<td style="padding:15px; font-size:0.9rem;">' . get_the_date('', $req) . '</td>';
-                            echo '<td style="padding:15px; font-size:0.9rem; font-weight:700;">' . $currency . number_format($amt, 2) . '</td>';
-                            echo '<td style="padding:15px;"><span style="background:' . $stat_color . '22; color:' . $stat_color . '; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; text-transform:uppercase;">' . $stat . '</span></td>';
+                            echo '<td data-label="' . esc_attr(__('Date', 'obenlo')) . '" style="padding:15px; font-size:0.9rem;">' . get_the_date('', $req) . '</td>';
+                            echo '<td data-label="' . esc_attr(__('Amount', 'obenlo')) . '" style="padding:15px; font-size:0.9rem; font-weight:700;">' . $currency . number_format($amt, 2) . '</td>';
+                            echo '<td data-label="' . esc_attr(__('Status', 'obenlo')) . '" style="padding:15px;"><span style="background:' . $stat_color . '22; color:' . $stat_color . '; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; text-transform:uppercase;">' . $stat . '</span></td>';
                         echo '</tr>';
                     }
                     echo '</tbody>';
