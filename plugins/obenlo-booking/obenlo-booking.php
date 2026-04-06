@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Obenlo Booking
  * Description: Custom 100% bespoke booking platform for Stays, Experiences, and Services.
- * Version: 1.5.0
+ * Version: 1.5.1
  * Author: Obenlo
  * Author URI: https://obenlo.com
  */
@@ -39,6 +39,7 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-wishlist.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-virtual-security.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-payments-webhook.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-refunds.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-sync.php';
 
 // Initialize the plugin
 function obenlo_booking_init()
@@ -97,6 +98,9 @@ function obenlo_booking_init()
 
     $webhook = new Obenlo_Booking_Payments_Webhook();
     add_action('rest_api_init', array($webhook, 'register_routes'));
+
+    $sync = new Obenlo_Booking_Sync();
+    $sync->init();
 
     // Check if we need to run DB updates
     obenlo_booking_update_check();
