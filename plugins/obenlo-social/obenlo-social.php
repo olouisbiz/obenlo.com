@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Obenlo Social Auto-Poster
  * Description:       Manually sync and push your Listings and Blog Posts directly to your official Obenlo Facebook and Instagram accounts.
- * Version:           1.5.0
+ * Version:           1.6.6
  * Author:            Obenlo
  */
 
@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
 
-define( 'OBENLO_SOCIAL_VERSION', '1.4.0' );
+define( 'OBENLO_SOCIAL_VERSION', '1.6.6' );
 define( 'OBENLO_SOCIAL_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OBENLO_SOCIAL_URL', plugin_dir_url( __FILE__ ) );
 
