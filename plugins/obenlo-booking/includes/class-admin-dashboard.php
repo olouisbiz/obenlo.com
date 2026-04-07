@@ -1354,7 +1354,9 @@ class Obenlo_Booking_Admin_Dashboard
         $broadcasts = get_posts(array(
             'post_type' => 'broadcast',
             'posts_per_page' => 10,
-            'post_status' => 'publish'
+            'post_status' => 'publish',
+            'orderby' => 'ID',
+            'order' => 'DESC'
         ));
 
         if (empty($broadcasts)) {
@@ -1400,8 +1402,10 @@ class Obenlo_Booking_Admin_Dashboard
             'posts_per_page' => -1,
             'suppress_filters' => false,
             'meta_key' => '_obenlo_ticket_status',
-            'orderby' => 'meta_value',
-            'order' => 'ASC' // Open tickets first
+            'orderby' => array(
+                'meta_value' => 'ASC', // Open tickets first ('open' < 'resolved')
+                'ID' => 'DESC'         // Newest tickets at the top
+            )
         ));
         if (empty($tickets)) {
             echo '<p>No active tickets.</p>';
