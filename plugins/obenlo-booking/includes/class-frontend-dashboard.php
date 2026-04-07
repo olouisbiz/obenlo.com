@@ -2358,6 +2358,11 @@ class Obenlo_Booking_Frontend_Dashboard
             Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'booking_confirmed');
         }
         elseif ($do_action === 'complete') {
+            $status = get_post_meta($booking_id, '_obenlo_booking_status', true);
+            if ($status !== 'confirmed') {
+                $this->redirect_with_error('cannot_complete_unconfirmed');
+            }
+
             update_post_meta($booking_id, '_obenlo_booking_status', 'completed');
             // Trigger Platform Fee Calculation & Balance Release
             $payments = new Obenlo_Booking_Payments();

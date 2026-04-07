@@ -30,7 +30,7 @@ get_header();
             </div>
             <div class="standard-card">
                 <h4>3. Book with confidence</h4>
-                <p>Our secure payment system protects your money. Hosts are only paid after you've successfully checked in.</p>
+                <p>Our secure payment system protects your money. Hosts are only paid after the experience is successfully completed.</p>
             </div>
         </div>
     </section>
@@ -52,7 +52,7 @@ get_header();
             </div>
             <div class="standard-card">
                 <h4>3. Secure processing</h4>
-                <p>We handle all the financial logistics, ensuring you get paid reliably and on time for every booking.</p>
+                <p>Funds are secured at the time of booking and released to your balance once the trip is marked as "Completed".</p>
             </div>
         </div>
     </section>

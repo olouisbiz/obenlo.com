@@ -143,11 +143,14 @@ class Obenlo_Booking_Refunds
             update_post_meta($refund_id, '_obenlo_refund_status', 'completed');
             update_post_meta($booking_id, '_obenlo_booking_status', 'refunded');
 
-            // Logic to deduct from host balance
-            $net_earnings = floatval(get_post_meta($booking_id, '_obenlo_booking_net_earnings', true));
-            if ($net_earnings > 0) {
-                $current_balance = floatval(get_user_meta($host_id, '_obenlo_host_balance', true));
-                update_user_meta($host_id, '_obenlo_host_balance', $current_balance - $net_earnings);
+            // Only deduct from balance if funds were already released (completed booking)
+            $is_released = (get_post_meta($booking_id, '_obenlo_payout_released', true) === 'yes');
+            if ($is_released) {
+                $net_earnings = floatval(get_post_meta($booking_id, '_obenlo_booking_net_earnings', true));
+                if ($net_earnings > 0) {
+                    $current_balance = floatval(get_user_meta($host_id, '_obenlo_host_balance', true));
+                    update_user_meta($host_id, '_obenlo_host_balance', $current_balance - $net_earnings);
+                }
             }
             Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'refund_approved');
         } else {
@@ -178,12 +181,15 @@ class Obenlo_Booking_Refunds
             update_post_meta($refund_id, '_obenlo_refund_status', 'completed');
             update_post_meta($booking_id, '_obenlo_booking_status', 'refunded');
             
-            // Logic to deduct from host balance
-            $host_id = get_post_meta($booking_id, '_obenlo_host_id', true);
-            $net_earnings = floatval(get_post_meta($booking_id, '_obenlo_booking_net_earnings', true));
-            if ($net_earnings > 0) {
-                $current_balance = floatval(get_user_meta($host_id, '_obenlo_host_balance', true));
-                update_user_meta($host_id, '_obenlo_host_balance', $current_balance - $net_earnings);
+            // Only deduct from balance if funds were already released (completed booking)
+            $is_released = (get_post_meta($booking_id, '_obenlo_payout_released', true) === 'yes');
+            if ($is_released) {
+                $host_id = get_post_meta($booking_id, '_obenlo_host_id', true);
+                $net_earnings = floatval(get_post_meta($booking_id, '_obenlo_booking_net_earnings', true));
+                if ($net_earnings > 0) {
+                    $current_balance = floatval(get_user_meta($host_id, '_obenlo_host_balance', true));
+                    update_user_meta($host_id, '_obenlo_host_balance', $current_balance - $net_earnings);
+                }
             }
         } else {
             update_post_meta($refund_id, '_obenlo_refund_status', 'rejected');
