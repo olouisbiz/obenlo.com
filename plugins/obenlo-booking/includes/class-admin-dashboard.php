@@ -1318,11 +1318,16 @@ class Obenlo_Booking_Admin_Dashboard
         if (isset($_GET['broadcast_sent'])) {
             echo '<div style="background:#d4edda; padding:10px; margin-bottom:15px; border:1px solid #c3e6cb; color:#155724;">Broadcast sent successfully!</div>';
         }
+        if (isset($_GET['broadcast_deleted'])) {
+            echo '<div style="background:#d1ecf1; padding:10px; margin-bottom:15px; border:1px solid #bee5eb; color:#0c5460;">Broadcast deleted successfully.</div>';
+        }
 
-        echo '<h3>Global Platform Broadcast</h3>';
-        echo '<p style="color:#666; margin-bottom:30px;">Push a message to all users or specific roles via Email and PWA Push Notifications.</p>';
+        echo '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;">';
 
-        echo '<div style="max-width: 600px;">';
+        // Column 1: Send New Broadcast
+        echo '<div>';
+        echo '<h3>Send New Broadcast</h3>';
+        echo '<p style="color:#666; margin-bottom:20px;">Push a message to all users or specific roles via Email and PWA Push Notifications.</p>';
         echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="background:#f9f9f9; padding:25px; border-radius:12px; border:1px solid #eee;">';
         echo '<input type="hidden" name="action" value="obenlo_send_broadcast">';
         wp_nonce_field('send_broadcast', 'broadcast_nonce');
@@ -1340,6 +1345,50 @@ class Obenlo_Booking_Admin_Dashboard
         echo '<button type="submit" style="background:#e61e4d; color:white; border:none; padding:15px 25px; border-radius:12px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1rem; box-shadow: 0 4px 15px rgba(230,30,77,0.2);">🚀 Send Broadcast Now</button>';
         echo '</form>';
         echo '</div>';
+
+        // Column 2: Broadcast History
+        echo '<div>';
+        echo '<h3>Broadcast History</h3>';
+        echo '<p style="color:#666; margin-bottom:20px;">Review or delete previously sent announcements.</p>';
+        
+        $broadcasts = get_posts(array(
+            'post_type' => 'broadcast',
+            'posts_per_page' => 10,
+            'post_status' => 'publish'
+        ));
+
+        if (empty($broadcasts)) {
+            echo '<div style="padding:40px; background:#fdfdfd; border:1px dashed #ddd; border-radius:12px; text-align:center; color:#999;">No broadcasts sent yet.</div>';
+        } else {
+            echo '<div style="display:flex; flex-direction:column; gap:15px;">';
+            foreach ($broadcasts as $b) {
+                $role = get_post_meta($b->ID, '_obenlo_broadcast_recipient', true);
+                $role_label = ($role === 'all') ? 'Everyone' : (($role === 'host') ? 'Hosts' : 'Guests');
+                
+                echo '<div style="background:#fff; border:1px solid #eee; border-radius:12px; padding:15px; position:relative; box-shadow:0 2px 8px rgba(0,0,0,0.02);">';
+                echo '<div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">';
+                echo '<span style="font-size:0.7rem; font-weight:800; text-transform:uppercase; color:#e61e4d; background:#fff1f2; padding:3px 8px; border-radius:20px;">' . esc_html($role_label) . '</span>';
+                echo '<span style="font-size:0.8rem; color:#aaa;">' . get_the_date('', $b->ID) . '</span>';
+                echo '</div>';
+                
+                echo '<h4 style="margin:5px 0; font-size:1rem; color:#222;">' . esc_html($b->post_title) . '</h4>';
+                echo '<p style="font-size:0.85rem; color:#666; margin-bottom:15px;">' . wp_trim_words($b->post_content, 15) . '</p>';
+                
+                echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" onsubmit="return confirm(\'Delete this announcement? This cannot be undone.\');" style="margin:0;">';
+                echo '<input type="hidden" name="action" value="obenlo_delete_broadcast">';
+                echo '<input type="hidden" name="broadcast_id" value="' . $b->ID . '">';
+                wp_nonce_field('delete_broadcast', 'broadcast_nonce');
+                echo '<button type="submit" style="background:none; border:none; color:#ef4444; font-size:0.8rem; font-weight:700; cursor:pointer; padding:0; display:flex; align-items:center; gap:5px;">';
+                echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px; height:14px;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+                echo 'Delete Announcement</button>';
+                echo '</form>';
+                echo '</div>';
+            }
+            echo '</div>';
+        }
+        echo '</div>'; // End Column 2
+        
+        echo '</div>'; // End Grid
     }
 
     private function render_communication_tab()

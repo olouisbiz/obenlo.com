@@ -18,6 +18,7 @@ class Obenlo_Booking_Communication
         add_action('admin_post_obenlo_submit_ticket', array($this, 'handle_submit_ticket'));
         add_action('admin_post_nopriv_obenlo_submit_ticket', array($this, 'handle_submit_ticket'));
         add_action('admin_post_obenlo_send_broadcast', array($this, 'handle_send_broadcast'));
+        add_action('admin_post_obenlo_delete_broadcast', array($this, 'handle_delete_broadcast'));
         add_action('admin_post_obenlo_submit_ticket_reply', array($this, 'handle_submit_ticket_reply'));
         add_action('admin_post_obenlo_update_ticket_status', array($this, 'handle_ticket_status'));
 
@@ -1027,6 +1028,24 @@ class Obenlo_Booking_Communication
             Obenlo_Booking_Notifications::notify_broadcast_event($broadcast_id, $recipient_role);
 
             wp_safe_redirect(add_query_arg('broadcast_sent', '1', wp_get_referer()));
+            exit;
+        }
+    }
+
+    public function handle_delete_broadcast()
+    {
+        if (!current_user_can('administrator')) {
+            obenlo_redirect_with_error('unauthorized');
+        }
+
+        if (!isset($_POST['broadcast_nonce']) || !wp_verify_nonce($_POST['broadcast_nonce'], 'delete_broadcast')) {
+            obenlo_redirect_with_error('security_failed');
+        }
+
+        $broadcast_id = intval($_POST['broadcast_id']);
+        if ($broadcast_id) {
+            wp_delete_post($broadcast_id, true);
+            wp_safe_redirect(add_query_arg('broadcast_deleted', '1', wp_get_referer()));
             exit;
         }
     }
