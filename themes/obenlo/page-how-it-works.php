@@ -22,7 +22,7 @@ get_header();
         <div class="standard-grid">
             <div class="standard-card">
                 <h4>1. Find your experience</h4>
-                <p>Browse through hundreds of unique stays, experiences, and local services tailored to your needs.</p>
+                <p>Browse through hundreds of unique stays, experiences, events, and local services tailored to your needs.</p>
             </div>
             <div class="standard-card">
                 <h4>2. Connect with Hosts</h4>

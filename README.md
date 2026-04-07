@@ -5,7 +5,7 @@ Welcome to the **Obenlo Platform**. This document is the definitive manual for t
 ---
 
 ## 1. Platform Overview
-Obenlo is a bespoke, 100% custom-built booking platform specifically optimized for **Stays, Experiences, and Services**. It focuses on the unique needs of the Caribbean and African markets, integrating local payout methods (MonCash/NatCash) with global standards (Stripe/PayPal).
+Obenlo is a bespoke, 100% custom-built booking platform specifically optimized for **Stays, Experiences, Events, and Services**. It focuses on the unique needs of the Caribbean and African markets, integrating local payout methods (MonCash/NatCash) with global standards (Stripe/PayPal).
 
 ### Design Philosophy
 *   **"Mobile-First" Premium UX**: Every interface is designed to behave like a native app.
@@ -58,7 +58,7 @@ To ensure extreme performance and design flexibility, Obenlo separates its conce
 ## 4. Guest Guide (The Traveler Experience)
 
 ### Booking a Trip
-*   **Search**: Use the global search to find Stays or Experiences.
+*   **Search**: Use the global search to find Stays, Experiences, or Events.
 *   **Payment**: Pay securely via Card (Stripe), PayPal, or local Mobile Money (MonCash).
 *   **Confirmation**: You will receive an instant confirmation email and a dashboard update once your payment is verified.
 
