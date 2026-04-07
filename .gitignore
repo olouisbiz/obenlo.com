@@ -16,16 +16,23 @@
 !/plugins/obenlo-i18n/
 !/plugins/obenlo-pwa/
 !/plugins/obenlo-seo/
-# Documentation and ChatGPT Prompts
+!/plugins/obenlo-social/
+
+# Documentation and Project Files
+!/README.md
+!/CHANGELOG.md
+!/obenlo-business.md
+!/deployment-guide.md
 !/obenlo_listing_logic.md
 !/obenlo_profile_logic.md
 !/obenlo_chatgpt_prompts.md
-!/README.md
-!/CHANGELOG.md
 !/sync.ps1
-!/deployment-guide.md
 !/.gitignore
+
+# Development Files
+/node_modules/
+.DS_Store
+Thumbs.db
 
 # Ignore zip files
 *.zip
-!/plugins/obenlo-social/
