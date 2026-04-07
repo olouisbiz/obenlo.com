@@ -26,6 +26,8 @@ class Obenlo_Booking_Admin_Dashboard
         add_action('admin_post_obenlo_toggle_user_suspension', array($this, 'handle_toggle_user_suspension'));
         add_action('admin_post_obenlo_trash_listing', array($this, 'handle_trash_listing'));
         add_action('admin_post_obenlo_toggle_demo_visibility', array($this, 'handle_toggle_demo_visibility'));
+        add_action('admin_post_obenlo_delete_demo', array($this, 'handle_delete_demo'));
+        add_action('admin_post_obenlo_delete_user_admin', array($this, 'handle_delete_user_admin'));
         add_action('admin_post_obenlo_admin_testimony_action', array($this, 'handle_testimony_action'));
     }
 
@@ -719,6 +721,13 @@ class Obenlo_Booking_Admin_Dashboard
                         <?php
             endif; ?>
                         <a href="mailto:<?php echo esc_attr($user->user_email); ?>" style="margin-left: 10px;">Contact</a>
+                        |
+                        <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline;" onsubmit="return confirm('Permanently delete this user and ALL their content? This cannot be undone.');">
+                            <input type="hidden" name="action" value="obenlo_delete_user_admin">
+                            <input type="hidden" name="user_id" value="<?php echo $user->ID; ?>">
+                            <?php wp_nonce_field('delete_user_' . $user->ID, 'delete_nonce'); ?>
+                            <button type="submit" style="background:none; border:none; color:#e61e4d; cursor:pointer; text-decoration:underline; padding:0; font-size:1rem;">Delete</button>
+                        </form>
                     </td>
                 </tr>
             <?php
@@ -1588,6 +1597,15 @@ class Obenlo_Booking_Admin_Dashboard
                 
                 echo '<button type="submit" style="background:#222; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:0.8em; font-weight:700;">Transfer</button>';
                 echo '</form>';
+                
+                // Delete Form
+                echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline; margin:0;" onsubmit="return confirm(\'Permanently delete this demo listing and its contents? This cannot be undone.\')">';
+                echo '<input type="hidden" name="action" value="obenlo_delete_demo">';
+                echo '<input type="hidden" name="listing_id" value="' . $demo->ID . '">';
+                wp_nonce_field('delete_demo_' . $demo->ID, 'delete_nonce');
+                echo '<button type="submit" style="background:none; border:none; color:#e61e4d; cursor:pointer; font-weight:700; font-size:0.9rem; text-decoration:underline; padding:0;">Delete</button>';
+                echo '</form>';
+
                 echo '</div>';
                 echo '</td>';
                 echo '</tr>';
@@ -1647,6 +1665,59 @@ class Obenlo_Booking_Admin_Dashboard
         }
 
         wp_safe_redirect(add_query_arg('tab', 'demo_manager', wp_get_referer()));
+        exit;
+    }
+
+    public function handle_delete_demo()
+    {
+        if (!current_user_can('administrator')) {
+            obenlo_redirect_with_error('unauthorized');
+        }
+
+        $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
+        check_admin_referer('delete_demo_' . $listing_id, 'delete_nonce');
+
+        if ($listing_id) {
+            $listing = get_post($listing_id);
+            if ($listing && get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes') {
+                // Delete children (units) if any
+                $children = get_posts(array(
+                    'post_type' => 'listing',
+                    'post_parent' => $listing_id,
+                    'posts_per_page' => -1,
+                    'fields' => 'ids',
+                    'post_status' => 'any'
+                ));
+                foreach ($children as $child_id) {
+                    wp_delete_post($child_id, true);
+                }
+                
+                // Delete the demo parent listing
+                wp_delete_post($listing_id, true);
+            }
+        }
+
+        wp_safe_redirect(add_query_arg('tab', 'demo_manager', wp_get_referer()));
+        exit;
+    }
+
+    public function handle_delete_user_admin()
+    {
+        if (!current_user_can('administrator')) {
+            obenlo_redirect_with_error('unauthorized');
+        }
+
+        $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        check_admin_referer('delete_user_' . $user_id, 'delete_nonce');
+
+        // Prevent self-deletion
+        if ($user_id && get_current_user_id() !== $user_id) {
+            require_once(ABSPATH . 'wp-admin/includes/user.php');
+            // Deleting user and their contents
+            wp_delete_user($user_id);
+        }
+
+        wp_safe_redirect(add_query_arg('tab', 'users', wp_get_referer()));
         exit;
     }
 

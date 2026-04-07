@@ -2,7 +2,11 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
-## [1.6.2] - 2026-04-07
+## [1.6.3] - 2026-04-07
+### Added
+- **Administrative Deletion Logic**: Implemented permanent deletion for Demo Listings and User Accounts (Host/Guest) directly from the Site Admin Dashboard.
+- **Cascading Deletion**: Deleting a Demo Listing now automatically removes all associated child units.
+- **Safety Confirmations**: Added browser-level confirmation prompts for all destructive administrative actions.
 ### Added
 - **Demo Visibility Control**: New "Hide/Show" toggle for administrators in the Demo Listing Manager. 
 - **Private Storefronts**: Hidden demo listings and their associated virtual host profiles are now strictly excluded from public site queries and direct visitor access (404).
