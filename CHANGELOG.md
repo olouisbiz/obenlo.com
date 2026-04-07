@@ -1,8 +1,12 @@
-# Changelog
+# CHANGELOG: Obenlo Platform
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
-## [1.6.0] - 2026-04-06
+## [1.6.1] - 2026-04-07
+### Fixed
+- Listing Edit permissions for Administrators (resolving 'Invalid listing' error on demo listings).
+
+## [1.6.0] - 2026-04-07
 ### Added
 - **Automated Host Onboarding**: Sync Google Form submissions directly to Obenlo via REST API.
 - **Instant Demo Creation**: Automated generation of "Demo" storefronts with instant, public-facing preview links.

@@ -1105,7 +1105,7 @@ class Obenlo_Booking_Frontend_Dashboard
 
         if ($listing_id > 0) {
             $post = get_post($listing_id);
-            if ($post && $post->post_author == get_current_user_id()) {
+            if ($post && ($post->post_author == get_current_user_id() || current_user_can('administrator'))) {
                 $title = get_the_title($listing_id);
                 // Use the same filter logic for content
                 $sandboxed_content = get_post_meta($listing_id, '_obenlo_sandboxed_content', true);

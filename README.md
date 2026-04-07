@@ -78,7 +78,11 @@ git fetch origin; git reset --hard origin/main; git clean -fd
 
 ## 📝 Changelog
 
-### [1.6.0] - 2026-04-06
+### [1.6.1] - 2026-04-07
+#### Fixed
+- **Permission Patch**: Resolved "Invalid listing" error for administrators when editing demo host listings.
+
+### [1.6.0] - 2026-04-07
 #### Added
 - **Host Sync Engine**: Direct integration between Google Forms and Obenlo REST API.
 - **Instant Demos**: Automatic creation of live storefront previews for potential hosts.
