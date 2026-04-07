@@ -191,6 +191,7 @@ class Obenlo_Booking_Admin_Dashboard
                     'settings'       => array('label' => 'Settings',       'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>'),
                     'translation'    => array('label' => 'Translation',    'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>'),
                     'demo_manager'   => array('label' => 'Demo Manager',   'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>'),
+                    'payouts'        => array('label' => 'Payouts',        'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>'),
                 );
 
                 foreach ($nav_items as $id => $item) {
@@ -223,6 +224,7 @@ class Obenlo_Booking_Admin_Dashboard
                     case 'settings':      $this->render_settings_tab(); break;
                     case 'translation':   $this->render_translation_tab(); break;
                     case 'demo_manager':  $this->render_demo_manager_tab(); break;
+                    case 'payouts':       $this->render_payout_management_tab(); break;
                     case 'reviews':       $this->render_reviews_tab(); break;
                     case 'testimonies':   $this->render_testimonies_tab(); break;
                     case 'refunds':       $this->render_refunds_tab(); break;
@@ -669,6 +671,7 @@ class Obenlo_Booking_Admin_Dashboard
                 <th>Role</th>
                 <th>Status</th>
                 <th>Verification</th>
+                <th>Payout Settings</th>
                 <th>Joined</th>
                 <th>Actions</th>
             </tr>
@@ -696,6 +699,19 @@ class Obenlo_Booking_Admin_Dashboard
                         <td data-label="Status"><span class="badge badge-success">Active</span></td>
                     <?php endif; ?>
                     <td data-label="Verification"><span class="badge <?php echo $v_badge; ?>"><?php echo ucfirst($status); ?></span></td>
+                    <td data-label="Payout Settings">
+                        <?php 
+                        $p_method = get_user_meta($user->ID, 'obenlo_payout_method', true);
+                        $p_details = get_user_meta($user->ID, 'obenlo_payout_details', true);
+                        if ($p_method): ?>
+                            <div style="font-size:0.85rem;">
+                                <span class="badge badge-guest" style="text-transform:uppercase;"><?php echo esc_html($p_method); ?></span>
+                                <div style="margin-top:4px; font-family:monospace; color:#666;"><?php echo esc_html($p_details); ?></div>
+                            </div>
+                        <?php else: ?>
+                            <span style="color:#ccc; font-style:italic; font-size:0.8rem;">Not set</span>
+                        <?php endif; ?>
+                    </td>
                     <td data-label="Joined"><?php echo date('M d, Y', strtotime($user->user_registered)); ?></td>
                     <td data-label="Actions">
                         <?php if (in_array('host', $user->roles)): 
@@ -980,21 +996,43 @@ class Obenlo_Booking_Admin_Dashboard
                     </div>
                 </div>
 
-                <button type="submit" style="background:#e61e4d; color:#fff; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:700;">Save Payment Settings</button>
+        <button type="submit" style="background:#e61e4d; color:#fff; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:700;">Save Payment Settings</button>
             </form>
         </div>
+        <?php
+    }
 
-        <h3 style="margin-top:50px;">Pending Payout Requests</h3>
+    private function render_payout_management_tab()
+    {
+        echo '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">';
+        echo '<div>';
+        echo '<h3 style="margin:0;">Host Payout Management</h3>';
+        echo '<p style="color:#666; margin-top:5px;">Process withdrawal requests and manage host payment methods.</p>';
+        echo '</div>';
+        echo '</div>';
+
+        if (isset($_GET['sync_status'])) {
+            $color = ($_GET['sync_status'] === 'success') ? '#155724' : '#721c24';
+            $bg = ($_GET['sync_status'] === 'success') ? '#d4edda' : '#f8d7da';
+            $border = ($_GET['sync_status'] === 'success') ? '#c3e6cb' : '#f5c6cb';
+            echo '<div style="background:' . $bg . '; color:' . $color . '; border:1px solid ' . $border . '; padding:15px; border-radius:8px; margin-bottom:20px; font-weight:600;">' . esc_html(urldecode($_GET['sync_msg'])) . '</div>';
+        }
+
+        ?>
+        <h4 style="margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+            <span style="font-size:1.5rem;">📥</span> Pending Payout Requests
+        </h4>
         <?php
         $pending_payouts = get_posts(array(
             'post_type' => 'obenlo_payout_req',
             'meta_key' => '_status',
             'meta_value' => 'pending',
-            'posts_per_page' => -1
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
         ));
 
         if (empty($pending_payouts)):
-            echo '<p style="color:#666; font-style:italic;">No pending payout requests at this time.</p>';
+            echo '<div style="background:#f9f9f9; padding:40px; text-align:center; border-radius:12px; color:#999; border:1px dashed #ddd;">No pending payout requests at this time.</div>';
         else: ?>
             <table class="admin-table">
                 <thead>
@@ -1026,25 +1064,26 @@ class Obenlo_Booking_Admin_Dashboard
                         </td>
                         <td data-label="Date Requested"><?php echo get_the_date('', $payout); ?></td>
                         <td data-label="Actions">
-                            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline-block;">
-                                <input type="hidden" name="action" value="obenlo_process_payout">
-                                <input type="hidden" name="payout_id" value="<?php echo $payout->ID; ?>">
-                                <input type="hidden" name="payout_status" value="paid">
-                                <?php wp_nonce_field('process_payout_' . $payout->ID, 'security'); ?>
-                                <input type="text" name="transaction_id" placeholder="Manual TX ID" style="width:120px; padding:5px; margin-right:5px; border-radius:4px; border:1px solid #ddd;">
-                                <button type="submit" class="btn-approve" style="background:none; border:none; cursor:pointer;" onclick="return confirm('Confirm you have manually sent this payout?')">Mark as Paid</button>
-                                <?php if ($method === 'moncash'): ?>
-                                    <button type="submit" name="payout_action" value="auto_moncash" style="background:#e61e4d; color:#fff; border:none; padding:5px 10px; border-radius:4px; margin-left:10px; font-size:0.85rem; cursor:pointer;" onclick="return confirm('Send money via MonCash API now?')">🚀 Send via MonCash</button>
-                                <?php endif; ?>
-                            </form>
-                            | 
-                            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline-block;">
-                                <input type="hidden" name="action" value="obenlo_process_payout">
-                                <input type="hidden" name="payout_id" value="<?php echo $payout->ID; ?>">
-                                <input type="hidden" name="payout_status" value="cancelled">
-                                <?php wp_nonce_field('process_payout_' . $payout->ID, 'security'); ?>
-                                <button type="submit" class="btn-reject" style="background:none; border:none; cursor:pointer;" onclick="return confirm('Reject this payout request?')">Reject</button>
-                            </form>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:flex; gap:5px; margin:0;">
+                                    <input type="hidden" name="action" value="obenlo_process_payout">
+                                    <input type="hidden" name="payout_id" value="<?php echo $payout->ID; ?>">
+                                    <input type="hidden" name="payout_status" value="paid">
+                                    <?php wp_nonce_field('process_payout_' . $payout->ID, 'security'); ?>
+                                    <input type="text" name="transaction_id" placeholder="TX ID" style="width:100px; padding:6px; border-radius:6px; border:1px solid #ddd; font-size:0.85rem;">
+                                    <button type="submit" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:700; font-size:0.85rem;" onclick="return confirm('Confirm manual payout?')">Mark Paid</button>
+                                    <?php if ($method === 'moncash'): ?>
+                                        <button type="submit" name="payout_action" value="auto_moncash" style="background:#e61e4d; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:0.85rem;" onclick="return confirm('Disburse via MonCash API instantly?')">🚀 MonCash API</button>
+                                    <?php endif; ?>
+                                </form>
+                                <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="margin:0;">
+                                    <input type="hidden" name="action" value="obenlo_process_payout">
+                                    <input type="hidden" name="payout_id" value="<?php echo $payout->ID; ?>">
+                                    <input type="hidden" name="payout_status" value="cancelled">
+                                    <?php wp_nonce_field('process_payout_' . $payout->ID, 'security'); ?>
+                                    <button type="submit" style="background:none; border:none; color:#e61e4d; cursor:pointer; text-decoration:underline; font-weight:600; font-size:0.85rem;" onclick="return confirm('Reject this request?')">Reject</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -1052,15 +1091,18 @@ class Obenlo_Booking_Admin_Dashboard
             </table>
         <?php endif; ?>
 
-        <h3 style="margin-top:50px;">Recent Processed Payouts</h3>
+        <h4 style="margin-top:50px; margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+            <span style="font-size:1.5rem;">📜</span> Recent Processed Payouts
+        </h4>
         <?php
         $recent_payouts = get_posts(array(
             'post_type' => 'obenlo_payout_req',
             'meta_key' => '_status',
             'meta_value' => 'paid',
-            'posts_per_page' => 10,
+            'posts_per_page' => 20,
             'orderby' => 'date',
-            'order' => 'DESC'
+            'order' => 'DESC',
+            'post_status' => 'publish'
         ));
 
         if (empty($recent_payouts)):
@@ -1071,7 +1113,7 @@ class Obenlo_Booking_Admin_Dashboard
                     <tr>
                         <th>Host</th>
                         <th>Amount</th>
-                        <th>Details</th>
+                        <th>Method</th>
                         <th>Date Paid</th>
                         <th>TX ID</th>
                     </tr>
@@ -1081,11 +1123,11 @@ class Obenlo_Booking_Admin_Dashboard
                         $host = get_userdata($payout->post_author);
                     ?>
                     <tr>
-                        <td><?php echo esc_html($host ? $host->display_name : 'Unknown'); ?></td>
-                        <td style="font-weight:700;">$<?php echo number_format(get_post_meta($payout->ID, '_amount', true), 2); ?></td>
-                        <td><?php echo esc_html(strtoupper(get_post_meta($payout->ID, '_method', true))); ?></td>
-                        <td><?php echo get_post_meta($payout->ID, '_paid_date', true); ?></td>
-                        <td><code><?php echo esc_html(get_post_meta($payout->ID, '_transaction_id', true)); ?></code></td>
+                        <td data-label="Host"><?php echo esc_html($host ? $host->display_name : 'Deleted User'); ?></td>
+                        <td data-label="Amount" style="font-weight:700;">$<?php echo number_format(get_post_meta($payout->ID, '_amount', true), 2); ?></td>
+                        <td data-label="Method"><span class="badge badge-guest"><?php echo esc_html(strtoupper(get_post_meta($payout->ID, '_method', true))); ?></span></td>
+                        <td data-label="Date Paid"><?php echo get_post_meta($payout->ID, '_paid_date', true); ?></td>
+                        <td data-label="TX ID"><code><?php echo esc_html(get_post_meta($payout->ID, '_transaction_id', true)); ?></code></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

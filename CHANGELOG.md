@@ -2,7 +2,12 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
-## [1.6.3] - 2026-04-07
+## [1.6.4] - 2026-04-07
+### Added
+- **Payout Management System**: Created a dedicated administrative tab for managing host withdrawal requests.
+- **Unified Payout Controls**: Consolidated "Pending" and "Processed" payout tables into a single, high-performance view.
+- **Host Payout Insights**: Added a "Payout Settings" column to the User Management dashboard, allowing admins to instantly view host payment methods and account details.
+- **Automated Disbursement**: Direct "MonCash API" button in the Payouts tab for instantaneous funds transfer to Haitian hosts.
 ### Added
 - **Administrative Deletion Logic**: Implemented permanent deletion for Demo Listings and User Accounts (Host/Guest) directly from the Site Admin Dashboard.
 - **Cascading Deletion**: Deleting a Demo Listing now automatically removes all associated child units.
