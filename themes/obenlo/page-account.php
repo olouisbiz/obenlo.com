@@ -358,6 +358,7 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
                             Booking Approvals & Limits
                         </h3>
                         <p style="color:#444; line-height:1.6;"><strong>Booking Requests:</strong> When you book a stay or service, the request is sent to the Host. Your card will only be charged once the Host <em>approves</em> your request. If they decline or let it expire, you are not charged.</p>
+                        <p style="color:#444; line-height:1.6;"><strong>Booking Completion:</strong> Once your stay or service is finished, the host will mark the booking as <em>Completed</em>. This finalizes the transaction and releases the host's payment. If you have any issues, please contact support or message the host <em>before</em> the booking status changes to Completed.</p>
                         <p style="color:#444; line-height:1.6;"><strong>Guest Limits:</strong> Please respect the maximum capacity listed by the host. Bringing unauthorized guests violates our local community guidelines and could result in immediate cancellation without refund.</p>
                     </div>
 

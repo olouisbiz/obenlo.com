@@ -2508,7 +2508,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 </h3>
                 <p style="color:#444; line-height:1.6;"><strong>Approval Process:</strong> You must <em>Approve</em> or <em>Decline</em> pending booking requests quickly. Once approved, the guest is charged automatically.</p>
                 <p style="color:#444; line-height:1.6;"><strong>Check-Ins:</strong> When a guest arrives, click "Check In" on their booking. This updates their status to In House. If an issue arises, you can mark the booking as cancelled before check-in.</p>
-                <p style="color:#444; line-height:1.6;"><strong>Getting Paid:</strong> Ensure your preferred payout details are linked in your Payout Settings. Payouts are calculated dynamically based on your completed bookings. Use the 'Generate Report' feature on the Payouts tab to track your financials.</p>
+                <p style="color:#444; line-height:1.6;"><strong>Getting Paid:</strong> Obenlo uses a <em>Payout-on-Completion</em> model. This means your earnings are calculated upon approval but only released to your withdrawable balance once you (the Host) mark the booking as <strong>Completed</strong>. This ensures platform integrity and simplifies refund handling for non-commenced bookings.</p>
             </div>
 
             <div style="background:#fff; border:1px solid #eee; border-radius:16px; padding:30px;">

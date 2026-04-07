@@ -2,12 +2,12 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
-## [1.6.6] - 2026-04-09
+## [1.6.6] - 2026-04-07
 ### Fixed
 - **Refund Synchronization**: Fixed a bug where refunds were deducting from host balance even if funds hadn't been released yet.
 - **Completion Guard**: Restricted booking completion to "Confirmed" bookings only to prevent accidental fund release on cancelled or refunded trips.
 
-## [1.6.5] - 2026-04-08
+## [1.6.5] - 2026-04-07
 ### Added
 - **Payout Restriction**: Host earnings are now only released to their balance after a booking is marked as "Completed".
 - **Refined Earnings Logic**: Separated calculation from balance updates for better financial auditability.
