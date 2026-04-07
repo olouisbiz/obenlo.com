@@ -2,6 +2,14 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.6.0] - 2026-04-06
+### Added
+- **Automated Host Onboarding**: Sync Google Form submissions directly to Obenlo via REST API.
+- **Instant Demo Creation**: Automated generation of "Demo" storefronts with instant, public-facing preview links.
+- **Branded Outreach System**: Automatic, professional recruitment emails sent from `info@obenlo.com` upon form submission.
+- **Smart Keyword Mapping**: Resilient form-to-field matching that allows for flexible question naming in Google Forms.
+- **Footer Navigation**: Added "Request a Demo" CTA and streamlined "Become a Host" accessibility.
+
 ## [1.5.0] - 2026-04-05
 ### Added
 - **Premium Mobile Navigation**: Implemented a fixed bottom navigation system for both Site Admin and Frontend Host Dashboards, providing an app-like experience on mobile.

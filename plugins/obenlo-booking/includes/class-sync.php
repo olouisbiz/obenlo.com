@@ -42,6 +42,12 @@ class Obenlo_Booking_Sync {
         }
 
         $email = sanitize_email($params['email']);
+
+        // Smart Slug Mapping (e.g., "Stays" -> "stay")
+        $category_slug = !empty($params['category_slug']) ? sanitize_title($params['category_slug']) : 'stay';
+        if ($category_slug === 'stays' || $category_slug === 'stay') {
+            $category_slug = 'stay';
+        }
         $user_id = email_exists($email);
         $new_user = false;
 
@@ -75,13 +81,14 @@ class Obenlo_Booking_Sync {
         update_user_meta($user_id, 'obenlo_instagram', sanitize_text_field($params['social_insta'] ?? ''));
         update_user_meta($user_id, 'obenlo_facebook', sanitize_text_field($params['social_fb'] ?? ''));
         update_user_meta($user_id, 'obenlo_store_video', esc_url_raw($params['store_video'] ?? ''));
+        update_user_meta($user_id, 'obenlo_whatsapp', sanitize_text_field($params['whatsapp_number'] ?? ''));
 
         // 3. Create Listing
         $is_demo = !empty($params['is_demo']) && ($params['is_demo'] === true || $params['is_demo'] === 'true' || $params['is_demo'] === 'yes');
         
         $listing_data = array(
             'post_title'   => sanitize_text_field($params['listing_title']),
-            'post_content' => wp_kses_post($params['listing_content'] ?? ''),
+            'post_content' => wp_kses_post($params['listing_description'] ?? ''),
             'post_status'  => $is_demo ? 'publish' : 'pending', // Demo listings are published to "look active"
             'post_type'    => 'listing',
             'post_author'  => $user_id,
@@ -97,8 +104,11 @@ class Obenlo_Booking_Sync {
         // 4. Update Listing Meta
         update_post_meta($listing_id, '_obenlo_price', sanitize_text_field($params['listing_price'] ?? '0'));
         update_post_meta($listing_id, '_obenlo_capacity', sanitize_text_field($params['listing_capacity'] ?? ''));
-        update_post_meta($listing_id, '_obenlo_location', sanitize_text_field($params['listing_address'] ?? ''));
-        update_post_meta($listing_id, '_obenlo_pricing_model', sanitize_text_field($params['pricing_model'] ?? 'per_night'));
+        update_post_meta($listing_id, '_obenlo_location', sanitize_text_field($params['listing_location'] ?? ''));
+        
+        // Map pricing model to slug format
+        $pricing_model = strtolower(str_replace(' ', '_', $params['pricing_model'] ?? 'per_night'));
+        update_post_meta($listing_id, '_obenlo_pricing_model', $pricing_model);
         update_post_meta($listing_id, '_obenlo_listing_country', sanitize_text_field($params['listing_country'] ?? 'haiti'));
 
         if ($is_demo) {
@@ -113,8 +123,8 @@ class Obenlo_Booking_Sync {
         }
 
         // 5. Handle Taxonomy (Category)
-        if (!empty($params['category_slug'])) {
-            $term = get_term_by('slug', sanitize_title($params['category_slug']), 'listing_type');
+        if (!empty($category_slug)) {
+            $term = get_term_by('slug', $category_slug, 'listing_type');
             if ($term) {
                 wp_set_post_terms($listing_id, array($term->term_id), 'listing_type');
             }

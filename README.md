@@ -78,6 +78,13 @@ git fetch origin; git reset --hard origin/main; git clean -fd
 
 ## 📝 Changelog
 
+### [1.6.0] - 2026-04-06
+#### Added
+- **Host Sync Engine**: Direct integration between Google Forms and Obenlo REST API.
+- **Instant Demos**: Automatic creation of live storefront previews for potential hosts.
+- **Outreach Automation**: Email templates for immediate host recruitment.
+- **Improved Navigation**: Refined footer CTAs for better conversion.
+
 ### [1.4.0] - 2026-04-05
 #### Added
 - **Refund Ecosystem**: Comprehensive system for Guest refund requests and Host-side approval/rejection.
@@ -97,5 +104,5 @@ git fetch origin; git reset --hard origin/main; git clean -fd
 - **PWA**: Refined mobile install prompt sequences.
 
 ---
-*Manual Updated: April 2026*
+*Manual Updated: April 2026 (v1.6.0)*
 *Maintained by the Obenlo Development Team*
