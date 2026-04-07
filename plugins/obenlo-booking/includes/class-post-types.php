@@ -372,9 +372,10 @@ class Obenlo_Booking_Post_Types {
         if ( is_singular('listing') ) {
             global $post;
             $is_listing_suspended = get_post_meta( $post->ID, '_obenlo_is_suspended', true ) === 'yes';
+            $is_demo_hidden       = get_post_meta( $post->ID, '_obenlo_demo_hidden', true ) === 'yes';
             $is_author_suspended  = get_user_meta( $post->post_author, '_obenlo_is_suspended', true ) === 'yes';
 
-            if ( $is_listing_suspended || $is_author_suspended ) {
+            if ( $is_listing_suspended || $is_author_suspended || $is_demo_hidden ) {
                 if ( current_user_can('administrator') ) return;
                 if ( is_user_logged_in() && $post->post_author == get_current_user_id() ) return;
                 
@@ -414,6 +415,8 @@ class Obenlo_Booking_Post_Types {
         }
 
         $meta_query = (array) $query->get('meta_query');
+        
+        // Hide Suspended Listings
         $meta_query[] = array(
             'relation' => 'OR',
             array(
@@ -426,6 +429,21 @@ class Obenlo_Booking_Post_Types {
                 'compare' => '!='
             )
         );
+
+        // Hide Hidden Demos
+        $meta_query[] = array(
+            'relation' => 'OR',
+            array(
+                'key' => '_obenlo_demo_hidden',
+                'compare' => 'NOT EXISTS'
+            ),
+            array(
+                'key' => '_obenlo_demo_hidden',
+                'value' => 'yes',
+                'compare' => '!='
+            )
+        );
+
         $query->set('meta_query', $meta_query);
     }
 

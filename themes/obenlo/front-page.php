@@ -14,20 +14,43 @@ if ( is_user_logged_in() ) {
     }
 }
 
-$demo_meta_query = array();
-if ( $hide_demo_content && ! $user_can_see_demo ) {
-    $demo_meta_query = array(
+$demo_meta_query = array('relation' => 'AND');
+
+if ( ! $user_can_see_demo ) {
+    // 1. Always hide demos marked as HIDDEN in Demo Manager
+    $demo_meta_query[] = array(
         'relation' => 'OR',
         array(
-            'key' => '_obenlo_is_demo',
+            'key' => '_obenlo_demo_hidden',
             'compare' => 'NOT EXISTS'
         ),
         array(
-            'key' => '_obenlo_is_demo',
+            'key' => '_obenlo_demo_hidden',
             'value' => 'yes',
             'compare' => '!='
         )
     );
+
+    // 2. Hide ALL demos if global setting is ON
+    if ( $hide_demo_content ) {
+        $demo_meta_query[] = array(
+            'relation' => 'OR',
+            array(
+                'key' => '_obenlo_is_demo',
+                'compare' => 'NOT EXISTS'
+            ),
+            array(
+                'key' => '_obenlo_is_demo',
+                'value' => 'yes',
+                'compare' => '!='
+            )
+        );
+    }
+}
+
+// Cleanup if no filters applied
+if ( count($demo_meta_query) <= 1 ) {
+    $demo_meta_query = array();
 }
 ?>
 

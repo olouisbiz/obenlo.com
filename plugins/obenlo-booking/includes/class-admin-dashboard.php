@@ -25,6 +25,7 @@ class Obenlo_Booking_Admin_Dashboard
         add_action('admin_post_obenlo_toggle_listing_suspension', array($this, 'handle_toggle_listing_suspension'));
         add_action('admin_post_obenlo_toggle_user_suspension', array($this, 'handle_toggle_user_suspension'));
         add_action('admin_post_obenlo_trash_listing', array($this, 'handle_trash_listing'));
+        add_action('admin_post_obenlo_toggle_demo_visibility', array($this, 'handle_toggle_demo_visibility'));
         add_action('admin_post_obenlo_admin_testimony_action', array($this, 'handle_testimony_action'));
     }
 
@@ -1549,14 +1550,26 @@ class Obenlo_Booking_Admin_Dashboard
                 $d_bio = get_post_meta($demo->ID, '_obenlo_demo_host_bio', true);
                 $d_loc = get_post_meta($demo->ID, '_obenlo_demo_host_location', true);
 
+                $is_hidden = get_post_meta($demo->ID, '_obenlo_demo_hidden', true) === 'yes';
+                $vis_text = $is_hidden ? 'Show' : 'Hide';
+                $vis_color = $is_hidden ? '#10b981' : '#666';
+
                 echo '<tr>';
-                echo '<td><strong>' . esc_html($d_name) . '</strong><br><small>' . esc_html($demo->post_title) . '</small></td>';
+                echo '<td><strong>' . esc_html($d_name) . '</strong>' . ($is_hidden ? ' <span class="badge" style="background:#666; color:#fff; font-size:0.6rem;">HIDDEN</span>' : '') . '<br><small>' . esc_html($demo->post_title) . '</small></td>';
                 echo '<td style="max-width:300px; font-size:0.85rem;">' . wp_trim_words($d_bio, 15) . '</td>';
                 echo '<td>' . esc_html($d_loc) . '</td>';
                 echo '<td>';
                 echo '<div style="display:flex; gap:15px; align-items:center;">';
                 echo '<a href="' . get_permalink($demo->ID) . '" target="_blank" style="color:#333; font-weight:600; text-decoration:none;">View</a>';
                 echo '<a href="' . esc_url(home_url("/host-dashboard?action=edit&listing_id={$demo->ID}&demo=1")) . '" style="color:#e61e4d; font-weight:700; text-decoration:none;">Edit Setup</a>';
+                
+                // Visibility Toggle
+                echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:inline; margin:0;">';
+                echo '<input type="hidden" name="action" value="obenlo_toggle_demo_visibility">';
+                echo '<input type="hidden" name="listing_id" value="' . $demo->ID . '">';
+                wp_nonce_field('toggle_demo_vis_' . $demo->ID, 'vis_nonce');
+                echo '<button type="submit" style="background:none; border:none; color:' . $vis_color . '; cursor:pointer; font-weight:700; font-size:0.9rem; text-decoration:none; padding:0;">' . $vis_text . '</button>';
+                echo '</form>';
                 
                 // Transfer Form
                 echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:flex; gap:5px; margin:0;" onsubmit="return confirm(\'Are you sure you want to transfer this demo to a real host? This will move all demo data to their profile.\')">';
@@ -1630,6 +1643,28 @@ class Obenlo_Booking_Admin_Dashboard
                 
                 // Clear any restricted mode cache for the user if applicable
                 clean_user_cache($user_id);
+            }
+        }
+
+        wp_safe_redirect(add_query_arg('tab', 'demo_manager', wp_get_referer()));
+        exit;
+    }
+
+    public function handle_toggle_demo_visibility()
+    {
+        if (!current_user_can('administrator')) {
+            obenlo_redirect_with_error('unauthorized');
+        }
+
+        $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
+        check_admin_referer('toggle_demo_vis_' . $listing_id, 'vis_nonce');
+
+        if ($listing_id) {
+            $is_hidden = get_post_meta($listing_id, '_obenlo_demo_hidden', true) === 'yes';
+            if ($is_hidden) {
+                delete_post_meta($listing_id, '_obenlo_demo_hidden');
+            } else {
+                update_post_meta($listing_id, '_obenlo_demo_hidden', 'yes');
             }
         }
 

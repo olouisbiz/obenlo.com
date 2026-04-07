@@ -2,6 +2,11 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.6.2] - 2026-04-07
+### Added
+- **Demo Visibility Control**: New "Hide/Show" toggle for administrators in the Demo Listing Manager. 
+- **Private Storefronts**: Hidden demo listings and their associated virtual host profiles are now strictly excluded from public site queries and direct visitor access (404).
+
 ## [1.6.1] - 2026-04-07
 ### Fixed
 - Listing Edit permissions for Administrators (resolving 'Invalid listing' error on demo listings).

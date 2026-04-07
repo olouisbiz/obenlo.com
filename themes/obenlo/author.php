@@ -28,6 +28,11 @@ if (!$demo_listing_id && $demo_host_slug) {
         'post_type' => 'listing',
         'meta_query' => array(
             array('key' => '_obenlo_is_demo', 'value' => 'yes'),
+            array(
+                'relation' => 'OR',
+                array('key' => '_obenlo_demo_hidden', 'compare' => 'NOT EXISTS'),
+                array('key' => '_obenlo_demo_hidden', 'value' => 'yes', 'compare' => '!=')
+            )
         ),
         'posts_per_page' => 20, // Check multiple
         'post_parent' => 0
@@ -50,8 +55,14 @@ if (!$demo_listing_id && $demo_mode_param && $user_id) {
     $demo_post = get_posts(array(
         'post_type' => 'listing',
         'author' => $user_id,
-        'meta_key' => '_obenlo_is_demo',
-        'meta_value' => 'yes',
+        'meta_query' => array(
+            array('key' => '_obenlo_is_demo', 'value' => 'yes'),
+            array(
+                'relation' => 'OR',
+                array('key' => '_obenlo_demo_hidden', 'compare' => 'NOT EXISTS'),
+                array('key' => '_obenlo_demo_hidden', 'value' => 'yes', 'compare' => '!=')
+            )
+        ),
         'posts_per_page' => 1,
         'post_parent' => 0
     ));
@@ -62,6 +73,10 @@ if (!$demo_listing_id && $demo_mode_param && $user_id) {
 }
 
 if ($demo_listing_id && get_post_meta($demo_listing_id, '_obenlo_is_demo', true) === 'yes') {
+    $is_demo_hidden = get_post_meta($demo_listing_id, '_obenlo_demo_hidden', true) === 'yes';
+    if ($is_demo_hidden && !current_user_can('administrator')) {
+        wp_die('This storefront is currently private.', 'Private Storefront', array('response' => 404));
+    }
     $is_demo_preview = true;
     $demo_host_name = get_post_meta($demo_listing_id, '_obenlo_demo_host_name', true);
     $demo_meta = [
