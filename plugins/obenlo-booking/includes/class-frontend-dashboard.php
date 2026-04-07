@@ -242,10 +242,6 @@ class Obenlo_Booking_Frontend_Dashboard
                 </a>
 
                 <?php if ($is_host): ?>
-                    <a href="?action=broadcasts" class="sidebar-link <?php echo $action === 'broadcasts' ? 'active' : ''; ?>">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                        <span><?php echo __('Broadcasts', 'obenlo'); ?></span>
-                    </a>
                     <a href="?action=availability" class="sidebar-link <?php echo $action === 'availability' ? 'active' : ''; ?>">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                         <span><?php echo __('Availability', 'obenlo'); ?></span>
@@ -362,9 +358,6 @@ class Obenlo_Booking_Frontend_Dashboard
         elseif ($action === 'messages') {
             echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Inbox', 'obenlo') . '</h2></div>';
             echo do_shortcode('[obenlo_messages_page]');
-        }
-        elseif ($action === 'broadcasts') {
-            $this->render_broadcasts_tab();
         }
         elseif ($action === 'availability') {
             $this->render_availability_tab();
@@ -2514,7 +2507,7 @@ class Obenlo_Booking_Frontend_Dashboard
             <div style="background:#fff; border:1px solid #eee; border-radius:16px; padding:30px;">
                 <h3 style="margin-top:0; color:#8b5cf6; font-size:1.3rem; display:flex; align-items:center; gap:10px;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px; height:24px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    <?php echo __('Support Tickets & Platform Broadcasts', 'obenlo'); ?>
+                    <?php echo __('Support', 'obenlo'); ?>
                 </h3>
                 <p style="color:#444; line-height:1.6;"><strong>Help Center:</strong> Need direct assistance from our admin staff? Go to the <strong>Help Center</strong> tab. You can open a new Support Ticket to ask questions about your account, dispute a review, or report a bug.</p>
                 <p style="color:#444; line-height:1.6;"><strong>Broadcasts:</strong> Keep an eye on the <strong>Broadcasts</strong> tab! We use this system to send out global notices regarding site maintenance, new feature releases, or changes to our policies.</p>
@@ -3214,11 +3207,6 @@ class Obenlo_Booking_Frontend_Dashboard
         exit;
     }
 
-    private function render_broadcasts_tab() {
-        echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Platform Broadcasts', 'obenlo') . '</h2></div>';
-        echo '<p style="margin-bottom:30px; color:#666; padding: 0 20px;">' . __('Stay updated with official announcements from the Obenlo team.', 'obenlo') . '</p>';
-        echo '<div style="padding: 0 20px;">' . do_shortcode('[obenlo_broadcasts_page]') . '</div>';
-    }
 
     private function render_trips_section() {
         $user_id = get_current_user_id();

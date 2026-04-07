@@ -61,7 +61,7 @@ class Obenlo_Booking_Admin_Dashboard
 
         ob_start();
 ?>
-        <div class="obenlo-dashboard-container admin-mode" data-version="1.4.0">
+        <div class="obenlo-dashboard-container admin-mode" data-version="1.6.6">
             <style>
                 .obenlo-dashboard-container { display: flex; min-height: 800px; background: #fff; font-family: 'Inter', sans-serif; gap: 0; margin-left: -20px; }
                 .dashboard-sidebar { width: 260px; background: #fdfdfd; border-right: 1px solid #f0f0f0; padding: 40px 20px; display: flex; flex-direction: column; gap: 5px; position: sticky; top: 0; height: 100vh; z-index: 99; }
@@ -187,7 +187,8 @@ class Obenlo_Booking_Admin_Dashboard
                     'testimonies'    => array('label' => 'Testimonies',    'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>'),
                     'refunds'        => array('label' => 'Refunds',        'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>'),
                     'messaging'      => array('label' => 'Messaging',      'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>'),
-                    'communication'  => array('label' => 'Support Tickets','icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>'),
+                    'broadcast'      => array('label' => 'Broadcast',      'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>'),
+                    'communication'  => array('label' => 'Support',        'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>'),
                     'settings'       => array('label' => 'Settings',       'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>'),
                     'translation'    => array('label' => 'Translation',    'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>'),
                     'demo_manager'   => array('label' => 'Demo Manager',   'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>'),
@@ -195,7 +196,7 @@ class Obenlo_Booking_Admin_Dashboard
                 );
 
                 foreach ($nav_items as $id => $item) {
-                    if (!current_user_can('administrator') && in_array($id, array('overview', 'listings', 'users', 'payments', 'settings', 'translation', 'demo_manager'))) continue;
+                    if (!current_user_can('administrator') && in_array($id, array('overview', 'listings', 'users', 'payments', 'settings', 'translation', 'demo_manager', 'broadcast'))) continue;
                     $active = ($tab === $id) ? 'active' : '';
                     echo "<a href='{$base_url}{$id}' class='sidebar-link {$active}'>{$item['icon']}<span>{$item['label']}</span></a>";
                 }
@@ -220,6 +221,7 @@ class Obenlo_Booking_Admin_Dashboard
                     case 'bookings':      $this->render_bookings_tab(); break;
                     case 'payments':      $this->render_payments_tab(); break;
                     case 'messaging':     $this->render_messaging_oversight_tab(); break;
+                    case 'broadcast':     $this->render_broadcast_tab(); break;
                     case 'communication': $this->render_communication_tab(); break;
                     case 'settings':      $this->render_settings_tab(); break;
                     case 'translation':   $this->render_translation_tab(); break;
@@ -1311,40 +1313,39 @@ class Obenlo_Booking_Admin_Dashboard
         echo '</table>';
     }
 
-    private function render_communication_tab()
+    private function render_broadcast_tab()
     {
         if (isset($_GET['broadcast_sent'])) {
             echo '<div style="background:#d4edda; padding:10px; margin-bottom:15px; border:1px solid #c3e6cb; color:#155724;">Broadcast sent successfully!</div>';
         }
 
-        echo '<h3>Platform Communication</h3>';
+        echo '<h3>Global Platform Broadcast</h3>';
+        echo '<p style="color:#666; margin-bottom:30px;">Push a message to all users or specific roles via Email and PWA Push Notifications.</p>';
 
-        echo '<div style="display:grid; grid-template-columns: 1fr 1fr; gap:40px;">';
-
-        // Broadcast Section
-        echo '<div>';
-        echo '<h4>Send Global Broadcast</h4>';
+        echo '<div style="max-width: 600px;">';
         echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="background:#f9f9f9; padding:25px; border-radius:12px; border:1px solid #eee;">';
         echo '<input type="hidden" name="action" value="obenlo_send_broadcast">';
         wp_nonce_field('send_broadcast', 'broadcast_nonce');
 
-        echo '<label style="display:block; margin-bottom:15px;">Recipient Group:<br>';
-        echo '<select name="broadcast_role" style="width:100%; padding:10px; margin-top:5px;">';
+        echo '<label style="display:block; margin-bottom:15px; font-weight:700;">Recipient Group:<br>';
+        echo '<select name="broadcast_role" style="width:100%; padding:10px; margin-top:5px; border-radius:8px; border:1px solid #ddd;">';
         echo '<option value="all">All Users (Hosts & Guests)</option>';
         echo '<option value="host">Hosts Only</option>';
         echo '<option value="guest">Guests Only</option>';
         echo '</select></label>';
 
-        echo '<label style="display:block; margin-bottom:15px;">Subject:<br><input type="text" name="broadcast_title" required style="width:100%; padding:10px; margin-top:5px;"></label>';
-        echo '<label style="display:block; margin-bottom:15px;">Message (HTML allowed):<br><textarea name="broadcast_content" required style="width:100%; padding:10px; margin-top:5px; height:150px;"></textarea></label>';
+        echo '<label style="display:block; margin-bottom:15px; font-weight:700;">Subject:<br><input type="text" name="broadcast_title" required style="width:100%; padding:10px; margin-top:5px; border-radius:8px; border:1px solid #ddd;"></label>';
+        echo '<label style="display:block; margin-bottom:15px; font-weight:700;">Message (HTML allowed):<br><textarea name="broadcast_content" required style="width:100%; padding:10px; margin-top:5px; height:200px; border-radius:8px; border:1px solid #ddd; font-family:inherit;"></textarea></label>';
 
-        echo '<button type="submit" style="background:#e61e4d; color:white; border:none; padding:12px 25px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%;">🚀 Send Broadcast Now</button>';
+        echo '<button type="submit" style="background:#e61e4d; color:white; border:none; padding:15px 25px; border-radius:12px; cursor:pointer; font-weight:bold; width:100%; font-size:1.1rem; box-shadow: 0 4px 15px rgba(230,30,77,0.2);">🚀 Send Broadcast Now</button>';
         echo '</form>';
         echo '</div>';
+    }
 
-        // Ticket Moderation Section
-        echo '<div>';
-        echo '<h4>Active Support Tickets</h4>';
+    private function render_communication_tab()
+    {
+        echo '<h3>Active Support</h3>';
+        echo '<div style="background:#fff; border:1px solid #eee; border-radius:15px; padding:30px;">';
         $tickets = get_posts(array(
             'post_type' => 'ticket',
             'posts_per_page' => -1,

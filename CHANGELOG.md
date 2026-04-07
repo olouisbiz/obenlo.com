@@ -6,6 +6,7 @@ All notable changes to the **Obenlo Platform** will be documented in this file.
 ### Fixed
 - **Refund Synchronization**: Fixed a bug where refunds were deducting from host balance even if funds hadn't been released yet.
 - **Completion Guard**: Restricted booking completion to "Confirmed" bookings only to prevent accidental fund release on cancelled or refunded trips.
+- **Broadcast Standardization**: Centralized the global broadcast functionality within the Site Admin Dashboard and removed it from the Host Dashboard to ensure administrator-only access for core platform announcements.
 
 ## [1.6.5] - 2026-04-07
 ### Added

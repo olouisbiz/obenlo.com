@@ -46,6 +46,7 @@ To ensure extreme performance and design flexibility, Obenlo separates its conce
 *   **Parent Listings**: Create a "Master" listing (e.g., "Grand Villa").
 *   **Units/Child Listings**: Add specific units under the parent (e.g., "Room 101", "Room 102").
 *   **Status Toggles**: Instantly "Hide" or "Show" listings to manage seasonal availability.
+*   **Event Management**: Specialized tools for ticket quantities and time-based availability specifically for Events and Experiences.
 
 ### Financials & Payouts (v1.6.5 Logic)
 *   **Earnings**: Your earnings are calculated immediately upon payment but are held by the platform.
