@@ -257,6 +257,11 @@ class Obenlo_Booking_Frontend_Dashboard
                     <span><?php echo __('Help Center', 'obenlo'); ?></span>
                 </a>
 
+                <a href="?action=announcements" class="sidebar-link <?php echo $action === 'announcements' ? 'active' : ''; ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <span><?php echo __('Announcements', 'obenlo'); ?></span>
+                </a>
+
                 <?php if ($is_host): ?>
                     <a href="?action=guide" class="sidebar-link <?php echo $action === 'guide' ? 'active' : ''; ?>">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
@@ -373,6 +378,10 @@ class Obenlo_Booking_Frontend_Dashboard
         }
         elseif ($action === 'support') {
             $this->render_support_section();
+        }
+        elseif ($action === 'announcements') {
+            echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Announcements', 'obenlo') . '</h2></div>';
+            echo do_shortcode('[obenlo_broadcasts_page]');
         }
         elseif ($action === 'guide') {
             $this->render_host_guide();

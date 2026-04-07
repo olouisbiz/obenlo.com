@@ -388,9 +388,9 @@ class Obenlo_Booking_Notifications
         $content = get_post_field('post_content', $broadcast_id);
 
         $args = array('fields' => 'ID');
-        if ($target === 'hosts') {
+        if ($target === 'hosts' || $target === 'host') {
             $args['role'] = 'host';
-        } elseif ($target === 'guests') {
+        } elseif ($target === 'guests' || $target === 'guest') {
             $args['role'] = 'guest';
         }
 
