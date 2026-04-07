@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Obenlo Social Auto-Poster
  * Description:       Manually sync and push your Listings and Blog Posts directly to your official Obenlo Facebook and Instagram accounts.
- * Version:           1.6.6
+ * Version:           1.6.7
  * Author:            Obenlo
  */
 

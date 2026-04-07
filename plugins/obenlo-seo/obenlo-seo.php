@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Obenlo SEO
  * Description: Premium, lightweight SEO engine for Obenlo. Automates Meta Tags, OpenGraph, and JSON-LD Schema.
- * Version: 1.6.6
+ * Version: 1.6.7
  * Author: Obenlo
  * Author URI: https://obenlo.com
  */

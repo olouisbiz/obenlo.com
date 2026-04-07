@@ -2,6 +2,15 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.6.7] - 2026-04-07
+### Added
+- **Broadcast History Management**: Site Admins can now review, filter, and delete past platform announcements directly from the dashboard.
+- **Announcements Feed**: Restricted broadcast viewing to "Announcements" tabs in both Host and Guest dashboards for better UX.
+
+### Fixed
+- **Audience Filtering**: Fixed a critical leak where "Guest Only" broadcasts were being received by Hosts due to role matching inconsistencies.
+- **Branding Consistency**: Standardized the naming from "Broadcasts" to "Announcements" across the entire Guest/Host facing interface.
+
 ## [1.6.6] - 2026-04-07
 ### Fixed
 - **Refund Synchronization**: Fixed a bug where refunds were deducting from host balance even if funds hadn't been released yet.

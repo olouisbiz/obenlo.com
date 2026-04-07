@@ -88,7 +88,22 @@ To ensure extreme performance and design flexibility, Obenlo separates its conce
 
 ---
 
-## 6. Core Static Pages & Legal Templates
+## 6. Official Announcements (Platform Communication)
+
+Obenlo includes a centralized **Announcements** system that allows Site Admins to reach all users or specific roles (Hosts/Guests) instantly.
+
+### For Site Admins
+*   **Create Announcements**: Under the **Broadcast** tab in your Site Admin Dashboard, you can push HTML-enabled messages to the entire platform or filter by "Hosts only" or "Guests only".
+*   **History Management (NEW v1.6.7)**: Admins can now **Review** and **Delete** past announcements directly from the history column. Deleting an announcement removes it from all user dashboards instantly.
+*   **Multi-Channel Delivery**: Announcements are sent via email and also appear in the user's dashboard "Announcements" feed.
+
+### For Hosts & Guests
+*   **Announcements Tab**: Accessible via the "Announcements" (Bell icon) or sidebar link in the account/host dashboards.
+*   **Read-Only Stream**: A dedicated feed of official Obenlo updates, news, and platform changes.
+
+---
+
+## 7. Core Static Pages & Legal Templates
 The Obenlo theme includes several standardized templates for user guides and legal requirements:
 *   **How It Works (`page-how-it-works.php`)**: The primary educational portal for new users.
 *   **Refund Policy (`page-refund-policy.php`)**: Detailed rules on transactional disputes and timeframes.
