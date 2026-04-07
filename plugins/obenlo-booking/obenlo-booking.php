@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Obenlo Booking
  * Description: Custom 100% bespoke booking platform for Stays, Experiences, and Services.
- * Version: 1.6.4
+ * Version: 1.6.5
  * Author: Obenlo
  * Author URI: https://obenlo.com
  */

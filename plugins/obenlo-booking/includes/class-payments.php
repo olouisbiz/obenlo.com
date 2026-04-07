@@ -607,7 +607,7 @@ class Obenlo_Booking_Payments
     }
 
     /**
-     * Calculate and record earnings/commission for a booking
+     * Calculate and record earnings/commission for a booking (Meta only)
      */
     public function calculate_booking_earnings($booking_id)
     {
@@ -633,11 +633,35 @@ class Obenlo_Booking_Payments
         update_post_meta($booking_id, '_obenlo_booking_commission_amount', $commission_amount);
         update_post_meta($booking_id, '_obenlo_booking_net_earnings', $net_earnings);
 
-        // Update Host Balance
-        $current_balance = floatval(get_user_meta($host_id, '_obenlo_host_balance', true));
-        $new_balance = $current_balance + $net_earnings;
-        update_user_meta($host_id, '_obenlo_host_balance', $new_balance);
+        error_log("Obenlo Earnings: Booking #$booking_id confirmed. Net earnings calculated: +$$net_earnings (Payout pending completion)");
+    }
 
-        error_log("Obenlo Earnings: Booking #$booking_id confirmed. Host #$host_id earnings updated: +$$net_earnings. Total balance: $$new_balance");
+    /**
+     * Release host earnings to their main balance (Called on booking completion)
+     */
+    public function release_booking_payout($booking_id)
+    {
+        $released = get_post_meta($booking_id, '_obenlo_payout_released', true);
+        if ($released === 'yes') {
+            return; // Already released
+        }
+
+        $net_earnings = floatval(get_post_meta($booking_id, '_obenlo_booking_net_earnings', true));
+        $host_id = get_post_meta($booking_id, '_obenlo_host_id', true);
+
+        if ($net_earnings <= 0 || !$host_id) {
+            // Re-calculate if meta is missing
+            $this->calculate_booking_earnings($booking_id);
+            $net_earnings = floatval(get_post_meta($booking_id, '_obenlo_booking_net_earnings', true));
+        }
+
+        if ($net_earnings > 0 && $host_id) {
+            $current_balance = floatval(get_user_meta($host_id, '_obenlo_host_balance', true));
+            $new_balance = $current_balance + $net_earnings;
+            update_user_meta($host_id, '_obenlo_host_balance', $new_balance);
+            update_post_meta($booking_id, '_obenlo_payout_released', 'yes');
+
+            error_log("Obenlo Balance: Booking #$booking_id completed. Host #$host_id balance updated: +$$net_earnings. Total: $$new_balance");
+        }
     }
 }

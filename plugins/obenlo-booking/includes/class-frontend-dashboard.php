@@ -2359,9 +2359,10 @@ class Obenlo_Booking_Frontend_Dashboard
         }
         elseif ($do_action === 'complete') {
             update_post_meta($booking_id, '_obenlo_booking_status', 'completed');
-            // Trigger Platform Fee Calculation
+            // Trigger Platform Fee Calculation & Balance Release
             $payments = new Obenlo_Booking_Payments();
             $payments->calculate_platform_fee($booking_id);
+            $payments->release_booking_payout($booking_id);
 
             Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'booking_completed');
         }
