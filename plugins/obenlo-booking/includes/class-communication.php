@@ -1099,7 +1099,8 @@ class Obenlo_Booking_Communication
             </div>
             <div style="margin-top: 25px; padding-left: 10px; border-left: 2px solid #eee;">
                 <p style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #222;">Official Obenlo Announcement</p>
-                <p style="margin: 3px 0 0 0; font-size: 0.85rem; color: #888;">Thank you for being part of our community.</p>
+                <p style="margin: 3px 0 10px 0; font-size: 0.85rem; color: #888;">Thank you for being part of our community.</p>
+                <p style="margin: 0; font-size: 0.9rem; font-weight: 800; color: #e61e4d;">The Obenlo Team</p>
             </div>
         </div>
         ';
