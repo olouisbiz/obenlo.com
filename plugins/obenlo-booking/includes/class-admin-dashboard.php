@@ -1395,18 +1395,50 @@ class Obenlo_Booking_Admin_Dashboard
 
     private function render_communication_tab()
     {
+        $current_status = isset($_GET['status_filter']) ? sanitize_text_field($_GET['status_filter']) : 'all';
+
+        echo '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">';
         echo '<h3>Active Support</h3>';
+        
+        // Filter UI
+        echo '<div style="display:flex; gap:10px;">';
+        $filters = array('all' => 'All Tickets', 'open' => 'Open', 'resolved' => 'Resolved');
+        foreach ($filters as $slug => $label) {
+            $is_active = ($current_status === $slug);
+            $bg = $is_active ? '#e61e4d' : '#f9f9f9';
+            $color = $is_active ? '#fff' : '#666';
+            $border = $is_active ? '1px solid #e61e4d' : '1px solid #ddd';
+            echo '<a href="' . esc_url(add_query_arg('status_filter', $slug)) . '" style="padding:8px 18px; border-radius:30px; border:' . $border . '; text-decoration:none; color:' . $color . '; background:' . $bg . '; font-size:0.85rem; font-weight:700; transition:all 0.2s;">' . esc_html($label) . '</a>';
+        }
+        echo '</div>';
+        echo '</div>';
+
         echo '<div style="background:#fff; border:1px solid #eee; border-radius:15px; padding:30px;">';
-        $tickets = get_posts(array(
+        
+        $args = array(
             'post_type' => 'ticket',
             'posts_per_page' => -1,
             'suppress_filters' => false,
-            'meta_key' => '_obenlo_ticket_status',
-            'orderby' => array(
-                'meta_value' => 'ASC', // Open tickets first ('open' < 'resolved')
-                'ID' => 'DESC'         // Newest tickets at the top
-            )
-        ));
+        );
+
+        if ($current_status !== 'all') {
+            $args['meta_query'] = array(
+                array(
+                    'key' => '_obenlo_ticket_status',
+                    'value' => $current_status
+                )
+            );
+            $args['orderby'] = 'ID';
+            $args['order'] = 'DESC';
+        } else {
+            $args['meta_key'] = '_obenlo_ticket_status';
+            $args['orderby'] = array(
+                'meta_value' => 'ASC', // Open first
+                'ID' => 'DESC'         // Newest first
+            );
+        }
+
+        $tickets = get_posts($args);
         if (empty($tickets)) {
             echo '<p>No active tickets.</p>';
         }

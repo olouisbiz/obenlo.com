@@ -1017,7 +1017,7 @@ class Obenlo_Booking_Communication
         $broadcast_id = wp_insert_post(array(
             'post_type' => 'broadcast',
             'post_title' => $title,
-            'post_content' => $content,
+            'post_content' => self::wrap_broadcast_content($content),
             'post_status' => 'publish'
         ));
 
@@ -1082,6 +1082,30 @@ class Obenlo_Booking_Communication
     }
 
     /**
+     * Wrap raw broadcast content in a premium template if no custom HTML is detected.
+     */
+    public static function wrap_broadcast_content($content)
+    {
+        // If content already contains common wrapping tags or Obenlo styling strings, just keep it raw
+        if (strpos($content, '<div') !== false || strpos($content, '<table') !== false || strpos($content, 'font-family') !== false) {
+            return $content;
+        }
+
+        // Standard Obenlo Premium Template for plain text entries
+        return '
+        <div style="font-family: \'Inter\', sans-serif, Arial; line-height: 1.8; color: #333; font-size: 1.05rem;">
+            <div style="background: #fffafa; padding: 25px; border-radius: 16px; border-left: 6px solid #e61e4d; border-top: 1px solid #fef2f2; border-right: 1px solid #fef2f2; border-bottom: 3px solid #ffe4e6;">
+                ' . wpautop($content) . '
+            </div>
+            <div style="margin-top: 25px; padding-left: 10px; border-left: 2px solid #eee;">
+                <p style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #222;">Official Obenlo Announcement</p>
+                <p style="margin: 3px 0 0 0; font-size: 0.85rem; color: #888;">Thank you for being part of our community.</p>
+            </div>
+        </div>
+        ';
+    }
+
+    /**
      * Render the broadcasts page for the current user's role
      */
     public function render_broadcasts_page($atts)
@@ -1120,7 +1144,7 @@ class Obenlo_Booking_Communication
                             <span class="broadcast-date"><?php echo get_the_date('', $broadcast->ID); ?></span>
                         </div>
                         <div class="broadcast-content">
-                            <?php echo wp_kses_post($broadcast->post_content); ?>
+                            <?php echo wp_kses_post(self::wrap_broadcast_content($broadcast->post_content)); ?>
                         </div>
                     </div>
                 <?php endforeach; ?>

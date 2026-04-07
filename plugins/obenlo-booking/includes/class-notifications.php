@@ -396,7 +396,7 @@ class Obenlo_Booking_Notifications
 
         $users     = get_users($args);
         $subject   = "Important Update: $title";
-        $body_html = '<p style="margin:0 0 16px 0;">' . wp_kses_post(wpautop($content)) . '</p>';
+        $body_html = Obenlo_Booking_Communication::wrap_broadcast_content($content);
 
         foreach ($users as $user_id) {
             self::send_html_to_user($user_id, $subject, $body_html, 'View Dashboard', home_url('/account'), true);
