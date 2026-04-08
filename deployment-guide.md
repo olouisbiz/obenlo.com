@@ -1,4 +1,9 @@
-# Obenlo Official Deployment Guide
+# Obenlo Official Deployment
+# CHANGELOG
+## [1.6.7] - 2026-04-07
+- Stable recovery point.
+- Removed Planner experimental code.
+- Protected uploads folder in .gitignore.
 
 This guide explains the secure, step-by-step workflow for moving new features or bug fixes from your local computer (`obenlo.local`) to your live production website (`obenlo.com`).
 
@@ -6,6 +11,19 @@ This guide explains the secure, step-by-step workflow for moving new features or
 
 ## 🛑 Golden Rule
 **Never edit code directly on the live server.** Always make your changes locally first, test them, and then use this guide to deploy them.
+
+---
+
+## 🔑 SSH Credentials Quick Reference
+
+| Detail | Value |
+| :--- | :--- |
+| **Hostname** | `ssh.obenlo.com` |
+| **User** | `u2269-codu8dgnuwae` |
+| **Port** | `18765` |
+| **Private Key (.ppk)** | `C:\Users\obenc\.ssh\obenlo_siteground_ed25519.ppk` |
+| **Private Key (OpenSSH)** | `C:\Users\obenc\.ssh\obenlo_siteground_ed25519` |
+| **Public Key** | `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2QLPa+zlIVWmUZCEErbk+9hE9vmx/iGJmYiVoVkCay` |
 
 ---
 
@@ -58,7 +76,7 @@ Now that GitHub has the approved code, you just need to tell your live SiteGroun
 
 ### Step 1: Open PuTTY
 1. Double-click **PuTTY** on your computer.
-2. Select **Obenlo Live Site** from your Saved Sessions and click **Load**.
+2. Select **SiteGround_Live** from your Saved Sessions (Version: 1.6.7) and click **Load**.
 3. Click **Open**. 
 *(The black terminal window will appear. Because we configured your Auto-login username and PPK key, it will instantly log you in without asking for a password!)*
 
