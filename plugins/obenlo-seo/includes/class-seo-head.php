@@ -25,6 +25,11 @@ class Obenlo_SEO_Head {
 
             return $listing_name . ' • ' . $host_name . ' | Obenlo';
         }
+
+        if (is_front_page()) {
+            return 'Obenlo | Book Local Services, Events & Unique Stays';
+        }
+
         return $title;
     }
 
@@ -36,6 +41,10 @@ class Obenlo_SEO_Head {
         $is_listing = is_singular('listing');
 
         $description = get_bloginfo('description');
+        if (is_front_page()) {
+            $description = 'The all-in-one marketplace for local services, viral events, and unique stays. Discover top-rated hosts and book your next experience on Obenlo.';
+        }
+        
         $image = get_template_directory_uri() . '/assets/images/logo-social-profile.png';
         $url = home_url(add_query_arg(array(), $GLOBALS['wp']->request));
 
