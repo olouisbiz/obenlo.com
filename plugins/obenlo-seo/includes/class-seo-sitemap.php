@@ -13,6 +13,7 @@ class Obenlo_SEO_Sitemap {
         add_action('init', array($this, 'add_rewrite_rules'));
         add_filter('query_vars', array($this, 'add_query_vars'));
         add_action('template_redirect', array($this, 'render_sitemap'));
+        add_filter('robots_txt', array($this, 'update_robots_txt'), 999, 2);
     }
 
     /**
@@ -89,6 +90,21 @@ class Obenlo_SEO_Sitemap {
 
         echo '</urlset>';
         exit;
+    }
+
+    /**
+     * Update robots.txt to point to the premium sitemap
+     */
+    public function update_robots_txt($output, $public) {
+        $custom_sitemap = home_url('/sitemap.xml');
+        $output = preg_replace('/Sitemap: .*/i', "Sitemap: $custom_sitemap", $output);
+        
+        // Ensure sitemap is present if not already matched
+        if (strpos($output, "Sitemap: $custom_sitemap") === false) {
+            $output .= "\nSitemap: $custom_sitemap\n";
+        }
+
+        return $output;
     }
 
     /**

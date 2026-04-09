@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) {
 class Obenlo_SEO_Schema {
     public function init() {
         add_action('wp_footer', array($this, 'inject_listing_schema'), 20);
+        add_action('wp_footer', array($this, 'inject_global_schema'), 10);
     }
 
     /**
@@ -63,5 +64,43 @@ class Obenlo_SEO_Schema {
 
         echo "\n<!-- Obenlo Rich Search Data -->\n";
         echo '<script type="application/ld+json">' . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . '</script>' . "\n";
+    }
+
+    /**
+     * Inject Global Organization & WebSite Schema
+     */
+    public function inject_global_schema() {
+        if (!is_front_page()) {
+            return;
+        }
+
+        $organization = array(
+            "@context" => "https://schema.org",
+            "@type" => "Organization",
+            "name" => "Obenlo",
+            "url" => home_url('/'),
+            "logo" => get_template_directory_uri() . '/assets/images/logo.png',
+            "sameAs" => array(
+                "https://facebook.com/obenlo",
+                "https://instagram.com/obenlo",
+                "https://twitter.com/obenlo"
+            )
+        );
+
+        $website = array(
+            "@context" => "https://schema.org",
+            "@type" => "WebSite",
+            "name" => "Obenlo",
+            "url" => home_url('/'),
+            "potentialAction" => array(
+                "@type" => "SearchAction",
+                "target" => home_url('/?s={search_term_string}'),
+                "query-input" => "required name=search_term_string"
+            )
+        );
+
+        echo "\n<!-- Obenlo Global Brand Data -->\n";
+        echo '<script type="application/ld+json">' . json_encode($organization, JSON_UNESCAPED_SLASHES) . '</script>' . "\n";
+        echo '<script type="application/ld+json">' . json_encode($website, JSON_UNESCAPED_SLASHES) . '</script>' . "\n";
     }
 }
