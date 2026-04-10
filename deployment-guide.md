@@ -136,3 +136,6 @@ git fetch origin
 git reset --hard origin/main
 ```
 This will completely overwrite all files on the live site to match exactly what is on GitHub's `main` branch. Use this if you need to "fix" a broken state or roll back.
+
+---
+**✅ ARCHITECTURE TESTED: 2026-04-10** (This line proves the deployment flow is working).
