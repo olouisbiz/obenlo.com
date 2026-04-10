@@ -15,87 +15,114 @@ This guide explains the secure, step-by-step workflow for moving new features or
 ---
 
 ## 🔑 SSH Credentials Quick Reference
+# Obenlo Official Deployment Guide: The Simple Way
+
+This guide explains how to move your code from your local computer to your live website (`obenlo.com`) using **GitHub Desktop** and **PuTTY**.
+
+---
+
+## 🏗 System Architecture
+
+Your development system follows a professional 3-stage process to ensure your code is safe, versioned, and easy to deploy:
+
+1.  **Local (obenlo.local)**: You create and test features here using **Local WP**.
+2.  **GitHub (The Bridge)**: You save your work in **GitHub Desktop** and push it to the cloud. This acts as your backup and the "clearing house" for your official code.
+3.  **SiteGround (Live Site)**: You use **PuTTY** to tell the live server to download the latest approved code from GitHub.
+
+---
+
+## 🔑 Your New Secure Credentials
+
+The following credentials are built specifically for your new `github_deploy_key`.
 
 | Detail | Value |
 | :--- | :--- |
 | **Hostname** | `ssh.obenlo.com` |
 | **User** | `u2269-codu8dgnuwae` |
 | **Port** | `18765` |
-| **Private Key (.ppk)** | `C:\Users\obenc\.ssh\obenlo_siteground_ed25519.ppk` |
-| **Private Key (OpenSSH)** | `C:\Users\obenc\.ssh\obenlo_siteground_ed25519` |
-| **Public Key** | `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2QLPa+zlIVWmUZCEErbk+9hE9vmx/iGJmYiVoVkCay` |
+| **Public Key File** | `C:\Users\obenc\.ssh\github_deploy_key.pub` |
+| **Private Key File** | `C:\Users\obenc\.ssh\github_deploy_key` |
 
 ---
 
-## Phase 1: Local Development to GitHub (The "Dev" Branch)
+## Step 1: Add the Key to SiteGround & GitHub
 
-Your local computer is currently on the `main` branch. Whenever you want to start working on something new, you should switch to the `dev` branch so you don't accidentally break the main code.
+Before PuTTY can connect, you must give the "Public" key to both SiteGround and GitHub.
 
-### Step 1: Switch to `dev`
-Open **PowerShell** and navigate to your Obenlo folder:
-```powershell
-cd "c:\Users\obenc\Local Sites\obenlo\app\public\wp-content\"
-git checkout dev
+### A. SiteGround Setup
+1. Open your **SiteGround Site Tools**.
+2. Go to **Devs > SSH Keys Manager**.
+3. Click the **Import** tab.
+4. **Key Name**: `GitHub_Deploy`
+5. **Public Key**: Copy and paste the text below exactly:
+```text
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCaLkJe02iluJSelZZZDbxJgwJb0DnjvyPY8AwT+CGbpLq7UNXArmRyGL8zuDwilb4HxgcVn56G2ilN/xC8xaBkds+5QTO9Tf9mgl0u/iCDwzO4tXm4pPc0+fTky7WkezPzPF23lqZ48jSvAhj17sRHFky4CGqpvuu6RCmPeBM4MW2J4jBe6mFUPi6y6LQMPoeZ5Ku7iJmC9TRj6M8G6ccD3/gmE8rBy/vVqXRhXDumW4Y9+vkCNyyVnff5je1NvNsxxNVoVQ6D2D/Zj0kWI+phbekyBdXXKMf3gp5cHU9a7Zj/55oo4LzjoxO0vW99PSynahOl0MqNq6YKyTrbp3ET7cTVK5UHE6qoq3yM643qGmolrCRz3utQrODopAIPASd4QEe0a8AFsmNvsuPG17RrVFXavUuwsKZKy9PEI0I/k95baHO9tgxwn3f4H9ghCWFCbijNsw60pEaukfwkp29z3rsnjcd0TRHg9qKNBeV2Y2ZUbuhRuLFSUfFQ/aqltJOrEcJ7wgaHblSyk06jZ7Rn+sEZhVgEkVl5p0EnoFjrse0T29xE8pJczIcYptJytTkWqbiOKZwzBPFrPa4u1rjhYK6+ah3u2QHlIJ78RugcadUpJEU925q1EXQwALuihRZ0TuA/9xypvyzIwumiArR82MvSvlDAjoQmx3w9MksDyQ== obenc@Obenlo-1
 ```
-*(If you are already on `dev`, it will safely tell you).*
+6. Click **Import**.
 
-### Step 2: Make Your Changes
-Edit your theme files, plugin files, CSS, etc. using your code editor. Test everything on your local website (`obenlo.local`) to make sure it looks and works perfectly.
-
-### Step 3: Save and Push to GitHub
-Once you are happy with the changes, you need to save them ("commit") and push them up to the cloud (GitHub).
-In PowerShell, run these three commands one after the other:
-```powershell
-git add .
-git commit -m "Describe what you changed here (e.g., Updated the Favicon)"
-git push origin dev
-```
-Your new code is now safely backed up on the internet (GitHub) in the `dev` branch!
+### B. GitHub Setup
+1. Go to your repository: [https://github.com/olouisbiz/obenlo.com](https://github.com/olouisbiz/obenlo.com)
+2. Go to **Settings** (tab at the top) > **Deploy keys**.
+3. Click **Add deploy key**.
+4. **Title**: `SiteGround_Live`
+5. **Key**: Paste the **same text** from above.
+6. **Allow write access**: Keep this UNCHECKED (for security).
+7. Click **Add key**.
 
 ---
 
-## Phase 2: Approving Changes (Merging to `main`)
+## Step 2: Configure PuTTY
 
-We use GitHub to safely fuse your new `dev` code into the official `main` code.
+PuTTY needs the key in a special `.ppk` format. We will use **PuTTYgen** (which was installed with PuTTY) to do this.
 
-1. Open your web browser and go to your repository: [https://github.com/olouisbiz/obenlo.com](https://github.com/olouisbiz/obenlo.com)
-2. Near the top, GitHub will usually display a green button saying **Compare & pull request** because it noticed you pushed to `dev`. Click it.
-   *(If you don't see it, go to the **Pull requests** tab at the top and click **New pull request**. Set `base: main` and `compare: dev`).*
-3. Give your Pull Request a simple title.
-4. Click the green **Create pull request** button.
-5. GitHub will check to make sure the code doesn't conflict. Once it's green, click **Merge pull request**.
-6. Click **Confirm merge**.
+1. Open **PuTTYgen**.
+2. Click **Conversions** (in the top menu) > **Import key**.
+3. Navigate to `C:\Users\obenc\.ssh\` and select the file named `github_deploy_key`.
+4. Click **Save private key** (say "Yes" to saving without a passphrase).
+5. Name it `github_deploy_key.ppk` and save it in that same folder.
 
-Congratulations! The official `main` branch now contains your latest updates.
+### Now, setup the connection in PuTTY:
+1. Open **PuTTY**.
+2. **Host Name**: `ssh.obenlo.com`
+3. **Port**: `18765`
+4. In the left menu, go to **Connection > SSH > Auth > Credentials**.
+5. Click **Browse** under "Private key file for authentication" and select your new `github_deploy_key.ppk`.
+6. Go back to **Session** (top of left menu).
+7. In "Saved Sessions", type **SiteGround_Live** and click **Save**.
+8. Click **Open**.
 
 ---
 
-## Phase 3: Deploying to Live SiteGround (Using PuTTY)
+## Step 3: Daily Deployment (The Manual Pull)
 
-Now that GitHub has the approved code, you just need to tell your live SiteGround server to download it.
+Once the setup above is done, this is your daily routine:
 
-### Step 1: Open PuTTY
-1. Double-click **PuTTY** on your computer.
-2. Select **SiteGround_Live** from your Saved Sessions (Version: 1.6.7) and click **Load**.
-3. Click **Open**. 
-*(The black terminal window will appear. Because we configured your Auto-login username and PPK key, it will instantly log you in without asking for a password!)*
-
-### Step 2: Navigate to your Website Folder
-You need to tell the server exactly which folder to update. In the black PuTTY window, type this immediately after the `$` prompt:
+1. **Local**: Use **GitHub Desktop** to commit and push your changes to GitHub `main` branch.
+2. **PuTTY**: Open PuTTY, load **SiteGround_Live**, and click **Open**.
+3. **Login**: Type your username (`u2269-codu8dgnuwae`) and press Enter.
+4. **Update**: Type these two lines in the black window:
 ```bash
 cd www/obenlo.com/public_html/wp-content
-```
-Press **Enter**.
-
-### Step 3: Pull the Updates
-Now, tell the server to pull the latest code from the `main` branch on GitHub:
-```bash
 git pull origin main
 ```
-Press **Enter**.
 
-You will see a checklist of files being downloaded and updated on your screen. 
-**That's it! Your live website (`obenlo.com`) is now instantly updated with your newest features!**
+Instead of manually logging into PuTTY every time, we have set up **GitHub Actions**. This means that as soon as you merge your code into `main` on GitHub, it will automatically send the updates to SiteGround for you.
+
+### How to set up GitHub Secrets (First Time Only)
+
+1. Open your repository on GitHub: [olouisbiz/obenlo.com](https://github.com/olouisbiz/obenlo.com)
+2. Go to **Settings** > **Secrets and variables** > **Actions**.
+3. Click **New repository secret**.
+4. **Name**: `SSH_PRIVATE_KEY`
+5. **Value**: (Paste the private key I provided you in our chat).
+6. Click **Add secret**.
+7. Repeat for `SSH_HOST` (value: `ssh.obenlo.com`), `SSH_USER` (value: `u2269-codu8dgnuwae`), and `SSH_PORT` (value: `18765`).
+
+### How it works
+Every time you complete **Phase 2** (Merging to `main`), GitHub will start a "Workflow".
+- You can watch it in the **Actions** tab on GitHub.
+- It will safely sync your `wp-content` files to SiteGround using `rsync`.
+- It automatically ignores temporary files and images in `uploads/`.
 
 ---
 
