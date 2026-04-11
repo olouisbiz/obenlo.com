@@ -341,7 +341,14 @@ if ( count($demo_meta_query) <= 1 ) {
         </div>
         <p style="color: #666; margin-bottom: 40px;"><?php esc_html_e( 'Top-rated professionals and property hosts ready to serve you.', 'obenlo' ); ?></p>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px;">
+        <!-- Horizontal Scrollable Container -->
+        <div style="display: flex; gap: 20px; overflow-x: auto; padding: 10px 0 30px 0; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none;">
+            <style>
+                /* Hide scrollbar for Chrome, Safari and Opera */
+                .featured-hosts div::-webkit-scrollbar {
+                    display: none;
+                }
+            </style>
             <?php
             $host_args = array( 'role' => 'host', 'number' => 10, 'orderby' => 'post_count', 'order' => 'DESC' );
             if ( $hide_demo_content && ! $user_can_see_demo ) {
@@ -355,9 +362,11 @@ if ( count($demo_meta_query) <= 1 ) {
                 $hosts = get_users( array( 'role' => 'administrator', 'number' => 10 ) ); // Fallback
             }
             
-            foreach ( $hosts as $host ) :
-                include locate_template('template-parts/content-host-card.php');
-            endforeach; ?>
+            foreach ( $hosts as $host ) : ?>
+                <div style="flex: 0 0 auto; width: 280px; scroll-snap-align: start;">
+                    <?php include locate_template('template-parts/content-host-card.php'); ?>
+                </div>
+            <?php endforeach; ?>
         </div>
     </section>
         
