@@ -400,6 +400,7 @@ class Obenlo_Booking_Frontend_Dashboard
     private function render_overview_tab()
     {
         $user_id = get_current_user_id();
+        $user    = wp_get_current_user();
 
         // Stats Calculation
         $listings_count = count(get_posts(array('post_type' => 'listing', 'author' => $user_id, 'post_parent' => 0, 'posts_per_page' => -1, 'suppress_filters' => false)));
