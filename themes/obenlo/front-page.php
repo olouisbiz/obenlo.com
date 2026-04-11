@@ -341,33 +341,73 @@ if ( count($demo_meta_query) <= 1 ) {
         </div>
         <p style="color: #666; margin-bottom: 40px;"><?php esc_html_e( 'Top-rated professionals and property hosts ready to serve you.', 'obenlo' ); ?></p>
         
-        <!-- Horizontal Scrollable Container -->
-        <div style="display: flex; gap: 20px; overflow-x: auto; padding: 10px 0 30px 0; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none;">
-            <style>
-                /* Hide scrollbar for Chrome, Safari and Opera */
-                .featured-hosts div::-webkit-scrollbar {
-                    display: none;
+        <!-- Horizontal Scrollable Container with Navigation -->
+        <div style="position: relative; margin: 0 -10px;">
+            <!-- Left Arrow -->
+            <button id="host-scroll-left" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 10; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; color: #222; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-50%) scale(1.1)';this.style.background='#fff';" onmouseout="this.style.transform='translateY(-50%) scale(1)';this.style.background='rgba(255,255,255,0.9)';">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:18px; height:18px;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+
+            <!-- Scroll Container -->
+            <div id="host-scroll-container" style="display: flex; gap: 20px; overflow-x: auto; padding: 10px 0 30px 0; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth;">
+                <style>
+                    #host-scroll-container::-webkit-scrollbar { display: none; }
+                </style>
+                <?php
+                $host_args = array( 'role' => 'host', 'number' => 10, 'orderby' => 'post_count', 'order' => 'DESC' );
+                if ( $hide_demo_content && ! $user_can_see_demo ) {
+                    $demo_user = get_user_by('login', 'demo');
+                    if ( $demo_user ) { $host_args['exclude'] = array( $demo_user->ID ); }
                 }
-            </style>
-            <?php
-            $host_args = array( 'role' => 'host', 'number' => 10, 'orderby' => 'post_count', 'order' => 'DESC' );
-            if ( $hide_demo_content && ! $user_can_see_demo ) {
-                $demo_user = get_user_by('login', 'demo');
-                if ( $demo_user ) {
-                    $host_args['exclude'] = array( $demo_user->ID );
-                }
-            }
-            $hosts = get_users( $host_args );
-            if ( empty($hosts) ) {
-                $hosts = get_users( array( 'role' => 'administrator', 'number' => 10 ) ); // Fallback
-            }
-            
-            foreach ( $hosts as $host ) : ?>
-                <div style="flex: 0 0 auto; width: 280px; scroll-snap-align: start;">
-                    <?php include locate_template('template-parts/content-host-card.php'); ?>
-                </div>
-            <?php endforeach; ?>
+                $hosts = get_users( $host_args );
+                if ( empty($hosts) ) { $hosts = get_users( array( 'role' => 'administrator', 'number' => 10 ) ); }
+                
+                foreach ( $hosts as $host ) : ?>
+                    <div style="flex: 0 0 auto; width: 280px; scroll-snap-align: start;">
+                        <?php include locate_template('template-parts/content-host-card.php'); ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Right Arrow -->
+            <button id="host-scroll-right" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 10; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; color: #222; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-50%) scale(1.1)';this.style.background='#fff';" onmouseout="this.style.transform='translateY(-50%) scale(1)';this.style.background='rgba(255,255,255,0.9)';">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:18px; height:18px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const container = document.getElementById('host-scroll-container');
+                const leftBtn = document.getElementById('host-scroll-left');
+                const rightBtn = document.getElementById('host-scroll-right');
+                
+                if (!container || !leftBtn || !rightBtn) return;
+
+                const scrollAmount = 300;
+
+                leftBtn.addEventListener('click', () => {
+                    container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                });
+
+                rightBtn.addEventListener('click', () => {
+                    container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                });
+
+                // Hide/Show arrows based on scroll position
+                const toggleArrows = () => {
+                    leftBtn.style.opacity = container.scrollLeft <= 0 ? '0' : '1';
+                    leftBtn.style.pointerEvents = container.scrollLeft <= 0 ? 'none' : 'auto';
+                    
+                    const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 10;
+                    rightBtn.style.opacity = isAtEnd ? '0' : '1';
+                    rightBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+                };
+
+                container.addEventListener('scroll', toggleArrows);
+                window.addEventListener('resize', toggleArrows);
+                toggleArrows(); // Initial check
+            });
+        </script>
     </section>
         
     </div>
