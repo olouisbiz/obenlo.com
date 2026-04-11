@@ -2,6 +2,19 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.6.8] - 2026-04-11
+### Added
+- **Automated Page Restoration Logic**: Safeguards platform stability by ensuring all core pages (Login, Dashboard, Account, Policy pages, etc.) exist in the database with correct templates and shortcodes.
+- **Improved Performance**: Implemented a one-time execution guard for database migrations to optimize site speed after platform updates.
+
+### Fixed
+- **Dashboard UI Bug**: Fixed undefined `$user` warning in Host Dashboard Overview tab, ensuring consistent display of host profile names.
+- **Link Stability**: Corrected login and support shortcode links across the theme to ensure seamless platform navigation.
+
+### Removed
+- **Legacy Payment Gateways**: Fully decommissioned and removed MonCash and Natcash logic and legacy files.
+
+
 ## [1.6.7] - 2026-04-07
 ### Added
 - **Broadcast History Management**: Site Admins can now review, filter, and delete past platform announcements directly from the dashboard.

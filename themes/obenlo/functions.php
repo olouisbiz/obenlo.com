@@ -341,20 +341,56 @@ add_filter('registration_redirect', function() {
 });
 
 /**
- * Ensure the Welcome page exists in the database
+ * Ensure the required pages exist in the database (Enhanced Safety)
  */
-add_action('init', function() {
-    if (get_page_by_path('welcome')) {
-        return;
+add_action('init', function () {
+    // Avoid running on every page load - check flag
+    if (get_option('obenlo_pages_restored_v167')) return;
+
+    $pages = array(
+        'welcome'              => array('title' => 'Welcome',              'template' => 'page-welcome.php'),
+        'about-us'             => array('title' => 'About Us',             'template' => 'page-about-us.php'),
+        'account'              => array('title' => 'Account',              'template' => 'page-account.php'),
+        'become-a-host'        => array('title' => 'Become a Host',        'template' => 'page-become-a-host.php'),
+        'blog'                 => array('title' => 'Blog',                 'template' => 'page-blog.php'),
+        'cancellation-policy'  => array('title' => 'Cancellation Policy',  'template' => 'page-cancellation-policy.php'),
+        'community'            => array('title' => 'Community',            'template' => 'page-community.php'),
+        'faq'                  => array('title' => 'FAQ',                  'template' => 'page-faq.php'),
+        'guest-rules'          => array('title' => 'Guest Rules',          'template' => 'page-guest-rules.php'),
+        'host-onboarding'      => array('title' => 'Host Onboarding',      'template' => 'page-host-onboarding.php'),
+        'hosts'                => array('title' => 'Hosts',                'template' => 'page-hosts.php'),
+        'how-it-works'         => array('title' => 'How It Works',         'template' => 'page-how-it-works.php'),
+        'login'                => array('title' => 'Login',                'template' => 'page-login.php'),
+        'privacy'              => array('title' => 'Privacy Policy',       'template' => 'page-privacy.php'),
+        'refund-policy'        => array('title' => 'Refund Policy',        'template' => 'page-refund-policy.php'),
+        'support'              => array('title' => 'Support',              'template' => 'page-support.php', 'content' => '[obenlo_support_page]'),
+        'terms'                => array('title' => 'Terms of Service',     'template' => 'page-terms.php'),
+        'trips'                => array('title' => 'Trips',                'template' => 'page-trips.php'),
+        'trust-safety'         => array('title' => 'Trust & Safety',       'template' => 'page-trust-safety.php'),
+        'wishlists'            => array('title' => 'Wishlists',            'template' => 'page-wishlists.php'),
+        'host-dashboard'       => array('title' => 'Host Dashboard',       'template' => 'default',         'content' => '[obenlo_host_dashboard]'),
+        'site-admin'           => array('title' => 'Site Admin',           'template' => 'default',         'content' => '[obenlo_admin_dashboard]'),
+        'messages'             => array('title' => 'Messages',             'template' => 'default',         'content' => '[obenlo_messages_page]'),
+        'broadcasts'           => array('title' => 'Broadcasts',           'template' => 'default',         'content' => '[obenlo_broadcasts_page]'),
+    );
+
+    foreach ($pages as $slug => $data) {
+        // Use get_page_by_path which returns the page if it exists in ANY status (including trash/draft)
+        if (!get_page_by_path($slug, OBJECT, 'page')) {
+            wp_insert_post(array(
+                'post_title'    => $data['title'],
+                'post_name'     => $slug,
+                'post_status'   => 'publish',
+                'post_type'     => 'page',
+                'post_content'  => $data['content'] ?? '',
+                'page_template' => (isset($data['template']) && $data['template'] !== 'default') ? $data['template'] : ''
+            ));
+        }
     }
 
-    wp_insert_post(array(
-        'post_title'   => 'Welcome',
-        'post_name'    => 'welcome',
-        'post_status'  => 'publish',
-        'post_type'    => 'page',
-        'page_template' => 'page-welcome.php'
-    ));
+    // Mark as completed so this block never runs again on this site
+    update_option('obenlo_pages_restored_v167', time());
+    flush_rewrite_rules();
 });
 
 /**

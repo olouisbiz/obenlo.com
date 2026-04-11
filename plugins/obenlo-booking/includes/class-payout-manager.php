@@ -47,8 +47,6 @@ class Obenlo_Booking_Payout_Manager {
             'cashapp'  => array( 'label' => 'CashApp', 'field' => 'text', 'placeholder' => '$Cashtag' ),
             'venmo'    => array( 'label' => 'Venmo', 'field' => 'text', 'placeholder' => '@username' ),
             'zelle'    => array( 'label' => 'Zelle', 'field' => 'text', 'placeholder' => 'Phone or Email' ),
-            'moncash'  => array( 'label' => 'MonCash (Haiti)', 'field' => 'tel', 'placeholder' => '+509 XXXX XXXX' ),
-            'natcash'  => array( 'label' => 'Natcash (Haiti)', 'field' => 'tel', 'placeholder' => '+509 XXXX XXXX' ),
         );
     }
 
@@ -173,25 +171,6 @@ class Obenlo_Booking_Payout_Manager {
         $host_id = get_post_field('post_author', $payout_id);
         $amount_usd = get_post_meta($payout_id, '_amount', true);
         $method = get_post_meta($payout_id, '_method', true);
-
-        // Handle Automatic MonCash Disbursement
-        if ($payout_action === 'auto_moncash' && $method === 'moncash') {
-            $details = get_post_meta($payout_id, '_details', true); // Telephone number
-            $rate = floatval(get_option('obenlo_htg_exchange_rate', '100'));
-            $amount_htg = $amount_usd * $rate;
-
-            $moncash = new Obenlo_Booking_MonCash();
-            $result = $moncash->disburse_funds($details, $amount_htg);
-
-            if (is_wp_error($result)) {
-                $error_msg = $result->get_error_message();
-                wp_safe_redirect(add_query_arg(array('sync_status' => 'error', 'sync_msg' => urlencode('MonCash Error: ' . $error_msg)), wp_get_referer()));
-                exit;
-            }
-
-            $tx_id = $result; // MonCash Transaction ID
-            $status = 'paid';
-        }
 
         if ($status === 'paid') {
             update_post_meta($payout_id, '_status', 'paid');
