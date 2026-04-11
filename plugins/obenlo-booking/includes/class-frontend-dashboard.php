@@ -2478,72 +2478,119 @@ class Obenlo_Booking_Frontend_Dashboard
     {
         ?>
         <div class="dashboard-header">
-            <h2 class="dashboard-title"><?php echo __('Host Success Guide', 'obenlo'); ?></h2>
+            <h2 class="dashboard-title"><?php echo __('The Obenlo Business Manual', 'obenlo'); ?></h2>
         </div>
-        <p style="color:#666; font-size:1.1rem; margin-bottom:40px; max-width: 800px;"><?php echo __('Master the Obenlo platform to grow your brand. Follow these professional standards to build trust and maximize your bookings.', 'obenlo'); ?></p>
+        <p style="color:#666; font-size:1.1rem; margin-bottom:50px; max-width: 900px; line-height:1.6;">
+            <?php echo __('This guide is your single source of truth for running a professional business on Obenlo. Follow these pillars to ensure your storefront is high-converting, your operations are smooth, and your payouts are fast.', 'obenlo'); ?>
+        </p>
 
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap:30px;">
-            
-            <!-- 1. Profile & Photography -->
-            <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
-                <div style="width:50px; height:50px; background:#fff1f3; color:#e61e4d; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        <!-- Pillar 1: Identity -->
+        <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); position:relative; overflow:hidden;">
+            <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">01</div>
+            <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#e61e4d; display:flex; align-items:center; gap:15px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <?php echo __('Identity: Managing Your Storefront', 'obenlo'); ?>
+            </h3>
+            <p style="color:#444; font-size:1.05rem; line-height:1.8; max-width:800px;">
+                Your **Storefront** is not just a profile; it is your digital business card. 
+            </p>
+            <ul style="color:#555; font-size:1rem; line-height:2; margin-top:20px; padding-left:20px;">
+                <li><strong>Brand Presence:</strong> Upload a high-resolution logo and a covering banner that represents your service environment.</li>
+                <li><strong>The Trust Checkmark:</strong> Complete your identity verification in the <b>Verification</b> tab. Businesses with the crimson badge convert 40% better.</li>
+                <li><strong>Social Links:</strong> Connect your Facebook and Instagram in the <b>Storefront</b> settings to show guests you have a wider community.</li>
+                <li><strong>BIO Strategy:</strong> Write in the first person ("I provide" or "We offer"). Explain your expertise and what makes your service unique in the Caribbean.</li>
+            </ul>
+        </div>
+
+        <!-- Pillar 2: Inventory Architecture -->
+        <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #3b82f6; position:relative; overflow:hidden;">
+            <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">02</div>
+            <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#3b82f6; display:flex; align-items:center; gap:15px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"></path></svg>
+                <?php echo __('Inventory: Main vs. Bookables', 'obenlo'); ?>
+            </h3>
+            <p style="color:#444; font-size:1.05rem; line-height:1.8; max-width:800px;">
+                Obenlo uses a hierarchical system to keep your business organized.
+            </p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px; margin-top:25px;">
+                <div style="background:#f1f5f9; padding:25px; border-radius:24px;">
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;"><?php echo __('Main Listing (The Hub)', 'obenlo'); ?></h4>
+                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">This is your general business page. It hosts your address, main photos, and overall description. It is <b>not</b> bookable on its own.</p>
                 </div>
-                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('Aesthetics & Success', 'obenlo'); ?></h3>
-                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Photo Standards:</strong> Use bright, daylight shots. You need a "Hero" wide-shot, a "Detail" shot of an amenity, and a "Vibe" shot showing the experience in action.</p>
-                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Bio Strategy:</strong> Guests book people they trust. Use a clear profile photo of your face and a bio that explains <em>why</em> you do what you do.</p>
-            </div>
-
-            <!-- 2. Listing Hierarchy: Main & Bookables -->
-            <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
-                <div style="width:50px; height:50px; background:#eff6ff; color:#3b82f6; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <div style="background:#f1f5f9; padding:25px; border-radius:24px;">
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;"><?php echo __('Bookables (The Products)', 'obenlo'); ?></h4>
+                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">These are the specific units or slots guests pay for. Create individual bookables for every room, tour time, or service type you offer.</p>
                 </div>
-                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('Main vs. Bookables', 'obenlo'); ?></h3>
-                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Main Listing (Business):</strong> This is your primary identity (e.g., "Sandy Shores Hotel" or "Island Tours Ltd"). It holds your overall location and global photos.</p>
-                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Bookable Units & Services:</strong> Use these for the actual things people buy (e.g., "Ocean View Room" or "Friday Sunset Cruise"). You link these to your Main Listing to manage separate pricing.</p>
             </div>
+            <p style="margin-top:20px; font-size:0.95rem; color:#e61e4d; font-weight:700;">PRO TIP: Use "Units" if you have multiple identical bookables (like 5 Deluxe Rooms) so you don't have to create 5 separate listings.</p>
+        </div>
 
-            <!-- 3. Operations & Payments -->
-            <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
-                <div style="width:50px; height:50px; background:#fefce8; color:#eab308; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+        <!-- Pillar 3: The Booking Lifecycle -->
+        <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #10b981; position:relative; overflow:hidden;">
+            <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">03</div>
+            <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#10b981; display:flex; align-items:center; gap:15px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <?php echo __('Operations: Path to Payout', 'obenlo'); ?>
+            </h3>
+            <div style="display:flex; flex-direction:column; gap:20px; margin-top:25px;">
+                <div style="display:flex; gap:20px; align-items:flex-start;">
+                    <div style="width:30px; height:30px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800; font-size:0.8rem;">1</div>
+                    <div>
+                        <h4 style="margin:0; font-weight:800;"><?php echo __('Approve Requests', 'obenlo'); ?></h4>
+                        <p style="margin:5px 0 0 0; font-size:0.95rem; color:#666;"><?php echo __('Speed is key. Approve bookings in the <b>Bookings</b> tab to lock in the guest’s payment.', 'obenlo'); ?></p>
+                    </div>
                 </div>
-                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('Money & Management', 'obenlo'); ?></h3>
-                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Check-Ins:</strong> Always mark a guest as "Checked In" when they arrive to track attendance in the system.</p>
-                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Payout Release:</strong> Funds move to your balance <strong>only after</strong> you mark the booking as <strong>"Completed"</strong>. Do this immediately after the stay or service ends.</p>
-            </div>
-
-            <!-- 4. Verification & Trust -->
-            <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
-                <div style="width:50px; height:50px; background:#ecfdf5; color:#10b981; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <div style="display:flex; gap:20px; align-items:flex-start;">
+                    <div style="width:30px; height:30px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800; font-size:0.8rem;">2</div>
+                    <div>
+                        <h4 style="margin:0; font-weight:800;"><?php echo __('Mark Check-In', 'obenlo'); ?></h4>
+                        <p style="margin:5px 0 0 0; font-size:0.95rem; color:#666;"><?php echo __('When the service starts, mark "Check In". This prevents fraudulent refund requests.', 'obenlo'); ?></p>
+                    </div>
                 </div>
-                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('ID & Trust', 'obenlo'); ?></h3>
-                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>ID Verification:</strong> To accept money on Obenlo, you must upload your Government ID via the <a href="?action=verification" style="color:#10b981; font-weight:700;">Verification Tab</a>. Verified hosts get higher search ranking.</p>
-                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Managing Reviews:</strong> You can approve or reply to reviews in your dashboard. High ratings lead to more "Featured" exposure.</p>
-            </div>
-
-            <!-- 5. Help & Support -->
-            <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
-                <div style="width:50px; height:50px; background:#f5f3ff; color:#8b5cf6; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <div style="display:flex; gap:20px; align-items:flex-start; background:#fff8f1; padding:20px; border-radius:20px; border:1px dashed #f59e0b;">
+                    <div style="width:30px; height:30px; border-radius:50%; background:#f59e0b; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800; font-size:0.8rem;">3</div>
+                    <div>
+                        <h4 style="margin:0; font-weight:800; color:#92400e;"><?php echo __('THE FINAL STEP: Complete Service', 'obenlo'); ?></h4>
+                        <p style="margin:5px 0 0 0; font-size:0.95rem; color:#b45309; font-weight:600;"><?php echo __('CRITICAL: You MUST click "Mark Completed" after the stay/service is finished. Money ONLY enters your withdrawable balance AFTER this action.', 'obenlo'); ?></p>
+                    </div>
                 </div>
-                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('Support Channels', 'obenlo'); ?></h3>
-                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Help Center:</strong> For direct assistance, open a Support Ticket in the <a href="?action=support" style="color:#8b5cf6; font-weight:700;">Help Center</a>. Our staff usually responds within 24 hours.</p>
-                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Announcements:</strong> Read platform-wide alerts in the <strong>Announcements</strong> tab for maintenance notices and new feature updates.</p>
             </div>
+        </div>
 
-            <!-- 6. Critical Policies -->
-            <div style="background:#fffcf2; border:1px solid #fde047; border-left:6px solid #eab308; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
-                <div style="width:50px; height:50px; background:#fffbeb; color:#d97706; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <!-- Pillar 4: Growth & Reputation -->
+        <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #8b5cf6; position:relative; overflow:hidden;">
+            <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">04</div>
+            <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#8b5cf6; display:flex; align-items:center; gap:15px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <?php echo __('Reputation: Reviews & Exposure', 'obenlo'); ?>
+            </h3>
+            <p style="color:#444; font-size:1.05rem; line-height:1.8;">
+                Reviews are your currency on Obenlo.
+            </p>
+            <ul style="color:#555; font-size:1rem; line-height:2; margin-top:10px; padding-left:20px;">
+                <li><strong>Review Moderation:</strong> Check the <b>Reviews</b> tab frequently. Approve positive reviews to make them visible and always reply to feedback—it shows future guests you are a pro.</li>
+                <li><strong>Obenlo Love:</strong> Submit your own success stories in the <b>Obenlo Love</b> tab. We feature these on our homepage to drive traffic to your storefront.</li>
+                <li><strong>Ranking:</strong> Respond faster to <b>Messages</b> to increase your visibility in search results.</li>
+            </ul>
+        </div>
+
+        <!-- Pillar 5: Safety & Support -->
+        <div style="background:#fffcf2; border:1px solid #fde047; border-radius:32px; padding:45px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #d97706; position:relative; overflow:hidden;">
+            <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#fffbeb; line-height:1; user-select:none;">05</div>
+            <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#d97706; display:flex; align-items:center; gap:15px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <?php echo __('Safety: Protection & Support', 'obenlo'); ?>
+            </h3>
+            <p style="color:#713f12; font-size:1.05rem; line-height:1.7;">
+                <strong>Zero Leakage Policy:</strong> Never accept payments outside of Obenlo. Doing so removes all insurance coverage and will lead to an immediate ban.
+            </p>
+            <div style="margin-top:25px; padding:25px; background:#fff; border-radius:24px; border:1px solid #fef3c7;">
+                <h4 style="margin:0 0 15px 0; font-weight:800; color:#854d0e;"><?php echo __('Direct Assistance', 'obenlo'); ?></h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                    <p style="margin:0; font-size:0.95rem; color:#92400e;"><strong>Help Center:</strong> Open a ticket for account issues, disputes, or bugs. We respond within 24h.</p>
+                    <p style="margin:0; font-size:0.95rem; color:#92400e;"><strong>Announcements:</strong> Check here for technical updates and critical platform changes.</p>
                 </div>
-                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('Compliance & Safety', 'obenlo'); ?></h3>
-                <p style="color:#713f12; font-size:0.9rem; line-height:1.6;"><strong>Zero Tolerance:</strong> Obenlo suspends profiles for fraudulent listings, safety violations, or abusive behavior. Suspended profiles and listings are instantly hidden from the public.</p>
-                <p style="color:#713f12; font-size:0.9rem; line-height:1.6; margin-bottom:0;"><strong>Disputes:</strong> All disputes must be handled via formal Support Tickets. Verified ID is required for all dispute resolutions.</p>
             </div>
-
         </div>
         <?php
     }
