@@ -2478,58 +2478,70 @@ class Obenlo_Booking_Frontend_Dashboard
     {
         ?>
         <div class="dashboard-header">
-            <h2 class="dashboard-title"><?php echo __('Host Guide & Resources', 'obenlo'); ?></h2>
+            <h2 class="dashboard-title"><?php echo __('Host Success Guide', 'obenlo'); ?></h2>
         </div>
-        <p style="color:#666; font-size:1.05rem; margin-bottom:30px;"><?php echo __('Welcome to the Obenlo Host Guide. Here you will find everything you need to succeed, optimize your listings, and understand our community policies.', 'obenlo'); ?></p>
+        <p style="color:#666; font-size:1.1rem; margin-bottom:40px; max-width: 800px;"><?php echo __('Master the Obenlo platform to grow your brand. Follow these professional standards to build trust and maximize your bookings.', 'obenlo'); ?></p>
 
-        <div style="display:grid; gap:30px;">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap:30px;">
             
-            <div style="background:#fff; border:1px solid #eee; border-radius:16px; padding:30px;">
-                <h3 style="margin-top:0; color:#e61e4d; font-size:1.3rem; display:flex; align-items:center; gap:10px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px; height:24px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                    <?php echo __('Crafting the Perfect Listing', 'obenlo'); ?>
-                </h3>
-                <p style="color:#444; line-height:1.6;"><strong>High-Quality Photos:</strong> Listings with bright, high-resolution photos receive significantly more bookings. Ensure your cover photo accurately represents the experience.</p>
-                <p style="color:#444; line-height:1.6;"><strong>Detailed Descriptions:</strong> Be transparent about what guests can expect. Mention any unique amenities, exact location hints, and accessibility features.</p>
-                <p style="color:#444; line-height:1.6;"><strong>Managing Units:</strong> If you have multiple rooms or identical items, use our "Units/Sessions" system. Create one main parent listing, then add child units to manage separate availability calendars.</p>
+            <!-- 1. Profile & Photography -->
+            <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                <div style="width:50px; height:50px; background:#fff1f3; color:#e61e4d; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                </div>
+                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('Aesthetics & Success', 'obenlo'); ?></h3>
+                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Photo Standards:</strong> Use bright, daylight shots. You need a "Hero" wide-shot, a "Detail" shot of an amenity, and a "Vibe" shot showing the experience in action.</p>
+                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Bio Strategy:</strong> Guests book people they trust. Use a clear profile photo of your face and a bio that explains <em>why</em> you do what you do.</p>
             </div>
 
-            <div style="background:#fff; border:1px solid #eee; border-radius:16px; padding:30px;">
-                <h3 style="margin-top:0; color:#3b82f6; font-size:1.3rem; display:flex; align-items:center; gap:10px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px; height:24px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <?php echo __('Profile & Trust Verification', 'obenlo'); ?>
-                </h3>
-                <p style="color:#444; line-height:1.6;">Guests look at your storefront to build trust before booking. Make sure your bio tells your story.</p>
-                <p style="color:#444; line-height:1.6;"><strong>ID Verification:</strong> To accept bookings, you must complete the identity verification process. Visit the <a href="?action=verification" style="color:#3b82f6; font-weight:700;">Verification Tab</a> to upload your Government ID if you haven't already. Verified hosts earn a special badge.</p>
-                <p style="color:#444; line-height:1.6;"><strong>Reviews:</strong> You can manage guest reviews in your Dashboard. Approving reviews makes them public. Replying to reviews publicly shows future guests that you are responsive and caring.</p>
+            <!-- 2. Listing Hierarchy: Main & Bookables -->
+            <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                <div style="width:50px; height:50px; background:#eff6ff; color:#3b82f6; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('Main vs. Bookables', 'obenlo'); ?></h3>
+                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Main Listing (Business):</strong> This is your primary identity (e.g., "Sandy Shores Hotel" or "Island Tours Ltd"). It holds your overall location and global photos.</p>
+                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Bookable Units & Services:</strong> Use these for the actual things people buy (e.g., "Ocean View Room" or "Friday Sunset Cruise"). You link these to your Main Listing to manage separate pricing.</p>
             </div>
 
-            <div style="background:#fff; border:1px solid #eee; border-radius:16px; padding:30px;">
-                <h3 style="margin-top:0; color:#10b981; font-size:1.3rem; display:flex; align-items:center; gap:10px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px; height:24px;"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-                    <?php echo __('Bookings, Payments & Payouts', 'obenlo'); ?>
-                </h3>
-                <p style="color:#444; line-height:1.6;"><strong>Approval Process:</strong> You must <em>Approve</em> or <em>Decline</em> pending booking requests quickly. Once approved, the guest is charged automatically.</p>
-                <p style="color:#444; line-height:1.6;"><strong>Check-Ins:</strong> When a guest arrives, click "Check In" on their booking. This updates their status to In House. If an issue arises, you can mark the booking as cancelled before check-in.</p>
-                <p style="color:#444; line-height:1.6;"><strong>Getting Paid:</strong> Obenlo uses a <em>Payout-on-Completion</em> model. This means your earnings are calculated upon approval but only released to your withdrawable balance once you (the Host) mark the booking as <strong>Completed</strong>. This ensures platform integrity and simplifies refund handling for non-commenced bookings.</p>
+            <!-- 3. Operations & Payments -->
+            <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                <div style="width:50px; height:50px; background:#fefce8; color:#eab308; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                </div>
+                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('Money & Management', 'obenlo'); ?></h3>
+                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Check-Ins:</strong> Always mark a guest as "Checked In" when they arrive to track attendance in the system.</p>
+                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Payout Release:</strong> Funds move to your balance <strong>only after</strong> you mark the booking as <strong>"Completed"</strong>. Do this immediately after the stay or service ends.</p>
             </div>
 
-            <div style="background:#fff; border:1px solid #eee; border-radius:16px; padding:30px;">
-                <h3 style="margin-top:0; color:#8b5cf6; font-size:1.3rem; display:flex; align-items:center; gap:10px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px; height:24px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    <?php echo __('Support', 'obenlo'); ?>
-                </h3>
-                <p style="color:#444; line-height:1.6;"><strong>Help Center:</strong> Need direct assistance from our admin staff? Go to the <strong>Help Center</strong> tab. You can open a new Support Ticket to ask questions about your account, dispute a review, or report a bug.</p>
-                <p style="color:#444; line-height:1.6;"><strong>Broadcasts:</strong> Keep an eye on the <strong>Broadcasts</strong> tab! We use this system to send out global notices regarding site maintenance, new feature releases, or changes to our policies.</p>
+            <!-- 4. Verification & Trust -->
+            <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                <div style="width:50px; height:50px; background:#ecfdf5; color:#10b981; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('ID & Trust', 'obenlo'); ?></h3>
+                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>ID Verification:</strong> To accept money on Obenlo, you must upload your Government ID via the <a href="?action=verification" style="color:#10b981; font-weight:700;">Verification Tab</a>. Verified hosts get higher search ranking.</p>
+                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Managing Reviews:</strong> You can approve or reply to reviews in your dashboard. High ratings lead to more "Featured" exposure.</p>
             </div>
-            
-            <div style="background:#fffcf2; border:1px solid #fde047; border-left:4px solid #eab308; border-radius:12px; padding:25px;">
-                <h3 style="margin-top:0; color:#854d0e; font-size:1.2rem; display:flex; align-items:center; gap:10px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px; height:20px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    <?php echo __('Important: Platform Policies & Suspensions', 'obenlo'); ?>
-                </h3>
-                <p style="color:#713f12; line-height:1.6;">Obenlo enforces a zero-tolerance policy for fraudulent listings, dangerous environments, or abusive guest interactions. Ensure all information is accurate and your service levels are high.</p>
-                <p style="color:#713f12; line-height:1.6; margin-bottom:0;"><strong>Account Suspensions:</strong> If your account violates our terms, an Administrator will suspend your Host profile. This immediately hides all your listings and profile from public view across the platform. If this happens, you will see a red warning banner on your Dashboard "My Listings" tab explaining the direct reason. You must resolve the issue via a Support Ticket to regain access.</p>
+
+            <!-- 5. Help & Support -->
+            <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                <div style="width:50px; height:50px; background:#f5f3ff; color:#8b5cf6; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('Support Channels', 'obenlo'); ?></h3>
+                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Help Center:</strong> For direct assistance, open a Support Ticket in the <a href="?action=support" style="color:#8b5cf6; font-weight:700;">Help Center</a>. Our staff usually responds within 24 hours.</p>
+                <p style="color:#444; font-size:0.95rem; line-height:1.7;"><strong>Announcements:</strong> Read platform-wide alerts in the <strong>Announcements</strong> tab for maintenance notices and new feature updates.</p>
+            </div>
+
+            <!-- 6. Critical Policies -->
+            <div style="background:#fffcf2; border:1px solid #fde047; border-left:6px solid #eab308; border-radius:32px; padding:35px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                <div style="width:50px; height:50px; background:#fffbeb; color:#d97706; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:24px; height:24px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <h3 style="margin-top:0; font-size:1.4rem; font-weight:800;"><?php echo __('Compliance & Safety', 'obenlo'); ?></h3>
+                <p style="color:#713f12; font-size:0.9rem; line-height:1.6;"><strong>Zero Tolerance:</strong> Obenlo suspends profiles for fraudulent listings, safety violations, or abusive behavior. Suspended profiles and listings are instantly hidden from the public.</p>
+                <p style="color:#713f12; font-size:0.9rem; line-height:1.6; margin-bottom:0;"><strong>Disputes:</strong> All disputes must be handled via formal Support Tickets. Verified ID is required for all dispute resolutions.</p>
             </div>
 
         </div>

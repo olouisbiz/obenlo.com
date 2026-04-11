@@ -13,6 +13,7 @@ All notable changes to the **Obenlo Platform** will be documented in this file.
 
 ### Removed
 - **Legacy Payment Gateways**: Fully decommissioned and removed MonCash and Natcash logic and legacy files.
+- **Unified Versioning**: Established a project-wide versioning standard where all core plugins and the theme share the same version number for better ecosystem synchronization.
 
 
 ## [1.6.7] - 2026-04-07

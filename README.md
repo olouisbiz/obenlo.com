@@ -74,4 +74,4 @@ Haitian-specific gateways (MonCash/Natcash) require valid API keys in the Settin
 ---
 
 **Obenlo Technical Team**
-*v1.6.7 - "Crimson & Stone" Stable*
+*v1.6.8 - "Unified Platform" Standard*
