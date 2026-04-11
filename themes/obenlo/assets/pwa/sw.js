@@ -1,4 +1,4 @@
-const CACHE_NAME = 'obenlo-pwa-cache-v2';
+const CACHE_NAME = 'obenlo-pwa-cache-v1.6.8';
 const ASSETS_TO_CACHE = [
   '/',
   '/wp-content/themes/obenlo/assets/css/style.css',
