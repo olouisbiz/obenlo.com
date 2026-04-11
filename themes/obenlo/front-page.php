@@ -136,7 +136,7 @@ if ( count($demo_meta_query) <= 1 ) {
             $srv_args = array(
                 'post_parent'    => 0,
                 'post_type'      => 'listing',
-                'posts_per_page' => 10,
+                'posts_per_page' => 8,
                 'post_status'    => 'publish',
                 'tax_query'      => array(
                     array(
@@ -177,7 +177,7 @@ if ( count($demo_meta_query) <= 1 ) {
             $evt_args = array(
                 'post_parent'    => 0,
                 'post_type'      => 'listing',
-                'posts_per_page' => 10,
+                'posts_per_page' => 8,
                 'post_status'    => 'publish',
                 'tax_query'      => array(
                     array(
@@ -221,7 +221,7 @@ if ( count($demo_meta_query) <= 1 ) {
             $exp_args = array(
                 'post_parent'    => 0,
                 'post_type'      => 'listing',
-                'posts_per_page' => 10,
+                'posts_per_page' => 8,
                 'post_status'    => 'publish',
                 'tax_query'      => array(
                     array(
@@ -262,7 +262,7 @@ if ( count($demo_meta_query) <= 1 ) {
             $stay_args = array(
                 'post_parent'    => 0,
                 'post_type'      => 'listing',
-                'posts_per_page' => 10,
+                'posts_per_page' => 8,
                 'post_status'    => 'publish',
                 'tax_query'      => array(
                     array(
