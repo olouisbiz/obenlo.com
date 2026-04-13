@@ -216,4 +216,63 @@
         0%, 100% { transform: translateX(0); }
         50% { transform: translateX(5px); }
     }
+
+    /* Demo Listing Manager: Clean Action Layout */
+    .admin-mode .admin-table td {
+        padding-top: 25px !important;
+        padding-bottom: 25px !important;
+        gap: 15px !important;
+    }
+
+    /* Style the Action Container in Demo Manager */
+    .admin-mode .admin-table td div {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 20px !important;
+        width: 100% !important;
+    }
+
+    .admin-mode .admin-table td a, 
+    .admin-mode .admin-table td button {
+        font-size: 0.95rem !important;
+        text-decoration: none !important;
+        white-space: nowrap !important;
+    }
+
+    .admin-mode .admin-table td select {
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        border: 1px solid #ddd !important;
+        background: #fff !important;
+        font-size: 0.9rem !important;
+        height: auto !important;
+    }
+
+    /* Style the Transfer Button specifically */
+    .admin-mode button[type="submit"][style*="background:#222"] {
+        background: #1a1a1a !important;
+        color: #fff !important;
+        padding: 8px 18px !important;
+        border-radius: 8px !important;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+
+    /* Edit Setup Link */
+    .admin-mode a[style*="color:#e61e4d"] {
+        color: #e61e4d !important;
+        font-weight: 800 !important;
+    }
+
+    /* Visibility and Delete Buttons */
+    .admin-mode button[style*="background:none"] {
+        color: #666 !important;
+        font-weight: 700 !important;
+    }
+
+    .admin-mode button[style*="color:#e61e4d"][style*="underline"] {
+        color: #e61e4d !important;
+        text-underline-offset: 4px !important;
+    }
 }
