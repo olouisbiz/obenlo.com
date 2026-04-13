@@ -1305,8 +1305,20 @@ class Obenlo_Booking_Frontend_Dashboard
                         </div>
 
                         <div style="margin-bottom:20px;">
-                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Demo Host Location', 'obenlo'); ?></label>
-                            <input type="text" name="_obenlo_demo_host_location" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_location', true)); ?>" placeholder="e.g. Port-au-Prince, Haiti" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
+                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Host Specialties', 'obenlo'); ?></label>
+                            <input type="text" name="_obenlo_demo_host_specialties" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_specialties', true)); ?>" placeholder="<?php echo esc_attr(__('e.g. Organic, Pet Friendly, Multilingual', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
+                            <p style="font-size:0.75rem; color:#e61e4d; opacity:0.7; margin-top:5px;"><?php echo __('Separate your specialties with commas.', 'obenlo'); ?></p>
+                        </div>
+
+                        <div class="grid-row" style="margin-bottom:20px;">
+                            <div style="flex:1;">
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Demo Host Location', 'obenlo'); ?></label>
+                                <input type="text" name="_obenlo_demo_host_location" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_location', true)); ?>" placeholder="e.g. Port-au-Prince, Haiti" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Featured Video (YouTube/Vimeo)', 'obenlo'); ?></label>
+                                <input type="url" name="_obenlo_demo_host_video" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_video', true)); ?>" placeholder="https://www.youtube.com/watch?v=..." style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
+                            </div>
                         </div>
 
                         <div style="margin-bottom:25px;">
@@ -2213,6 +2225,12 @@ class Obenlo_Booking_Frontend_Dashboard
                 }
                 if (isset($_POST['_obenlo_demo_host_facebook'])) {
                     update_post_meta($new_post_id, '_obenlo_demo_host_facebook', esc_url_raw($_POST['_obenlo_demo_host_facebook']));
+                }
+                if (isset($_POST['_obenlo_demo_host_specialties'])) {
+                    update_post_meta($new_post_id, '_obenlo_demo_host_specialties', sanitize_text_field($_POST['_obenlo_demo_host_specialties']));
+                }
+                if (isset($_POST['_obenlo_demo_host_video'])) {
+                    update_post_meta($new_post_id, '_obenlo_demo_host_video', esc_url_raw($_POST['_obenlo_demo_host_video']));
                 }
 
                 // Processing Demo Assets

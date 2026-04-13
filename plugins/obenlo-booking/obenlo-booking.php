@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Obenlo Booking
  * Description: Custom 100% bespoke booking platform for Stays, Experiences, Events, and Services.
- * Version: 1.7.1
+ * Version: 1.7.2
  * Author: Obenlo
  * Author URI: https://obenlo.com
  */
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-define('OBENLO_BOOKING_VERSION', '1.7.1');
+define('OBENLO_BOOKING_VERSION', '1.7.2');
 define('OBENLO_BOOKING_DIR', plugin_dir_path(__FILE__));
 define('OBENLO_BOOKING_URL', plugin_dir_url(__FILE__));
 

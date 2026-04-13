@@ -2,6 +2,10 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.7.2] - 2026-04-13
+### Added
+- **Demo Setup Parity**: Expanded the Super-Admin Demo Setup form to include all standard Storefront fields. Administrators can now configure 'Host Specialties' and 'Featured Video' URLs for ghost accounts to ensure consistent storefront quality.
+
 ## [1.7.1] - 2026-04-13
 ### Added
 - **PWA Action Styling**: Optimized the Demo Listing Manager table for mobile/standalone mode. Actions (View, Edit Setup, Transfer, Delete) now use a clean, touch-friendly UI matching the platform's premium aesthetic.
