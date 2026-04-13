@@ -17,16 +17,20 @@
         padding-top: 0 !important;
     }
 
-    /* Hide the global site header on dashboard pages to prevent overlap */
-    .site-header {
-        display: none !important;
-    }
-
-    /* HOST DASHBOARD: Transform Layout into Native App */
+    /* Ensure the dashboard content clears the sticky site-header */
     .obenlo-dashboard-container {
         display: block !important;
+        padding-top: 20px !important; /* Initial padding */
         padding-bottom: 90px !important; /* Space for bottom nav */
         background: #fdfdfd !important;
+    }
+
+    /* Fixed site-header adjustment for PWA */
+    .site-header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+        background: #fff !important;
     }
 
     /* Sticky Top Header */
