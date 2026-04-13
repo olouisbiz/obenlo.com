@@ -17,6 +17,11 @@
         padding-top: 0 !important;
     }
 
+    /* Hide the global site header on dashboard pages to prevent overlap */
+    .site-header {
+        display: none !important;
+    }
+
     /* HOST DASHBOARD: Transform Layout into Native App */
     .obenlo-dashboard-container {
         display: block !important;
@@ -26,22 +31,18 @@
 
     /* Sticky Top Header */
     .dashboard-header {
-        position: sticky !important;
-        top: 0 !important;
-        background: rgba(255,255,255,0.95) !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
-        z-index: 1000 !important;
-        padding: 15px 20px !important;
-        margin: 0 -20px 20px -20px !important;
-        border-bottom: 1px solid rgba(0,0,0,0.05) !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
+        position: relative !important; /* Changed from sticky to relative to prevent eating space */
+        padding: 40px 20px 20px 20px !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        z-index: 10 !important;
     }
 
     .dashboard-title {
-        font-size: 1.6rem !important;
+        font-size: 1.8rem !important; /* Reduced from 2.2rem inline */
+        line-height: 1.2 !important;
     }
 
     .dashboard-content {
