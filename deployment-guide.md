@@ -1,5 +1,10 @@
 # Obenlo Official Deployment
 # CHANGELOG
+## [1.7.1] - 2026-04-13
+- PWA UX Refinement: Styled Demo Listing Manager actions for standalone mode.
+- Administrative HUD: Automatic detection for management sessions in PWA.
+- Branding Restoration: Reverted accidental branding merges; restored stable platform identity.
+
 ## [1.7.0] - 2026-04-13
 - Hierarchical Category Workflow: Enforced parent-child logic for industries.
 - Contextual Sub-Categories: Child listings show specific sub-types based on parent.
