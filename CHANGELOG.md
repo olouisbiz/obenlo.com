@@ -2,6 +2,16 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.7.1] - 2026-04-13
+### Added
+- **PWA Action Styling**: Optimized the Demo Listing Manager table for mobile/standalone mode. Actions (View, Edit Setup, Transfer, Delete) now use a clean, touch-friendly UI matching the platform's premium aesthetic.
+- **Admin HUD Mode**: Implemented automatic detection for administrative sessions in the PWA, ensuring management tools remain accessible without compromising the host-only simplified view for regular users.
+
+### Fixed
+- **Stable Branding Restoration**: Reverted accidental branding merges and restored the platform's stable black/neutral and pink design identity.
+- **PWA Navigation Integrity**: Purged intrusive navigation injections to maintain the "Pure" 1.7.0 architectural baseline while preserving necessary functional UI updates.
+
+
 ## [1.7.0] - 2026-04-13
 ### Added
 - **Hierarchical Category Workflow**: Enforced a strict parent-child relationship for listing categories. Main Listings are now restricted to top-level Industry Categories (Stay, Experience, Service, Event).
