@@ -1,9 +1,17 @@
 # Obenlo Official Deployment
 # CHANGELOG
+## [1.6.9] - 2026-04-13
+- Relaxed Booking Availability: Removed strict operating hours enforcement.
+- New Industry Subcategories: Added Ticket (Event) and Beauty (Service).
+- Enhanced Demo Assets: Added admin control for ghost host logos and banners.
+- Smart Industry Logic: Improved parent-aware category detection.
+
+## [1.6.8] - 2026-04-11
+- Automated Page Restoration Logic for platform stability.
+- Legacy Payment Gateways Decommissioned (MonCash/Natcash).
+- Unified project-wide versioning.
+
 ## [1.6.7] - 2026-04-07
-- Stable recovery point.
-- Removed Planner experimental code.
-- Protected uploads folder in .gitignore.
 
 This guide explains the secure, step-by-step workflow for moving new features or bug fixes from your local computer (`obenlo.local`) to your live production website (`obenlo.com`).
 
