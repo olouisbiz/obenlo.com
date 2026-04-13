@@ -1247,7 +1247,6 @@ class Obenlo_Booking_Frontend_Dashboard
                 <input type="hidden" name="listing_id" value="<?php echo esc_attr($listing_id); ?>">
                 <?php if ($is_child): ?>
                     <input type="hidden" name="parent_id" value="<?php echo esc_attr($parent_id > 0 ? $parent_id : filter_input(INPUT_GET, 'parent_id', FILTER_SANITIZE_NUMBER_INT)); ?>">
-                    <input type="hidden" name="listing_type" value="<?php echo esc_attr($selected_type); ?>">
                 <?php endif; ?>
                 
                 <?php 
@@ -1349,23 +1348,54 @@ class Obenlo_Booking_Frontend_Dashboard
                     </div>
 
 
-                    <?php if (!$is_child): ?>
-                        <div style="margin-bottom:20px;">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Category', 'obenlo'); ?></label>
-                            <select name="listing_type" id="smart_listing_type" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                <option value=""><?php echo __('-- Select a Category --', 'obenlo'); ?></option>
-                                <?php
-            $types = get_terms(array('taxonomy' => 'listing_type', 'hide_empty' => false));
-            if (!is_wp_error($types)) {
-                foreach ($types as $type) {
-                    $selected = ($selected_type == $type->term_id) ? 'selected' : '';
-                    echo '<option value="' . esc_attr($type->term_id) . '" data-slug="' . esc_attr($type->slug) . '" ' . $selected . '>' . esc_html($type->name) . '</option>';
-                }
-            }
-?>
-                            </select>
-                        </div>
+                    <div style="margin-bottom:20px;">
+                        <label id="listing_type_label" style="display:block; font-weight:700; margin-bottom:8px; color:#444;">
+                            <?php echo $is_child ? __('Sub-Category', 'obenlo') : __('Industry Category', 'obenlo'); ?>
+                        </label>
+                        <select name="listing_type" id="smart_listing_type" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
+                            <option value=""><?php echo $is_child ? __('-- Select Sub-Category --', 'obenlo') : __('-- Select Industry --', 'obenlo'); ?></option>
+                            <?php
+                            if ($is_child) {
+                                // Find the parent's top-level industry
+                                $parent_terms = wp_get_post_terms($parent_id, 'listing_type');
+                                $parent_type_id = !empty($parent_terms) && !is_wp_error($parent_terms) ? $parent_terms[0]->term_id : 0;
+                                
+                                // Direct to top parent if not already there
+                                if ($parent_type_id) {
+                                    $check_term = get_term($parent_type_id, 'listing_type');
+                                    while($check_term && $check_term->parent != 0) {
+                                       $check_term = get_term($check_term->parent, 'listing_type');
+                                    }
+                                    if ($check_term) $parent_type_id = $check_term->term_id;
+                                }
 
+                                if ($parent_type_id) {
+                                    $sub_types = get_terms(array('taxonomy' => 'listing_type', 'parent' => $parent_type_id, 'hide_empty' => false));
+                                    if (!is_wp_error($sub_types)) {
+                                        foreach ($sub_types as $type) {
+                                            $selected = ($selected_type == $type->term_id) ? 'selected' : '';
+                                            echo '<option value="' . esc_attr($type->term_id) . '" data-slug="' . esc_attr($type->slug) . '" ' . $selected . '>' . esc_html($type->name) . '</option>';
+                                        }
+                                    }
+                                }
+                            } else {
+                                // Only top-level industries for Main Listing
+                                $top_types = get_terms(array('taxonomy' => 'listing_type', 'parent' => 0, 'hide_empty' => false));
+                                if (!is_wp_error($top_types)) {
+                                    foreach ($top_types as $type) {
+                                        $selected = ($selected_type == $type->term_id) ? 'selected' : '';
+                                        echo '<option value="' . esc_attr($type->term_id) . '" data-slug="' . esc_attr($type->slug) . '" ' . $selected . '>' . esc_html($type->name) . '</option>';
+                                    }
+                                }
+                            }
+                            ?>
+                        </select>
+                        <?php if(!$is_child): ?>
+                            <p style="font-size:0.75rem; color:#888; margin-top:5px;"><?php echo __('Choose the primary industry. You will select specific sub-types for each unit/session.', 'obenlo'); ?></p>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if (!$is_child): ?>
                         <div class="grid-row" style="margin-bottom:20px;">
                             <div id="generic_location_wrapper" style="flex:2;">
                                 <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Address / Location', 'obenlo'); ?></label>
@@ -2253,10 +2283,18 @@ class Obenlo_Booking_Frontend_Dashboard
             }
             update_post_meta($new_post_id, '_obenlo_addons_structured', wp_json_encode($structured_addons));
 
-            // Term: Type (Only parent dictates category really, but child saves implicitly)
-            if (isset($_POST['listing_type']) && !empty($_POST['listing_type'])) {
-                $term_id = intval($_POST['listing_type']);
-                wp_set_post_terms($new_post_id, array($term_id), 'listing_type');
+            // Term: Type (Hierarchy Enforcement)
+            $post_type_override = isset($_POST['listing_type']) ? intval($_POST['listing_type']) : 0;
+            if ($parent_id > 0 && !$post_type_override) {
+                // Inherit from parent if sub-category isn't explicitly set
+                $parent_terms = wp_get_post_terms($parent_id, 'listing_type');
+                if ($parent_terms && !is_wp_error($parent_terms)) {
+                    $post_type_override = $parent_terms[0]->term_id;
+                }
+            }
+
+            if ($post_type_override) {
+                wp_set_post_terms($new_post_id, array($post_type_override), 'listing_type');
             }
 
             // Term: Amenities (Repeater strings - Only parent)

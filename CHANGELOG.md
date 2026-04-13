@@ -2,6 +2,15 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.7.0] - 2026-04-13
+### Added
+- **Hierarchical Category Workflow**: Enforced a strict parent-child relationship for listing categories. Main Listings are now restricted to top-level Industry Categories (Stay, Experience, Service, Event).
+- **Contextual Sub-Category Selection**: Bookable units now offer specialized sub-category selection based on the parent's industry (e.g., "Beauty" as a child of "Service").
+- **Smart Category Inheritance**: Child listings now automatically inherit their parent's industry category if no specific sub-type is selected during creation.
+
+### Changed
+- **Dashboard UI Optimization**: Refined the category selection interface in the Host Dashboard to streamline the business creation process.
+
 ## [1.6.9] - 2026-04-13
 ### Added
 - **Expanded Industry Categories**: Added **Ticket** (under Event) and **Beauty** (under Service) subcategories to support a wider range of booking types.

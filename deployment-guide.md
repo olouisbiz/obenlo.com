@@ -1,5 +1,10 @@
 # Obenlo Official Deployment
 # CHANGELOG
+## [1.7.0] - 2026-04-13
+- Hierarchical Category Workflow: Enforced parent-child logic for industries.
+- Contextual Sub-Categories: Child listings show specific sub-types based on parent.
+- Smart Inheritance: Unset child categories fallback to parent industry.
+
 ## [1.6.9] - 2026-04-13
 - Relaxed Booking Availability: Removed strict operating hours enforcement.
 - New Industry Subcategories: Added Ticket (Event) and Beauty (Service).
