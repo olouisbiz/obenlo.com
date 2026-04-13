@@ -290,6 +290,8 @@ class Obenlo_Booking_Post_Types {
             'Freelance'          => 'service',
             'Photographer'       => 'service',
             'Delivery'           => 'service',
+            'Beauty'             => 'service',
+            'Ticket'             => 'event',
         );
 
         foreach ( $sub_types as $name => $parent_key ) {

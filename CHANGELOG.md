@@ -2,6 +2,18 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.6.9] - 2026-04-13
+### Added
+- **Expanded Industry Categories**: Added **Ticket** (under Event) and **Beauty** (under Service) subcategories to support a wider range of booking types.
+- **Smart Category Logic**: Implemented parent-aware industry detection in the dashboard and listing templates, ensuring subcategories automatically inherit their parent's pricing models and booking rules.
+- **Enhanced Demo Management**: Added administrative controls for Demo Host Logos, Storefront Banners, and Weekly Availability to the Demo Listing form.
+- **Demo Asset Migration**: Assets and availability settings defined for Demo Listings are now seamlessly transferred to the host's permanent profile upon account handover.
+
+### Fixed
+- **Relaxed Booking Availability**: Removed strict enforcement of operating hours during the booking process. Guests can now book at any time, with hours serving as an informational guide rather than a hard block.
+- **Demo Storefront Parity**: Fixed a bug where custom demo business hours were not reflecting correctly on the simulated host storefront.
+- **Booking Form Stability**: Fixed a client-side validation error that was disabling the "Reserve" button incorrectly for out-of-hours bookings.
+
 ## [1.6.8] - 2026-04-11
 ### Added
 - **Automated Page Restoration Logic**: Safeguards platform stability by ensuring all core pages (Login, Dashboard, Account, Policy pages, etc.) exist in the database with correct templates and shortcodes.

@@ -50,9 +50,12 @@ class Obenlo_Booking_Payments
         $timestamp = strtotime($date);
         $day_of_week = strtolower(date('l', $timestamp));
 
+        // Day-active check removed per user request to allow booking anytime.
+        /*
         if (!isset($business_hours[$day_of_week]) || $business_hours[$day_of_week]['active'] !== 'yes') {
             wp_send_json_error(array('message' => 'The host does not accept bookings on ' . date('l', $timestamp) . 's.'));
         }
+        */
 
         $conf = $business_hours[$day_of_week];
         $start_time = $conf['start'];
@@ -281,6 +284,8 @@ class Obenlo_Booking_Payments
                 );
             }
 
+            // Business hours check removed per user request to allow booking anytime.
+            /*
             if (is_array($business_hours) && isset($business_hours[$day_of_week])) {
                 $day_config = $business_hours[$day_of_week];
                 if ($day_config['active'] !== 'yes') {
@@ -290,6 +295,7 @@ class Obenlo_Booking_Payments
                     obenlo_redirect_with_error('time_unavailable');
                 }
             }
+            */
         }
 
         // 3. Double-Booking Prevention (with Multi-Unit Capacity and Ghost Timeout)

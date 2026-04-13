@@ -29,6 +29,8 @@ class Obenlo_Booking_Admin_Dashboard
         add_action('admin_post_obenlo_delete_demo', array($this, 'handle_delete_demo'));
         add_action('admin_post_obenlo_delete_user_admin', array($this, 'handle_delete_user_admin'));
         add_action('admin_post_obenlo_admin_testimony_action', array($this, 'handle_testimony_action'));
+        add_action('admin_post_obenlo_admin_save_host_profile', array($this, 'handle_admin_save_host_profile'));
+        add_action('admin_post_obenlo_admin_save_host_availability', array($this, 'handle_admin_save_host_availability'));
     }
 
     public function add_admin_menu()
@@ -230,6 +232,8 @@ class Obenlo_Booking_Admin_Dashboard
                     case 'reviews':       $this->render_reviews_tab(); break;
                     case 'testimonies':   $this->render_testimonies_tab(); break;
                     case 'refunds':       $this->render_refunds_tab(); break;
+                    case 'edit_host':     $this->render_edit_host_tab(); break;
+                    case 'manage_availability': $this->render_manage_availability_tab(); break;
                     default:              $this->render_overview_tab(); break;
                 }
                 ?>
@@ -740,6 +744,10 @@ class Obenlo_Booking_Admin_Dashboard
             endif; ?>
                         <a href="mailto:<?php echo esc_attr($user->user_email); ?>" style="margin-left: 10px;">Contact</a>
                         |
+                        <?php if (in_array('host', $user->roles)): ?>
+                            <a href="?page=obenlo-admin-dashboard&tab=edit_host&user_id=<?php echo $user->ID; ?>" style="font-weight:bold; color:#222;">Edit Store</a> |
+                            <a href="?page=obenlo-admin-dashboard&tab=manage_availability&user_id=<?php echo $user->ID; ?>" style="font-weight:bold; color:#2563eb;">Availability</a> |
+                        <?php endif; ?>
                         <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="display:inline;" onsubmit="return confirm('Permanently delete this user and ALL their content? This cannot be undone.');">
                             <input type="hidden" name="action" value="obenlo_delete_user_admin">
                             <input type="hidden" name="user_id" value="<?php echo $user->ID; ?>">
@@ -1668,6 +1676,9 @@ class Obenlo_Booking_Admin_Dashboard
                 $d_tag = get_post_meta($listing_id, '_obenlo_demo_host_tagline', true);
                 $d_insta = get_post_meta($listing_id, '_obenlo_demo_host_instagram', true);
                 $d_fb = get_post_meta($listing_id, '_obenlo_demo_host_facebook', true);
+                $d_logo = get_post_meta($listing_id, '_obenlo_demo_host_logo', true);
+                $d_banner = get_post_meta($listing_id, '_obenlo_demo_host_banner', true);
+                $d_hours = get_post_meta($listing_id, '_obenlo_demo_business_hours', true);
 
                 if ($d_name) update_user_meta($user_id, 'obenlo_store_name', $d_name);
                 if ($d_bio) update_user_meta($user_id, 'obenlo_store_description', $d_bio);
@@ -1675,6 +1686,9 @@ class Obenlo_Booking_Admin_Dashboard
                 if ($d_tag) update_user_meta($user_id, 'obenlo_store_tagline', $d_tag);
                 if ($d_insta) update_user_meta($user_id, 'obenlo_instagram', $d_insta);
                 if ($d_fb) update_user_meta($user_id, 'obenlo_facebook', $d_fb);
+                if ($d_logo) update_user_meta($user_id, 'obenlo_store_logo', $d_logo);
+                if ($d_banner) update_user_meta($user_id, 'obenlo_store_banner', $d_banner);
+                if ($d_hours) update_user_meta($user_id, '_obenlo_business_hours', $d_hours);
 
                 // 3. Clean up Demo flags
                 delete_post_meta($listing_id, '_obenlo_is_demo');
@@ -1684,6 +1698,9 @@ class Obenlo_Booking_Admin_Dashboard
                 delete_post_meta($listing_id, '_obenlo_demo_host_tagline');
                 delete_post_meta($listing_id, '_obenlo_demo_host_instagram');
                 delete_post_meta($listing_id, '_obenlo_demo_host_facebook');
+                delete_post_meta($listing_id, '_obenlo_demo_host_logo');
+                delete_post_meta($listing_id, '_obenlo_demo_host_banner');
+                delete_post_meta($listing_id, '_obenlo_demo_business_hours');
                 
                 // Clear any restricted mode cache for the user if applicable
                 clean_user_cache($user_id);
@@ -2232,6 +2249,215 @@ class Obenlo_Booking_Admin_Dashboard
             }
         }
         echo '</table>';
+    }
+
+    private function render_edit_host_tab()
+    {
+        if (!current_user_can('administrator')) return;
+
+        $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+        $user = get_userdata($user_id);
+
+        if (!$user) {
+            echo '<p>User not found.</p>';
+            return;
+        }
+
+        $store_name = get_user_meta($user_id, 'obenlo_store_name', true) ?: $user->display_name;
+        $store_desc = get_user_meta($user_id, 'obenlo_store_description', true);
+        $store_tagline = get_user_meta($user_id, 'obenlo_store_tagline', true);
+        $store_location = get_user_meta($user_id, 'obenlo_store_location', true);
+        $store_logo = get_user_meta($user_id, 'obenlo_store_logo', true);
+        $store_banner = get_user_meta($user_id, 'obenlo_store_banner', true);
+
+        echo '<h3>Edit Host Storefront: ' . esc_html($store_name) . '</h3>';
+?>
+        <div style="background:#fff; padding:40px; border-radius:24px; border:1px solid #eee; max-width:800px;">
+            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="obenlo_admin_save_host_profile">
+                <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+                <?php wp_nonce_field('admin_save_host_profile_' . $user_id, 'profile_nonce'); ?>
+
+                <div style="margin-bottom:25px;">
+                    <label style="display:block; font-weight:700; margin-bottom:8px;">Store / Business Name</label>
+                    <input type="text" name="store_name" value="<?php echo esc_attr($store_name); ?>" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                </div>
+
+                <div style="margin-bottom:25px;">
+                    <label style="display:block; font-weight:700; margin-bottom:8px;">Store Tagline</label>
+                    <input type="text" name="store_tagline" value="<?php echo esc_attr($store_tagline); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                </div>
+
+                <div style="margin-bottom:25px;">
+                    <label style="display:block; font-weight:700; margin-bottom:8px;">Store Description</label>
+                    <textarea name="store_description" rows="5" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($store_desc); ?></textarea>
+                </div>
+
+                <div style="margin-bottom:25px;">
+                    <label style="display:block; font-weight:700; margin-bottom:8px;">Location Info</label>
+                    <input type="text" name="store_location" value="<?php echo esc_attr($store_location); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:40px;">
+                    <div>
+                        <label style="display:block; font-weight:700; margin-bottom:8px;">Store Logo</label>
+                        <?php if($store_logo): ?>
+                            <img src="<?php echo wp_get_attachment_image_url($store_logo, 'thumbnail'); ?>" style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:10px; display:block;">
+                        <?php endif; ?>
+                        <input type="file" name="store_logo" accept="image/*">
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:700; margin-bottom:8px;">Store Banner</label>
+                        <?php if($store_banner): ?>
+                            <img src="<?php echo wp_get_attachment_image_url($store_banner, 'medium'); ?>" style="width:100%; height:100px; border-radius:10px; object-fit:cover; margin-bottom:10px; display:block;">
+                        <?php endif; ?>
+                        <input type="file" name="store_banner" accept="image/*">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Update Host Profile</button>
+            </form>
+        </div>
+<?php
+    }
+
+    private function render_manage_availability_tab()
+    {
+        if (!current_user_can('administrator')) return;
+
+        $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+        $user = get_userdata($user_id);
+
+        if (!$user) {
+            echo '<p>User not found.</p>';
+            return;
+        }
+
+        $business_hours = get_user_meta($user_id, '_obenlo_business_hours', true);
+        if (!is_array($business_hours)) {
+            $business_hours = array();
+        }
+        $vacation_blocks = get_user_meta($user_id, '_obenlo_vacation_blocks', true);
+        if (!is_array($vacation_blocks)) {
+            $vacation_blocks = array();
+        }
+
+        echo '<h3>Supervise Availability: ' . esc_html($user->display_name) . '</h3>';
+?>
+        <div style="background:#fff; padding:40px; border-radius:24px; border:1px solid #eee; max-width:800px;">
+            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST">
+                <input type="hidden" name="action" value="obenlo_admin_save_host_availability">
+                <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+                <?php wp_nonce_field('admin_save_host_availability_' . $user_id, 'availability_nonce'); ?>
+
+                <h4 style="margin-top:0; margin-bottom:20px;">Standard Weekly Hours</h4>
+                <div style="display:flex; flex-direction:column; gap:15px; margin-bottom:40px;">
+                <?php
+        $days = array('monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday', 'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday', 'sunday' => 'Sunday');
+        foreach ($days as $key => $label):
+            $active = isset($business_hours[$key]['active']) && $business_hours[$key]['active'] === 'yes';
+            $start = isset($business_hours[$key]['start']) ? $business_hours[$key]['start'] : '09:00';
+            $end = isset($business_hours[$key]['end']) ? $business_hours[$key]['end'] : '17:00';
+?>
+                    <div style="display:flex; align-items:center; gap:20px; padding:10px; border-bottom:1px solid #f9f9f9;">
+                        <label style="width:100px; font-weight:700;">
+                            <input type="checkbox" name="hours[<?php echo $key; ?>][active]" value="yes" <?php checked($active); ?>> <?php echo $label; ?>
+                        </label>
+                        <input type="time" name="hours[<?php echo $key; ?>][start]" value="<?php echo esc_attr($start); ?>">
+                        <span>to</span>
+                        <input type="time" name="hours[<?php echo $key; ?>][end]" value="<?php echo esc_attr($end); ?>">
+                    </div>
+                <?php endforeach; ?>
+                </div>
+
+                <h4 style="margin-bottom:20px;">Vacation / Blacked Out Dates</h4>
+                <div id="admin-vacation-blocks" style="display:flex; flex-direction:column; gap:15px; margin-bottom:20px;">
+                    <?php if(!empty($vacation_blocks)): foreach($vacation_blocks as $idx => $block): ?>
+                        <div class="vac-row" style="display:flex; gap:10px; align-items:flex-end;">
+                            <div style="flex:1;"><label style="display:block; font-size:0.7rem;">Start</label><input type="date" name="vacation[<?php echo $idx; ?>][start]" value="<?php echo esc_attr($block['start']); ?>" style="width:100%;"></div>
+                            <div style="flex:1;"><label style="display:block; font-size:0.7rem;">End</label><input type="date" name="vacation[<?php echo $idx; ?>][end]" value="<?php echo esc_attr($block['end']); ?>" style="width:100%;"></div>
+                            <div style="flex:2;"><label style="display:block; font-size:0.7rem;">Note</label><input type="text" name="vacation[<?php echo $idx; ?>][reason]" value="<?php echo esc_attr($block['reason']); ?>" style="width:100%;"></div>
+                        </div>
+                    <?php endforeach; endif; ?>
+                </div>
+                <p style="font-size:0.8rem; color:#888;">Note: This admin view only allows editing existing blocks or wiping them. Re-add from Host Dashboard if new ones needed.</p>
+
+                <button type="submit" class="btn-primary" style="margin-top:20px;">Save Availability</button>
+            </form>
+        </div>
+<?php
+    }
+
+    public function handle_admin_save_host_profile()
+    {
+        if (!current_user_can('administrator')) wp_die('No permission');
+
+        $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        check_admin_referer('admin_save_host_profile_' . $user_id, 'profile_nonce');
+
+        // Text Meta
+        update_user_meta($user_id, 'obenlo_store_name', sanitize_text_field($_POST['store_name']));
+        update_user_meta($user_id, 'obenlo_store_tagline', sanitize_text_field($_POST['store_tagline']));
+        update_user_meta($user_id, 'obenlo_store_description', sanitize_textarea_field($_POST['store_description']));
+        update_user_meta($user_id, 'obenlo_store_location', sanitize_text_field($_POST['store_location']));
+
+        // Files
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        require_once(ABSPATH . 'wp-admin/includes/media.php');
+
+        if (isset($_FILES['store_logo']) && !empty($_FILES['store_logo']['name'])) {
+            $attachment_id = media_handle_upload('store_logo', 0);
+            if (!is_wp_error($attachment_id)) {
+                update_user_meta($user_id, 'obenlo_store_logo', $attachment_id);
+            }
+        }
+        if (isset($_FILES['store_banner']) && !empty($_FILES['store_banner']['name'])) {
+            $attachment_id = media_handle_upload('store_banner', 0);
+            if (!is_wp_error($attachment_id)) {
+                update_user_meta($user_id, 'obenlo_store_banner', $attachment_id);
+            }
+        }
+
+        wp_redirect(add_query_arg(array('page' => 'obenlo-admin-dashboard', 'tab' => 'users', 'msg' => '1'), admin_url('admin.php')));
+        exit;
+    }
+
+    public function handle_admin_save_host_availability()
+    {
+        if (!current_user_can('administrator')) wp_die('No permission');
+
+        $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        check_admin_referer('admin_save_host_availability_' . $user_id, 'availability_nonce');
+
+        // Business Hours
+        $hours = isset($_POST['hours']) ? (array)$_POST['hours'] : array();
+        $sanitized_hours = array();
+        foreach ($hours as $day => $data) {
+            $sanitized_hours[sanitize_key($day)] = array(
+                'active' => isset($data['active']) && $data['active'] === 'yes' ? 'yes' : 'no',
+                'start' => sanitize_text_field($data['start']),
+                'end' => sanitize_text_field($data['end'])
+            );
+        }
+        update_user_meta($user_id, '_obenlo_business_hours', $sanitized_hours);
+
+        // Vacation Blocks
+        $vacations = isset($_POST['vacation']) ? (array)$_POST['vacation'] : array();
+        $sanitized_vacations = array();
+        foreach ($vacations as $v) {
+            if (!empty($v['start']) && !empty($v['end'])) {
+                $sanitized_vacations[] = array(
+                    'start' => sanitize_text_field($v['start']),
+                    'end' => sanitize_text_field($v['end']),
+                    'reason' => sanitize_text_field($v['reason'])
+                );
+            }
+        }
+        update_user_meta($user_id, '_obenlo_vacation_blocks', $sanitized_vacations);
+
+        wp_redirect(add_query_arg(array('page' => 'obenlo-admin-dashboard', 'tab' => 'users', 'msg' => '1'), admin_url('admin.php')));
+        exit;
     }
 
 }

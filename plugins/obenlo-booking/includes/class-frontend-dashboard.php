@@ -1187,16 +1187,31 @@ class Obenlo_Booking_Frontend_Dashboard
         if ($selected_type) {
             $type_term = get_term($selected_type, 'listing_type');
             if ($type_term && !is_wp_error($type_term)) {
-                $slug = $type_term->slug;
-                $name_lower = strtolower($type_term->name);
-                if (strpos($name_lower, 'stay') !== false || in_array($slug, ['hotel', 'guest-house']))
-                    $category_flag = 'stay';
-                elseif (strpos($name_lower, 'experience') !== false || strpos($name_lower, 'tour') !== false)
-                    $category_flag = 'experience';
-                elseif (in_array($slug, ['event', 'show', 'class']) || strpos($name_lower, 'event') !== false)
-                    $category_flag = 'event';
-                elseif (strpos($name_lower, 'service') !== false || in_array($slug, ['chauffeur', 'cook', 'barbershop', 'hairdresser', 'concierge', 'personal-assistant', 'babysitter', 'dogsitter']))
-                    $category_flag = 'service';
+                $check_names = [strtolower($type_term->name)];
+                $check_slugs = [$type_term->slug];
+
+                if ($type_term->parent != 0) {
+                    $parent_term = get_term($type_term->parent, 'listing_type');
+                    if ($parent_term && !is_wp_error($parent_term)) {
+                        $check_names[] = strtolower($parent_term->name);
+                        $check_slugs[] = $parent_term->slug;
+                    }
+                }
+
+                foreach ($check_names as $n) {
+                    if (strpos($n, 'stay') !== false) { $category_flag = 'stay'; break; }
+                    if (strpos($n, 'experience') !== false || strpos($n, 'tour') !== false) { $category_flag = 'experience'; break; }
+                    if (strpos($n, 'event') !== false) { $category_flag = 'event'; break; }
+                    if (strpos($n, 'service') !== false) { $category_flag = 'service'; break; }
+                }
+
+                if ($category_flag === 'default') {
+                    foreach ($check_slugs as $s) {
+                        if (in_array($s, ['hotel', 'guest-house'])) { $category_flag = 'stay'; break; }
+                        if (in_array($s, ['event', 'show', 'class', 'ticket'])) { $category_flag = 'event'; break; }
+                        if (in_array($s, ['service', 'beauty', 'chauffeur', 'cook', 'barbershop', 'hairdresser'])) { $category_flag = 'service'; break; }
+                    }
+                }
             }
         }
 
@@ -1238,39 +1253,86 @@ class Obenlo_Booking_Frontend_Dashboard
                 <?php 
                 $is_demo_edit = ($listing_id > 0 && get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes');
                 $is_demo_create = (isset($_GET['demo']) && $_GET['demo'] == '1');
-                if (($is_demo_edit || $is_demo_create) && current_user_can('administrator')): ?>
+                if (($is_demo_edit || $is_demo_create) && current_user_can('administrator')): 
+                    $demo_logo = get_post_meta($listing_id, '_obenlo_demo_host_logo', true);
+                    $demo_banner = get_post_meta($listing_id, '_obenlo_demo_host_banner', true);
+                    $demo_hours = get_post_meta($listing_id, '_obenlo_demo_business_hours', true) ?: array();
+                ?>
                     <input type="hidden" name="is_demo" value="1">
-                    <div style="background:#fff1f3; color:#e61e4d; padding:20px; border-radius:12px; margin-bottom:30px; border:1px solid #fecdd3;">
-                        <h4 style="margin-top:0; margin-bottom:10px; color:#e61e4d;">🛠️ <?php echo __('Demo Listing Configuration', 'obenlo'); ?></h4>
-                        <p style="margin-top:0; margin-bottom:20px; font-size:0.9rem;"><?php echo __('You are configuring a Demo Listing. Specify the simulated Host details below.', 'obenlo'); ?></p>
+                    <div style="background:#fff1f3; color:#e61e4d; padding:25px; border-radius:20px; margin-bottom:40px; border:1px solid #fecdd3; box-shadow:0 10px 30px rgba(230,30,77,0.05);">
+                        <h4 style="margin-top:0; margin-bottom:15px; color:#e61e4d; display:flex; align-items:center; gap:10px;">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                            <?php echo __('Super-Admin Demo Setup', 'obenlo'); ?>
+                        </h4>
+                        <p style="margin-top:0; margin-bottom:25px; font-size:0.95rem; opacity:0.8;"><?php echo __('Simulate a professional storefront by providing the profile assets and availability for this ghost host.', 'obenlo'); ?></p>
                         
-                        <div class="grid-row" style="margin-bottom:15px;">
+                        <div class="grid-row" style="margin-bottom:20px;">
                             <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;"><?php echo __('Demo Host Name', 'obenlo'); ?></label>
-                                <input type="text" name="_obenlo_demo_host_name" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_name', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Host Display Name', 'obenlo'); ?></label>
+                                <input type="text" name="_obenlo_demo_host_name" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_name', true)); ?>" placeholder="e.g. Marie Antoinette" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
                             </div>
                             <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;"><?php echo __('Demo Host Tagline', 'obenlo'); ?></label>
-                                <input type="text" name="_obenlo_demo_host_tagline" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_tagline', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
-                            </div>
-                        </div>
-                        <div class="grid-row" style="margin-bottom:15px;">
-                            <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Instagram (e.g. @obenlo)</label>
-                                <input type="text" name="_obenlo_demo_host_instagram" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_instagram', true)); ?>" placeholder="@username" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
-                            </div>
-                            <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;">Demo Facebook URL</label>
-                                <input type="text" name="_obenlo_demo_host_facebook" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_facebook', true)); ?>" placeholder="https://facebook.com/..." style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Host Tagline', 'obenlo'); ?></label>
+                                <input type="text" name="_obenlo_demo_host_tagline" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_tagline', true)); ?>" placeholder="e.g. Master Chef & Host" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
                             </div>
                         </div>
-                        <div style="margin-bottom:15px;">
-                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;"><?php echo __('Demo Host Location', 'obenlo'); ?></label>
-                            <input type="text" name="_obenlo_demo_host_location" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_location', true)); ?>" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;">
+
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px; margin-bottom:25px;">
+                            <div>
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Profile Logo', 'obenlo'); ?></label>
+                                <?php if($demo_logo): ?>
+                                    <img src="<?php echo wp_get_attachment_image_url($demo_logo, 'thumbnail'); ?>" style="width:60px; height:60px; border-radius:50%; object-fit:cover; margin-bottom:8px; display:block; border:2px solid #fff;">
+                                <?php endif; ?>
+                                <input type="file" name="demo_host_logo" accept="image/*" style="font-size:0.8rem;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Storefront Banner', 'obenlo'); ?></label>
+                                <?php if($demo_banner): ?>
+                                    <img src="<?php echo wp_get_attachment_image_url($demo_banner, 'medium'); ?>" style="width:100%; height:60px; border-radius:8px; object-fit:cover; margin-bottom:8px; display:block; border:2px solid #fff;">
+                                <?php endif; ?>
+                                <input type="file" name="demo_host_banner" accept="image/*" style="font-size:0.8rem;">
+                            </div>
                         </div>
-                        <div>
-                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:5px;"><?php echo __('Demo Host Bio', 'obenlo'); ?></label>
-                            <textarea name="_obenlo_demo_host_bio" rows="3" style="width:100%; padding:10px; border:1px solid #fecdd3; border-radius:8px;"><?php echo esc_textarea(get_post_meta($listing_id, '_obenlo_demo_host_bio', true)); ?></textarea>
+
+                        <div class="grid-row" style="margin-bottom:20px;">
+                            <div style="flex:1;">
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;">Demo Instagram (e.g. @obenlo)</label>
+                                <input type="text" name="_obenlo_demo_host_instagram" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_instagram', true)); ?>" placeholder="@username" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;">Demo Facebook URL</label>
+                                <input type="text" name="_obenlo_demo_host_facebook" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_facebook', true)); ?>" placeholder="https://facebook.com/..." style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Demo Host Location', 'obenlo'); ?></label>
+                            <input type="text" name="_obenlo_demo_host_location" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_location', true)); ?>" placeholder="e.g. Port-au-Prince, Haiti" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
+                        </div>
+
+                        <div style="margin-bottom:25px;">
+                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Demo Host Bio (Storefront Text)', 'obenlo'); ?></label>
+                            <textarea name="_obenlo_demo_host_bio" rows="4" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;" placeholder="Write a compelling story..."><?php echo esc_textarea(get_post_meta($listing_id, '_obenlo_demo_host_bio', true)); ?></textarea>
+                        </div>
+
+                        <div style="background:rgba(255,255,255,0.5); padding:20px; border-radius:15px; border:1px solid #fecdd3;">
+                            <h5 style="margin-top:0; margin-bottom:15px; color:#e61e4d;"><?php echo __('Simulated Availability', 'obenlo'); ?></h5>
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:10px;">
+                                <?php
+                                $days = array('monday' => 'Mon', 'tuesday' => 'Tue', 'wednesday' => 'Wed', 'thursday' => 'Thu', 'friday' => 'Fri', 'saturday' => 'Sat', 'sunday' => 'Sun');
+                                foreach($days as $key => $label):
+                                    $active = isset($demo_hours[$key]['active']) && $demo_hours[$key]['active'] === 'yes';
+                                ?>
+                                    <label style="background:#fff; padding:10px; border-radius:8px; border:1px solid #fecdd3; display:flex; flex-direction:column; align-items:center; gap:5px; font-size:0.75rem;">
+                                        <input type="checkbox" name="demo_hours[<?php echo $key; ?>][active]" value="yes" <?php checked($active); ?>>
+                                        <strong><?php echo $label; ?></strong>
+                                        <span style="font-size:0.65rem; color:#888;">9AM - 5PM</span>
+                                        <input type="hidden" name="demo_hours[<?php echo $key; ?>][start]" value="09:00">
+                                        <input type="hidden" name="demo_hours[<?php echo $key; ?>][end]" value="17:00">
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                            <p style="font-size:0.75rem; color:#666; margin-bottom:0; font-style:italic;">* Availability is simplified to 9AM-5PM for active days in demo mode.</p>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -1608,25 +1670,35 @@ class Obenlo_Booking_Frontend_Dashboard
 
         if (!is_wp_error($types)) {
             foreach ($types as $type) {
-                // Very simple heuristic to map term IDs to normalized names
-                $name_lower = strtolower($type->name);
-                $slug = $type->slug;
-                if (strpos($name_lower, 'stay') !== false || in_array($slug, ['hotel', 'guest-house']))
-                    $type_map[$type->term_id] = 'stay';
-                elseif (strpos($name_lower, 'experience') !== false || strpos($name_lower, 'tour') !== false)
-                    $type_map[$type->term_id] = 'experience';
-                elseif (in_array($slug, ['celebration']) || strpos($name_lower, 'celebration') !== false)
-                    $type_map[$type->term_id] = 'celebration';
-                elseif (in_array($slug, ['donation-giving']) || strpos($name_lower, 'donation') !== false)
-                    $type_map[$type->term_id] = 'donation';
-                elseif (in_array($slug, ['event', 'show', 'class']) || strpos($name_lower, 'event') !== false)
-                    $type_map[$type->term_id] = 'event';
-                elseif (strpos($name_lower, 'service') !== false || in_array($slug, ['chauffeur', 'cook', 'barbershop', 'hairdresser', 'concierge', 'personal-assistant', 'babysitter', 'dogsitter']))
-                    $type_map[$type->term_id] = 'service';
-                else
-                    $type_map[$type->term_id] = 'default';
-                
-                $slug_map[$type->term_id] = $slug;
+                $check_names = [strtolower($type->name)];
+                $check_slugs = [$type->slug];
+                $mapped_cat = 'default';
+
+                if ($type->parent != 0) {
+                    $parent_term = get_term($type->parent, 'listing_type');
+                    if ($parent_term && !is_wp_error($parent_term)) {
+                        $check_names[] = strtolower($parent_term->name);
+                        $check_slugs[] = $parent_term->slug;
+                    }
+                }
+
+                foreach ($check_names as $n) {
+                    if (strpos($n, 'stay') !== false) { $mapped_cat = 'stay'; break; }
+                    if (strpos($n, 'experience') !== false || strpos($n, 'tour') !== false) { $mapped_cat = 'experience'; break; }
+                    if (strpos($n, 'event') !== false) { $mapped_cat = 'event'; break; }
+                    if (strpos($n, 'service') !== false) { $mapped_cat = 'service'; break; }
+                }
+
+                if ($mapped_cat === 'default') {
+                    foreach ($check_slugs as $s) {
+                        if (in_array($s, ['hotel', 'guest-house'])) { $mapped_cat = 'stay'; break; }
+                        if (in_array($s, ['event', 'show', 'class', 'ticket'])) { $mapped_cat = 'event'; break; }
+                        if (in_array($s, ['service', 'beauty', 'chauffeur', 'cook', 'barbershop', 'hairdresser'])) { $mapped_cat = 'service'; break; }
+                    }
+                }
+
+                $type_map[$type->term_id] = $mapped_cat;
+                $slug_map[$type->term_id] = $type->slug;
             }
         }
 
@@ -2111,6 +2183,38 @@ class Obenlo_Booking_Frontend_Dashboard
                 }
                 if (isset($_POST['_obenlo_demo_host_facebook'])) {
                     update_post_meta($new_post_id, '_obenlo_demo_host_facebook', esc_url_raw($_POST['_obenlo_demo_host_facebook']));
+                }
+
+                // Processing Demo Assets
+                require_once(ABSPATH . 'wp-admin/includes/image.php');
+                require_once(ABSPATH . 'wp-admin/includes/file.php');
+                require_once(ABSPATH . 'wp-admin/includes/media.php');
+
+                if (isset($_FILES['demo_host_logo']) && !empty($_FILES['demo_host_logo']['name'])) {
+                    $attachment_id = media_handle_upload('demo_host_logo', $new_post_id);
+                    if (!is_wp_error($attachment_id)) {
+                        update_post_meta($new_post_id, '_obenlo_demo_host_logo', $attachment_id);
+                    }
+                }
+                if (isset($_FILES['demo_host_banner']) && !empty($_FILES['demo_host_banner']['name'])) {
+                    $attachment_id = media_handle_upload('demo_host_banner', $new_post_id);
+                    if (!is_wp_error($attachment_id)) {
+                        update_post_meta($new_post_id, '_obenlo_demo_host_banner', $attachment_id);
+                    }
+                }
+
+                // Demo Availability
+                if (isset($_POST['demo_hours'])) {
+                    $d_hours = (array)$_POST['demo_hours'];
+                    $sanitized_d_hours = array();
+                    foreach ($d_hours as $day => $d_data) {
+                        $sanitized_d_hours[sanitize_key($day)] = array(
+                            'active' => isset($d_data['active']) && $d_data['active'] === 'yes' ? 'yes' : 'no',
+                            'start' => '09:00',
+                            'end' => '17:00'
+                        );
+                    }
+                    update_post_meta($new_post_id, '_obenlo_demo_business_hours', $sanitized_d_hours);
                 }
             }
 

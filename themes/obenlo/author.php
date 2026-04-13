@@ -99,15 +99,17 @@ $store_video = get_user_meta($user_id, 'obenlo_store_video', true);
 $insta = ($is_demo_preview && !empty($demo_meta['insta'])) ? $demo_meta['insta'] : get_user_meta($user_id, 'obenlo_instagram', true);
 $fb = ($is_demo_preview && !empty($demo_meta['fb'])) ? $demo_meta['fb'] : get_user_meta($user_id, 'obenlo_facebook', true);
 $specialties = get_user_meta($user_id, 'obenlo_specialties', true);
-$business_hours = get_user_meta($user_id, '_obenlo_business_hours', true);
+$business_hours = ($is_demo_preview) ? get_post_meta($demo_listing_id, '_obenlo_demo_business_hours', true) : get_user_meta($user_id, '_obenlo_business_hours', true);
 $store_logo_id = get_user_meta($user_id, 'obenlo_store_logo', true);
 $store_banner_id = get_user_meta($user_id, 'obenlo_store_banner', true);
 
 // Banner/Logo Overrides for Demo
 if ($is_demo_preview) {
-    // Premium Default Images
-    $banner_url = 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=2000';
-    $logo_url = 'https://images.unsplash.com/photo-1599305090598-fe179d501227?auto=format&fit=crop&q=80&w=200';
+    $demo_logo_id = get_post_meta($demo_listing_id, '_obenlo_demo_host_logo', true);
+    $demo_banner_id = get_post_meta($demo_listing_id, '_obenlo_demo_host_banner', true);
+
+    $logo_url = $demo_logo_id ? wp_get_attachment_image_url($demo_logo_id, 'thumbnail') : 'https://images.unsplash.com/photo-1599305090598-fe179d501227?auto=format&fit=crop&q=80&w=200';
+    $banner_url = $demo_banner_id ? wp_get_attachment_image_url($demo_banner_id, 'full') : 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=2000';
 } else {
     $banner_url = $store_banner_id ? wp_get_attachment_image_url($store_banner_id, 'full') : 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000';
     $logo_url = $store_logo_id ? wp_get_attachment_image_url($store_logo_id, 'thumbnail') : get_avatar_url($user_id, ['size' => 150]);

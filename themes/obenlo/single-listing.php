@@ -729,7 +729,8 @@ get_header(); ?>
         $form_has_guests = $cfg['has_guests'] && $capacity;
 
         $host_id = get_post_field('post_author', $listing_id);
-        $business_hours = get_user_meta($host_id, '_obenlo_business_hours', true) ?: array();
+        $business_hours = $is_demo ? get_post_meta($listing_id, '_obenlo_demo_business_hours', true) : get_user_meta($host_id, '_obenlo_business_hours', true);
+        $business_hours = $business_hours ?: array();
         $vacation_blocks = get_user_meta($host_id, '_obenlo_vacation_blocks', true) ?: array();
 ?>
 
@@ -1025,7 +1026,8 @@ get_header(); ?>
                                     }
                                 }
 
-                                // 2. Check Business Hours for Exact Time
+                                // 2. Check Business Hours for Exact Time (Validation disabled per user request)
+                                /*
                                 if ((s.type === 'datetime-local' || s.type === 'time') && s.value && s.value.includes('T')) {
                                     var dayOfWeek = startD.toLocaleDateString('en-US', {weekday: 'long'}).toLowerCase();
                                     
@@ -1051,6 +1053,7 @@ get_header(); ?>
                                         }
                                     }
                                 }
+                                */
                             }
 
                             // 3. Generate Timeslots if mode is timeslot
