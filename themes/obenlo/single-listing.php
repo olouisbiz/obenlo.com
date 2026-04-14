@@ -956,6 +956,11 @@ get_header(); ?>
                             </button>
                         </div>
 
+                        <?php 
+                        if ( class_exists( 'Obenlo_Social_Admin_UI' ) ) {
+                            Obenlo_Social_Admin_UI::render_frontend_push_button( get_the_ID() ); 
+                        }
+                        ?>
 
                         <script>
                         document.addEventListener('DOMContentLoaded', function() {

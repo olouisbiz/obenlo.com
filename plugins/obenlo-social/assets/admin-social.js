@@ -20,41 +20,50 @@ jQuery(document).ready(function($) {
         var $btn = $(this);
         currentBtnData = $btn.data();
         
-        // Detection
-        var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        var isMacDesktop = navigator.userAgent.includes('Macintosh') && (!navigator.maxTouchPoints || navigator.maxTouchPoints === 0);
-
-        if (!isMobile || isMacDesktop) {
-            return true; 
-        }
-
         e.preventDefault();
         
+        // Populate Caption Editor
+        var caption = currentBtnData.caption || '';
+        $('#obenlo-social-caption-edit').val(caption);
+
         // Set Preview Image
         if (currentBtnData.image) {
             $('#obenlo-social-preview-img').attr('src', currentBtnData.image);
         }
         
-        $('#share-to-fb').attr('href', $btn.attr('href'));
+        // Update Links Initially
+        updateShareLinks();
+
         $('#obenlo-social-picker-overlay').show();
         $('#obenlo-social-picker').show();
     });
+
+    // Real-time link updating as user edits caption
+    $(document).on('input', '#obenlo-social-caption-edit', function() {
+        updateShareLinks();
+    });
+
+    function updateShareLinks() {
+        var caption = $('#obenlo-social-caption-edit').val();
+        var url = currentBtnData.url;
+        
+        // WhatsApp: https://wa.me/?text=[CAPTION]%20[URL]
+        var waUrl = "https://wa.me/?text=" + encodeURIComponent(caption + "\n\n" + url);
+        $('#share-to-wa').attr('href', waUrl);
+
+        // Facebook
+        var fbUrl = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url);
+        $('#share-to-fb').attr('href', fbUrl);
+    }
 
     // Close Actions
     $(document).on('click', '#obenlo-close-picker, #obenlo-social-picker-overlay', function() {
         closePicker();
     });
 
-    // Instagram Button Logic
+    // Instagram Button Logic (Copies Caption + Opens IG)
     $(document).on('click', '#share-to-ig', function() {
-        var type = currentBtnData.type || 'listing';
-        var template = (type === 'listing') ? obenloSocialObj.listing_template : obenloSocialObj.post_template;
-        var caption = template;
-        
-        if (currentBtnData.title) caption = caption.replace('{title}', currentBtnData.title);
-        if (currentBtnData.price) caption = caption.replace('{price}', currentBtnData.price);
-        if (currentBtnData.location) caption = caption.replace('{location}', currentBtnData.location);
-        if (currentBtnData.excerpt) caption = caption.replace('{excerpt}', currentBtnData.excerpt);
+        var caption = $('#obenlo-social-caption-edit').val();
 
         // Copy Caption to Clipboard
         var dummy = document.createElement("textarea");
@@ -66,7 +75,6 @@ jQuery(document).ready(function($) {
         
         showToast("Caption copied! Opening Instagram...");
 
-        // Open Instagram after a short delay
         setTimeout(function() {
             window.location.href = "instagram://camera";
             setTimeout(function() {
