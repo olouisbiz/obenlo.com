@@ -11,6 +11,68 @@ class Obenlo_SEO_Schema {
     public function init() {
         add_action('wp_footer', array($this, 'inject_listing_schema'), 20);
         add_action('wp_footer', array($this, 'inject_global_schema'), 10);
+        add_action('wp_footer', array($this, 'inject_breadcrumb_schema'), 15);
+    }
+
+    /**
+     * Inject BreadcrumbList Schema for hierarchical navigation
+     */
+    public function inject_breadcrumb_schema() {
+        $post_id = get_the_ID();
+        $is_listing = is_singular('listing');
+
+        $items = array();
+        // 1. Home
+        $items[] = array(
+            "@type" => "ListItem",
+            "position" => 1,
+            "name" => "Home",
+            "item" => home_url('/')
+        );
+
+        if ($is_listing) {
+            $type_terms = wp_get_post_terms($post_id, 'listing_type');
+            if (!is_wp_error($type_terms) && !empty($type_terms)) {
+                $term = $type_terms[0];
+                $pos = 2;
+                
+                // If sub-category, add parent first
+                if ($term->parent != 0) {
+                    $parent = get_term($term->parent, 'listing_type');
+                    $items[] = array(
+                        "@type" => "ListItem",
+                        "position" => $pos++,
+                        "name" => $parent->name,
+                        "item" => home_url('/?s=' . urlencode($parent->name)) // Category search link
+                    );
+                }
+
+                $items[] = array(
+                    "@type" => "ListItem",
+                    "position" => $pos++,
+                    "name" => $term->name,
+                    "item" => home_url('/?s=' . urlencode($term->name))
+                );
+
+                $items[] = array(
+                    "@type" => "ListItem",
+                    "position" => $pos++,
+                    "name" => get_the_title($post_id),
+                    "item" => get_permalink($post_id)
+                );
+            }
+        }
+
+        if (empty($items)) return;
+
+        $breadcrumb = array(
+            "@context" => "https://schema.org",
+            "@type" => "BreadcrumbList",
+            "itemListElement" => $items
+        );
+
+        echo "\n<!-- Obenlo Authority Navigation -->\n";
+        echo '<script type="application/ld+json">' . json_encode($breadcrumb, JSON_UNESCAPED_SLASHES) . '</script>' . "\n";
     }
 
     /**

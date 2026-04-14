@@ -10,7 +10,22 @@ if (!defined('ABSPATH')) {
 class Obenlo_SEO_Head {
     public function init() {
         add_action('wp_head', array($this, 'inject_meta_tags'), 1);
+        add_action('wp_head', array($this, 'inject_verification_tags'), 2);
         add_filter('pre_get_document_title', array($this, 'dynamic_seo_title'), 999);
+    }
+
+    /**
+     * Inject Google/Bing verification tags
+     */
+    public function inject_verification_tags() {
+        // Users can add their IDs here or via meta-fields later
+        $google_id = get_option('obenlo_google_site_verification'); // Placeholder
+        if ($google_id) {
+            echo '<meta name="google-site-verification" content="' . esc_attr($google_id) . '">' . "\n";
+        }
+        // Branded Meta
+        echo '<meta name="apple-mobile-web-app-title" content="Obenlo">' . "\n";
+        echo '<meta name="application-name" content="Obenlo">' . "\n";
     }
 
     /**
