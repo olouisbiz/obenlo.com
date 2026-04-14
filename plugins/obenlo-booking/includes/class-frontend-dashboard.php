@@ -1792,11 +1792,15 @@ class Obenlo_Booking_Frontend_Dashboard
                     });
                 }
 
+                // Auto-set defaults ONLY for NEW listings or if currently empty
+                var isNew = <?php echo ($listing_id > 0) ? 'false' : 'true'; ?>;
+                var shouldSetDefault = isNew || !pricingModel.value;
+
                 if (category === 'stay') {
                     if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Night)', 'obenlo')); ?>';
                     if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Capacity/Max Guests', 'obenlo')); ?>';
                     if (pricingModel) {
-                        pricingModel.value = 'per_night';
+                        if (shouldSetDefault) pricingModel.value = 'per_night';
                         Array.from(pricingModel.options).forEach(opt => {
                             if (!['per_night', 'per_day', 'flat_fee'].includes(opt.value)) {
                                 opt.hidden = true;
@@ -1811,9 +1815,9 @@ class Obenlo_Booking_Frontend_Dashboard
                     if (priceLabel) priceLabel.innerText = category === 'event' ? '<?php echo esc_js(__('Price (Per Ticket)', 'obenlo')); ?>' : '<?php echo esc_js(__('Price (Per Person/Ticket)', 'obenlo')); ?>';
                     if (capLabel) capLabel.innerText = category === 'event' ? '<?php echo esc_js(__('Total Tickets Available', 'obenlo')); ?>' : '<?php echo esc_js(__('Max Tickets/Participants', 'obenlo')); ?>';
                     if (pricingModel) {
-                        pricingModel.value = 'per_person';
+                        if (shouldSetDefault) pricingModel.value = 'per_person';
                         Array.from(pricingModel.options).forEach(opt => {
-                            if (!['per_person', 'flat_fee'].includes(opt.value)) {
+                            if (!['per_person', 'flat_fee', 'per_donation'].includes(opt.value)) {
                                 opt.hidden = true;
                                 opt.disabled = true;
                             }
@@ -1827,24 +1831,25 @@ class Obenlo_Booking_Frontend_Dashboard
                     if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Hour/Session)', 'obenlo')); ?>';
                     if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Max Clients per Slot', 'obenlo')); ?>';
                     if (pricingModel) {
-                        pricingModel.value = 'per_session';
+                        if (shouldSetDefault) {
+                            pricingModel.value = 'per_session';
+                            if(['babysitter', 'dogsitter', 'chauffeur'].includes(slug)) {
+                                pricingModel.value = 'per_hour';
+                            }
+                        }
                         Array.from(pricingModel.options).forEach(opt => {
                             if (!['per_session', 'per_hour', 'flat_fee'].includes(opt.value)) {
                                 opt.hidden = true;
                                 opt.disabled = true;
                             }
                         });
-                        // Special cases for services
-                        if(['babysitter', 'dogsitter', 'chauffeur'].includes(slug)) {
-                            pricingModel.value = 'per_hour';
-                        }
                     }
                     if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Amenities', 'obenlo')); ?>';
                 } else if (category === 'celebration') {
                     if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Event Fee ($)', 'obenlo')); ?>';
                     if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Max Guests', 'obenlo')); ?>';
                     if (pricingModel) {
-                        pricingModel.value = 'per_event';
+                        if (shouldSetDefault) pricingModel.value = 'per_event';
                         Array.from(pricingModel.options).forEach(opt => {
                             if (!['per_event', 'per_hour', 'per_person', 'flat_fee'].includes(opt.value)) {
                                 opt.hidden = true;
@@ -1860,7 +1865,7 @@ class Obenlo_Booking_Frontend_Dashboard
                     if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Suggested Donation ($)', 'obenlo')); ?>';
                     if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Max Donors/Supporters (Optional)', 'obenlo')); ?>';
                     if (pricingModel) {
-                        pricingModel.value = 'per_donation';
+                        if (shouldSetDefault) pricingModel.value = 'per_donation';
                         Array.from(pricingModel.options).forEach(opt => {
                             if (!['per_donation', 'custom_donation', 'flat_fee'].includes(opt.value)) {
                                 opt.hidden = true;
@@ -2318,27 +2323,25 @@ class Obenlo_Booking_Frontend_Dashboard
                 wp_set_post_terms($new_post_id, array($post_type_override), 'listing_type');
             }
 
-            // Term: Amenities (Repeater strings - Only parent)
-            if ($parent_id == 0) {
-                $selected_amenities = array();
-                if (isset($_POST['listing_amenities_repeater']) && is_array($_POST['listing_amenities_repeater'])) {
-                    foreach ($_POST['listing_amenities_repeater'] as $amenity_val) {
-                        $term_name = sanitize_text_field(wp_unslash($amenity_val));
-                        $term_name = trim($term_name);
-                        if (!empty($term_name)) {
-                            $term = term_exists($term_name, 'listing_amenity');
-                            if (!$term) {
-                                $term = wp_insert_term($term_name, 'listing_amenity');
-                            }
-                            if (!is_wp_error($term) && isset($term['term_id'])) {
-                                $selected_amenities[] = intval($term['term_id']);
-                            }
+            // Term: Amenities (Repeater strings - Available for all)
+            $selected_amenities = array();
+            if (isset($_POST['listing_amenities_repeater']) && is_array($_POST['listing_amenities_repeater'])) {
+                foreach ($_POST['listing_amenities_repeater'] as $amenity_val) {
+                    $term_name = sanitize_text_field(wp_unslash($amenity_val));
+                    $term_name = trim($term_name);
+                    if (!empty($term_name)) {
+                        $term = term_exists($term_name, 'listing_amenity');
+                        if (!$term) {
+                            $term = wp_insert_term($term_name, 'listing_amenity');
+                        }
+                        if (!is_wp_error($term) && isset($term['term_id'])) {
+                            $selected_amenities[] = intval($term['term_id']);
                         }
                     }
                 }
-                // Set all amenities
-                wp_set_post_terms($new_post_id, $selected_amenities, 'listing_amenity');
             }
+            // Set all amenities
+            wp_set_post_terms($new_post_id, $selected_amenities, 'listing_amenity');
 
             // --- Images Processing ---
 
