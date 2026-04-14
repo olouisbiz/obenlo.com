@@ -95,6 +95,14 @@ class Obenlo_SEO_Schema {
                 "name" => $location,
                 "address" => $location
             );
+
+            // Add duration if available
+            $duration_val = get_post_meta($post_id, '_obenlo_duration_val', true);
+            $duration_unit = get_post_meta($post_id, '_obenlo_duration_unit', true) ?: 'hours';
+            if ($duration_val) {
+                $iso_duration = ($duration_unit === 'hours') ? 'PT' . $duration_val . 'H' : 'PT' . $duration_val . 'M';
+                $data["duration"] = $iso_duration;
+            }
         }
 
         echo "\n<!-- Obenlo Premium Schema v1.7.2 -->\n";
