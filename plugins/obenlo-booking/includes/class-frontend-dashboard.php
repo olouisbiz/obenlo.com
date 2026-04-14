@@ -1166,10 +1166,12 @@ class Obenlo_Booking_Frontend_Dashboard
         $parent_post = null;
         if ($is_child) {
             $parent_post = get_post($parent_id);
-            // Inherit type from parent
-            $parent_terms = wp_get_post_terms($parent_id, 'listing_type');
-            if (!empty($parent_terms) && !is_wp_error($parent_terms)) {
-                $selected_type = $parent_terms[0]->term_id;
+            // Inherit type from parent ONLY IF child has no type yet
+            if (!$selected_type) {
+                $parent_terms = wp_get_post_terms($parent_id, 'listing_type');
+                if (!empty($parent_terms) && !is_wp_error($parent_terms)) {
+                    $selected_type = $parent_terms[0]->term_id;
+                }
             }
         }
 
