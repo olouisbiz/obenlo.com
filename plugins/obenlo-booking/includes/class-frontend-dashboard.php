@@ -1381,7 +1381,12 @@ class Obenlo_Booking_Frontend_Dashboard
                                     if ($check_term) $parent_type_id = $check_term->term_id;
                                 }
 
-                                if ($parent_type_id) {
+                                if (!$parent_type_id) {
+                                    // Fallback: If parent has no industries, show top-level industries directly
+                                    $parent_type_id = 0;
+                                }
+
+                                if ($parent_type_id !== null) {
                                     $sub_types = get_terms(array('taxonomy' => 'listing_type', 'parent' => $parent_type_id, 'hide_empty' => false));
                                     if (!is_wp_error($sub_types)) {
                                         foreach ($sub_types as $type) {
@@ -2126,26 +2131,30 @@ class Obenlo_Booking_Frontend_Dashboard
         }
 
         $post_data = array(
-            'post_title' => $title,
+            'post_title'   => $title,
             'post_content' => $content,
-            'post_status' => 'publish',
-            'post_type' => 'listing',
-            'post_author' => get_current_user_id(),
-            'post_parent' => $parent_id
+            'post_status'  => 'publish',
+            'post_type'    => 'listing',
+            'post_parent'  => $parent_id
         );
 
+        if ($listing_id > 0) {
+            $post_data['ID'] = $listing_id;
+            // Preserve author on edit
+            $existing_post = get_post($listing_id);
+            if ($existing_post) {
+                $post_data['post_author'] = $existing_post->post_author;
+            }
+        } else {
+            $post_data['post_author'] = get_current_user_id();
+        }
 
         if ($listing_id > 0) {
-            // Verify ownership
-            $existing_post = get_post($listing_id);
             if ($existing_post->post_author != get_current_user_id() && !current_user_can('administrator')) {
                 $this->redirect_with_error('unauthorized');
             }
-
-            $post_data['ID'] = $listing_id;
             $new_post_id = wp_update_post($post_data);
-        }
-        else {
+        } else {
             $new_post_id = wp_insert_post($post_data);
         }
 
