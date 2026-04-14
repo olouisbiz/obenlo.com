@@ -842,6 +842,13 @@ get_header(); ?>
                                     <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;"><?php echo esc_html($date_label); ?></label>
                                     <input type="datetime-local" name="start_date" required style="width: 100%; border: 1px solid #ccc; padding: 10px; border-radius: 6px;" min="<?php echo date('Y-m-d\TH:i'); ?>">
                                 </div>
+                                <?php if ($duration_val): ?>
+                                    <div class="form-row" style="margin-top:10px;">
+                                        <p style="font-size:0.9rem; color:#666; font-weight:700;">⏱ <?php echo __('Duration:', 'obenlo'); ?> <?php echo esc_html($duration_val); ?> <?php echo esc_html($duration_unit); ?></p>
+                                        <input type="hidden" name="booking_duration" value="<?php echo esc_attr($duration_val); ?>">
+                                        <input type="hidden" name="booking_duration_unit" value="<?php echo esc_attr($duration_unit ?: 'hours'); ?>">
+                                    </div>
+                                <?php endif; ?>
                             <?php
         else: /* date_only */?>
                                 <div class="form-row">
