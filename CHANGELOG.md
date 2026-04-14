@@ -2,6 +2,20 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.7.3] - 2026-04-13
+### Added
+- **Smart SEO Engine 2.0**: Implemented location-aware dynamic titles and comprehensive JSON-LD schema support for all core industries (Stay, Experience, Service, Event).
+- **Google Rich Snippets**: Integrated `Obenlo_Booking_Reviews` into search results to display star ratings and pricing directly on Google.
+- **Authority Navigation**: Added BreadcrumbList schema to improve category ranking and search result hierarchy.
+- **Obenlo Social Sharing**: Launched the upgraded share dashboard featuring WhatsApp integration and a live "Smart Caption" editor.
+- **Frontend Host Tools**: Added a "Host Quick Tools" sidebar on single listings, allowing owners to promotion their listings without entering the admin dashboard.
+- **Image Sitemaps**: Enabled specialized image indexing for all listings to boost discovery in Google Images.
+
+### Fixed
+- **Child Listing Persistence**: Resolved a critical bug where unit/session categories would reset to the parent industry type upon editing.
+- **Booking Duration Display**: Fixed a frontend bug where host-predefined durations were not displaying or pre-filling correctly for non-timeslot booking modes.
+- **Ownership Preservation**: Ensured that administrator edits to listings no longer overwrite the original host's author ID.
+
 ## [1.7.2] - 2026-04-13
 ### Added
 - **Demo Setup Parity**: Expanded the Super-Admin Demo Setup form to include all standard Storefront fields. Administrators can now configure 'Host Specialties' and 'Featured Video' URLs for ghost accounts to ensure consistent storefront quality.

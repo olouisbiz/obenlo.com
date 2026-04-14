@@ -27,8 +27,8 @@ Obenlo is decentralized across several specialized plugins for maintainability:
    - Payments: Multi-gateway orchestration.
 2. **`obenlo-pwa`**: Handles offline experience, push notifications, and "Add to Home" logic.
 3. **`obenlo-i18n`**: Advanced translation engine and language filtering.
-4. **`obenlo-seo`**: Custom SEO meta handling and structured data for listings.
-5. **`obenlo-social`**: Auth bridges and viral sharing engines.
+4. **`obenlo-seo`**: Smart SEO Engine 2.0. Handles location-aware meta, BreadcrumbList schema, and rich snippets.
+5. **`obenlo-social`**: Provides viral sharing engines, WhatsApp auto-posting, and frontend quick tools for hosts.
 
 ---
 
@@ -74,4 +74,4 @@ Haitian-specific gateways (MonCash/Natcash) require valid API keys in the Settin
 ---
 
 **Obenlo Technical Team**
-*v1.6.8 - "Unified Platform" Standard*
+*v1.7.3 - "Smart Search & Social" Update*
