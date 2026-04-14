@@ -25,44 +25,79 @@ class Obenlo_SEO_Schema {
         $listing_name = get_the_title($post_id);
         $listing_description = wp_trim_words(get_post_meta($post_id, '_obenlo_listing_content', true), 50);
         $listing_image = has_post_thumbnail($post_id) ? get_the_post_thumbnail_url($post_id, 'large') : '';
-        $category_slug = get_post_meta($post_id, '_obenlo_listing_category', true);
-        $price = get_post_meta($post_id, '_obenlo_listing_price', true);
-        $location = get_post_meta($post_id, '_obenlo_listing_location', true);
+        $price = get_post_meta($post_id, '_obenlo_price', true);
+        $location = get_post_meta($post_id, '_obenlo_location', true);
+
+        // Fetch Industry/Category
+        $type_terms = wp_get_post_terms($post_id, 'listing_type');
+        $main_cat = 'Product';
+        if (!is_wp_error($type_terms) && !empty($type_terms)) {
+            foreach($type_terms as $term) {
+                $check = strtolower($term->name);
+                if (strpos($check, 'stay') !== false) { $main_cat = 'Hotel'; break; }
+                if (strpos($check, 'house') !== false) { $main_cat = 'BedAndBreakfast'; break; }
+                if (strpos($check, 'event') !== false) { $main_cat = 'Event'; break; }
+                if (strpos($check, 'experience') !== false) { $main_cat = 'Event'; break; }
+                if (strpos($check, 'service') !== false) { $main_cat = 'Service'; break; }
+                if (strpos($check, 'chauffeur') !== false) { $main_cat = 'TaxiService'; break; }
+                if (strpos($check, 'barber') !== false) { $main_cat = 'BarberShop'; break; }
+            }
+        }
 
         // Core Schema Data
         $data = array(
             "@context" => "https://schema.org",
+            "@type" => $main_cat,
             "name" => $listing_name,
             "description" => $listing_description,
             "url" => get_permalink($post_id),
             "image" => $listing_image,
             "offers" => array(
                 "@type" => "Offer",
-                "price" => $price,
+                "price" => $price ?: "0",
                 "priceCurrency" => "USD",
-                "availability" => "https://schema.org/InStock"
+                "availability" => "https://schema.org/InStock",
+                "url" => get_permalink($post_id)
             )
         );
 
-        // Advanced Categorization for Rich Results
-        if ($category_slug === 'stay') {
-            $data["@type"] = "Hotel";
-            $data["address"] = $location;
-        } elseif ($category_slug === 'event' || $category_slug === 'class') {
-            $data["@type"] = "Event";
+        // Support Reviews in Google
+        if (class_exists('Obenlo_Booking_Reviews')) {
+            $avg_rating = Obenlo_Booking_Reviews::get_listing_average_rating($post_id);
+            $review_count = Obenlo_Booking_Reviews::get_listing_review_count($post_id);
+            if ($avg_rating > 0) {
+                $data["aggregateRating"] = array(
+                    "@type" => "AggregateRating",
+                    "ratingValue" => $avg_rating,
+                    "reviewCount" => $review_count ?: 1,
+                    "bestRating" => "5",
+                    "worstRating" => "1"
+                );
+            }
+        }
+
+        // Advanced Categorization
+        if ($main_cat === 'Hotel' || $main_cat === 'BedAndBreakfast') {
+            $data["address"] = array(
+                "@type" => "PostalAddress",
+                "streetAddress" => $location
+            );
+        } elseif ($main_cat === 'Event') {
             $data["eventStatus"] = "https://schema.org/EventScheduled";
             $data["eventAttendanceMode"] = "https://schema.org/OfflineEventAttendanceMode";
             
-            // Check for virtual event
             $is_virtual = get_post_meta($post_id, '_obenlo_event_location_type', true);
             if ($is_virtual === 'virtual') {
                  $data["eventAttendanceMode"] = "https://schema.org/OnlineEventAttendanceMode";
             }
-        } else {
-            $data["@type"] = "Product";
+            $data["location"] = array(
+                "@type" => "Place",
+                "name" => $location,
+                "address" => $location
+            );
         }
 
-        echo "\n<!-- Obenlo Rich Search Data -->\n";
+        echo "\n<!-- Obenlo Premium Schema v1.7.2 -->\n";
         echo '<script type="application/ld+json">' . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . '</script>' . "\n";
     }
 

@@ -19,15 +19,27 @@ class Obenlo_SEO_Head {
     public function dynamic_seo_title($title) {
         if (is_singular('listing')) {
             $post_id = get_the_ID();
-            $host_id = @get_post_field('post_author', $post_id);
-            $host_name = $host_id ? get_the_author_meta('display_name', $host_id) : '';
-            $listing_name = get_the_title($post_id);
+            $title_val = get_the_title($post_id);
+            $location = get_post_meta($post_id, '_obenlo_location', true);
+            $industry = $this->get_listing_industry($post_id);
 
-            return $listing_name . ' • ' . $host_name . ' | Obenlo';
+            // Smart Title: [Name] | [Industry] [Location] | Obenlo
+            $smart_title = $title_val;
+            if ($industry) $smart_title .= ' - ' . $industry;
+            if ($location) $smart_title .= ' in ' . $location;
+            
+            return $smart_title . ' | Obenlo';
+        }
+
+        if (is_author()) {
+            $author = get_queried_object();
+            $store_name = get_user_meta($author->ID, 'obenlo_store_name', true);
+            $name = $store_name ? $store_name : $author->display_name;
+            return $name . ' - Professional Host on Obenlo';
         }
 
         if (is_front_page()) {
-            return 'Obenlo | Book Local Services, Events & Unique Stays';
+            return 'Obenlo | Marketplace for Local Services, Viral Events & Stays';
         }
 
         return $title;
@@ -42,17 +54,25 @@ class Obenlo_SEO_Head {
 
         $description = get_bloginfo('description');
         if (is_front_page()) {
-            $description = 'The all-in-one marketplace for local services, viral events, and unique stays. Discover top-rated hosts and book your next experience on Obenlo.';
+            $description = 'Obenlo is the all-in-one marketplace for discovering top-rated local services, viral events, and unique stays. Book verified hosts directly.';
         }
         
         $image = get_template_directory_uri() . '/assets/images/logo-social-profile.png';
-        $url = home_url(add_query_arg(array(), $GLOBALS['wp']->request));
+        $canonical = home_url(add_query_arg(array(), $GLOBALS['wp']->request));
 
         if ($is_listing) {
             $content = get_post_meta($post_id, '_obenlo_listing_content', true);
-            $description = $content ? wp_trim_words($content, 25, '...') : $description;
+            $price = get_post_meta($post_id, '_obenlo_price', true);
+            $location = get_post_meta($post_id, '_obenlo_location', true);
+            
+            $desc_prefix = '';
+            if ($price) $desc_prefix .= 'Starting at $' . $price . '. ';
+            if ($location) $desc_prefix .= 'Located in ' . $location . '. ';
+            
+            $description = $content ? wp_trim_words($content, 20, '...') : $description;
+            $description = $desc_prefix . $description;
 
-            // Use Featured Image (Listing Photo)
+            // Use Featured Image
             if (has_post_thumbnail($post_id)) {
                 $image = get_the_post_thumbnail_url($post_id, 'large');
             }
@@ -61,12 +81,13 @@ class Obenlo_SEO_Head {
         ?>
         <!-- Obenlo SEO Engine -->
         <meta name="description" content="<?php echo esc_attr($description); ?>">
+        <link rel="canonical" href="<?php echo esc_url($canonical); ?>">
 
         <!-- OpenGraph (WhatsApp / Facebook) -->
         <meta property="og:type" content="<?php echo $is_listing ? 'website' : 'website'; ?>">
         <meta property="og:title" content="<?php echo esc_attr(wp_get_document_title()); ?>">
         <meta property="og:description" content="<?php echo esc_attr($description); ?>">
-        <meta property="og:url" content="<?php echo esc_url($url); ?>">
+        <meta property="og:url" content="<?php echo esc_url($canonical); ?>">
         <meta property="og:image" content="<?php echo esc_url($image); ?>">
         <meta property="og:site_name" content="Obenlo">
 
@@ -76,5 +97,18 @@ class Obenlo_SEO_Head {
         <meta name="twitter:description" content="<?php echo esc_attr($description); ?>">
         <meta name="twitter:image" content="<?php echo esc_url($image); ?>">
         <?php
+    }
+
+    private function get_listing_industry($post_id) {
+        $type_terms = wp_get_post_terms($post_id, 'listing_type');
+        if (is_wp_error($type_terms) || empty($type_terms)) return '';
+        
+        // Find top level industry
+        foreach($type_terms as $term) {
+            if ($term->parent == 0) return $term->name;
+            $parent = get_term($term->parent, 'listing_type');
+            if ($parent && !is_wp_error($parent)) return $parent->name;
+        }
+        return '';
     }
 }

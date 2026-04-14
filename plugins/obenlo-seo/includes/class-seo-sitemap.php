@@ -41,7 +41,7 @@ class Obenlo_SEO_Sitemap {
 
         header('Content-Type: text/xml; charset=utf-8');
         echo '<?xml version="1.0" encoding="UTF-8"?>';
-        echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">';
 
         // 1. Static Pages & Home
         $this->add_url(home_url('/'), '1.0', 'daily');
@@ -60,7 +60,7 @@ class Obenlo_SEO_Sitemap {
             $this->add_url(get_permalink($page->ID), '0.8', 'weekly');
         }
 
-        // 2. Active Listings
+        // 2. Active Listings (With Images)
         $listings = get_posts(array(
             'post_type'      => 'listing',
             'posts_per_page' => -1,
@@ -72,7 +72,13 @@ class Obenlo_SEO_Sitemap {
             if (get_post_meta($listing->ID, '_obenlo_is_suspended', true) === 'yes') {
                 continue;
             }
-            $this->add_url(get_permalink($listing->ID), '0.9', 'daily');
+            
+            $images = array();
+            if (has_post_thumbnail($listing->ID)) {
+                $images[] = get_the_post_thumbnail_url($listing->ID, 'large');
+            }
+            
+            $this->add_url(get_permalink($listing->ID), '0.9', 'daily', $images, $listing->post_title);
         }
 
         // 3. Host Storefronts
@@ -85,7 +91,12 @@ class Obenlo_SEO_Sitemap {
             if (get_user_meta($host->ID, '_obenlo_is_suspended', true) === 'yes') {
                 continue;
             }
-            $this->add_url(home_url('/' . $host->user_nicename . '/'), '0.7', 'weekly');
+            
+            // Generate clean storefront URL matching the slug logic
+            $store_name = get_user_meta($host->ID, 'obenlo_store_name', true);
+            $slug = !empty($store_name) ? sanitize_title($store_name) : $host->user_nicename;
+            
+            $this->add_url(home_url('/' . $slug . '/'), '0.7', 'weekly');
         }
 
         echo '</urlset>';
@@ -110,11 +121,19 @@ class Obenlo_SEO_Sitemap {
     /**
      * Helper to output URL tags
      */
-    private function add_url($url, $priority = '0.5', $changefreq = 'weekly') {
+    private function add_url($url, $priority = '0.5', $changefreq = 'weekly', $images = array(), $title = '') {
         echo '<url>';
         echo '<loc>' . esc_url($url) . '</loc>';
         echo '<priority>' . esc_html($priority) . '</priority>';
         echo '<changefreq>' . esc_html($changefreq) . '</changefreq>';
+        if (!empty($images)) {
+            foreach ($images as $img_url) {
+                echo '<image:image>';
+                echo '<image:loc>' . esc_url($img_url) . '</image:loc>';
+                echo '<image:title>' . esc_html($title) . '</image:title>';
+                echo '</image:image>';
+            }
+        }
         echo '</url>';
     }
 }
