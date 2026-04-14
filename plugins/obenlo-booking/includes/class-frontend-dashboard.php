@@ -1521,7 +1521,7 @@ class Obenlo_Booking_Frontend_Dashboard
                         </div>
 
                         <div class="grid-row" style="margin-bottom:20px;">
-                            <div id="duration_wrapper" class="grid-col-1-2" style="display:flex; gap:10px;">
+                            <div id="duration_wrapper" class="grid-col-1-2" style="display:flex; flex-wrap:wrap; gap:10px;">
                                 <div style="flex:1;">
                                     <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Duration', 'obenlo'); ?></label>
                                     <input type="number" step="0.5" name="duration_val" value="<?php echo esc_attr($duration_val); ?>" placeholder="e.g. 1.5" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
@@ -1533,6 +1533,9 @@ class Obenlo_Booking_Frontend_Dashboard
                                         <option value="minutes" <?php selected($duration_unit, 'minutes'); ?>><?php echo __('Minutes', 'obenlo'); ?></option>
                                     </select>
                                 </div>
+                                <p style="font-size:0.75rem; color:#888; margin-top:8px; width:100%;">
+                                    <?php echo __('This predefines how long the service takes. It will appear as the default duration on your booking form.', 'obenlo'); ?>
+                                </p>
                             </div>
                         </div>
 

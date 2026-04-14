@@ -816,11 +816,21 @@ get_header(); ?>
                                 </div>
                                 <div id="timeslot_loading" style="display:none; margin-top:10px; font-size:0.9em; color:#666;">Checking availability...</div>
                                 <input type="hidden" name="start_date" id="final_start_date" required>
-                                <?php if ($duration_val): ?>
+                                <?php if ($booking_mode === 'timeslot'): ?>
+                                    <div class="form-row" style="margin-top:15px;">
+                                        <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;">
+                                            <?php echo $pricing_model === 'per_hour' ? __('Duration (Hours)', 'obenlo') : __('Minutes / Sessions', 'obenlo'); ?>
+                                            <?php if ($duration_val): ?>
+                                                <span style="color:#e61e4d; font-size:0.8rem; font-weight:700; margin-left:5px;">(Host Predefined: <?php echo esc_html($duration_val); ?> <?php echo esc_html($duration_unit); ?>)</span>
+                                            <?php endif; ?>
+                                        </label>
+                                        <input type="number" name="booking_duration" min="0.5" step="0.5" value="<?php echo esc_attr($duration_val ?: 1); ?>" required style="width: 100%; border: 1px solid #ccc; padding: 10px; border-radius: 6px;">
+                                        <input type="hidden" name="booking_duration_unit" value="<?php echo $pricing_model === 'per_hour' ? 'hours' : ($duration_unit ?: 'hours'); ?>">
+                                    </div>
+                                <?php elseif ($duration_val): ?>
                                     <input type="hidden" name="booking_duration" value="<?php echo esc_attr($duration_val); ?>">
                                     <input type="hidden" name="booking_duration_unit" value="<?php echo esc_attr($duration_unit); ?>">
-                                <?php
-            endif; ?>
+                                <?php endif; ?>
                             <?php
         elseif ($booking_mode === 'datetime' || $booking_mode === 'event_datetime'): ?>
                                 <div class="form-row">
@@ -972,7 +982,13 @@ get_header(); ?>
                                     var g = form.querySelector('input[name="guests"]');
                                     var hasGuests = <?php echo $form_has_guests ? 'true' : 'false'; ?>;
                                     var qty = (g && g.value && hasGuests) ? parseInt(g.value) || 1 : 1;
-                                    total = basePrice * qty;
+                                    
+                                    // Handle duration multiplier for per_hour model
+                                    var pricingModel = "<?php echo esc_js($pricing_model); ?>";
+                                    var durationEl = form.querySelector('input[name="booking_duration"]');
+                                    var duration = (durationEl && pricingModel === 'per_hour') ? parseFloat(durationEl.value) || 1 : 1;
+                                    
+                                    total = basePrice * qty * duration;
                                 }
 
                                 // Add addons
