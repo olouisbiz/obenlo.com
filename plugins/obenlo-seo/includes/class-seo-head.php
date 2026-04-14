@@ -54,7 +54,7 @@ class Obenlo_SEO_Head {
         }
 
         if (is_front_page()) {
-            return 'Obenlo | Marketplace for Local Services, Viral Events & Stays';
+            return 'Obenlo | Stays, Experiences, Services & Events Marketplace';
         }
 
         return $title;
@@ -69,7 +69,7 @@ class Obenlo_SEO_Head {
 
         $description = get_bloginfo('description');
         if (is_front_page()) {
-            $description = 'Obenlo is the all-in-one marketplace for discovering top-rated local services, viral events, and unique stays. Book verified hosts directly.';
+            $description = 'Obenlo is the ultimate marketplace for Stays, unique Experiences, local Services, and viral Events. Book verified local hosts directly.';
         }
         
         $image = get_template_directory_uri() . '/assets/images/logo-social-profile.png';
