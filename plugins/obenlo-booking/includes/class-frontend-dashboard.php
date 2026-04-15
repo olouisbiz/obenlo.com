@@ -689,7 +689,7 @@ class Obenlo_Booking_Frontend_Dashboard
                                 </div>
                             </td>
                             <td data-label="<?php echo esc_attr(__('Owner', 'obenlo')); ?>">
-                                <div style="font-weight:600; color:#666; font-size:0.85rem;"><?php echo esc_html($owner_name); ?></div>
+                                <div style="font-weight:600; color:#666; font-size:0.85rem;"><?php echo wp_kses_post($owner_name); ?></div>
                             </td>
                             <td data-label="<?php echo esc_attr(__('Category', 'obenlo')); ?>"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
                             <td data-label="<?php echo esc_attr(__('Status', 'obenlo')); ?>">
