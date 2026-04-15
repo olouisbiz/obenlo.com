@@ -666,10 +666,17 @@ class Obenlo_Booking_Frontend_Dashboard
                     'suppress_filters' => false,
                 ));
                 
-                $owner_name = get_the_author_meta('display_name', $listing->post_author);
-                if (empty($owner_name)) {
-                    $owner_user = get_userdata($listing->post_author);
-                    $owner_name = $owner_user ? $owner_user->user_login : 'Unknown';
+                $is_demo = get_post_meta($listing->ID, '_obenlo_is_demo', true) === 'yes';
+                $demo_host_name = get_post_meta($listing->ID, '_obenlo_demo_host_name', true);
+                
+                if ($is_demo && !empty($demo_host_name)) {
+                    $owner_name = $demo_host_name . ' <span style="font-size:0.6rem; background:#eee; padding:2px 4px; border-radius:4px; color:#888;">Demo</span>';
+                } else {
+                    $owner_name = get_the_author_meta('display_name', $listing->post_author);
+                    if (empty($owner_name)) {
+                        $owner_user = get_userdata($listing->post_author);
+                        $owner_name = $owner_user ? $owner_user->user_login : 'Unknown';
+                    }
                 }
 ?>
                         <tr>
