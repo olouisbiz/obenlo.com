@@ -647,6 +647,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 <thead>
                     <tr>
                         <th><?php echo __('Listing', 'obenlo'); ?></th>
+                        <th><?php echo __('Owner', 'obenlo'); ?></th>
                         <th><?php echo __('Category', 'obenlo'); ?></th>
                         <th><?php echo __('Status', 'obenlo'); ?></th>
                         <th><?php echo __('Units/Sessions', 'obenlo'); ?></th>
@@ -664,6 +665,12 @@ class Obenlo_Booking_Frontend_Dashboard
                     'posts_per_page' => -1,
                     'suppress_filters' => false,
                 ));
+                
+                $owner_name = get_the_author_meta('display_name', $listing->post_author);
+                if (empty($owner_name)) {
+                    $owner_user = get_userdata($listing->post_author);
+                    $owner_name = $owner_user ? $owner_user->user_login : 'Unknown';
+                }
 ?>
                         <tr>
                             <td data-label="<?php echo esc_attr(__('Listing', 'obenlo')); ?>">
@@ -673,6 +680,9 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <?php endif; ?>
                                     <span style="font-weight:700; color:#222; text-align: left;"><?php echo get_the_title($listing->ID); ?></span>
                                 </div>
+                            </td>
+                            <td data-label="<?php echo esc_attr(__('Owner', 'obenlo')); ?>">
+                                <div style="font-weight:600; color:#666; font-size:0.85rem;"><?php echo esc_html($owner_name); ?></div>
                             </td>
                             <td data-label="<?php echo esc_attr(__('Category', 'obenlo')); ?>"><span class="badge badge-info"><?php echo esc_html($type_display); ?></span></td>
                             <td data-label="<?php echo esc_attr(__('Status', 'obenlo')); ?>">
@@ -710,6 +720,7 @@ class Obenlo_Booking_Frontend_Dashboard
                             <?php foreach ($children as $child): ?>
                                 <tr style="background:#fafafa;">
                                     <td data-label="<?php echo esc_attr(__('Listing', 'obenlo')); ?>" style="padding-left:30px; font-size:0.85rem; color:#666;">└─ <?php echo get_the_title($child->ID); ?></td>
+                                    <td data-label="<?php echo esc_attr(__('Owner', 'obenlo')); ?>"></td>
                                     <td data-label="<?php echo esc_attr(__('Category', 'obenlo')); ?>"></td>
                                     <td data-label="<?php echo esc_attr(__('Status', 'obenlo')); ?>"><span class="badge badge-success" style="opacity:0.6; font-size:0.7rem;"><?php echo ucfirst($child->post_status); ?></span></td>
                                     <td data-label="<?php echo esc_attr(__('Units', 'obenlo')); ?>"></td>
