@@ -163,13 +163,13 @@ if ($is_demo_preview) $hosting_since = 2024;
 
     /* Hero Section */
     .premium-hero {
-        height: 350px;
+        height: 480px;
         position: relative;
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: center;
         background: #000;
-        padding-top: 30px;
+        padding-top: 0;
     }
     .hero-banner {
         position: absolute;
@@ -213,7 +213,7 @@ if ($is_demo_preview) $hosting_since = 2024;
         padding: 0 40px;
         display: flex;
         justify-content: flex-end;
-        align-items: flex-start;
+        align-items: center;
     }
 
     .hero-text h1 {
@@ -235,13 +235,13 @@ if ($is_demo_preview) $hosting_since = 2024;
 
     /* Glass Card */
     .host-glass-card {
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 20px;
-        padding: 12px 18px 18px;
-        box-shadow: 0 15px 30px -10px rgba(0,0,0,0.2);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 24px;
+        padding: 15px 22px 22px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         display: flex;
         flex-direction: column;
         align-items: center;
