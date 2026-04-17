@@ -240,25 +240,25 @@ if ($is_demo_preview) $hosting_since = 2024;
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
         border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 24px;
-        padding: 15px 20px 20px;
+        border-radius: 20px;
+        padding: 12px 18px 18px;
         box-shadow: 0 15px 30px -10px rgba(0,0,0,0.2);
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
         position: relative;
-        max-width: 280px;
+        max-width: 250px;
     }
 
     .host-logo-large {
-        width: 80px;
-        height: 80px;
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
-        border: 4px solid white;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        margin-top: -55px;
-        margin-bottom: 10px;
+        border: 3px solid white;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        margin-top: -48px;
+        margin-bottom: 8px;
         background: white;
         object-fit: cover;
     }
@@ -311,8 +311,8 @@ if ($is_demo_preview) $hosting_since = 2024;
         background: linear-gradient(135deg, #FF385C 0%, #E61E4D 100%);
         color: #fff !important;
         border: none;
-        padding: 12px 24px;
-        border-radius: 12px;
+        padding: 10px 20px;
+        border-radius: 10px;
         font-weight: 700;
         font-size: 1rem;
         cursor: pointer;
@@ -431,10 +431,10 @@ if ($is_demo_preview) $hosting_since = 2024;
 
             <div class="host-glass-card">
                 <img src="<?php echo esc_url($logo_url); ?>" alt="" class="host-logo-large">
-                <h2 style="margin:0; font-size:1.25rem; font-weight:800; color:#1a1a1a;">
+                <h2 style="margin:0; font-size:1.15rem; font-weight:800; color:#1a1a1a;">
                     <?php echo esc_html($store_name); ?>
                 </h2>
-                <p style="color:#666; margin:8px 0 15px; font-weight:500; font-size:0.95rem;">
+                <p style="color:#666; margin:4px 0 12px; font-weight:500; font-size:0.85rem;">
                     <?php if($store_location): ?>
                         📍 <?php echo esc_html($store_location); ?>
                     <?php endif; ?>
@@ -450,7 +450,7 @@ if ($is_demo_preview) $hosting_since = 2024;
                 <?php 
                 if ($is_demo_preview && get_post_meta($demo_listing_id, '_obenlo_claim_pending', true) !== 'yes') {
                     $claim_url = home_url('/login?claim_id=' . $demo_listing_id . '#signup');
-                    echo '<a href="' . esc_url($claim_url) . '" style="display:inline-block; margin-top: 15px; background: transparent; color: #e61e4d; border: 2px solid #e61e4d; padding: 10px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; transition: all 0.2s ease;">';
+                    echo '<a href="' . esc_url($claim_url) . '" style="display:inline-block; margin-top: 12px; background: transparent; color: #e61e4d; border: 1.5px solid #e61e4d; padding: 8px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size:0.85rem; transition: all 0.2s ease;">';
                     echo 'Is this your profile? Claim it';
                     echo '</a>';
                 }
