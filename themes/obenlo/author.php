@@ -163,7 +163,7 @@ if ($is_demo_preview) $hosting_since = 2024;
 
     /* Hero Section */
     .premium-hero {
-        height: 500px;
+        height: 400px;
         position: relative;
         overflow: hidden;
         display: flex;
@@ -241,25 +241,25 @@ if ($is_demo_preview) $hosting_since = 2024;
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
         border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 28px;
-        padding: 20px 25px 25px;
-        box-shadow: 0 20px 40px -10px rgba(0,0,0,0.25);
+        border-radius: 24px;
+        padding: 15px 20px 20px;
+        box-shadow: 0 15px 30px -10px rgba(0,0,0,0.2);
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
         position: relative;
-        max-width: 320px;
+        max-width: 280px;
     }
 
     .host-logo-large {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
         border-radius: 50%;
         border: 4px solid white;
         box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        margin-top: -65px;
-        margin-bottom: 12px;
+        margin-top: -55px;
+        margin-bottom: 10px;
         background: white;
         object-fit: cover;
     }
@@ -294,9 +294,9 @@ if ($is_demo_preview) $hosting_since = 2024;
     .specialty-pill {
         background: rgba(0, 0, 0, 0.05);
         color: #1a1a1a;
-        padding: 5px 12px;
+        padding: 4px 10px;
         border-radius: 50px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 700;
         border: 1px solid rgba(0,0,0,0.02);
         transition: all 0.25s ease;
@@ -444,7 +444,7 @@ if ($is_demo_preview) $hosting_since = 2024;
 
             <div class="host-glass-card">
                 <img src="<?php echo esc_url($logo_url); ?>" alt="" class="host-logo-large">
-                <h2 style="margin:0; font-size:1.4rem; font-weight:800; color:#1a1a1a;">
+                <h2 style="margin:0; font-size:1.25rem; font-weight:800; color:#1a1a1a;">
                     <?php echo esc_html($store_name); ?>
                 </h2>
                 <p style="color:#666; margin:8px 0 15px; font-weight:500; font-size:0.95rem;">
