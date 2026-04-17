@@ -169,7 +169,7 @@ if ($is_demo_preview) $hosting_since = 2024;
         align-items: flex-start;
         justify-content: center;
         background: #000;
-        padding-top: 60px;
+        padding-top: 30px;
     }
     .hero-banner {
         position: absolute;
@@ -456,9 +456,9 @@ if ($is_demo_preview) $hosting_since = 2024;
                 ?>
 
                 <?php if($specialties): ?>
-                    <div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">
-                        <div style="font-size:0.7rem; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; font-weight:700;">Host Specialties</div>
-                        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;">
+                    <div style="margin-top:5px; padding-top:5px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">
+                        <div style="font-size:0.65rem; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; font-weight:700;">Host Specialties</div>
+                        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
                             <?php 
                             $spec_list = array_filter(array_map('trim', explode(',', $specialties)));
                             foreach($spec_list as $spec): 
