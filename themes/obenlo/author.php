@@ -163,7 +163,7 @@ if ($is_demo_preview) $hosting_since = 2024;
 
     /* Hero Section */
     .premium-hero {
-        height: 600px;
+        height: 500px;
         position: relative;
         overflow: hidden;
         display: flex;
@@ -241,24 +241,25 @@ if ($is_demo_preview) $hosting_since = 2024;
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
         border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 32px;
-        padding: 24px 30px 30px;
-        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+        border-radius: 28px;
+        padding: 20px 25px 25px;
+        box-shadow: 0 20px 40px -10px rgba(0,0,0,0.25);
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
         position: relative;
+        max-width: 320px;
     }
 
     .host-logo-large {
-        width: 120px;
-        height: 120px;
+        width: 100px;
+        height: 100px;
         border-radius: 50%;
         border: 4px solid white;
         box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        margin-top: -70px;
-        margin-bottom: 15px;
+        margin-top: -65px;
+        margin-bottom: 12px;
         background: white;
         object-fit: cover;
     }
@@ -443,7 +444,7 @@ if ($is_demo_preview) $hosting_since = 2024;
 
             <div class="host-glass-card">
                 <img src="<?php echo esc_url($logo_url); ?>" alt="" class="host-logo-large">
-                <h2 style="margin:0; font-size:1.6rem; font-weight:800; color:#1a1a1a;">
+                <h2 style="margin:0; font-size:1.4rem; font-weight:800; color:#1a1a1a;">
                     <?php echo esc_html($store_name); ?>
                 </h2>
                 <p style="color:#666; margin:8px 0 15px; font-weight:500; font-size:0.95rem;">
