@@ -165,12 +165,11 @@ if ($is_demo_preview) $hosting_since = 2024;
     .premium-hero {
         height: 420px;
         position: relative;
-        overflow: hidden;
         display: flex;
         align-items: flex-start;
         justify-content: center;
         background: #000;
-        padding-top: 25px;
+        padding-top: 60px;
     }
     .hero-banner {
         position: absolute;
