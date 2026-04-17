@@ -163,14 +163,14 @@ if ($is_demo_preview) $hosting_since = 2024;
 
     /* Hero Section */
     .premium-hero {
-        height: 380px;
+        height: 360px;
         position: relative;
         overflow: hidden;
         display: flex;
         align-items: flex-start;
         justify-content: center;
         background: #000;
-        padding-top: 40px;
+        padding-top: 50px;
     }
     .hero-banner {
         position: absolute;
@@ -212,10 +212,9 @@ if ($is_demo_preview) $hosting_since = 2024;
         width: 100%;
         margin: 0 auto;
         padding: 0 40px;
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 60px;
-        align-items: center;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-start;
     }
 
     .hero-text h1 {
@@ -339,10 +338,10 @@ if ($is_demo_preview) $hosting_since = 2024;
         justify-content: center;
         gap: 40px;
         background: white;
-        padding: 30px;
+        padding: 20px 30px;
         border-radius: 24px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        margin-top: -50px;
+        margin-top: -30px;
         position: relative;
         z-index: 20;
         max-width: 1000px;
