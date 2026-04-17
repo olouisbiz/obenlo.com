@@ -163,7 +163,7 @@ if ($is_demo_preview) $hosting_since = 2024;
 
     /* Hero Section */
     .premium-hero {
-        height: 420px;
+        height: 350px;
         position: relative;
         display: flex;
         align-items: flex-start;
