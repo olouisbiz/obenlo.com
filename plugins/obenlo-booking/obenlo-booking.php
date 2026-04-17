@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-define('OBENLO_BOOKING_VERSION', '1.7.2');
+define('OBENLO_BOOKING_VERSION', '1.7.3');
 define('OBENLO_BOOKING_DIR', plugin_dir_path(__FILE__));
 define('OBENLO_BOOKING_URL', plugin_dir_url(__FILE__));
 
@@ -106,6 +106,35 @@ function obenlo_booking_init()
     obenlo_booking_update_check();
 }
 add_action('plugins_loaded', 'obenlo_booking_init');
+
+// Prevent Demo Accounts from appearing in general user queries (Isolation)
+add_action('pre_get_users', function($query) {
+    if (is_admin() && !defined('DOING_AJAX')) {
+        // In Admin, we only exclude if it's the standard Users list and no specific demo search is happening
+        $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+        if ($screen && $screen->id === 'users') {
+            // Apply isolation in the main WP Users list to keep things clean
+            $meta_query = $query->get('meta_query') ?: [];
+            $meta_query[] = array(
+                'relation' => 'OR',
+                array('key' => '_obenlo_is_demo_account', 'compare' => 'NOT EXISTS'),
+                array('key' => '_obenlo_is_demo_account', 'value' => 'yes', 'compare' => '!=')
+            );
+            $query->set('meta_query', $meta_query);
+        }
+    } else {
+        // Outside of Admin (Frontend), always exclude unless explicitly requested via 'include_demo_accounts'
+        if ( empty($query->query_vars['include_demo_accounts']) ) {
+            $meta_query = $query->get('meta_query') ?: [];
+            $meta_query[] = array(
+                'relation' => 'OR',
+                array('key' => '_obenlo_is_demo_account', 'compare' => 'NOT EXISTS'),
+                array('key' => '_obenlo_is_demo_account', 'value' => 'yes', 'compare' => '!=')
+            );
+            $query->set('meta_query', $meta_query);
+        }
+    }
+});
 
 /**
  * Universal Obenlo Whitelabel Redirect

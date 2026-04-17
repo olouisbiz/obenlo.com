@@ -355,10 +355,6 @@ if ( count($demo_meta_query) <= 1 ) {
                 </style>
                 <?php
                 $host_args = array( 'role' => 'host', 'number' => 10, 'orderby' => 'post_count', 'order' => 'DESC' );
-                if ( $hide_demo_content && ! $user_can_see_demo ) {
-                    $demo_user = get_user_by('login', 'demo');
-                    if ( $demo_user ) { $host_args['exclude'] = array( $demo_user->ID ); }
-                }
                 $hosts = get_users( $host_args );
                 if ( empty($hosts) ) { $hosts = get_users( array( 'role' => 'administrator', 'number' => 10 ) ); }
                 

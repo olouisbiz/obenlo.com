@@ -1581,24 +1581,31 @@ class Obenlo_Booking_Admin_Dashboard
         echo '</div>';
         echo '<a href="' . esc_url(home_url('/host-dashboard?action=add&demo=1')) . '" style="background:#e61e4d; color:#fff; text-decoration:none; padding:10px 20px; border-radius:8px; font-weight:bold;">+ Create Demo Listing</a>';
         echo '</div>';
+
+        // --- SECTION 2: Demo Listing Manager ---
+        echo '<h4 style="margin: 30px 0 15px;">Demo Listing Manager</h4>';
+        echo '<p style="color:#666; font-size:0.9rem; margin-bottom:15px;">Manage all listings marked as demos, ensuring they are attached to the correct virtual or admin owners.</p>';
         
         echo '<table class="admin-table">';
-        echo '<tr><th>Preview Name</th><th>Demo Bio</th><th>Location</th><th>Actions</th></tr>';
+        echo '<tr><th>Owner Identity</th><th>Demo Bio</th><th>Location</th><th>Actions</th></tr>';
         
         if (empty($demos)) {
             echo '<tr><td colspan="4" style="padding:40px; text-align:center; color:#999;">No demo listings created. <a href="' . esc_url(home_url('/host-dashboard?action=add&demo=1')) . '" style="color:#e61e4d; font-weight:bold;">Create one now</a></td></tr>';
         } else {
             foreach ($demos as $demo) {
-                $d_name = get_post_meta($demo->ID, '_obenlo_demo_host_name', true);
-                $d_bio = get_post_meta($demo->ID, '_obenlo_demo_host_bio', true);
-                $d_loc = get_post_meta($demo->ID, '_obenlo_demo_host_location', true);
+                $owner_name = get_the_author_meta('display_name', $demo->post_author);
+                $is_demo_acc = get_user_meta($demo->post_author, '_obenlo_is_demo_account', true) === 'yes';
+
+                $d_name = get_post_meta($demo->ID, '_obenlo_demo_host_name', true) ?: $owner_name;
+                $d_bio = get_post_meta($demo->ID, '_obenlo_demo_host_bio', true) ?: get_the_author_meta('description', $demo->post_author);
+                $d_loc = get_post_meta($demo->ID, '_obenlo_demo_host_location', true) ?: get_user_meta($demo->post_author, 'obenlo_store_location', true);
 
                 $is_hidden = get_post_meta($demo->ID, '_obenlo_demo_hidden', true) === 'yes';
                 $vis_text = $is_hidden ? 'Show' : 'Hide';
                 $vis_color = $is_hidden ? '#10b981' : '#666';
 
                 echo '<tr>';
-                echo '<td><strong>' . esc_html($d_name) . '</strong>' . ($is_hidden ? ' <span class="badge" style="background:#666; color:#fff; font-size:0.6rem;">HIDDEN</span>' : '') . '<br><small>' . esc_html($demo->post_title) . '</small></td>';
+                echo '<td><strong>' . esc_html($d_name) . '</strong>' . ($is_hidden ? ' <span class="badge" style="background:#666; color:#fff; font-size:0.6rem;">HIDDEN</span>' : '') . '<br><small>' . esc_html($demo->post_title) . '</small><br><span style="font-size:0.75rem; color:#666; background:#f0f0f0; padding:2px 6px; border-radius:4px; margin-top:4px; display:inline-block;">Account: ' . ($is_demo_acc ? '👤 ' : '🛡️ Admin: ') . esc_html($owner_name) . '</span></td>';
                 echo '<td style="max-width:300px; font-size:0.85rem;">' . wp_trim_words($d_bio, 15) . '</td>';
                 echo '<td>' . esc_html($d_loc) . '</td>';
                 echo '<td>';

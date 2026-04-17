@@ -607,14 +607,35 @@ class Obenlo_Booking_Frontend_Dashboard
         $is_host_suspended = get_user_meta($user_id, '_obenlo_is_suspended', true) === 'yes';
         $host_suspension_reason = get_user_meta($user_id, '_obenlo_suspension_reason', true);
 
-        $args = array(
-            'post_type' => 'listing',
-            'author' => $user_id,
+        $user_listings = get_posts(array(
+            'post_type'      => 'listing',
+            'author'         => $user_id,
             'posts_per_page' => -1,
-            'post_parent' => 0,
-            'suppress_filters' => false, // Ensure sandbox isolation is applied
-        );
-        $listings = get_posts($args);
+            'post_parent'    => 0,
+            'suppress_filters' => false,
+        ));
+
+        if (current_user_can('administrator')) {
+            $demo_listings = get_posts(array(
+                'post_type'      => 'listing',
+                'meta_key'       => '_obenlo_is_demo',
+                'meta_value'     => 'yes',
+                'posts_per_page' => -1,
+                'post_parent'    => 0,
+                'suppress_filters' => false,
+            ));
+            // Merge and ensure uniqueness by ID
+            $listings = array();
+            $seen_ids = array();
+            foreach (array_merge($user_listings, $demo_listings) as $l) {
+                if (!in_array($l->ID, $seen_ids)) {
+                    $listings[] = $l;
+                    $seen_ids[] = $l->ID;
+                }
+            }
+        } else {
+            $listings = $user_listings;
+        }
 
 ?>
         <div class="dashboard-header">
@@ -2166,7 +2187,13 @@ class Obenlo_Booking_Frontend_Dashboard
                 $post_data['post_author'] = $existing_post->post_author;
             }
         } else {
-            $post_data['post_author'] = get_current_user_id();
+            // New Listing: Inherit parent author if applicable (crucial for Demo units), else current user
+            if ($parent_id > 0) {
+                $parent = get_post($parent_id);
+                $post_data['post_author'] = $parent ? $parent->post_author : get_current_user_id();
+            } else {
+                $post_data['post_author'] = get_current_user_id();
+            }
         }
 
         if ($listing_id > 0) {
@@ -2176,6 +2203,31 @@ class Obenlo_Booking_Frontend_Dashboard
             $new_post_id = wp_update_post($post_data);
         } else {
             $new_post_id = wp_insert_post($post_data);
+
+            // --- Safe Auto-attribution for Demo Listings (Admin Only) ---
+            if (isset($_POST['is_demo']) && $_POST['is_demo'] === '1' && current_user_can('administrator')) {
+                $demo_host_name = !empty($_POST['_obenlo_demo_host_name']) ? sanitize_text_field($_POST['_obenlo_demo_host_name']) : '';
+                
+                if ($demo_host_name) {
+                    $demo_user_login = 'demo_' . sanitize_title($demo_host_name);
+                    
+                    // Look for existing or create new demo host account
+                    $demo_user_id = username_exists($demo_user_login);
+                    if (!$demo_user_id) {
+                        $demo_user_id = wp_create_user($demo_user_login, wp_generate_password(), $demo_user_login . "@obenlo.com");
+                        if (!is_wp_error($demo_user_id)) {
+                            wp_update_user(['ID' => $demo_user_id, 'display_name' => $demo_host_name]);
+                            $du = new WP_User($demo_user_id);
+                            $du->set_role('host');
+                            update_user_meta($demo_user_id, '_obenlo_is_demo_account', 'yes');
+                        }
+                    }
+                    
+                    if ($demo_user_id && !is_wp_error($demo_user_id)) {
+                        wp_update_post(['ID' => $new_post_id, 'post_author' => $demo_user_id]);
+                    }
+                }
+            }
         }
 
         if ($new_post_id && !is_wp_error($new_post_id)) {
