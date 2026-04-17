@@ -2322,6 +2322,18 @@ class Obenlo_Booking_Frontend_Dashboard
                     update_post_meta($new_post_id, '_obenlo_demo_host_video', esc_url_raw($_POST['_obenlo_demo_host_video']));
                 }
 
+                // Sync to Virtual User Meta (for consistent display in author.php and elsewhere)
+                $virtual_user_id = get_post_field('post_author', $new_post_id);
+                if ($virtual_user_id && $virtual_user_id != get_current_user_id()) {
+                    if (isset($_POST['_obenlo_demo_host_name'])) update_user_meta($virtual_user_id, 'obenlo_store_name', sanitize_text_field($_POST['_obenlo_demo_host_name']));
+                    if (isset($_POST['_obenlo_demo_host_bio'])) update_user_meta($virtual_user_id, 'obenlo_store_description', sanitize_textarea_field(wp_unslash($_POST['_obenlo_demo_host_bio'])));
+                    if (isset($_POST['_obenlo_demo_host_location'])) update_user_meta($virtual_user_id, 'obenlo_store_location', sanitize_text_field($_POST['_obenlo_demo_host_location']));
+                    if (isset($_POST['_obenlo_demo_host_tagline'])) update_user_meta($virtual_user_id, 'obenlo_store_tagline', sanitize_text_field($_POST['_obenlo_demo_host_tagline']));
+                    if (isset($_POST['_obenlo_demo_host_specialties'])) update_user_meta($virtual_user_id, 'obenlo_specialties', sanitize_text_field($_POST['_obenlo_demo_host_specialties']));
+                    if (isset($_POST['_obenlo_demo_host_instagram'])) update_user_meta($virtual_user_id, 'obenlo_instagram', sanitize_text_field($_POST['_obenlo_demo_host_instagram']));
+                    if (isset($_POST['_obenlo_demo_host_facebook'])) update_user_meta($virtual_user_id, 'obenlo_facebook', sanitize_text_field($_POST['_obenlo_demo_host_facebook']));
+                }
+
                 // Processing Demo Assets
                 require_once(ABSPATH . 'wp-admin/includes/image.php');
                 require_once(ABSPATH . 'wp-admin/includes/file.php');

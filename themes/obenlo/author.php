@@ -18,8 +18,10 @@ $user_id = $curauth ? $curauth->ID : 0;
 $demo_listing_id = get_query_var('demo_listing_id') ?: (isset($_GET['demo_listing_id']) ? intval($_GET['demo_listing_id']) : 0);
 $demo_mode_param = get_query_var('demo_listing_mode') ?: (isset($_GET['demo_mode']) ? 1 : 0);
 $demo_host_slug = get_query_var('demo_host_name');
-$is_demo_preview = false;
 $demo_meta = [];
+
+// New: Check if the user ID itself belongs to a virtual demo account
+$is_virtual_demo_user = get_user_meta($user_id, '_obenlo_is_demo_account', true) === 'yes';
 
 // If no specific ID but demo host slug is provided
 if (!$demo_listing_id && $demo_host_slug) {
@@ -49,6 +51,17 @@ if (!$demo_listing_id && $demo_host_slug) {
     }
 }
 
+// If it's a virtual demo user but we don't have a listing yet
+if (!$demo_listing_id && $is_virtual_demo_user && $user_id) {
+    $demo_post = get_posts(array(
+        'post_type' => 'listing',
+        'author' => $user_id,
+        'posts_per_page' => 1,
+        'post_parent' => 0
+    ));
+    if ($demo_post) $demo_listing_id = $demo_post[0]->ID;
+}
+
 // If still no ID but demo mode is on for a user
 if (!$demo_listing_id && $demo_mode_param && $user_id) {
     // Search for demo listings authored by this user
@@ -71,12 +84,14 @@ if (!$demo_listing_id && $demo_mode_param && $user_id) {
         $demo_listing_id = $demo_post[0]->ID;
     }
 }
+if ($is_virtual_demo_user) $is_demo_preview = true;
 
 if ($demo_listing_id && get_post_meta($demo_listing_id, '_obenlo_is_demo', true) === 'yes') {
     $is_demo_hidden = get_post_meta($demo_listing_id, '_obenlo_demo_hidden', true) === 'yes';
     if ($is_demo_hidden && !current_user_can('administrator')) {
         wp_die('This storefront is currently private.', 'Private Storefront', array('response' => 404));
     }
+    
     $is_demo_preview = true;
     $demo_host_name = get_post_meta($demo_listing_id, '_obenlo_demo_host_name', true);
     $demo_meta = [
@@ -86,6 +101,7 @@ if ($demo_listing_id && get_post_meta($demo_listing_id, '_obenlo_is_demo', true)
         'tagline' => get_post_meta($demo_listing_id, '_obenlo_demo_host_tagline', true),
         'insta' => get_post_meta($demo_listing_id, '_obenlo_demo_host_instagram', true),
         'fb' => get_post_meta($demo_listing_id, '_obenlo_demo_host_facebook', true),
+        'specialties' => get_post_meta($demo_listing_id, '_obenlo_demo_host_specialties', true),
     ];
 }
 
@@ -98,7 +114,7 @@ $store_tagline = ($is_demo_preview && !empty($demo_meta['tagline'])) ? $demo_met
 $store_video = get_user_meta($user_id, 'obenlo_store_video', true);
 $insta = ($is_demo_preview && !empty($demo_meta['insta'])) ? $demo_meta['insta'] : get_user_meta($user_id, 'obenlo_instagram', true);
 $fb = ($is_demo_preview && !empty($demo_meta['fb'])) ? $demo_meta['fb'] : get_user_meta($user_id, 'obenlo_facebook', true);
-$specialties = get_user_meta($user_id, 'obenlo_specialties', true);
+$specialties = ($is_demo_preview && !empty($demo_meta['specialties'])) ? $demo_meta['specialties'] : get_user_meta($user_id, 'obenlo_specialties', true);
 $business_hours = ($is_demo_preview) ? get_post_meta($demo_listing_id, '_obenlo_demo_business_hours', true) : get_user_meta($user_id, '_obenlo_business_hours', true);
 $store_logo_id = get_user_meta($user_id, 'obenlo_store_logo', true);
 $store_banner_id = get_user_meta($user_id, 'obenlo_store_banner', true);
