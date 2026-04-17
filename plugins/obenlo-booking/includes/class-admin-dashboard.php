@@ -1686,6 +1686,7 @@ class Obenlo_Booking_Admin_Dashboard
                 $d_logo = get_post_meta($listing_id, '_obenlo_demo_host_logo', true);
                 $d_banner = get_post_meta($listing_id, '_obenlo_demo_host_banner', true);
                 $d_hours = get_post_meta($listing_id, '_obenlo_demo_business_hours', true);
+                $d_spec = get_post_meta($listing_id, '_obenlo_demo_host_specialties', true);
 
                 if ($d_name) update_user_meta($user_id, 'obenlo_store_name', $d_name);
                 if ($d_bio) update_user_meta($user_id, 'obenlo_store_description', $d_bio);
@@ -1696,6 +1697,7 @@ class Obenlo_Booking_Admin_Dashboard
                 if ($d_logo) update_user_meta($user_id, 'obenlo_store_logo', $d_logo);
                 if ($d_banner) update_user_meta($user_id, 'obenlo_store_banner', $d_banner);
                 if ($d_hours) update_user_meta($user_id, '_obenlo_business_hours', $d_hours);
+                if ($d_spec) update_user_meta($user_id, 'obenlo_specialties', $d_spec);
 
                 // 3. Clean up Demo flags
                 delete_post_meta($listing_id, '_obenlo_is_demo');
@@ -1708,6 +1710,7 @@ class Obenlo_Booking_Admin_Dashboard
                 delete_post_meta($listing_id, '_obenlo_demo_host_logo');
                 delete_post_meta($listing_id, '_obenlo_demo_host_banner');
                 delete_post_meta($listing_id, '_obenlo_demo_business_hours');
+                delete_post_meta($listing_id, '_obenlo_demo_host_specialties');
                 
                 // Clear any restricted mode cache for the user if applicable
                 clean_user_cache($user_id);
