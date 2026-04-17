@@ -337,8 +337,8 @@ if ($is_demo_preview) $hosting_since = 2024;
         justify-content: center;
         gap: 40px;
         background: white;
-        padding: 20px 30px;
-        border-radius: 24px;
+        padding: 12px 40px;
+        border-radius: 16px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         margin-top: 0;
         position: relative;
@@ -348,8 +348,8 @@ if ($is_demo_preview) $hosting_since = 2024;
         margin-right: auto;
     }
     .stat-item { text-align: center; }
-    .stat-val { display: block; font-size: 1.6rem; font-weight: 800; color: #1a1a1a; margin-bottom: 5px; }
-    .stat-lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 700; }
+    .stat-val { display: block; font-size: 1.3rem; font-weight: 800; color: #1a1a1a; margin-bottom: 2px; }
+    .stat-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 700; }
 
     /* Tabs */
     .storefront-nav {
