@@ -163,14 +163,14 @@ if ($is_demo_preview) $hosting_since = 2024;
 
     /* Hero Section */
     .premium-hero {
-        height: 360px;
+        height: 420px;
         position: relative;
         overflow: hidden;
         display: flex;
         align-items: flex-start;
         justify-content: center;
         background: #000;
-        padding-top: 50px;
+        padding-top: 25px;
     }
     .hero-banner {
         position: absolute;
@@ -341,7 +341,7 @@ if ($is_demo_preview) $hosting_since = 2024;
         padding: 20px 30px;
         border-radius: 24px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        margin-top: -30px;
+        margin-top: 0;
         position: relative;
         z-index: 20;
         max-width: 1000px;
@@ -457,7 +457,7 @@ if ($is_demo_preview) $hosting_since = 2024;
                 ?>
 
                 <?php if($specialties): ?>
-                    <div style="margin-top:15px; padding-top:15px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">
+                    <div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,0,0,0.05); width:100%;">
                         <div style="font-size:0.7rem; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; font-weight:700;">Host Specialties</div>
                         <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;">
                             <?php 
