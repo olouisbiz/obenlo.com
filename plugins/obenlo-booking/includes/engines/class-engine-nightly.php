@@ -97,10 +97,8 @@ class Obenlo_Engine_Nightly extends Obenlo_Abstract_Engine {
             } else if (currentSlug === 'apartment') {
                 if (priceLabel) priceLabel.innerText = '" . esc_js(__('Monthly / Nightly Rate', 'obenlo')) . "';
             } else if (currentSlug === 'guest-house' || currentSlug === 'stay') {
-    public function get_host_js_logic($slug = '') {
-        return "
-            if (priceLabel) priceLabel.innerText = '" . esc_js(__('Stay Rate (Per Night)', 'obenlo')) . "';
-            if (currentSlug === 'cabin' || currentSlug === 'cottage') {
+                if (priceLabel) priceLabel.innerText = '" . esc_js(__('Stay Rate (Per Night)', 'obenlo')) . "';
+            } else if (currentSlug === 'cabin' || currentSlug === 'cottage') {
                 if (priceLabel) priceLabel.innerText = '" . esc_js(__('Cabin Rental (Per Night)', 'obenlo')) . "';
             }
 
