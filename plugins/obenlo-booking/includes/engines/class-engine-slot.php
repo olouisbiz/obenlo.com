@@ -149,6 +149,7 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
                                         grid.querySelectorAll('.slot-btn').forEach(b => { b.style.background = '#fff'; b.style.color = '#333'; b.style.borderColor = '#ddd'; });
                                         this.style.background = '#e61e4d'; this.style.color = '#fff'; this.style.borderColor = '#e61e4d';
                                         finalStart.value = dateVal + 'T' + slot.time;
+                                        if (typeof calculateTotal === 'function') { calculateTotal(); }
                                     });
                                     grid.appendChild(btn);
                                 });
@@ -223,15 +224,18 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
     }
 
     public function get_frontend_js_logic($listing_id, $slug = '') {
-        $model = get_post_meta($listing_id, '_obenlo_pricing_model', true);
+        $model = get_post_meta($listing_id, '_obenlo_pricing_model', true) ?: 'per_session';
         return "
             if (bookingMode === 'slot' || bookingMode === 'timeslot' || bookingMode === 'datetime') {
-                var model = \"$model\";
-                if (model === 'per_hour') {
-                    var dur = form.querySelector('input[name=\"booking_duration\"]');
-                    var hrs = dur ? parseFloat(dur.value) || 1 : 1;
+                var model = '" . esc_js($model) . "';
+                var durInp = form.querySelector('input[name=\"booking_duration\"]');
+                if (durInp && model === 'per_hour') {
+                    var hrs = parseFloat(durInp.value) || 1;
                     total = basePrice * hrs;
                 }
+                
+                // Add guest base multiplication if we ever want to support per-guest pricing here
+                // For now, slot booking is primarily per-session or per-hour flat for the slot.
             }
         ";
     }
