@@ -202,8 +202,9 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
             }
 
             if (pricingModel) {
-                 pricingModel.value = 'per_session';
-                 Array.from(pricingModel.options).forEach(function(opt) { if (!['per_session','per_hour','flat_fee','inquiry_only'].includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
+                 var allowed = ['per_session','per_hour','flat_fee','inquiry_only'];
+                 if (!allowed.includes(pricingModel.value)) { pricingModel.value = 'per_session'; }
+                 Array.from(pricingModel.options).forEach(function(opt) { if (!allowed.includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
             }
             if (durationWrapper) durationWrapper.style.display = 'flex';
             if (slotsWrapper)    slotsWrapper.style.display    = 'block';

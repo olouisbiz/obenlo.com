@@ -172,8 +172,9 @@ class Obenlo_Engine_Fixed_Block extends Obenlo_Abstract_Engine {
             }
 
             if (pricingModel) {
-                 pricingModel.value = 'per_person';
-                 Array.from(pricingModel.options).forEach(function(opt) { if (!['per_person', 'per_event', 'flat_fee'].includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
+                 var allowed = ['per_person', 'per_event', 'flat_fee'];
+                 if (!allowed.includes(pricingModel.value)) { pricingModel.value = 'per_person'; }
+                 Array.from(pricingModel.options).forEach(function(opt) { if (!allowed.includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
             }
             if (durationWrapper)    durationWrapper.style.display    = 'none';
             if (slotsWrapper)       slotsWrapper.style.display       = 'none';
