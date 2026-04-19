@@ -14,7 +14,6 @@ class Obenlo_Engine_Logistics extends Obenlo_Abstract_Engine {
 
     public function render_host_fields($listing_id, $slug = '') {
         $mile_rate = get_post_meta($listing_id, '_obenlo_logistics_mile_rate', true);
-        $base_price = get_post_meta($listing_id, '_obenlo_logistics_base_price', true);
         $flat_price = get_post_meta($listing_id, '_obenlo_logistics_flat_price', true);
         $flat_miles = get_post_meta($listing_id, '_obenlo_logistics_flat_miles', true);
         $flat_mins  = get_post_meta($listing_id, '_obenlo_logistics_flat_mins', true);
@@ -25,14 +24,11 @@ class Obenlo_Engine_Logistics extends Obenlo_Abstract_Engine {
             <h4 style="margin-top:0; color:#0369a1; font-size:1rem; display:flex; align-items:center; gap:8px;">
                 <span>🚚</span> Logistics Settings
             </h4>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div style="display:grid; grid-template-columns:1fr; gap:15px;">
                 <div>
                     <label style="display:block; font-size:0.8rem; font-weight:700; color:#0369a1; margin-bottom:5px;">Price Per Mile ($)</label>
                     <input type="number" name="logistics_mile_rate" step="0.01" value="<?php echo esc_attr($mile_rate); ?>" style="width:100%; border:1px solid #bae6fd; border-radius:8px; padding:10px;">
-                </div>
-                <div>
-                    <label style="display:block; font-size:0.8rem; font-weight:700; color:#0369a1; margin-bottom:5px;">Base Fee ($)</label>
-                    <input type="number" name="logistics_base_price" step="0.01" value="<?php echo esc_attr($base_price); ?>" style="width:100%; border:1px solid #bae6fd; border-radius:8px; padding:10px;">
+                    <p style="font-size:0.75rem; color:#0369a1; margin-top:4px;">Uses the "Base Delivery Fee" (top of page) + this Mile Rate.</p>
                 </div>
             </div>
             
@@ -178,7 +174,7 @@ class Obenlo_Engine_Logistics extends Obenlo_Abstract_Engine {
 
     public function calculate_price($listing_id, $data, $slug = '') {
         $mile_rate = floatval(get_post_meta($listing_id, '_obenlo_logistics_mile_rate', true));
-        $base_fee  = floatval(get_post_meta($listing_id, '_obenlo_logistics_base_price', true));
+        $base_fee  = floatval(get_post_meta($listing_id, '_obenlo_price', true));
         $flat_price = floatval(get_post_meta($listing_id, '_obenlo_logistics_flat_price', true));
         $flat_miles = floatval(get_post_meta($listing_id, '_obenlo_logistics_flat_miles', true));
         $flat_mins  = floatval(get_post_meta($listing_id, '_obenlo_logistics_flat_mins', true));
@@ -234,8 +230,117 @@ class Obenlo_Engine_Logistics extends Obenlo_Abstract_Engine {
 
     public function get_frontend_js_logic($listing_id, $slug = '') {
         return "
-            // Logistics live calculation logic handled in sidebar.php for now 
-            // as it requires substantial OSRM integration that is shared.
+            var pickupInp = document.getElementById('logistics_pickup_input');
+            var dropoffInp = document.getElementById('logistics_dropoff_input');
+            var logisInfo = document.getElementById('logistics-info');
+            var logisDist = document.getElementById('logistics-distance-val');
+            var logisTime = document.getElementById('logistics-time-val');
+            
+            var mileRate = " . floatval(get_post_meta($listing_id, '_obenlo_logistics_mile_rate', true)) . ";
+            var logisBase = basePrice;
+            var flatPrice = " . floatval(get_post_meta($listing_id, '_obenlo_logistics_flat_price', true)) . ";
+            var flatMiles = " . floatval(get_post_meta($listing_id, '_obenlo_logistics_flat_miles', true)) . ";
+            var flatMins  = " . floatval(get_post_meta($listing_id, '_obenlo_logistics_flat_mins', true)) . ";
+            
+            let debounceTimer;
+            function recalcLogisticsRoute() {
+                var p = pickupInp && pickupInp.value ? pickupInp.value : '';
+                var d = dropoffInp && dropoffInp.value ? dropoffInp.value : '';
+                if (!p || !d || d === 'N/A') return;
+                
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    if (liveTotalEl) liveTotalEl.innerText = 'Calc...';
+                    
+                    fetch('" . admin_url('admin-ajax.php') . "?action=obenlo_calc_route&pickup='+encodeURIComponent(p)+'&dropoff='+encodeURIComponent(d))
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            var distMiles = parseFloat(data.data.distance_miles);
+                            var distMins = parseFloat(data.data.duration_mins);
+                            
+                            if (logisInfo) {
+                                logisInfo.style.display = 'block';
+                                if (logisDist) logisDist.innerText = distMiles.toFixed(1) + ' mi';
+                                if (logisTime) logisTime.innerText = distMins.toFixed(0) + ' min';
+                            }
+                            
+                            var calcTotal = logisBase + (distMiles * mileRate);
+                            if (flatPrice > 0 && ((flatMiles > 0 && distMiles <= flatMiles) || (flatMins > 0 && distMins <= flatMins))) {
+                                calcTotal = flatPrice;
+                            }
+                            
+                            total = calcTotal;
+                            // Addons
+                            form.querySelectorAll('.addon-checkbox:checked').forEach(function(cb) {
+                                total += parseFloat(cb.getAttribute('data-price')) || 0;
+                            });
+                            if (liveTotalEl) liveTotalEl.innerText = total.toFixed(2);
+                        } else {
+                            if (liveTotalEl) liveTotalEl.innerText = logisBase.toFixed(2);
+                        }
+                    }).catch(err => {
+                        if (liveTotalEl) liveTotalEl.innerText = logisBase.toFixed(2);
+                    });
+                }, 1200);
+            }
+            
+            if (pickupInp) pickupInp.addEventListener('input', recalcLogisticsRoute);
+            if (dropoffInp) dropoffInp.addEventListener('input', recalcLogisticsRoute);
         ";
     }
+}
+
+// Ensure the helper function exists globally
+if (!function_exists('obenlo_calculate_distance_osrm')) {
+    function obenlo_calculate_distance_osrm($pickup, $dropoff) {
+        $result = ['distance_miles' => 0, 'duration_mins' => 0];
+        
+        $pickup = urlencode($pickup);
+        $dropoff = urlencode($dropoff);
+        
+        $p_res = wp_remote_get("https://nominatim.openstreetmap.org/search?format=json&q={$pickup}&limit=1");
+        $d_res = wp_remote_get("https://nominatim.openstreetmap.org/search?format=json&q={$dropoff}&limit=1");
+        
+        if (is_wp_error($p_res) || is_wp_error($d_res)) return $result;
+        
+        $p_body = json_decode(wp_remote_retrieve_body($p_res), true);
+        $d_body = json_decode(wp_remote_retrieve_body($d_res), true);
+        
+        if (empty($p_body) || empty($d_body)) return $result;
+        
+        $p_lat = $p_body[0]['lat'];
+        $p_lon = $p_body[0]['lon'];
+        $d_lat = $d_body[0]['lat'];
+        $d_lon = $d_body[0]['lon'];
+        
+        $osrm_res = wp_remote_get("https://router.project-osrm.org/route/v1/driving/{$p_lon},{$p_lat};{$d_lon},{$d_lat}?overview=false");
+        
+        if (is_wp_error($osrm_res)) return $result;
+        $osrm_body = json_decode(wp_remote_retrieve_body($osrm_res), true);
+        
+        if (!empty($osrm_body['routes'][0])) {
+            $meters = $osrm_body['routes'][0]['distance'];
+            $seconds = $osrm_body['routes'][0]['duration'];
+            $result['distance_miles'] = round($meters * 0.000621371, 1);
+            $result['duration_mins'] = round($seconds / 60, 0);
+        }
+        
+        return $result;
+    }
+}
+
+// Add the AJAX endpoint
+add_action('wp_ajax_obenlo_calc_route', 'obenlo_ajax_calc_route');
+add_action('wp_ajax_nopriv_obenlo_calc_route', 'obenlo_ajax_calc_route');
+function obenlo_ajax_calc_route() {
+    $pickup = sanitize_text_field($_GET['pickup']);
+    $dropoff = sanitize_text_field($_GET['dropoff']);
+    
+    if (!$pickup || !$dropoff) {
+        wp_send_json_error('Missing data');
+    }
+    
+    $res = obenlo_calculate_distance_osrm($pickup, $dropoff);
+    wp_send_json_success($res);
 }
