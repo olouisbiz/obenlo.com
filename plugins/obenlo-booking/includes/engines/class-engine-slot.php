@@ -97,7 +97,9 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
                 <div id="slot_loading_spinner" style="display:none; font-size:0.8rem; color:#888;">Checking availability...</div>
             </div>
 
-            <?php if ($pricing_model === 'per_hour'): ?>
+            <?php 
+            $show_duration = ($pricing_model === 'per_hour' || $is_mobile);
+            if ($show_duration): ?>
                 <div style="margin-bottom:15px;">
                     <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:5px;">DURATION (HOURS)</label>
                     <input type="number" name="booking_duration" value="<?php echo esc_attr($duration); ?>" min="0.5" step="0.5" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:12px;">
@@ -166,7 +168,10 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
         $price = floatval(get_post_meta($listing_id, '_obenlo_price', true));
         $pricing_model = get_post_meta($listing_id, '_obenlo_pricing_model', true) ?: 'per_session';
         
-        if ($pricing_model === 'per_hour') {
+        $mobile_slugs = ['babysitter','handyman','cleaning','cook','massage','personal-trainer'];
+        $is_mobile = in_array($slug, $mobile_slugs, true);
+
+        if ($pricing_model === 'per_hour' || ($is_mobile && isset($data['booking_duration']))) {
             $duration = isset($data['booking_duration']) ? floatval($data['booking_duration']) : 1;
             return $price * $duration;
         }
@@ -203,6 +208,12 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
 
             if (pricingModel) {
                  var allowed = ['per_session','per_hour','flat_fee','inquiry_only'];
+                 // Smart default for hourly-based services
+                 if (['babysitter','handyman','cleaning','cook','massage','personal-trainer'].includes(currentSlug)) {
+                     if (!pricingModel.value || pricingModel.value === 'per_session') {
+                         pricingModel.value = 'per_hour';
+                     }
+                 }
                  if (!allowed.includes(pricingModel.value)) { pricingModel.value = 'per_session'; }
                  Array.from(pricingModel.options).forEach(function(opt) { if (!allowed.includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
             }
