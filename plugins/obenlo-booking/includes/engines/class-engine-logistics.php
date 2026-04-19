@@ -230,63 +230,67 @@ class Obenlo_Engine_Logistics extends Obenlo_Abstract_Engine {
 
     public function get_frontend_js_logic($listing_id, $slug = '') {
         return "
-            var pickupInp = document.getElementById('logistics_pickup_input');
-            var dropoffInp = document.getElementById('logistics_dropoff_input');
-            var logisInfo = document.getElementById('logistics-info');
-            var logisDist = document.getElementById('logistics-distance-val');
-            var logisTime = document.getElementById('logistics-time-val');
-            
             var mileRate = " . floatval(get_post_meta($listing_id, '_obenlo_logistics_mile_rate', true)) . ";
-            var logisBase = basePrice;
             var flatPrice = " . floatval(get_post_meta($listing_id, '_obenlo_logistics_flat_price', true)) . ";
             var flatMiles = " . floatval(get_post_meta($listing_id, '_obenlo_logistics_flat_miles', true)) . ";
             var flatMins  = " . floatval(get_post_meta($listing_id, '_obenlo_logistics_flat_mins', true)) . ";
             
-            let debounceTimer;
-            function recalcLogisticsRoute() {
-                var p = pickupInp && pickupInp.value ? pickupInp.value : '';
-                var d = dropoffInp && dropoffInp.value ? dropoffInp.value : '';
-                if (!p || !d || d === 'N/A') return;
+            if (typeof window.logisPriceState === 'undefined') {
+                window.logisPriceState = null;
+                window.logisDebounce = null;
                 
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    if (liveTotalEl) liveTotalEl.innerText = 'Calc...';
+                var pInp = document.getElementById('logistics_pickup_input');
+                var dInp = document.getElementById('logistics_dropoff_input');
+                var lInfo = document.getElementById('logistics-info');
+                
+                function fetchRouteDistance() {
+                    if (!pInp || !dInp) return;
+                    var p = pInp.value, d = dInp.value;
+                    if (!p || !d || d === 'N/A') return;
                     
-                    fetch('" . admin_url('admin-ajax.php') . "?action=obenlo_calc_route&pickup='+encodeURIComponent(p)+'&dropoff='+encodeURIComponent(d))
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            var distMiles = parseFloat(data.data.distance_miles);
-                            var distMins = parseFloat(data.data.duration_mins);
-                            
-                            if (logisInfo) {
-                                logisInfo.style.display = 'block';
-                                if (logisDist) logisDist.innerText = distMiles.toFixed(1) + ' mi';
-                                if (logisTime) logisTime.innerText = distMins.toFixed(0) + ' min';
+                    clearTimeout(window.logisDebounce);
+                    window.logisDebounce = setTimeout(() => {
+                        var lTotal = document.getElementById('live-total');
+                        if (lTotal) lTotal.innerText = 'Calc...';
+                        
+                        fetch('" . admin_url('admin-ajax.php') . "?action=obenlo_calc_route&pickup='+encodeURIComponent(p)+'&dropoff='+encodeURIComponent(d))
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                var distMiles = parseFloat(data.data.distance_miles);
+                                var distMins = parseFloat(data.data.duration_mins);
+                                
+                                if (lInfo) {
+                                    lInfo.style.display = 'block';
+                                    var dSpan = document.getElementById('logistics-distance-val');
+                                    var tSpan = document.getElementById('logistics-time-val');
+                                    if(dSpan) dSpan.innerText = distMiles.toFixed(1) + ' mi';
+                                    if(tSpan) tSpan.innerText = distMins.toFixed(0) + ' min';
+                                }
+                                
+                                // Logistics Base is the parent baseFee (defined locally in calculateTotal)
+                                // We compute the remote logistics price over it.
+                                var calcPrice = basePrice + (distMiles * mileRate);
+                                if (flatPrice > 0 && ((flatMiles > 0 && distMiles <= flatMiles) || (flatMins > 0 && distMins <= flatMins))) {
+                                    calcPrice = flatPrice;
+                                }
+                                window.logisPriceState = calcPrice;
+                                
+                                // Explicitly trigger the parent form calc
+                                if (typeof calculateTotal === 'function') calculateTotal();
                             }
-                            
-                            var calcTotal = logisBase + (distMiles * mileRate);
-                            if (flatPrice > 0 && ((flatMiles > 0 && distMiles <= flatMiles) || (flatMins > 0 && distMins <= flatMins))) {
-                                calcTotal = flatPrice;
-                            }
-                            
-                            total = calcTotal;
-                            // Addons
-                            form.querySelectorAll('.addon-checkbox:checked').forEach(function(cb) {
-                                total += parseFloat(cb.getAttribute('data-price')) || 0;
-                            });
-                            if (liveTotalEl) liveTotalEl.innerText = total.toFixed(2);
-                        } else {
-                            if (liveTotalEl) liveTotalEl.innerText = logisBase.toFixed(2);
-                        }
-                    }).catch(err => {
-                        if (liveTotalEl) liveTotalEl.innerText = logisBase.toFixed(2);
-                    });
-                }, 1200);
+                        }).catch(e => console.error('Route fetch err:', e));
+                    }, 1200);
+                }
+                
+                if (pInp) pInp.addEventListener('input', fetchRouteDistance);
+                if (dInp) dInp.addEventListener('input', fetchRouteDistance);
             }
             
-            if (pickupInp) pickupInp.addEventListener('input', recalcLogisticsRoute);
-            if (dropoffInp) dropoffInp.addEventListener('input', recalcLogisticsRoute);
+            // Apply state synchronously within calculateTotal
+            if (window.logisPriceState !== null) {
+                total = window.logisPriceState;
+            }
         ";
     }
 }

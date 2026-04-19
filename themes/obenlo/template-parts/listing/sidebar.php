@@ -77,6 +77,10 @@
                         elseif ($pricing_model === 'per_day') $price_unit = '/ day';
                         elseif ($pricing_model === 'per_hour') $price_unit = '/ hour';
                         elseif ($pricing_model === 'per_person') $price_unit = '/ person';
+                        
+                        if ($engine && $engine->get_id() === 'logistics') {
+                            $price_unit = 'Base';
+                        }
                         ?>
 
                         <!-- Price Header -->
