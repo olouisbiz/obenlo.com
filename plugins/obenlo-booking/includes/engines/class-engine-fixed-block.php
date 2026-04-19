@@ -185,11 +185,15 @@ class Obenlo_Engine_Fixed_Block extends Obenlo_Abstract_Engine {
     }
 
     public function get_frontend_js_logic($listing_id, $slug = '') {
+        $model = get_post_meta($listing_id, '_obenlo_pricing_model', true) ?: 'per_person';
         return "
             if (bookingMode === 'fixed_block') {
-                var g = form.querySelector('input[name=\"guests\"]');
-                var qty = (g && g.value) ? parseInt(g.value) || 1 : 1;
-                total = basePrice * qty;
+                var model = '" . esc_js($model) . "';
+                if (model === 'per_person') {
+                    var gInput = form.querySelector('input[name=\"guests\"]');
+                    var qty = (gInput && gInput.value) ? parseInt(gInput.value) || 1 : 1;
+                    total = basePrice * qty;
+                }
             }
         ";
     }

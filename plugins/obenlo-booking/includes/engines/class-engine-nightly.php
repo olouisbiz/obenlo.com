@@ -114,7 +114,7 @@ class Obenlo_Engine_Nightly extends Obenlo_Abstract_Engine {
 
     public function get_frontend_js_logic($listing_id, $slug = '') {
         return "
-            if (bookingMode === 'date_range') {
+            if (bookingMode === 'nightly' || bookingMode === 'date_range') {
                 var sInput = form.querySelector('input[name=\"start_date\"]');
                 var eInput = form.querySelector('input[name=\"end_date\"]');
                 if (sInput && eInput && sInput.value && eInput.value) {

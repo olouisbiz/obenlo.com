@@ -106,6 +106,16 @@ class Obenlo_Engine_Session extends Obenlo_Abstract_Engine {
     }
 
     public function get_frontend_js_logic($listing_id, $slug = '') {
-        return "";
+        $model = get_post_meta($listing_id, '_obenlo_pricing_model', true) ?: 'per_event';
+        return "
+            if (bookingMode === 'session') {
+                var model = '" . esc_js($model) . "';
+                if (model === 'per_person') {
+                    var gInput = form.querySelector('input[name=\"guests\"]');
+                    var qty = (gInput && gInput.value) ? parseInt(gInput.value) || 1 : 1;
+                    total = basePrice * qty;
+                }
+            }
+        ";
     }
 }
