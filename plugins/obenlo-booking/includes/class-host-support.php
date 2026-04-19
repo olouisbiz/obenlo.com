@@ -104,19 +104,19 @@ class Obenlo_Host_Support
             <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">02</div>
             <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#3b82f6; display:flex; align-items:center; gap:15px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                <?php echo __('Inventory: Main vs. Bookables', 'obenlo'); ?>
+                <?php echo __('Categories & Booking Engines', 'obenlo'); ?>
             </h3>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px; margin-top:25px;">
                 <div style="background:#f1f5f9; padding:25px; border-radius:24px;">
-                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;"><?php echo __('Main Listing (The Hub)', 'obenlo'); ?></h4>
-                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">This is your general business page. It hosts your address, main photos, and overall description. It is <b>not</b> bookable on its own.</p>
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;"><?php echo __('Smart Categories', 'obenlo'); ?></h4>
+                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">Your listing's category automatically determines its booking engine. A Hotel uses nightly check-ins, while a Barber uses time slots, and Delivery uses route mapping.</p>
                 </div>
                 <div style="background:#f1f5f9; padding:25px; border-radius:24px;">
-                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;"><?php echo __('Bookables (The Products)', 'obenlo'); ?></h4>
-                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">These are the specific units or slots guests pay for. Create individual bookables for every room, tour time, or service type you offer.</p>
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;"><?php echo __('Pricing Models', 'obenlo'); ?></h4>
+                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">Pricing options adapt to your service. You can charge per night, per hour, per person, or use dynamic logistics pricing based on distance (via OpenStreetMap).</p>
                 </div>
             </div>
-            <p style="margin-top:20px; font-size:0.95rem; color:#e61e4d; font-weight:700;">PRO TIP: Use "Units" if you have multiple identical bookables (like 5 Deluxe Rooms) so you don't have to create 5 separate listings.</p>
+            <p style="margin-top:20px; font-size:0.95rem; color:#e61e4d; font-weight:700;">PRO TIP: Ensure you select the most accurate Subcategory (e.g., "Delivery" instead of general "Service") so your listing unlocks the correct fields like Session Runs, Locations, or Date/Time fields!</p>
         </div>
 
         <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #10b981; position:relative; overflow:hidden;">
