@@ -227,15 +227,16 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
         $model = get_post_meta($listing_id, '_obenlo_pricing_model', true) ?: 'per_session';
         return "
             if (bookingMode === 'slot' || bookingMode === 'timeslot' || bookingMode === 'datetime') {
-                var model = '" . esc_js($model) . "';
                 var durInp = form.querySelector('input[name=\"booking_duration\"]');
-                if (durInp && model === 'per_hour') {
-                    var hrs = parseFloat(durInp.value) || 1;
-                    total = basePrice * hrs;
-                }
+                var model = '" . esc_js($model) . "';
                 
-                // Add guest base multiplication if we ever want to support per-guest pricing here
-                // For now, slot booking is primarily per-session or per-hour flat for the slot.
+                // If the duration input is present and visible, we should respect its value for the calculation
+                if (durInp) {
+                    var hrs = parseFloat(durInp.value) || 0;
+                    if (hrs > 0) {
+                        total = basePrice * hrs;
+                    }
+                }
             }
         ";
     }
