@@ -80,23 +80,24 @@ class Obenlo_Host_Support
     {
         ?>
         <div class="dashboard-header">
-            <h2 class="dashboard-title"><?php echo __('The Obenlo Business Manual', 'obenlo'); ?></h2>
+            <h2 class="dashboard-title"><?php echo __('The Ultimate Hosting Guide', 'obenlo'); ?></h2>
         </div>
         <p style="color:#666; font-size:1.1rem; margin-bottom:50px; max-width: 900px; line-height:1.6;">
-            <?php echo __('This guide is your single source of truth for running a professional business on Obenlo. Follow these pillars to ensure your storefront is high-converting, your operations are smooth, and your payouts are fast.', 'obenlo'); ?>
+            <?php echo __('Welcome to Obenlo! This guide is designed to help you understand the platform and take you from zero to launching a stunning, high-converting listing. Follow these easy steps to build trust and grow your business.', 'obenlo'); ?>
         </p>
 
         <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); position:relative; overflow:hidden;">
             <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">01</div>
             <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#e61e4d; display:flex; align-items:center; gap:15px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                <?php echo __('Identity: Managing Your Storefront', 'obenlo'); ?>
+                <?php echo __('Get Your Account Ready', 'obenlo'); ?>
             </h3>
+            <p style="color:#555; font-size:1.05rem; line-height:1.7; margin-top:15px;">Before welcoming your first guest, make sure your profile builds trust and your payouts are configured.</p>
             <ul style="color:#555; font-size:1rem; line-height:2; margin-top:20px; padding-left:20px;">
-                <li><strong>Brand Presence:</strong> Upload a high-resolution logo and a covering banner that represents your service environment.</li>
-                <li><strong>The Trust Checkmark:</strong> Complete your identity verification in the <b>Verification</b> tab. Businesses with the crimson badge convert 40% better.</li>
-                <li><strong>Social Links:</strong> Connect your Facebook and Instagram in the <b>Storefront</b> settings to show guests you have a wider community.</li>
-                <li><strong>BIO Strategy:</strong> Write in the first person. Explain your expertise and what makes your service unique.</li>
+                <li><strong>Identity Verification:</strong> Guests prefer hosts they can trust. Head over to the <b>Verification</b> tab to upload your ID. The verified badge drastically increases your bookings.</li>
+                <li><strong>Storefront Setup:</strong> On the <b>Storefront</b> tab, upload a professional logo and a beautiful banner. Write a friendly, first-person bio about your background and what you offer.</li>
+                <li><strong>Link Social Media:</strong> Connect your Instagram or Facebook to let guests explore your broader community.</li>
+                <li><strong>Payouts:</strong> Don't forget to configure your payout settings so you can receive your earnings smoothly!</li>
             </ul>
         </div>
 
@@ -104,46 +105,50 @@ class Obenlo_Host_Support
             <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">02</div>
             <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#3b82f6; display:flex; align-items:center; gap:15px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                <?php echo __('Categories & Booking Engines', 'obenlo'); ?>
+                <?php echo __('Create the Perfect Listing', 'obenlo'); ?>
             </h3>
+            <p style="color:#555; font-size:1.05rem; line-height:1.7; margin-top:15px;">Your listing is your storefront product. Here is how to make it irresistible to guests.</p>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px; margin-top:25px;">
                 <div style="background:#f1f5f9; padding:25px; border-radius:24px;">
-                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;"><?php echo __('Smart Categories', 'obenlo'); ?></h4>
-                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">Your listing's category automatically determines its booking engine. A Hotel uses nightly check-ins, while a Barber uses time slots, and Delivery uses route mapping.</p>
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;">Choose the Right Category</h4>
+                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">Obenlo automatically adapts your booking form based on the category you choose. For example, selecting "Chauffeur" will ask the guest for pickup/drop-off locations, while selecting "Stay" will show a nightly calendar. Always pick the most specific subcategory available!</p>
                 </div>
                 <div style="background:#f1f5f9; padding:25px; border-radius:24px;">
-                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;"><?php echo __('Pricing Models', 'obenlo'); ?></h4>
-                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">Pricing options adapt to your service. You can charge per night, per hour, per person, or use dynamic logistics pricing based on distance (via OpenStreetMap).</p>
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;">High-Quality Photos</h4>
+                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">Upload bright, well-lit photos. The main photo should clearly show the value of your service or property. Listings with 5 or more high-quality photos receive up to three times as many bookings.</p>
+                </div>
+                <div style="background:#f1f5f9; padding:25px; border-radius:24px;">
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;">Compelling Descriptions</h4>
+                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">Use the description to answer common questions. Tell them what to expect, what is included, and any special amenities you provide.</p>
+                </div>
+                <div style="background:#f1f5f9; padding:25px; border-radius:24px;">
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#1e293b;">Offer Add-ons</h4>
+                    <p style="margin:0; font-size:0.95rem; color:#475569; line-height:1.6;">In the Features tab, use "Extra Perks" or "Add-ons" to upsell additional services (e.g., breakfast included, expedited delivery, or VIP access). This is a great way to boost your earnings.</p>
                 </div>
             </div>
-            <p style="margin-top:20px; font-size:0.95rem; color:#e61e4d; font-weight:700;">PRO TIP: Ensure you select the most accurate Subcategory (e.g., "Delivery" instead of general "Service") so your listing unlocks the correct fields like Session Runs, Locations, or Date/Time fields!</p>
         </div>
 
         <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #10b981; position:relative; overflow:hidden;">
             <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">03</div>
             <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#10b981; display:flex; align-items:center; gap:15px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                <?php echo __('Operations: Path to Payout', 'obenlo'); ?>
+                <?php echo __('Delivering an Amazing Experience', 'obenlo'); ?>
             </h3>
+            <p style="color:#555; font-size:1.05rem; line-height:1.7; margin-top:15px;">Your listing is live! Now it's time to impress your clients and collect 5-star reviews.</p>
             <div style="display:flex; flex-direction:column; gap:20px; margin-top:25px;">
                 <div style="display:flex; gap:20px; align-items:flex-start;">
                     <div style="width:30px; height:30px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800; font-size:0.8rem;">1</div>
-                    <div><h4 style="margin:0; font-weight:800;"><?php echo __('Approve Requests', 'obenlo'); ?></h4><p style="margin:5px 0 0 0; font-size:0.95rem; color:#666;">Speed is key. Approve bookings in the <b>Bookings</b> tab to lock in the guest's payment.</p></div>
+                    <div><h4 style="margin:0; font-weight:800;">Respond Quickly</h4><p style="margin:5px 0 0 0; font-size:0.95rem; color:#666;">Check your Inbox regularly. Responding to messages rapidly shows guests you care and dramatically increases your chances of getting a booking.</p></div>
                 </div>
                 <div style="display:flex; gap:20px; align-items:flex-start;">
                     <div style="width:30px; height:30px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800; font-size:0.8rem;">2</div>
-                    <div><h4 style="margin:0; font-weight:800;"><?php echo __('Mark Check-In', 'obenlo'); ?></h4><p style="margin:5px 0 0 0; font-size:0.95rem; color:#666;">When the service starts, mark "Check In". This prevents fraudulent refund requests.</p></div>
+                    <div><h4 style="margin:0; font-weight:800;">Manage Your Bookings</h4><p style="margin:5px 0 0 0; font-size:0.95rem; color:#666;">Approve requests as soon as they come in. When the day arrives, make sure your service matches the high standards of your listing.</p></div>
                 </div>
-                <div style="display:flex; gap:20px; align-items:flex-start; background:#fff8f1; padding:20px; border-radius:20px; border:1px dashed #f59e0b;">
-                    <div style="width:30px; height:30px; border-radius:50%; background:#f59e0b; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800; font-size:0.8rem;">3</div>
-                    <div><h4 style="margin:0; font-weight:800; color:#92400e;">CRITICAL: Complete Service</h4><p style="margin:5px 0 0 0; font-size:0.95rem; color:#b45309; font-weight:600;">You MUST click "Mark Completed" after the stay/service is finished. Money ONLY enters your withdrawable balance AFTER this action.</p></div>
+                <div style="display:flex; gap:20px; align-items:flex-start;">
+                    <div style="width:30px; height:30px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800; font-size:0.8rem;">3</div>
+                    <div><h4 style="margin:0; font-weight:800;">Get Glowing Reviews</h4><p style="margin:5px 0 0 0; font-size:0.95rem; color:#666;">After the service is done, kindly ask your guest to leave a review. Future clients will look at these reviews first before deciding to book you!</p></div>
                 </div>
             </div>
-        </div>
-
-        <div style="background:#fffcf2; border:1px solid #fde047; border-radius:32px; padding:45px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #d97706;">
-            <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#d97706;"><?php echo __('Safety: Protection & Support', 'obenlo'); ?></h3>
-            <p style="color:#713f12; font-size:1.05rem; line-height:1.7;"><strong>Zero Leakage Policy:</strong> Never accept payments outside of Obenlo. Doing so removes all insurance coverage and will lead to an immediate ban.</p>
         </div>
         <?php
     }
