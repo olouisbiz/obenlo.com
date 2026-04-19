@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2026-04-19
+### Added
+- **Modular Booking Engines**: Completely restructured the booking system into a factory-based architecture (`Obenlo_Engine_Manager`) managing 6 isolated engines: `Nightly`, `Fixed Block`, `Session`, `Logistics`, `Slot`, and `Inquiry`.
+- **Dynamic Host Dashboard**: The host UI is now AJAX-driven. Engine modules automatically load their specific pricing and settings fields dynamically when a listing subcategory changes.
+- **Smart Logistics Mapping**: Added service date and time fallbacks, properly distinguishing mobile services (Slot engine) from Route services (Logistics engine).
+- **Subcategory Taxonomy Resolver**: Subcategory lookup now handles WP auto-suffixed slugs and delegates fallback efficiently.
+
+
+
 ## [1.9.0] - 2026-04-19
 ### Added
 - **Schedule / Session Runs**: Fully functional repeater system for recurring Experiences, Tours, and Classes.

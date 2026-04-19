@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Obenlo Booking
  * Description: Custom 100% bespoke booking platform for Stays, Experiences, Events, and Services.
- * Version: 1.9.0
+ * Version: 2.0.0
  * Author: Obenlo
  * Author URI: https://obenlo.com
  */
@@ -11,7 +11,8 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-define('OBENLO_BOOKING_VERSION', '1.9.0');
+define('OBENLO_BOOKING_VERSION', '2.0.0');
+
 define('OBENLO_BOOKING_DIR', plugin_dir_path(__FILE__));
 define('OBENLO_BOOKING_URL', plugin_dir_url(__FILE__));
 
@@ -158,6 +159,10 @@ function obenlo_booking_init()
 
     $sync = new Obenlo_Booking_Sync();
     $sync->init();
+
+    // Initialize Booking Engine Manager (Unified Architecture)
+    require_once OBENLO_BOOKING_DIR . 'includes/engines/class-engine-manager.php';
+    Obenlo_Engine_Manager::instance();
 
     // Check if we need to run DB updates
     obenlo_booking_update_check();

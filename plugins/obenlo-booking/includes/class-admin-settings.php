@@ -78,6 +78,13 @@ class Obenlo_Admin_Settings
                             <input type="text" name="pixel_id" value="<?php echo esc_attr($pixel_id); ?>" placeholder="1234567890" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
                         </div>
 
+                        <h4 style="border-bottom:2px solid #eee; padding-bottom:10px; margin-top:40px;">External API Integrations</h4>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; margin-bottom:5px;">Google Maps API Key</label>
+                            <p style="font-size:0.8em; color:#666; margin-bottom:10px;">Required for live distance-based pricing (Google Maps Distance Matrix & Places API).</p>
+                            <input type="text" name="google_maps_api_key" value="<?php echo esc_attr(get_option('obenlo_google_maps_api_key', '')); ?>" placeholder="AIza..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                        </div>
+
                         <div style="background:#fff3cd; padding:20px; border-radius:12px; border:1px solid #ffeeba; margin-top:40px;">
                             <h4 style="margin-top:0; color:#856404;">Emergency Tools</h4>
                             <p style="font-size:0.85em; color:#856404; margin-bottom:15px;">Use these only if the database fails during an update.</p>
@@ -143,6 +150,9 @@ class Obenlo_Admin_Settings
         }
         if (isset($_POST['pixel_id'])) {
             update_option('obenlo_meta_pixel_id', sanitize_text_field($_POST['pixel_id']));
+        }
+        if (isset($_POST['google_maps_api_key'])) {
+            update_option('obenlo_google_maps_api_key', sanitize_text_field($_POST['google_maps_api_key']));
         }
 
         update_option('obenlo_hide_demo_frontpage', isset($_POST['hide_demo_frontpage']) ? 'yes' : 'no');

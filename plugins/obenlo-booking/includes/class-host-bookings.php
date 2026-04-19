@@ -132,6 +132,17 @@ class Obenlo_Host_Bookings
                                 <?php if ($end_date && $end_date !== $start_date): ?>
                                     <div style="font-size:0.8rem; color:#888; padding-left:22px;"><?php echo __('to', 'obenlo'); ?> <?php echo esc_html($end_date); ?></div>
                                 <?php endif; ?>
+                                <?php
+                                $pickup  = get_post_meta($booking->ID, '_obenlo_logistics_pickup', true);
+                                $dropoff = get_post_meta($booking->ID, '_obenlo_logistics_dropoff', true);
+                                if ($pickup || $dropoff): ?>
+                                    <div style="margin-top:10px; padding:10px; background:#f0f9ff; border-radius:8px; border:1px solid #e0f2fe; font-size:0.85rem;">
+                                        <div style="color:#0369a1; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:5px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg> Pickup</div>
+                                        <div style="color:#333; margin-bottom:8px; padding-left:17px;"><?php echo esc_html($pickup ?: '──'); ?></div>
+                                        <div style="color:#0369a1; font-weight:700; margin-bottom:4px; display:flex; align-items:center; gap:5px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Drop-off</div>
+                                        <div style="color:#333; padding-left:17px;"><?php echo esc_html($dropoff ?: '──'); ?></div>
+                                    </div>
+                                <?php endif; ?>
                             </td>
                             <td data-label="<?php echo esc_attr(__('Price', 'obenlo')); ?>">
                                 <div style="font-size:1.1rem; font-weight:800; color:#222;">$<?php echo number_format(floatval($total), 2); ?></div>
@@ -281,7 +292,7 @@ class Obenlo_Host_Bookings
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="bookings-' . $export_date . '.csv"');
         $output = fopen('php://output', 'w');
-        fputcsv($output, array('Booking ID', 'Listing', 'Guest Name', 'Guest Email', 'Start Date', 'End Date', 'Guests', 'Total', 'Status', 'Conf. Code'));
+        fputcsv($output, array('Booking ID', 'Listing', 'Guest Name', 'Guest Email', 'Start Date', 'End Date', 'Guests', 'Total', 'Status', 'Conf. Code', 'Pickup Address', 'Dropoff Address'));
 
         foreach ($bookings as $booking) {
             $lid          = get_post_meta($booking->ID, '_obenlo_listing_id', true);
@@ -298,6 +309,8 @@ class Obenlo_Host_Bookings
                 get_post_meta($booking->ID, '_obenlo_total_price', true),
                 get_post_meta($booking->ID, '_obenlo_booking_status', true),
                 get_post_meta($booking->ID, '_obenlo_confirmation_code', true),
+                get_post_meta($booking->ID, '_obenlo_logistics_pickup', true) ?: 'N/A',
+                get_post_meta($booking->ID, '_obenlo_logistics_dropoff', true) ?: 'N/A',
             ));
         }
 

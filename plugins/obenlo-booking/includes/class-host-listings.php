@@ -14,6 +14,23 @@ class Obenlo_Host_Listings
         add_action('admin_post_nopriv_obenlo_dashboard_save_listing', array($this, 'handle_save_listing'));
         add_action('admin_post_obenlo_dashboard_save_listing',        array($this, 'handle_save_listing'));
         add_action('admin_post_obenlo_dashboard_delete_listing',      array($this, 'handle_delete_listing'));
+        
+        // AJAX Engine fields
+        add_action('wp_ajax_obenlo_get_engine_fields', array($this, 'ajax_get_engine_fields'));
+    }
+
+    public function ajax_get_engine_fields() {
+        $type_id    = isset($_POST['type_id']) ? intval($_POST['type_id']) : 0;
+        $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
+        
+        $engine = Obenlo_Engine_Manager::instance()->get_engine_for_listing_type($type_id);
+        
+        if ($engine) {
+            $html = $engine->render_host_fields($listing_id);
+            wp_send_json_success(array('html' => $html, 'engine' => $engine->get_id()));
+        } else {
+            wp_send_json_error('No engine found');
+        }
     }
 
     // ────────────────────────────────────────────────────────────
@@ -446,34 +463,28 @@ class Obenlo_Host_Listings
                             <p style="font-size:0.85rem; color:#666; margin-top:5px; margin-left:28px;"><?php echo __('Check this if you want the calendar to automatically show available time slots during your business hours (e.g. for Haircuts, Spa treatments).', 'obenlo'); ?></p>
                         </div>
 
-                        <!-- Schedule Runs (for experience/fixed-block engine) -->
-                        <div id="schedule_runs_wrapper" style="margin-top:20px; display:none; padding:15px; background:#f9fafb; border-radius:10px; border:1px solid #e5e7eb;">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Schedule / Session Runs', 'obenlo'); ?></label>
-                            <p style="font-size:0.85rem; color:#666; margin-bottom:15px;"><?php echo __('Define recurring session times (e.g., Every Wednesday 2pm-4pm).', 'obenlo'); ?></p>
-                            
-                            <div id="session-runs-container">
-                                <?php foreach ($session_runs as $run): ?>
-                                    <div class="session-run-row" style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
-                                        <select name="run_days[]" style="flex:1.5; padding:10px; border:1px solid #ddd; border-radius:8px; background:#fff;">
-                                            <?php foreach (['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','Daily'] as $day): ?>
-                                                <option value="<?php echo esc_attr($day); ?>" <?php selected($run['day'], $day); ?>><?php echo esc_html($day); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <input type="time" name="run_starts[]" value="<?php echo esc_attr($run['start']); ?>" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                        <span style="color:#888;">to</span>
-                                        <input type="time" name="run_ends[]" value="<?php echo esc_attr($run['end']); ?>" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                        <button type="button" class="remove-run-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800; height:40px;">&times;</button>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                            <button type="button" id="add-run-btn" style="background:#fff; border:1px dashed #ccc; color:#666; width:100%; padding:10px; border-radius:8px; cursor:pointer; font-weight:600; margin-top:5px;">+ <?php echo __('Add Recurring Time', 'obenlo'); ?></button>
+                        <!-- Modular Booking Engine Fields (Injected dynamically) -->
+                        <div id="obenlo-modular-engine-fields">
+                            <?php 
+                            $engine = Obenlo_Engine_Manager::instance()->get_engine_for_listing($listing_id);
+                            if ($engine) {
+                                echo $engine->render_host_fields($listing_id, $selected_type_slug);
+                            }
+                            ?>
                         </div>
 
-                        <!-- Logistics wrapper (for delivery/chauffeur) -->
-                        <div id="logistics_wrapper" style="margin-top:20px; display:none; padding:15px; background:#f9fafb; border-radius:10px; border:1px solid #e5e7eb;">
-                            <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Route / Service Area', 'obenlo'); ?></label>
-                            <input type="text" name="logistics_route" value="" placeholder="<?php echo esc_attr(__('e.g. Airport → Downtown, or City-Wide', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <!-- Logistics Fallback Wrapper (for JS toggle) -->
+                        <div id="logistics_wrapper" style="display:none;">
+                             <?php 
+                             $logis_engine = Obenlo_Engine_Manager::instance()->get_engine('logistics');
+                             if ($logis_engine && (!$engine || $engine->get_id() !== 'logistics')) {
+                                 echo $logis_engine->render_host_fields($listing_id);
+                             }
+                             ?>
                         </div>
+                        <input type="hidden" name="requires_logistics" id="hidden_requires_logistics" value="<?php echo (get_post_meta($listing_id, '_obenlo_requires_logistics', true) === 'yes') ? 'yes' : 'no'; ?>">
+                        
+                        <!-- Legacy Ref: runsWrapper JS still looks for this, so we'll keep the ID on the modular container if needed, or update JS -->
                     </div>
                 <?php else: ?>
                     <div class="form-section" style="background:#f0f9ff; border:1px solid #bae6fd; padding:20px; border-radius:12px; margin-bottom:30px;">
@@ -662,96 +673,61 @@ class Obenlo_Host_Listings
                 var genericLocWrapper   = document.getElementById('generic_location_wrapper');
                 var runsWrapper         = document.getElementById('schedule_runs_wrapper');
                 var logisWrapper        = document.getElementById('logistics_wrapper');
+                var hiddenLogis         = document.getElementById('hidden_requires_logistics');
 
                 function updateFormLogic(typeId) {
                     var engine = typeMap[typeId] || 'engine_default';
 
-                    // Defaults — show everything, hide specialised panels
+                    // Defaults — show everything
                     if (capContainer)       capContainer.style.display       = 'block';
                     if (durationWrapper)    durationWrapper.style.display    = 'flex';
                     if (slotsWrapper)       slotsWrapper.style.display       = 'block';
                     if (eventConfigWrapper) eventConfigWrapper.style.display = 'none';
                     if (genericLocWrapper)  genericLocWrapper.style.display  = 'block';
-                    if (runsWrapper)        runsWrapper.style.display        = 'none';
                     if (logisWrapper)       logisWrapper.style.display       = 'none';
+                    if (hiddenLogis)        hiddenLogis.value                = 'no';
 
                     var amenHeading = document.getElementById('amenities_heading');
-                    var shouldSetDefault = !isEditMode || (pricingModel && !pricingModel.value);
-
                     if (pricingModel) {
                         Array.from(pricingModel.options).forEach(function(opt) { opt.hidden = false; opt.disabled = false; });
                     }
 
-                    if (engine === 'engine_nightly') {
-                        if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Night)', 'obenlo')); ?>';
-                        if (capLabel)   capLabel.innerText   = '<?php echo esc_js(__('Capacity/Max Guests', 'obenlo')); ?>';
-                        if (pricingModel) {
-                            if (shouldSetDefault) pricingModel.value = 'per_night';
-                            Array.from(pricingModel.options).forEach(function(opt) { if (!['per_night','per_day','flat_fee','inquiry_only'].includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
-                        }
-                        if (durationWrapper) durationWrapper.style.display = 'none';
-                        if (slotsWrapper)    slotsWrapper.style.display    = 'none';
-                        if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Amenities', 'obenlo')); ?>';
+                    // Modular AJAX Update for Dashboard Fields
+                    var modularContainer = document.getElementById('obenlo-modular-engine-fields');
+                    if (modularContainer && typeId) {
+                        var data = new FormData();
+                        data.append('action', 'obenlo_get_engine_fields');
+                        data.append('type_id', typeId);
+                        data.append('listing_id', '<?php echo $listing_id; ?>');
 
-                    } else if (engine === 'engine_slot') {
-                        if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Hour/Session)', 'obenlo')); ?>';
-                        if (capLabel)   capLabel.innerText   = '<?php echo esc_js(__('Max Clients per Slot', 'obenlo')); ?>';
-                        if (pricingModel) {
-                            if (shouldSetDefault) pricingModel.value = 'per_session';
-                            Array.from(pricingModel.options).forEach(function(opt) { if (!['per_session','per_hour','flat_fee','inquiry_only'].includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
-                        }
-                        if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Provided Services', 'obenlo')); ?>';
+                        fetch('<?php echo admin_url('admin-ajax.php'); ?>', { method: 'POST', body: data })
+                        .then(res => res.json())
+                        .then(response => {
+                            if (response.success && response.data.html) {
+                                modularContainer.innerHTML = response.data.html;
+                                
+                                // Re-run engine specific JS logic
+                                var currentSlug = slugMap[typeId] || '';
+                                <?php foreach (Obenlo_Engine_Manager::instance()->get_engines() as $id => $eng): ?>
+                                if (engine === 'engine_<?php echo $id; ?>') {
+                                    <?php echo $eng->get_host_js_logic(); ?>
+                                }
+                                <?php endforeach; ?>
+                            }
+                        });
+                    }
 
-                    } else if (engine === 'engine_fixed_block') {
-                        if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Person/Ticket)', 'obenlo')); ?>';
-                        if (capLabel)   capLabel.innerText   = '<?php echo esc_js(__('Max Participants per Group', 'obenlo')); ?>';
-                        if (pricingModel) {
-                            if (shouldSetDefault) pricingModel.value = 'per_person';
-                            Array.from(pricingModel.options).forEach(function(opt) { if (!['per_person','flat_fee','inquiry_only'].includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
+                    // Categories with logistics enablement
+                    var currentSlug = slugMap[typeId] || '';
+                    var logisSlugs = ['delivery', 'chauffeur', 'driver', 'moving', 'towing', 'shipping', 'transport', 'babysitter', 'dogsitter', 'cleaning', 'handyman', 'cook', 'hairdresser', 'barber', 'massage', 'beauty', 'service'];
+                    if (logisSlugs.includes(currentSlug)) {
+                        if (logisWrapper) {
+                            logisWrapper.style.display = isChild ? 'block' : 'none';
+                            if (hiddenLogis && isChild) hiddenLogis.value = 'yes';
                         }
-                        if (slotsWrapper)        slotsWrapper.style.display        = 'none';
-                        if (runsWrapper)         runsWrapper.style.display         = isChild ? 'block' : 'none';
-                        if (genericLocWrapper)   genericLocWrapper.style.display   = isChild ? 'none'  : 'block';
-                        if (eventConfigWrapper)  eventConfigWrapper.style.display  = isChild ? 'block' : 'none';
-                        if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__("What's Included", 'obenlo')); ?>';
+                    }
 
-                    } else if (engine === 'engine_session') {
-                        if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Ticket/Entry)', 'obenlo')); ?>';
-                        if (capLabel)   capLabel.innerText   = '<?php echo esc_js(__('Total Tickets Available', 'obenlo')); ?>';
-                        if (pricingModel) {
-                            if (shouldSetDefault) pricingModel.value = 'per_event';
-                            Array.from(pricingModel.options).forEach(function(opt) { if (!['per_event','per_person','per_donation','custom_donation','flat_fee'].includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
-                        }
-                        if (durationWrapper)     durationWrapper.style.display     = 'none';
-                        if (slotsWrapper)        slotsWrapper.style.display        = 'none';
-                        if (runsWrapper)         runsWrapper.style.display         = isChild ? 'block' : 'none';
-                        if (eventConfigWrapper)  eventConfigWrapper.style.display  = isChild ? 'block' : 'none';
-                        if (genericLocWrapper)   genericLocWrapper.style.display   = isChild ? 'none'  : 'block';
-                        if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__("What's Included", 'obenlo')); ?>';
-
-                    } else if (engine === 'engine_logistics') {
-                        if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Base Rate)', 'obenlo')); ?>';
-                        if (capLabel)   capLabel.innerText   = '<?php echo esc_js(__('Max Passengers / Load Size', 'obenlo')); ?>';
-                        if (pricingModel) {
-                            if (shouldSetDefault) pricingModel.value = 'flat_fee';
-                            Array.from(pricingModel.options).forEach(function(opt) { if (!['flat_fee','per_hour','inquiry_only'].includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
-                        }
-                        if (slotsWrapper) slotsWrapper.style.display = 'none';
-                        if (logisWrapper) logisWrapper.style.display  = isChild ? 'block' : 'none';
-                        if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Features Details', 'obenlo')); ?>';
-
-                    } else if (engine === 'engine_inquiry') {
-                        if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Consultation / Base Fee', 'obenlo')); ?>';
-                        if (capLabel)   capLabel.innerText   = '<?php echo esc_js(__('Capacity / Availability', 'obenlo')); ?>';
-                        if (pricingModel) {
-                            if (shouldSetDefault) pricingModel.value = 'inquiry_only';
-                            Array.from(pricingModel.options).forEach(function(opt) { if (!['inquiry_only','flat_fee'].includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
-                        }
-                        if (slotsWrapper)    slotsWrapper.style.display    = 'none';
-                        if (durationWrapper) durationWrapper.style.display = 'none';
-                        if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Service Details', 'obenlo')); ?>';
-
-                    } else {
+                    if (engine === 'engine_default') {
                         if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Base)', 'obenlo')); ?>';
                         if (capLabel)   capLabel.innerText   = '<?php echo esc_js(__('Capacity/Max Guests', 'obenlo')); ?>';
                         if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Amenities', 'obenlo')); ?>';
@@ -791,31 +767,35 @@ class Obenlo_Host_Listings
             } catch(err) { console.error('Obenlo UBE JS Error: ' + err); }
 
             // ── Addons Repeater ──────────────────────────────────────
-            var addAddonBtn     = document.getElementById('add-addon-btn');
-            var addonsContainer = document.getElementById('addons-container');
-            var addonTemplate   = document.getElementById('addon-template');
-            if (addAddonBtn && addonsContainer && addonTemplate) {
-                addAddonBtn.addEventListener('click', function() { addonsContainer.appendChild(addonTemplate.content.cloneNode(true)); });
-                addonsContainer.addEventListener('click', function(e) { if (e.target.classList.contains('remove-addon-btn')) { e.target.closest('.addon-row').remove(); } });
-            }
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'add-addon-btn') {
+                    var container = document.getElementById('addons-container');
+                    var template  = document.getElementById('addon-template');
+                    if (container && template) { container.appendChild(template.content.cloneNode(true)); }
+                }
+                if (e.target.classList.contains('remove-addon-btn')) { e.target.closest('.addon-row').remove(); }
+            });
 
             // ── Session Runs Repeater ─────────────────────────────────
-            var addRunBtn     = document.getElementById('add-run-btn');
-            var runsContainer = document.getElementById('session-runs-container');
-            var runTemplate   = document.getElementById('run-template');
-            if (addRunBtn && runsContainer && runTemplate) {
-                addRunBtn.addEventListener('click', function() { runsContainer.appendChild(runTemplate.content.cloneNode(true)); });
-                runsContainer.addEventListener('click', function(e) { if (e.target.classList.contains('remove-run-btn')) { e.target.closest('.session-run-row').remove(); } });
-            }
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'add-run-btn') {
+                    var container = document.getElementById('session-runs-container');
+                    var template  = document.getElementById('run-template');
+                    if (container && template) { container.appendChild(template.content.cloneNode(true)); }
+                }
+                if (e.target.classList.contains('remove-run-btn')) { e.target.closest('.session-run-row').remove(); }
+            });
 
             // ── Amenities Repeater ───────────────────────────────────
-            var addAmenityBtn     = document.getElementById('add-amenity-btn');
-            var amenitiesContainer = document.getElementById('amenities-container');
-            var amenityTemplate   = document.getElementById('amenity-template');
-            if (addAmenityBtn && amenitiesContainer && amenityTemplate) {
-                addAmenityBtn.addEventListener('click', function() { amenitiesContainer.appendChild(amenityTemplate.content.cloneNode(true)); });
-                amenitiesContainer.addEventListener('click', function(e) { if (e.target.classList.contains('remove-amenity-btn')) { e.target.closest('.amenity-row').remove(); } });
-            }
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'add-amenity-btn') {
+                    var container = document.getElementById('amenities-container');
+                    var template  = document.getElementById('amenity-template');
+                    if (container && template) { container.appendChild(template.content.cloneNode(true)); }
+                }
+                if (e.target.classList.contains('remove-amenity-btn')) { e.target.closest('.amenity-row').remove(); }
+            });
+
 
             // ── Policy Custom Fields Toggle ──────────────────────────
             var policySelect  = document.getElementById('policy_type_select');
@@ -920,6 +900,15 @@ class Obenlo_Host_Listings
             if (isset($_POST['duration_val']))   update_post_meta($new_post_id, '_obenlo_duration_val',   sanitize_text_field($_POST['duration_val']));
             if (isset($_POST['duration_unit']))  update_post_meta($new_post_id, '_obenlo_duration_unit',  sanitize_text_field($_POST['duration_unit']));
             update_post_meta($new_post_id, '_obenlo_requires_slots', (isset($_POST['requires_slots']) && $_POST['requires_slots'] === 'yes') ? 'yes' : 'no');
+            update_post_meta($new_post_id, '_obenlo_requires_logistics', (isset($_POST['requires_logistics']) && $_POST['requires_logistics'] === 'yes') ? 'yes' : 'no');
+            if (isset($_POST['logistics_route'])) update_post_meta($new_post_id, '_obenlo_logistics_route', sanitize_text_field($_POST['logistics_route']));
+            
+            // Advanced Logistics Pricing Meta
+            if (isset($_POST['logistics_mile_rate']))  update_post_meta($new_post_id, '_obenlo_logistics_mile_rate',  sanitize_text_field($_POST['logistics_mile_rate']));
+            if (isset($_POST['logistics_base_price'])) update_post_meta($new_post_id, '_obenlo_logistics_base_price', sanitize_text_field($_POST['logistics_base_price']));
+            if (isset($_POST['logistics_flat_price'])) update_post_meta($new_post_id, '_obenlo_logistics_flat_price', sanitize_text_field($_POST['logistics_flat_price']));
+            if (isset($_POST['logistics_flat_miles'])) update_post_meta($new_post_id, '_obenlo_logistics_flat_miles', sanitize_text_field($_POST['logistics_flat_miles']));
+            if (isset($_POST['logistics_flat_mins']))  update_post_meta($new_post_id, '_obenlo_logistics_flat_mins',  sanitize_text_field($_POST['logistics_flat_mins']));
 
             // ── Demo Configuration ────────────────────────────────────
             Obenlo_Demo_Manager::save_demo_configuration($new_post_id);

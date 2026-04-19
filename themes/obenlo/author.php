@@ -15,6 +15,7 @@ if (!$curauth || !is_a($curauth, 'WP_User')) {
 $user_id = $curauth ? $curauth->ID : 0;
 
 // Demo Preview Overrides
+$is_demo_preview = false;
 $demo_listing_id = get_query_var('demo_listing_id') ?: (isset($_GET['demo_listing_id']) ? intval($_GET['demo_listing_id']) : 0);
 $demo_mode_param = get_query_var('demo_listing_mode') ?: (isset($_GET['demo_mode']) ? 1 : 0);
 $demo_host_slug = get_query_var('demo_host_name');

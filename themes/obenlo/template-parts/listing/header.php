@@ -1,4 +1,5 @@
         <div class="listing-header">
+            <?php if (!isset($is_demo_preview)) $is_demo_preview = false; ?>
             <?php if ($parent_id): ?>
                 <a href="<?php echo get_permalink($parent_id); ?>" style="display:inline-block; margin-bottom:15px; color:#666; text-decoration:none; font-weight: 500;">
                     &larr; Back to <?php echo esc_html(get_the_title($parent_id)); ?>

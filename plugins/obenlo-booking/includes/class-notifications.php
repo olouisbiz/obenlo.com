@@ -225,6 +225,13 @@ class Obenlo_Booking_Notifications
                     $subject = "[TEST MODE] " . $subject;
                 }
                 $msg     = "A new booking has been requested for your listing: <strong>$listing_title</strong>.<br>Total: <strong>\$$total</strong>";
+                
+                $pickup  = get_post_meta($booking_id, '_obenlo_logistics_pickup', true);
+                $dropoff = get_post_meta($booking_id, '_obenlo_logistics_dropoff', true);
+                if ($pickup || $dropoff) {
+                    $msg .= "<br><br><strong>Logistics Details:</strong><br>Pickup: " . esc_html($pickup ?: 'N/A') . "<br>Drop-off: " . esc_html($dropoff ?: 'N/A');
+                }
+
                 self::send_html_to_user($host_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Bookings', home_url('/host-dashboard/?action=bookings'), true);
                 
                 $admin_email = get_option('obenlo_admin_email', 'info@obenlo.com');
@@ -266,6 +273,17 @@ class Obenlo_Booking_Notifications
 
                 $body_html .= '<p style="margin:0 0 16px 0;">Total paid: <strong>$' . esc_html($total) . '</strong></p>';
 
+                $pickup  = get_post_meta($booking_id, '_obenlo_logistics_pickup', true);
+                $dropoff = get_post_meta($booking_id, '_obenlo_logistics_dropoff', true);
+                if ($pickup || $dropoff) {
+                    $body_html .= '
+                    <div style="background:#f0f9ff; border:1px solid #e0f2fe; border-radius:12px; padding:16px 20px; margin:0 0 20px 0;">
+                        <strong style="color:#0369a1;">📦 Logistics Summary</strong><br>
+                        <span style="font-size:0.9rem; color:#333;">Pickup: ' . esc_html($pickup ?: 'N/A') . '</span><br>
+                        <span style="font-size:0.9rem; color:#333;">Drop-off: ' . esc_html($dropoff ?: 'N/A') . '</span>
+                    </div>';
+                }
+
                 self::send_html_to_user($guest_id, $subject, $body_html, 'View My Trips', home_url('/account?tab=trips'), true);
 
                 // Notify Host of confirmed booking
@@ -274,6 +292,9 @@ class Obenlo_Booking_Notifications
                     $host_subject = "[TEST MODE] " . $host_subject;
                 }
                 $host_msg = "A new confirmed booking has been received for your listing: <strong>$listing_title</strong>.<br>Total Paid: <strong>\$$total</strong>";
+                if ($pickup || $dropoff) {
+                    $host_msg .= "<br><br><strong>Logistics Details:</strong><br>Pickup: " . esc_html($pickup ?: 'N/A') . "<br>Drop-off: " . esc_html($dropoff ?: 'N/A');
+                }
                 self::send_html_to_user($host_id, $host_subject, "<p style='margin:0 0 16px 0;'>$host_msg</p>", 'View Bookings', home_url('/host-dashboard/?action=bookings'), true);
 
                 // Notify Admin of confirmed booking

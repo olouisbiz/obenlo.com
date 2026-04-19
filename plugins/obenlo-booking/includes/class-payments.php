@@ -172,12 +172,24 @@ class Obenlo_Booking_Payments
 
         $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
         $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : '';
+        // Fallback: slot engine submits slot_date + final_slot_start_date
+        if (!$start_date && isset($_POST['slot_date'])) {
+            $start_date = sanitize_text_field($_POST['slot_date']);
+        }
+        // Fallback: logistics engine submits logistics_date + optional logistics_time
+        if (!$start_date && isset($_POST['logistics_date']) && $_POST['logistics_date']) {
+            $ldate = sanitize_text_field($_POST['logistics_date']);
+            $ltime = isset($_POST['logistics_time']) && $_POST['logistics_time']
+                     ? sanitize_text_field($_POST['logistics_time'])
+                     : '09:00';
+            $start_date = $ldate . 'T' . $ltime;
+        }
         $end_date = isset($_POST['end_date']) ? sanitize_text_field($_POST['end_date']) : '';
         $guests = isset($_POST['guests']) ? intval($_POST['guests']) : 1;
         $payment_method = isset($_POST['payment_method']) ? sanitize_text_field($_POST['payment_method']) : 'stripe';
 
-        // Extract Logistics Info
-        $logistics_pickup = isset($_POST['logistics_pickup']) ? sanitize_text_field($_POST['logistics_pickup']) : '';
+        // Extract Logistics / Address Info (present for logistics AND mobile service slots)
+        $logistics_pickup  = isset($_POST['logistics_pickup'])  ? sanitize_text_field($_POST['logistics_pickup'])  : '';
         $logistics_dropoff = isset($_POST['logistics_dropoff']) ? sanitize_text_field($_POST['logistics_dropoff']) : '';
 
         // Verify if payment method is enabled
@@ -253,6 +265,18 @@ class Obenlo_Booking_Payments
                 else {
                     $duration_mins = 60; // fallback
                 }
+            }
+        }
+
+        // Advanced Logistics Pricing (Mile-based)
+        if ($requires_logistics === 'yes') {
+            $logis_engine = Obenlo_Engine_Manager::instance()->get_engine('logistics');
+            if ($logis_engine) {
+                $logis_price = $logis_engine->calculate_price($listing_id, array(
+                    'pickup'  => $logistics_pickup,
+                    'dropoff' => $logistics_dropoff
+                ));
+                $total_price += $logis_price;
             }
         }
 
@@ -413,8 +437,13 @@ class Obenlo_Booking_Payments
         update_post_meta($booking_id, '_obenlo_confirmation_code', $confirmation_code);
         update_post_meta($booking_id, '_obenlo_guest_id', $guest_id_val);
 
-        if ($requires_logistics === 'yes') {
-            update_post_meta($booking_id, '_obenlo_logistics_pickup', $logistics_pickup);
+        // Always save address info when provided (logistics engine AND mobile service slots)
+        if ($logistics_pickup) {
+            update_post_meta($booking_id, '_obenlo_logistics_pickup',  $logistics_pickup);
+            update_post_meta($booking_id, '_obenlo_logistics_dropoff', $logistics_dropoff);
+        } elseif ($requires_logistics === 'yes') {
+            // Strict logistics listing with missing address
+            update_post_meta($booking_id, '_obenlo_logistics_pickup',  $logistics_pickup);
             update_post_meta($booking_id, '_obenlo_logistics_dropoff', $logistics_dropoff);
         }
         
