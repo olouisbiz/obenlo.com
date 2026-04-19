@@ -61,10 +61,16 @@ class Obenlo_Engine_Inquiry extends Obenlo_Abstract_Engine {
                 if (priceLabel) priceLabel.innerText = '" . esc_js(__('Project Starting Rate', 'obenlo')) . "';
             }
 
-            if (pricingModel) {
-                 pricingModel.value = 'inquiry_only';
-                 Array.from(pricingModel.options).forEach(function(opt) { if (!['inquiry_only','flat_fee'].includes(opt.value)) { opt.hidden = true; opt.disabled = true; } });
-            }
+            var pmWrapper = document.getElementById('pricing_model_wrapper');
+            if (pmWrapper) pmWrapper.style.display = 'none';
+            var pmSelect = document.getElementById('pricing_model');
+            if (pmSelect) pmSelect.value = 'inquiry_only';
+            
+            var capContainer = document.getElementById('capacity_wrapper');
+            if (capContainer) capContainer.style.display = 'none';
+            var unitsWrapper = document.getElementById('units_wrapper');
+            if (unitsWrapper) unitsWrapper.style.display = 'none';
+
             if (slotsWrapper)    slotsWrapper.style.display    = 'none';
             if (durationWrapper) durationWrapper.style.display = 'none';
         ";
