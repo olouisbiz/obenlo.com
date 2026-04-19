@@ -1,5 +1,14 @@
 # Obenlo Official Deployment
 # CHANGELOG
+
+## [1.9.0] - 2026-04-19
+- **MAJOR**: Implemented "Schedule / Session Runs" repeater engine for recurring event listings.
+- **SYNC**: Broadened category-specific booking engines for Classes, Shows, and Beauty Services.
+- **Visuals**: Cleaned up site-wide encoding issues; restored all premium icons and star rating symbols.
+- **Architecture**: Completed Admin and Host dashboard modularization for separate role-based logic.
+
+## [1.8.0] - 2026-04-15
+- Core: Modularized the Host Dashboard overview and listing management logic.
 ## [1.7.1] - 2026-04-13
 - PWA UX Refinement: Styled Demo Listing Manager actions for standalone mode.
 - Administrative HUD: Automatic detection for management sessions in PWA.
@@ -156,4 +165,4 @@ git reset --hard origin/main
 This will completely overwrite all files on the live site to match exactly what is on GitHub's `main` branch. Use this if you need to "fix" a broken state or roll back.
 
 ---
-**✅ ARCHITECTURE TESTED: 2026-04-10** (This line proves the deployment flow is working).
+**✅ ARCHITECTURE TESTED: 2026-04-19** (This line proves the deployment flow is working).
