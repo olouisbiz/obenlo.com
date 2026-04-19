@@ -205,6 +205,20 @@ class Obenlo_Engine_Logistics extends Obenlo_Abstract_Engine {
         return "
             if (priceLabel) priceLabel.innerText = '" . esc_js(__('Price (Base Rate)', 'obenlo')) . "';
             if (capLabel)   capLabel.innerText   = '" . esc_js(__('Max Capacity', 'obenlo')) . "';
+            
+            // Clean up the UI for Logistics
+            var pmWrapper = document.getElementById('pricing_model_wrapper');
+            if (pmWrapper) pmWrapper.style.display = 'none';
+            var durWrapper = document.getElementById('duration_wrapper');
+            if (durWrapper) durWrapper.style.display = 'none';
+            var slotWrapper = document.getElementById('requires_slots_wrapper');
+            if (slotWrapper) slotWrapper.style.display = 'none';
+            
+            // Ensure default pricing model is flat_fee to not confuse the DB
+            var pmSelect = document.getElementById('pricing_model');
+            if (pmSelect && pmSelect.value !== 'custom_donation' && pmSelect.value !== 'inquiry_only') {
+                pmSelect.value = 'flat_fee';
+            }
 
             // Subcategory Customizations
             if (currentSlug === 'delivery') {
