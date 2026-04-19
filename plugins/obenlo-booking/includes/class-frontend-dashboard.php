@@ -13,17 +13,29 @@ class Obenlo_Booking_Frontend_Dashboard
     public function init()
     {
         add_shortcode('obenlo_host_dashboard', array($this, 'render_dashboard'));
-        add_action('admin_post_nopriv_obenlo_dashboard_save_listing', array($this, 'handle_save_listing'));
-        add_action('admin_post_obenlo_dashboard_save_listing', array($this, 'handle_save_listing'));
+        // NOTE: save_listing and delete_listing hooks are owned by Obenlo_Host_Listings (class-host-listings.php)
+        // Kept here only as comments to avoid registering duplicate admin_post handlers.
+        // add_action('admin_post_nopriv_obenlo_dashboard_save_listing', ...)  â†’ class-host-listings.php
+        // add_action('admin_post_obenlo_dashboard_save_listing', ...)         â†’ class-host-listings.php
+        // add_action('admin_post_obenlo_dashboard_delete_listing', ...)       â†’ class-host-listings.php
         add_action('admin_post_obenlo_dashboard_save_storefront', array($this, 'handle_save_storefront'));
         add_action('admin_post_obenlo_dashboard_booking_action', array($this, 'handle_booking_action'));
         add_action('admin_post_obenlo_dashboard_save_availability', array($this, 'handle_save_availability'));
-        add_action('admin_post_obenlo_dashboard_delete_listing', array($this, 'handle_delete_listing'));
+        // delete_listing â†’ class-host-listings.php
+        // add_action('admin_post_obenlo_dashboard_delete_listing', ...) â†’ class-host-listings.php
         add_action('admin_post_obenlo_export_bookings', array($this, 'handle_export_bookings'));
         add_action('admin_post_obenlo_reply_review', array($this, 'handle_reply_review'));
         add_action('admin_post_obenlo_approve_review', array($this, 'handle_approve_review'));
         add_action('admin_post_obenlo_save_testimony', array($this, 'handle_save_testimony'));
         add_action('init', array($this, 'handle_global_location_fix'));
+    }
+
+    /**
+     * Public bridge â€” kept as a no-op since Obenlo_Host_Listings now owns the form rendering directly.
+     * @deprecated Phase 2 â€” render_listing_form() is now in class-host-listings.php
+     */
+    public function render_listing_form_public($listing_id = 0) {
+        // Intentionally empty â€” Obenlo_Host_Listings::render_listing_form() is called by the router.
     }
 
     public function handle_global_location_fix() {
@@ -282,7 +294,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 <?php
         // Flash Messages & Errors
         if (isset($_GET['message']) && $_GET['message'] === 'saved') {
-            echo '<div class="badge badge-success" style="margin-bottom:30px; display:block; text-align:center; padding:15px; border-radius:12px; font-weight:700;">' . __('✓ Action completed successfully!', 'obenlo') . '</div>';
+            echo '<div class="badge badge-success" style="margin-bottom:30px; display:block; text-align:center; padding:15px; border-radius:12px; font-weight:700;">' . __('âœ“ Action completed successfully!', 'obenlo') . '</div>';
         }
 
         if (isset($_GET['obenlo_error'])) {
@@ -448,7 +460,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 <div style="display:flex; align-items:center; gap:10px;">
                     <span class="badge <?php echo $status_class; ?>"><?php echo __('Account Status:', 'obenlo'); ?> <?php echo esc_html($status_label); ?></span>
                     <?php if ($verification_status !== 'verified'): ?>
-                        <a href="<?php echo home_url('/host-dashboard?action=verification'); ?>" style="font-size:0.85rem; color:#e61e4d; font-weight:700; text-decoration:none;"><?php echo __('Complete Verification →', 'obenlo'); ?></a>
+                        <a href="<?php echo home_url('/host-dashboard?action=verification'); ?>" style="font-size:0.85rem; color:#e61e4d; font-weight:700; text-decoration:none;"><?php echo __('Complete Verification â†’', 'obenlo'); ?></a>
                     <?php
         else: ?>
                         <a href="<?php echo home_url('/host-onboarding?step=3&force=1'); ?>" style="font-size:0.85rem; color:#666; font-weight:600; text-decoration:none;"><?php echo __('Update Payouts', 'obenlo'); ?></a>
@@ -542,17 +554,17 @@ class Obenlo_Booking_Frontend_Dashboard
         echo '<div class="dashboard-header"><h2 class="dashboard-title">Identity Verification</h2></div>';
         
         if ($status === 'verified') {
-            echo '<div style="background:#dcfce7; color:#166534; padding:20px; border-radius:12px; font-weight:500;">✓ Your identity has been successfully verified. Thank you for building trust in the Obenlo community.</div>';
+            echo '<div style="background:#dcfce7; color:#166534; padding:20px; border-radius:12px; font-weight:500;">âœ“ Your identity has been successfully verified. Thank you for building trust in the Obenlo community.</div>';
             return;
         }
         
         if ($status === 'pending') {
-            echo '<div style="background:#fef9c3; color:#854d0e; padding:20px; border-radius:12px; font-weight:500;">⏳ Your verification document is currently under review by our team. Approval usually takes 24-48 hours.</div>';
+            echo '<div style="background:#fef9c3; color:#854d0e; padding:20px; border-radius:12px; font-weight:500;">â³ Your verification document is currently under review by our team. Approval usually takes 24-48 hours.</div>';
             return;
         }
         
         if ($status === 'rejected') {
-            echo '<div style="background:#fee2e2; color:#991b1b; padding:20px; border-radius:12px; margin-bottom:20px; font-weight:500;">⚠️ Your previous verification attempt was rejected. Please ensure the document is clear, legible, and a valid government-issued ID.</div>';
+            echo '<div style="background:#fee2e2; color:#991b1b; padding:20px; border-radius:12px; margin-bottom:20px; font-weight:500;">âš ï¸ Your previous verification attempt was rejected. Please ensure the document is clear, legible, and a valid government-issued ID.</div>';
         }
         
         echo '<div style="background:#fff; padding:30px; border-radius:16px; border:1px solid #ddd; max-width:600px;">';
@@ -646,7 +658,7 @@ class Obenlo_Booking_Frontend_Dashboard
         <?php if ($is_host_suspended): ?>
             <div style="background:#fef2f2; border:1px solid #fee2e2; border-left:4px solid #ef4444; padding:20px; border-radius:12px; margin-bottom:30px;">
                 <h3 style="margin-top:0; color:#991b1b; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
-                    ⚠️ Your Host Account is Suspended
+                    âš ï¸ Your Host Account is Suspended
                 </h3>
                 <p style="color:#7f1d1d; margin-bottom:0;">
                     Your account has been suspended due to a policy violation. Your listings are currently hidden from the public.
@@ -747,7 +759,7 @@ class Obenlo_Booking_Frontend_Dashboard
                         <?php if (!empty($children)): ?>
                             <?php foreach ($children as $child): ?>
                                 <tr style="background:#fafafa;">
-                                    <td data-label="<?php echo esc_attr(__('Listing', 'obenlo')); ?>" style="padding-left:30px; font-size:0.85rem; color:#666;">└─ <?php echo get_the_title($child->ID); ?></td>
+                                    <td data-label="<?php echo esc_attr(__('Listing', 'obenlo')); ?>" style="padding-left:30px; font-size:0.85rem; color:#666;">â””â”€ <?php echo get_the_title($child->ID); ?></td>
                                     <td data-label="<?php echo esc_attr(__('Owner', 'obenlo')); ?>"></td>
                                     <td data-label="<?php echo esc_attr(__('Category', 'obenlo')); ?>"></td>
                                     <td data-label="<?php echo esc_attr(__('Status', 'obenlo')); ?>"><span class="badge badge-success" style="opacity:0.6; font-size:0.7rem;"><?php echo ucfirst($child->post_status); ?></span></td>
@@ -798,8 +810,8 @@ class Obenlo_Booking_Frontend_Dashboard
                 <h2 class="dashboard-title"><?php echo __('My Bookings', 'obenlo'); ?></h2>
             </div>
 
-            <!-- ── Confirmation Code Search ── -->
-            <!-- ── Modern Search & Export Bar ── -->
+            <!-- â”€â”€ Confirmation Code Search â”€â”€ -->
+            <!-- â”€â”€ Modern Search & Export Bar â”€â”€ -->
             <div style="margin-bottom:32px; display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;">
                 <div class="search-container">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;color:#888;margin-left:5px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -878,7 +890,7 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <?php endif; ?>
                                     <div>
                                         <div style="font-weight:700; color:#222; font-size:1rem; margin-bottom:2px;"><?php echo esc_html($listing_title); ?></div>
-                                        <div style="font-size:0.75rem; color:#888; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;"><?php echo esc_html($conf_code ?: '───'); ?></div>
+                                        <div style="font-size:0.75rem; color:#888; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;"><?php echo esc_html($conf_code ?: 'â”€â”€â”€'); ?></div>
                                     </div>
                                 </div>
                             </td>
@@ -913,7 +925,7 @@ class Obenlo_Booking_Frontend_Dashboard
                                     <?php echo esc_html(__(str_replace('_', ' ', $status), 'obenlo')); ?>
                                 </span>
                                 <?php if ($checked_in) : ?>
-                                    <div style="margin-top:8px;"><span class="badge badge-success" style="font-size:0.65rem; padding:4px 10px;">✓ IN HOUSE</span></div>
+                                    <div style="margin-top:8px;"><span class="badge badge-success" style="font-size:0.65rem; padding:4px 10px;">âœ“ IN HOUSE</span></div>
                                 <?php endif; ?>
                             </td>
                             <td data-label="<?php echo esc_attr(__('Actions', 'obenlo')); ?>">
@@ -1044,7 +1056,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 echo '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">';
                 echo '<div>';
                 echo '<div style="font-weight:800; font-size:1.1rem; color:#111;">' . esc_html($comment->comment_author) . '</div>';
-                echo '<div style="font-size:0.85rem; color:#666; margin-top:2px;">' . sprintf(__('Reviewed %s', 'obenlo'), '<a href="' . esc_url($listing_url) . '" style="color:#e61e4d; font-weight:600; text-decoration:none;">' . esc_html($listing_title) . '</a>') . ' • ' . get_comment_date('', $comment->comment_ID) . '</div>';
+                echo '<div style="font-size:0.85rem; color:#666; margin-top:2px;">' . sprintf(__('Reviewed %s', 'obenlo'), '<a href="' . esc_url($listing_url) . '" style="color:#e61e4d; font-weight:600; text-decoration:none;">' . esc_html($listing_title) . '</a>') . ' â€¢ ' . get_comment_date('', $comment->comment_ID) . '</div>';
                 echo '</div>';
                 
                 if ($rating) {
@@ -1122,912 +1134,6 @@ class Obenlo_Booking_Frontend_Dashboard
             echo '</div>';
         }
     }
-
-    private function render_listing_form($listing_id = 0)
-    {
-        $title = '';
-        $content = '';
-        $price = '';
-        $capacity = '';
-        $available_units = 1;
-        $addons = array();
-        $location = '';
-        $policy_type = 'global';
-        $policy_cancel = '';
-        $policy_refund = '';
-        $policy_other = '';
-        $parent_id = isset($_GET['parent_id']) ? intval($_GET['parent_id']) : 0;
-        $selected_type = '';
-        $virtual_link = '';
-        $event_is_fixed = 'no';
-        $event_date = '';
-        $event_start_time = '';
-        $event_end_time = '';
-        $event_location_type = 'virtual';
-
-        if ($listing_id > 0) {
-            $post = get_post($listing_id);
-            if ($post && ($post->post_author == get_current_user_id() || current_user_can('administrator'))) {
-                $title = get_the_title($listing_id);
-                // Use the same filter logic for content
-                $sandboxed_content = get_post_meta($listing_id, '_obenlo_sandboxed_content', true);
-                $content = $sandboxed_content ? $sandboxed_content : $post->post_content;
-                $parent_id = $post->post_parent;
-                $price = get_post_meta($listing_id, '_obenlo_price', true);
-                $capacity = get_post_meta($listing_id, '_obenlo_capacity', true);
-                $available_units = get_post_meta($listing_id, '_obenlo_available_units', true) ?: 1;
-                $location = get_post_meta($listing_id, '_obenlo_location', true);
-                $virtual_link = get_post_meta($listing_id, '_obenlo_virtual_link', true);
-                $event_is_fixed = get_post_meta($listing_id, '_obenlo_event_is_fixed', true) ?: 'no';
-                $event_date = get_post_meta($listing_id, '_obenlo_event_date', true);
-                $event_start_time = get_post_meta($listing_id, '_obenlo_event_start_time', true);
-                $event_end_time = get_post_meta($listing_id, '_obenlo_event_end_time', true);
-                $event_location_type = get_post_meta($listing_id, '_obenlo_event_location_type', true) ?: 'virtual';
-
-                $addons_json = get_post_meta($listing_id, '_obenlo_addons_structured', true);
-                if (!empty($addons_json)) {
-                    $decoded = json_decode($addons_json, true);
-                    if (is_array($decoded))
-                        $addons = $decoded;
-                }
-
-                $pricing_model = get_post_meta($listing_id, '_obenlo_pricing_model', true) ?: 'per_night';
-                $duration_val = get_post_meta($listing_id, '_obenlo_duration_val', true);
-                $duration_unit = get_post_meta($listing_id, '_obenlo_duration_unit', true) ?: 'hours';
-                $requires_slots = get_post_meta($listing_id, '_obenlo_requires_slots', true) ?: 'no';
-                $listing_country = get_post_meta($listing_id, '_obenlo_listing_country', true) ?: 'usa';
-
-                $type_terms = wp_get_post_terms($listing_id, 'listing_type');
-                if (!empty($type_terms) && !is_wp_error($type_terms)) {
-                    $selected_type = $type_terms[0]->term_id;
-                }
-
-                $policy_type = get_post_meta($listing_id, '_obenlo_policy_type', true) ?: 'global';
-                $policy_cancel = get_post_meta($listing_id, '_obenlo_policy_cancel', true);
-                $policy_refund = get_post_meta($listing_id, '_obenlo_policy_refund', true);
-                $policy_other = get_post_meta($listing_id, '_obenlo_policy_other', true);
-            }
-            else {
-                echo '<p>' . __('Invalid listing.', 'obenlo') . '</p>';
-                return;
-            }
-        }
-        else {
-            // Default blank values for new listings
-            $pricing_model = 'per_night';
-            $duration_val = '';
-            $duration_unit = 'hours';
-            $requires_slots = 'no';
-            $listing_country = 'usa';
-        }
-
-        $is_child = ($parent_id > 0);
-        $parent_post = null;
-        if ($is_child) {
-            $parent_post = get_post($parent_id);
-            // Inherit type from parent ONLY IF child has no type yet
-            if (!$selected_type) {
-                $parent_terms = wp_get_post_terms($parent_id, 'listing_type');
-                if (!empty($parent_terms) && !is_wp_error($parent_terms)) {
-                    $selected_type = $parent_terms[0]->term_id;
-                }
-            }
-        }
-
-        $form_action = esc_url(admin_url('admin-post.php'));
-        
-        // Contextual Labels
-        $title_label = $is_child ? __('Unit / Session Name', 'obenlo') : __('Business / Property Name', 'obenlo');
-        $desc_label = $is_child ? __('About this Unit / Session', 'obenlo') : __('About your Business / Property', 'obenlo');
-        $media_label = $is_child ? __('Unit Specific Photos', 'obenlo') : __('Primary Property Photos', 'obenlo');
-        $media_hint = $is_child ? __('Upload up to 3 photos', 'obenlo') : __('Upload up to 10 photos', 'obenlo');
-        $media_limit = $is_child ? 3 : 10;
-
-        // Derive category flag for dynamic headings
-        $category_flag = 'default';
-        if ($selected_type) {
-            $type_term = get_term($selected_type, 'listing_type');
-            if ($type_term && !is_wp_error($type_term)) {
-                $check_names = [strtolower($type_term->name)];
-                $check_slugs = [$type_term->slug];
-
-                if ($type_term->parent != 0) {
-                    $parent_term = get_term($type_term->parent, 'listing_type');
-                    if ($parent_term && !is_wp_error($parent_term)) {
-                        $check_names[] = strtolower($parent_term->name);
-                        $check_slugs[] = $parent_term->slug;
-                    }
-                }
-
-                foreach ($check_names as $n) {
-                    if (strpos($n, 'stay') !== false) { $category_flag = 'stay'; break; }
-                    if (strpos($n, 'experience') !== false || strpos($n, 'tour') !== false) { $category_flag = 'experience'; break; }
-                    if (strpos($n, 'event') !== false) { $category_flag = 'event'; break; }
-                    if (strpos($n, 'service') !== false) { $category_flag = 'service'; break; }
-                }
-
-                if ($category_flag === 'default') {
-                    foreach ($check_slugs as $s) {
-                        if (in_array($s, ['hotel', 'guest-house'])) { $category_flag = 'stay'; break; }
-                        if (in_array($s, ['event', 'show', 'class', 'ticket'])) { $category_flag = 'event'; break; }
-                        if (in_array($s, ['service', 'beauty', 'chauffeur', 'cook', 'barbershop', 'hairdresser'])) { $category_flag = 'service'; break; }
-                    }
-                }
-            }
-        }
-
-?>
-        <div class="dashboard-header">
-            <h2 class="dashboard-title">
-                <?php 
-                if ($listing_id) {
-                    echo sprintf($is_child ? __('Edit Unit/Session: %s', 'obenlo') : __('Edit Listing: %s', 'obenlo'), get_the_title($listing_id));
-                } else {
-                    echo $is_child ? __('Add New Unit/Session', 'obenlo') : __('Add New Listing', 'obenlo');
-                }
-                ?>
-            </h2>
-            <a href="?action=list" style="color:#666; font-weight:700; text-decoration:none;">← <?php echo __('Back to Listings', 'obenlo'); ?></a>
-        </div>
-
-        <div style="max-width:800px;">
-            <?php if ($is_child): ?>
-                <p style="background: #eff6ff; color: #1e40af; padding: 15px 20px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;">
-                    <?php echo __('Adding a specific bookable unit to:', 'obenlo'); ?> <strong><?php echo esc_html($parent_post->post_title); ?></strong>
-                </p>
-            <?php
-        else: ?>
-                <p style="color:#666; font-size:0.95rem; margin-bottom:30px;">
-                    <?php echo __("Create the main property, experience, or service. (You will add specific bookable units later).", 'obenlo'); ?>
-                </p>
-            <?php
-        endif; ?>
-
-            <form action="<?php echo $form_action; ?>" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="obenlo_dashboard_save_listing">
-                <input type="hidden" name="listing_id" value="<?php echo esc_attr($listing_id); ?>">
-                <?php if ($is_child): ?>
-                    <input type="hidden" name="parent_id" value="<?php echo esc_attr($parent_id > 0 ? $parent_id : filter_input(INPUT_GET, 'parent_id', FILTER_SANITIZE_NUMBER_INT)); ?>">
-                <?php endif; ?>
-                
-                <?php 
-                $is_demo_edit = ($listing_id > 0 && get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes');
-                $is_demo_create = (isset($_GET['demo']) && $_GET['demo'] == '1');
-                if (($is_demo_edit || $is_demo_create) && current_user_can('administrator')): 
-                    $demo_logo = get_post_meta($listing_id, '_obenlo_demo_host_logo', true);
-                    $demo_banner = get_post_meta($listing_id, '_obenlo_demo_host_banner', true);
-                    $demo_hours = get_post_meta($listing_id, '_obenlo_demo_business_hours', true) ?: array();
-                ?>
-                    <input type="hidden" name="is_demo" value="1">
-                    <div style="background:#fff1f3; color:#e61e4d; padding:25px; border-radius:20px; margin-bottom:40px; border:1px solid #fecdd3; box-shadow:0 10px 30px rgba(230,30,77,0.05);">
-                        <h4 style="margin-top:0; margin-bottom:15px; color:#e61e4d; display:flex; align-items:center; gap:10px;">
-                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                            <?php echo __('Super-Admin Demo Setup', 'obenlo'); ?>
-                        </h4>
-                        <p style="margin-top:0; margin-bottom:25px; font-size:0.95rem; opacity:0.8;"><?php echo __('Simulate a professional storefront by providing the profile assets and availability for this ghost host.', 'obenlo'); ?></p>
-                        
-                        <div class="grid-row" style="margin-bottom:20px;">
-                            <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Host Display Name', 'obenlo'); ?></label>
-                                <input type="text" name="_obenlo_demo_host_name" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_name', true)); ?>" placeholder="e.g. Marie Antoinette" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
-                            </div>
-                            <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Host Tagline', 'obenlo'); ?></label>
-                                <input type="text" name="_obenlo_demo_host_tagline" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_tagline', true)); ?>" placeholder="e.g. Master Chef & Host" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
-                            </div>
-                        </div>
-
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px; margin-bottom:25px;">
-                            <div>
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Profile Logo', 'obenlo'); ?></label>
-                                <?php if($demo_logo): ?>
-                                    <img src="<?php echo wp_get_attachment_image_url($demo_logo, 'thumbnail'); ?>" style="width:60px; height:60px; border-radius:50%; object-fit:cover; margin-bottom:8px; display:block; border:2px solid #fff;">
-                                <?php endif; ?>
-                                <input type="file" name="demo_host_logo" accept="image/*" style="font-size:0.8rem;">
-                            </div>
-                            <div>
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Storefront Banner', 'obenlo'); ?></label>
-                                <?php if($demo_banner): ?>
-                                    <img src="<?php echo wp_get_attachment_image_url($demo_banner, 'medium'); ?>" style="width:100%; height:60px; border-radius:8px; object-fit:cover; margin-bottom:8px; display:block; border:2px solid #fff;">
-                                <?php endif; ?>
-                                <input type="file" name="demo_host_banner" accept="image/*" style="font-size:0.8rem;">
-                            </div>
-                        </div>
-
-                        <div class="grid-row" style="margin-bottom:20px;">
-                            <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;">Demo Instagram (e.g. @obenlo)</label>
-                                <input type="text" name="_obenlo_demo_host_instagram" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_instagram', true)); ?>" placeholder="@username" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
-                            </div>
-                            <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;">Demo Facebook URL</label>
-                                <input type="text" name="_obenlo_demo_host_facebook" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_facebook', true)); ?>" placeholder="https://facebook.com/..." style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
-                            </div>
-                        </div>
-
-                        <div style="margin-bottom:20px;">
-                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Host Specialties', 'obenlo'); ?></label>
-                            <input type="text" name="_obenlo_demo_host_specialties" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_specialties', true)); ?>" placeholder="<?php echo esc_attr(__('e.g. Organic, Pet Friendly, Multilingual', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
-                            <p style="font-size:0.75rem; color:#e61e4d; opacity:0.7; margin-top:5px;"><?php echo __('Separate your specialties with commas.', 'obenlo'); ?></p>
-                        </div>
-
-                        <div class="grid-row" style="margin-bottom:20px;">
-                            <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Demo Host Location', 'obenlo'); ?></label>
-                                <input type="text" name="_obenlo_demo_host_location" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_location', true)); ?>" placeholder="e.g. Port-au-Prince, Haiti" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
-                            </div>
-                            <div style="flex:1;">
-                                <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Featured Video (YouTube/Vimeo)', 'obenlo'); ?></label>
-                                <input type="url" name="_obenlo_demo_host_video" value="<?php echo esc_attr(get_post_meta($listing_id, '_obenlo_demo_host_video', true)); ?>" placeholder="https://www.youtube.com/watch?v=..." style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;">
-                            </div>
-                        </div>
-
-                        <div style="margin-bottom:25px;">
-                            <label style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:8px;"><?php echo __('Demo Host Bio (Storefront Text)', 'obenlo'); ?></label>
-                            <textarea name="_obenlo_demo_host_bio" rows="4" style="width:100%; padding:12px; border:1px solid #fecdd3; border-radius:10px;" placeholder="Write a compelling story..."><?php echo esc_textarea(get_post_meta($listing_id, '_obenlo_demo_host_bio', true)); ?></textarea>
-                        </div>
-
-                        <div style="background:rgba(255,255,255,0.5); padding:20px; border-radius:15px; border:1px solid #fecdd3;">
-                            <h5 style="margin-top:0; margin-bottom:15px; color:#e61e4d;"><?php echo __('Simulated Availability', 'obenlo'); ?></h5>
-                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:10px;">
-                                <?php
-                                $days = array('monday' => 'Mon', 'tuesday' => 'Tue', 'wednesday' => 'Wed', 'thursday' => 'Thu', 'friday' => 'Fri', 'saturday' => 'Sat', 'sunday' => 'Sun');
-                                foreach($days as $key => $label):
-                                    $active = isset($demo_hours[$key]['active']) && $demo_hours[$key]['active'] === 'yes';
-                                ?>
-                                    <label style="background:#fff; padding:10px; border-radius:8px; border:1px solid #fecdd3; display:flex; flex-direction:column; align-items:center; gap:5px; font-size:0.75rem;">
-                                        <input type="checkbox" name="demo_hours[<?php echo $key; ?>][active]" value="yes" <?php checked($active); ?>>
-                                        <strong><?php echo $label; ?></strong>
-                                        <span style="font-size:0.65rem; color:#888;">9AM - 5PM</span>
-                                        <input type="hidden" name="demo_hours[<?php echo $key; ?>][start]" value="09:00">
-                                        <input type="hidden" name="demo_hours[<?php echo $key; ?>][end]" value="17:00">
-                                    </label>
-                                <?php endforeach; ?>
-                            </div>
-                            <p style="font-size:0.75rem; color:#666; margin-bottom:0; font-style:italic;">* Availability is simplified to 9AM-5PM for active days in demo mode.</p>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <?php wp_nonce_field('dashboard_save_listing', 'dashboard_listing_nonce'); ?>
-
-                <!-- Basic Information -->
-                <div class="form-section">
-                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Basic Information', 'obenlo'); ?></h4>
-                    
-                    <div style="margin-bottom:20px;">
-                        <label id="listing_title_label" style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo $title_label; ?></label>
-                        <input type="text" name="listing_title" value="<?php echo esc_attr($title); ?>" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; transition:border-color 0.2s;" onfocus="this.style.borderColor='#e61e4d'" onblur="this.style.borderColor='#ddd'">
-                    </div>
-
-
-                    <div style="margin-bottom:20px;">
-                        <label id="listing_type_label" style="display:block; font-weight:700; margin-bottom:8px; color:#444;">
-                            <?php echo $is_child ? __('Sub-Category', 'obenlo') : __('Industry Category', 'obenlo'); ?>
-                        </label>
-                        <select name="listing_type" id="smart_listing_type" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                            <option value=""><?php echo $is_child ? __('-- Select Sub-Category --', 'obenlo') : __('-- Select Industry --', 'obenlo'); ?></option>
-                            <?php
-                            if ($is_child) {
-                                // Find the parent's top-level industry
-                                $parent_terms = wp_get_post_terms($parent_id, 'listing_type');
-                                $parent_type_id = !empty($parent_terms) && !is_wp_error($parent_terms) ? $parent_terms[0]->term_id : 0;
-                                
-                                // Direct to top parent if not already there
-                                if ($parent_type_id) {
-                                    $check_term = get_term($parent_type_id, 'listing_type');
-                                    while($check_term && $check_term->parent != 0) {
-                                       $check_term = get_term($check_term->parent, 'listing_type');
-                                    }
-                                    if ($check_term) $parent_type_id = $check_term->term_id;
-                                }
-
-                                if (!$parent_type_id) {
-                                    // Fallback: If parent has no industries, show top-level industries directly
-                                    $parent_type_id = 0;
-                                }
-
-                                if ($parent_type_id !== null) {
-                                    $sub_types = get_terms(array('taxonomy' => 'listing_type', 'parent' => $parent_type_id, 'hide_empty' => false));
-                                    if (!is_wp_error($sub_types)) {
-                                        foreach ($sub_types as $type) {
-                                            $selected = ($selected_type == $type->term_id) ? 'selected' : '';
-                                            echo '<option value="' . esc_attr($type->term_id) . '" data-slug="' . esc_attr($type->slug) . '" ' . $selected . '>' . esc_html($type->name) . '</option>';
-                                        }
-                                    }
-                                }
-                            } else {
-                                // Only top-level industries for Main Listing
-                                $top_types = get_terms(array('taxonomy' => 'listing_type', 'parent' => 0, 'hide_empty' => false));
-                                if (!is_wp_error($top_types)) {
-                                    foreach ($top_types as $type) {
-                                        $selected = ($selected_type == $type->term_id) ? 'selected' : '';
-                                        echo '<option value="' . esc_attr($type->term_id) . '" data-slug="' . esc_attr($type->slug) . '" ' . $selected . '>' . esc_html($type->name) . '</option>';
-                                    }
-                                }
-                            }
-                            ?>
-                        </select>
-                        <?php if(!$is_child): ?>
-                            <p style="font-size:0.75rem; color:#888; margin-top:5px;"><?php echo __('Choose the primary industry. You will select specific sub-types for each unit/session.', 'obenlo'); ?></p>
-                        <?php endif; ?>
-                    </div>
-
-                    <?php if (!$is_child): ?>
-                        <div class="grid-row" style="margin-bottom:20px;">
-                            <div id="generic_location_wrapper" style="flex:2;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Address / Location', 'obenlo'); ?></label>
-                                <input type="text" name="listing_location" value="<?php echo esc_attr($location); ?>" placeholder="<?php echo esc_attr(__('e.g. Tulum, Mexico', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
-                            </div>
-                            <div style="flex:1;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Country', 'obenlo'); ?></label>
-                                <select name="listing_country" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                    <option value="usa" <?php selected($listing_country, 'usa'); ?>><?php echo __('United States (USA)', 'obenlo'); ?></option>
-                                    <option value="haiti" <?php selected($listing_country, 'haiti'); ?>><?php echo __('Haiti 🇭🇹', 'obenlo'); ?></option>
-                                    <option value="other" <?php selected($listing_country, 'other'); ?>><?php echo __('Other / International', 'obenlo'); ?></option>
-                                </select>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                    <div style="margin-bottom:0;">
-                        <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo esc_html($desc_label); ?></label>
-                        <textarea name="listing_content" rows="6" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;" placeholder="<?php echo $is_child ? esc_attr(__('Describe this specific unit, room, or session...', 'obenlo')) : esc_attr(__('Describe your overall business, property, or service group...', 'obenlo')); ?>"><?php echo esc_textarea($content); ?></textarea>
-                    </div>
-
-                    <?php if ($is_child): ?>
-                        <!-- Event Specific Configuration -->
-                        <div id="event_config_wrapper" style="margin-top:20px; display:none; padding:20px; background:#f9f9f9; border-radius:12px; border:1px solid #eee;">
-                            <h4 style="margin-top:0; margin-bottom:15px; color:#333;"><?php echo __('Event Schedule & Location', 'obenlo'); ?></h4>
-                            
-                            <div style="margin-bottom:15px;">
-                                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:700;">
-                                    <input type="checkbox" name="event_is_fixed" value="yes" id="event_is_fixed_toggle" <?php checked($event_is_fixed, 'yes'); ?>>
-                                    <?php echo __('Specific Scheduled Time (e.g., Monday 8 April, 4pm-10pm)', 'obenlo'); ?>
-                                </label>
-                            </div>
-
-                            <div id="fixed_time_fields" style="display:<?php echo ($event_is_fixed === 'yes') ? 'block' : 'none'; ?>; margin-bottom:20px;">
-                                <div class="grid-row">
-                                    <div class="grid-col-1-3">
-                                        <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('Event Date', 'obenlo'); ?></label>
-                                        <input type="date" name="event_date" value="<?php echo esc_attr($event_date); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                    </div>
-                                    <div class="grid-col-1-3">
-                                        <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('Start Time', 'obenlo'); ?></label>
-                                        <input type="time" name="event_start_time" value="<?php echo esc_attr($event_start_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                    </div>
-                                    <div class="grid-col-1-3">
-                                        <label style="display:block; font-size:0.85rem; font-weight:700; color:#666; margin-bottom:5px;"><?php echo __('End Time', 'obenlo'); ?></label>
-                                        <input type="time" name="event_end_time" value="<?php echo esc_attr($event_end_time); ?>" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style="margin-bottom:15px;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Event Type', 'obenlo'); ?></label>
-                                <select name="event_location_type" id="event_location_type_select" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                    <option value="virtual" <?php selected($event_location_type, 'virtual'); ?>><?php echo __('Virtual (Zoom, Google Meet, etc.)', 'obenlo'); ?></option>
-                                    <option value="in_person" <?php selected($event_location_type, 'in_person'); ?>><?php echo __('In-Person (Physical Address)', 'obenlo'); ?></option>
-                                </select>
-                            </div>
-
-                            <div id="virtual_link_wrapper" style="display:<?php echo ($event_location_type === 'virtual') ? 'block' : 'none'; ?>;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Virtual Meeting Link', 'obenlo'); ?></label>
-                                <input type="url" name="virtual_link" value="<?php echo esc_url($virtual_link); ?>" placeholder="<?php echo esc_attr(__('https://zoom.us/j/...', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
-                            </div>
-
-                            <div id="in_person_address_wrapper" style="display:<?php echo ($event_location_type === 'in_person') ? 'block' : 'none'; ?>;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Event Address', 'obenlo'); ?></label>
-                                <input type="text" name="listing_event_address" value="<?php echo esc_attr($location); ?>" placeholder="<?php echo esc_attr(__('Enter physical address...', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Pricing, Model & Capacity -->
-                <?php if ($is_child): ?>
-                    <div class="form-section">
-                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Pricing & Booking Rules', 'obenlo'); ?></h4>
-                        
-                        <div class="grid-row" style="margin-bottom:20px;">
-                            <div class="grid-col-1-2">
-                                <label id="listing_price_label" style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Base Price', 'obenlo'); ?></label>
-                                <div style="position:relative;">
-                                    <span style="position:absolute; left:12px; top:12px; color:#888;">$</span>
-                                    <input type="number" step="0.01" name="listing_price" value="<?php echo esc_attr($price); ?>" required style="width:100%; padding:12px 12px 12px 30px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
-                                </div>
-                            </div>
-                            <div id="pricing_model_wrapper" class="grid-col-1-2">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Pricing Model', 'obenlo'); ?></label>
-                                <select name="pricing_model" id="pricing_model" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                    <option value="per_night" <?php selected($pricing_model, 'per_night'); ?>><?php echo __('Per Night', 'obenlo'); ?></option>
-                                    <option value="per_day" <?php selected($pricing_model, 'per_day'); ?>><?php echo __('Per Day', 'obenlo'); ?></option>
-                                    <option value="per_hour" <?php selected($pricing_model, 'per_hour'); ?>><?php echo __('Per Hour', 'obenlo'); ?></option>
-                                    <option value="per_session" <?php selected($pricing_model, 'per_session'); ?>><?php echo __('Per Session / Appointment', 'obenlo'); ?></option>
-                                    <option value="per_person" <?php selected($pricing_model, 'per_person'); ?>><?php echo __('Per Person', 'obenlo'); ?></option>
-                                    <option value="per_event" <?php selected($pricing_model, 'per_event'); ?>><?php echo __('Per Event (Flat Fee)', 'obenlo'); ?></option>
-                                    <option value="per_donation" <?php selected($pricing_model, 'per_donation'); ?>><?php echo __('Per Donation (Fixed Amount)', 'obenlo'); ?></option>
-                                    <option value="custom_donation" <?php selected($pricing_model, 'custom_donation'); ?>><?php echo __('Custom Donation Amount (Pay What You Want)', 'obenlo'); ?></option>
-                                    <option value="flat_fee" <?php selected($pricing_model, 'flat_fee'); ?>><?php echo __('Flat Fee', 'obenlo'); ?></option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid-row" style="margin-bottom:20px;">
-                            <div id="capacity_wrapper" class="grid-col-1-2">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Max Capacity (Guests/Tickets)', 'obenlo'); ?></label>
-                                <input type="number" name="listing_capacity" value="<?php echo esc_attr($capacity); ?>" placeholder="<?php echo esc_attr(__('Leave blank if not applicable', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
-                            </div>
-                            <div id="units_wrapper" class="grid-col-1-2">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Available Units (Concurrent Slots)', 'obenlo'); ?></label>
-                                <input type="number" name="available_units" value="<?php echo esc_attr($available_units); ?>" min="1" step="1" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
-                                <p style="font-size:0.75rem; color:#888; margin-top:4px;"><?php echo __('How many times can this be booked at once?', 'obenlo'); ?></p>
-                            </div>
-                        </div>
-
-                        <div class="grid-row" style="margin-bottom:20px;">
-                            <div id="duration_wrapper" class="grid-col-1-2" style="display:flex; flex-wrap:wrap; gap:10px;">
-                                <div style="flex:1;">
-                                    <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Duration', 'obenlo'); ?></label>
-                                    <input type="number" step="0.5" name="duration_val" value="<?php echo esc_attr($duration_val); ?>" placeholder="e.g. 1.5" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
-                                </div>
-                                <div style="flex:1;">
-                                    <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Unit', 'obenlo'); ?></label>
-                                    <select name="duration_unit" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                        <option value="hours" <?php selected($duration_unit, 'hours'); ?>><?php echo __('Hours', 'obenlo'); ?></option>
-                                        <option value="minutes" <?php selected($duration_unit, 'minutes'); ?>><?php echo __('Minutes', 'obenlo'); ?></option>
-                                    </select>
-                                </div>
-                                <p style="font-size:0.75rem; color:#888; margin-top:8px; width:100%;">
-                                    <?php echo __('This predefines how long the service takes. It will appear as the default duration on your booking form.', 'obenlo'); ?>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div id="requires_slots_wrapper" style="margin-top:10px;">
-                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                                <input type="checkbox" name="requires_slots" value="yes" <?php checked($requires_slots, 'yes'); ?> style="width:18px; height:18px;">
-                                <span style="font-weight:700; color:#444;"><?php echo __('Requires Booking Time Slots', 'obenlo'); ?></span>
-                            </label>
-                            <p style="font-size:0.85rem; color:#666; margin-top:5px; margin-left:28px;"><?php echo __('Check this if you want the calendar to automatically show available time slots during your business hours (e.g. for Haircuts, Spa treatments).', 'obenlo'); ?></p>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <div class="form-section" style="background:#f0f9ff; border:1px solid #bae6fd; padding:20px; border-radius:12px; margin-bottom:30px;">
-                        <div style="display:flex; gap:15px; align-items:center;">
-                            <div style="font-size:1.5rem;">ℹ️</div>
-                            <div>
-                                <h4 style="margin:0 0 5px 0; color:#0369a1;"><?php echo __('Business Profile Mode', 'obenlo'); ?></h4>
-                                <p style="margin:0; font-size:0.9rem; color:#0c4a6e;"><?php echo __('This is your main profile. You will add bookable units, sessions, or events (with their own pricing) after saving this profile.', 'obenlo'); ?></p>
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" name="listing_price" value="0">
-                <?php endif; ?>
-
-
-
-                <?php 
-                $amenity_title = 'Amenities';
-                if (in_array($category_flag, ['experience', 'event', 'show'])) {
-                    $amenity_title = 'What\'s Included';
-                }
-                ?>
-                <!-- Amenities -->
-                <div class="form-section">
-                    <h4 id="amenities_heading" style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo esc_html($amenity_title); ?></h4>
-                    <div id="amenities-container">
-                        <?php
-        $current_amenities = wp_get_post_terms($listing_id, 'listing_amenity', array('fields' => 'names'));
-        if (is_wp_error($current_amenities))
-            $current_amenities = array();
-        if (!empty($current_amenities)):
-            foreach ($current_amenities as $amenity_name): ?>
-                                <div class="amenity-row" style="display:flex; gap:10px; margin-bottom:12px;">
-                                    <input type="text" name="listing_amenities_repeater[]" value="<?php echo esc_attr($amenity_name); ?>" placeholder="e.g. WiFi or Textbook" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                    <button type="button" class="remove-amenity-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
-                                </div>
-                            <?php
-            endforeach; ?>
-                        <?php
-        endif; ?>
-                    </div>
-                    <button type="button" id="add-amenity-btn" style="background:#f9f9f9; border:1px dashed #ccc; color:#666; width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:600; transition:all 0.2s;" onmouseover="this.style.borderColor='#e61e4d';this.style.color='#e61e4d'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">+ <?php echo __('Add New', 'obenlo'); ?></button>
-                    
-                    <template id="amenity-template">
-                        <div class="amenity-row" style="display:flex; gap:10px; margin-bottom:12px;">
-                            <input type="text" name="listing_amenities_repeater[]" value="" placeholder="<?php echo esc_attr(__('e.g. WiFi or Textbook', 'obenlo')); ?>" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                            <button type="button" class="remove-amenity-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
-                        </div>
-                    </template>
-                </div>
-
-                <?php if ($is_child): ?>
-                    <!-- Addons -->
-                    <div class="form-section">
-                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Add-ons (Optional Upsells)', 'obenlo'); ?></h4>
-                        <div id="addons-container">
-                            <?php if (!empty($addons)):
-                foreach ($addons as $addon): ?>
-                                    <div class="addon-row" style="display:flex; gap:10px; margin-bottom:12px;">
-                                        <input type="text" name="addon_names[]" value="<?php echo esc_attr($addon['name']); ?>" placeholder="Addon (e.g. Breakfast)" style="flex:2; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                        <input type="number" step="0.01" name="addon_prices[]" value="<?php echo esc_attr($addon['price']); ?>" placeholder="$" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                        <button type="button" class="remove-addon-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
-                                    </div>
-                                <?php
-                endforeach; ?>
-                            <?php
-            endif; ?>
-                        </div>
-                        <button type="button" id="add-addon-btn" style="background:#f9f9f9; border:1px dashed #ccc; color:#666; width:100%; padding:12px; border-radius:10px; cursor:pointer; font-weight:600;">+ <?php echo __('Add New Addon', 'obenlo'); ?></button>
-                        
-                        <template id="addon-template">
-                            <div class="addon-row" style="display:flex; gap:10px; margin-bottom:12px;">
-                                <input type="text" name="addon_names[]" value="" placeholder="<?php echo esc_attr(__('Addon (e.g. Breakfast)', 'obenlo')); ?>" style="flex:2; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                <input type="number" step="0.01" name="addon_prices[]" value="" placeholder="$" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                                <button type="button" class="remove-addon-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800;">&times;</button>
-                            </div>
-                        </template>
-                    </div>
-                <?php
-        endif; ?>
-
-                <!-- Media -->
-                <div class="form-section">
-                    <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo $media_label; ?></h4>
-                    
-                    <?php if ($listing_id > 0):
-            $images = get_attached_media('image', $listing_id);
-            $curr_count = count($images);
-            $thumb_id = get_post_thumbnail_id($listing_id);
-            // ... (rest of logic)
-?>
-                            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:15px; margin-bottom:20px;">
-                                <?php foreach ($images as $img_id => $img):
-                    $img_url = wp_get_attachment_image_url($img_id, 'thumbnail');
-                    $is_featured = ($img_id == $thumb_id);
-?>
-                                    <div style="position:relative; aspect-ratio:1; border-radius:12px; overflow:hidden; border:2px solid <?php echo $is_featured ? '#e61e4d' : '#eee'; ?>;">
-                                        <img src="<?php echo esc_url($img_url); ?>" style="width:100%; height:100%; object-fit:cover;">
-                                        <?php if ($is_featured): ?>
-                                            <div style="position:absolute; top:5px; left:5px; background:#e61e4d; color:#fff; font-size:8px; font-weight:800; padding:2px 6px; border-radius:20px;">COVER</div>
-                                        <?php endif; ?>
-                                        <label style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; text-align:center; padding:3px; cursor:pointer;">
-                                            <input type="checkbox" name="delete_images[]" value="<?php echo esc_attr($img_id); ?>"> <?php echo __('Remove', 'obenlo'); ?>
-                                        </label>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-                    
-                    <div style="background:#fcfcfc; border:2px dashed #eee; padding:30px; border-radius:15px; text-align:center;">
-                        <input type="file" name="listing_images[]" multiple accept="image/*" style="display:none;" id="listing_file_input" data-limit="<?php echo $media_limit; ?>">
-                        <label for="listing_file_input" style="cursor:pointer; color:#888;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px; height:40px; margin-bottom:10px; color:#ccc;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                            <div style="font-weight:700; color:#444;"><?php echo __('Click to upload photos', 'obenlo'); ?></div>
-                            <div style="font-size:0.8rem; color:#e61e4d;"><?php echo esc_html($media_hint); ?></div>
-                        </label>
-                    </div>
-                </div>
-
-                <?php if (!$is_child): ?>
-                    <!-- Policies -->
-                    <div class="form-section">
-                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Policies & Rules', 'obenlo'); ?></h4>
-                        
-                        <div style="margin-bottom:20px;">
-                            <select name="policy_type" id="policy_type_select" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                <option value="global" <?php selected($policy_type, 'global'); ?>><?php echo __('Use Obenlo Global Policies (Standard)', 'obenlo'); ?></option>
-                                <option value="custom" <?php selected($policy_type, 'custom'); ?>><?php echo __('Set Custom Policies', 'obenlo'); ?></option>
-                            </select>
-                        </div>
-                        
-                        <div id="custom_policies_fields" style="display:<?php echo($policy_type === 'custom') ? 'block' : 'none'; ?>;">
-                            <div style="margin-bottom:20px;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Cancellation Policy', 'obenlo'); ?></label>
-                                <textarea name="policy_cancel" rows="3" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($policy_cancel); ?></textarea>
-                            </div>
-                            <div style="margin-bottom:20px;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Refund Policy', 'obenlo'); ?></label>
-                                <textarea name="policy_refund" rows="3" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($policy_refund); ?></textarea>
-                            </div>
-                            <div style="margin-bottom:0;">
-                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('House Rules / Other', 'obenlo'); ?></label>
-                                <textarea name="policy_other" rows="3" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($policy_other); ?></textarea>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <div style="margin-top:40px; margin-bottom:100px;">
-                    <button type="submit" class="btn-primary" style="padding:15px 40px; font-size:1.1rem; width:100%;"><?php echo sprintf(__('Save %s Now', 'obenlo'), ($is_child ? __('Unit', 'obenlo') : __('Listing', 'obenlo'))); ?></button>
-                    <p style="text-align:center; color:#888; font-size:0.85rem; margin-top:15px;"><?php echo __("By saving, you agree to Obenlo's hosting standard and quality guidelines.", 'obenlo'); ?></p>
-                </div>
-            </form>
-        </div>
-        <?php
-        // Inject JavaScript for dynamic Category logic
-        $this->render_form_javascript($is_child, $selected_type);
-    }
-
-    private function render_form_javascript($is_child, $selected_type)
-    {
-        // We will output a small script to adjust labels based on category
-        // In a real WP environment, we'd enqueue this, but for the shortcode MVP this is clean enough.
-        $types = get_terms(array('taxonomy' => 'listing_type', 'hide_empty' => false));
-        $type_map = array();
-        $slug_map = array();
-
-        if (!is_wp_error($types)) {
-            foreach ($types as $type) {
-                $check_names = [strtolower($type->name)];
-                $check_slugs = [$type->slug];
-                $mapped_cat = 'default';
-
-                if ($type->parent != 0) {
-                    $parent_term = get_term($type->parent, 'listing_type');
-                    if ($parent_term && !is_wp_error($parent_term)) {
-                        $check_names[] = strtolower($parent_term->name);
-                        $check_slugs[] = $parent_term->slug;
-                    }
-                }
-
-                foreach ($check_names as $n) {
-                    if (strpos($n, 'stay') !== false) { $mapped_cat = 'stay'; break; }
-                    if (strpos($n, 'experience') !== false || strpos($n, 'tour') !== false) { $mapped_cat = 'experience'; break; }
-                    if (strpos($n, 'event') !== false) { $mapped_cat = 'event'; break; }
-                    if (strpos($n, 'service') !== false) { $mapped_cat = 'service'; break; }
-                }
-
-                if ($mapped_cat === 'default') {
-                    foreach ($check_slugs as $s) {
-                        if (in_array($s, ['hotel', 'guest-house'])) { $mapped_cat = 'stay'; break; }
-                        if (in_array($s, ['event', 'show', 'class', 'ticket'])) { $mapped_cat = 'event'; break; }
-                        if (in_array($s, ['service', 'beauty', 'chauffeur', 'cook', 'barbershop', 'hairdresser'])) { $mapped_cat = 'service'; break; }
-                    }
-                }
-
-                $type_map[$type->term_id] = $mapped_cat;
-                $slug_map[$type->term_id] = $type->slug;
-            }
-        }
-
-        $init_type_id = $selected_type ? $selected_type : '';
-        $type_map_json = json_encode($type_map);
-?>
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var typeMap = <?php echo json_encode($type_map); ?>;
-            var slugMap = <?php echo json_encode($slug_map); ?>;
-            var isChild = <?php echo $is_child ? 'true' : 'false'; ?>;
-            var initTypeId = '<?php echo esc_js($init_type_id); ?>';
-            
-            var typeSelect = document.querySelector('select[name="listing_type"]');
-            var priceLabel = document.getElementById('listing_price_label');
-            
-            var capInput = document.querySelector('input[name="listing_capacity"]');
-            var capContainer = capInput ? capInput.closest('div') : null;
-            if(!capContainer) capContainer = document.getElementById('capacity_wrapper');
-            var capLabel = capContainer ? capContainer.querySelector('label') : null;
-
-            var pricingModel = document.getElementById('pricing_model');
-            var durationWrapper = document.getElementById('duration_wrapper');
-            var slotsWrapper = document.getElementById('requires_slots_wrapper');
-            var eventConfigWrapper = document.getElementById('event_config_wrapper');
-            var genericLocationWrapper = document.getElementById('generic_location_wrapper');
-            
-            function updateFormLogic(typeId) {
-                var category = typeMap[typeId] || 'default';
-                var slug = slugMap[typeId] || '';
-                
-                // Reset defaults
-                if (capContainer) capContainer.style.display = 'block';
-                if (durationWrapper) durationWrapper.style.display = 'flex';
-                if (slotsWrapper) slotsWrapper.style.display = 'block';
-                if (eventConfigWrapper) eventConfigWrapper.style.display = 'none';
-                if (genericLocationWrapper) genericLocationWrapper.style.display = 'block';
-
-                var amenHeading = document.getElementById('amenities_heading');
-
-                // Reset Pricing Model Options
-                if (pricingModel) {
-                    Array.from(pricingModel.options).forEach(opt => {
-                        opt.hidden = false;
-                        opt.disabled = false;
-                    });
-                }
-
-                // Auto-set defaults ONLY for NEW listings or if currently empty
-                var isNew = <?php echo ($listing_id > 0) ? 'false' : 'true'; ?>;
-                var shouldSetDefault = isNew || !pricingModel.value;
-
-                if (category === 'stay') {
-                    if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Night)', 'obenlo')); ?>';
-                    if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Capacity/Max Guests', 'obenlo')); ?>';
-                    if (pricingModel) {
-                        if (shouldSetDefault) pricingModel.value = 'per_night';
-                        Array.from(pricingModel.options).forEach(opt => {
-                            if (!['per_night', 'per_day', 'flat_fee'].includes(opt.value)) {
-                                opt.hidden = true;
-                                opt.disabled = true;
-                            }
-                        });
-                    }
-                    if (durationWrapper) durationWrapper.style.display = 'none';
-                    if (slotsWrapper) slotsWrapper.style.display = 'none';
-                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Amenities', 'obenlo')); ?>';
-                } else if (category === 'event' || category === 'experience') {
-                    if (priceLabel) priceLabel.innerText = category === 'event' ? '<?php echo esc_js(__('Price (Per Ticket)', 'obenlo')); ?>' : '<?php echo esc_js(__('Price (Per Person/Ticket)', 'obenlo')); ?>';
-                    if (capLabel) capLabel.innerText = category === 'event' ? '<?php echo esc_js(__('Total Tickets Available', 'obenlo')); ?>' : '<?php echo esc_js(__('Max Tickets/Participants', 'obenlo')); ?>';
-                    if (pricingModel) {
-                        if (shouldSetDefault) pricingModel.value = 'per_person';
-                        Array.from(pricingModel.options).forEach(opt => {
-                            if (!['per_person', 'flat_fee', 'per_donation'].includes(opt.value)) {
-                                opt.hidden = true;
-                                opt.disabled = true;
-                            }
-                        });
-                    }
-                    if (slotsWrapper) slotsWrapper.style.display = 'none';
-                    if (eventConfigWrapper) eventConfigWrapper.style.display = isChild ? 'block' : 'none';
-                    if (genericLocationWrapper) genericLocationWrapper.style.display = isChild ? 'none' : 'block';
-                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__("What's Included", 'obenlo')); ?>';
-                } else if (category === 'service') {
-                    if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Per Hour/Session)', 'obenlo')); ?>';
-                    if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Max Clients per Slot', 'obenlo')); ?>';
-                    if (pricingModel) {
-                        if (shouldSetDefault) {
-                            pricingModel.value = 'per_session';
-                            if(['babysitter', 'dogsitter', 'chauffeur'].includes(slug)) {
-                                pricingModel.value = 'per_hour';
-                            }
-                        }
-                        Array.from(pricingModel.options).forEach(opt => {
-                            if (!['per_session', 'per_hour', 'flat_fee'].includes(opt.value)) {
-                                opt.hidden = true;
-                                opt.disabled = true;
-                            }
-                        });
-                    }
-                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Amenities', 'obenlo')); ?>';
-                } else if (category === 'celebration') {
-                    if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Event Fee ($)', 'obenlo')); ?>';
-                    if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Max Guests', 'obenlo')); ?>';
-                    if (pricingModel) {
-                        if (shouldSetDefault) pricingModel.value = 'per_event';
-                        Array.from(pricingModel.options).forEach(opt => {
-                            if (!['per_event', 'per_hour', 'per_person', 'flat_fee'].includes(opt.value)) {
-                                opt.hidden = true;
-                                opt.disabled = true;
-                            }
-                        });
-                    }
-                    if (slotsWrapper) slotsWrapper.style.display = 'none';
-                    if (eventConfigWrapper) eventConfigWrapper.style.display = 'block';
-                    if (genericLocationWrapper) genericLocationWrapper.style.display = 'none';
-                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__("What's Included", 'obenlo')); ?>';
-                } else if (category === 'donation') {
-                    if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Suggested Donation ($)', 'obenlo')); ?>';
-                    if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Max Donors/Supporters (Optional)', 'obenlo')); ?>';
-                    if (pricingModel) {
-                        if (shouldSetDefault) pricingModel.value = 'per_donation';
-                        Array.from(pricingModel.options).forEach(opt => {
-                            if (!['per_donation', 'custom_donation', 'flat_fee'].includes(opt.value)) {
-                                opt.hidden = true;
-                                opt.disabled = true;
-                            }
-                        });
-                    }
-                    if (durationWrapper) durationWrapper.style.display = 'none';
-                    if (slotsWrapper) slotsWrapper.style.display = 'none';
-                    if (eventConfigWrapper) eventConfigWrapper.style.display = 'none';
-                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Donation Details', 'obenlo')); ?>';
-                } else {
-                    if (priceLabel) priceLabel.innerText = '<?php echo esc_js(__('Price (Base)', 'obenlo')); ?>';
-                    if (capLabel) capLabel.innerText = '<?php echo esc_js(__('Capacity/Max Guests', 'obenlo')); ?>';
-                    if (amenHeading) amenHeading.innerText = '<?php echo esc_js(__('Amenities', 'obenlo')); ?>';
-                }
-
-                // Call location toggles within footer JS context
-                updateEventLocationToggles();
-            }
-
-            function updateEventLocationToggles() {
-                var eventLocationSelect = document.getElementById('event_location_type_select');
-                var vLinkWrapper = document.getElementById('virtual_link_wrapper');
-                var inPersWrapper = document.getElementById('in_person_address_wrapper');
-                if(eventLocationSelect && vLinkWrapper && inPersWrapper) {
-                    vLinkWrapper.style.display = eventLocationSelect.value === 'virtual' ? 'block' : 'none';
-                    inPersWrapper.style.display = eventLocationSelect.value === 'in_person' ? 'block' : 'none';
-                }
-            }
-            
-            if (typeSelect) {
-                typeSelect.addEventListener('change', function(e) {
-                    updateFormLogic(e.target.value);
-                });
-            }
-            
-            // Initialize
-            if (initTypeId) {
-                updateFormLogic(initTypeId);
-            } else if (typeSelect && typeSelect.value) {
-                updateFormLogic(typeSelect.value);
-            }
-            
-            // Addons Repeater Logic
-            var addAddonBtn = document.getElementById('add-addon-btn');
-            var addonsContainer = document.getElementById('addons-container');
-            var addonTemplate = document.getElementById('addon-template');
-            
-            if(addAddonBtn && addonsContainer && addonTemplate) {
-                addAddonBtn.addEventListener('click', function() {
-                    var clone = addonTemplate.content.cloneNode(true);
-                    addonsContainer.appendChild(clone);
-                });
-                
-                addonsContainer.addEventListener('click', function(e) {
-                    if(e.target.classList.contains('remove-addon-btn')) {
-                        e.target.closest('.addon-row').remove();
-                    }
-                });
-            }
-
-            // Amenities Repeater Logic
-            var addAmenityBtn = document.getElementById('add-amenity-btn');
-            var amenitiesContainer = document.getElementById('amenities-container');
-            var amenityTemplate = document.getElementById('amenity-template');
-            
-            if(addAmenityBtn && amenitiesContainer && amenityTemplate) {
-                addAmenityBtn.addEventListener('click', function() {
-                    var clone = amenityTemplate.content.cloneNode(true);
-                    amenitiesContainer.appendChild(clone);
-                });
-                
-                amenitiesContainer.addEventListener('click', function(e) {
-                    if(e.target.classList.contains('remove-amenity-btn')) {
-                        e.target.closest('.amenity-row').remove();
-                    }
-                });
-            }
-
-            // Policies Logic
-            var policySelect = document.getElementById('policy_type_select');
-            var customFields = document.getElementById('custom_policies_fields');
-            if(policySelect && customFields) {
-                policySelect.addEventListener('change', function(e) {
-                    if(e.target.value === 'custom') {
-                        customFields.style.display = 'block';
-                    } else {
-                        customFields.style.display = 'none';
-                    }
-                });
-            }
-
-            // Event Configuration JS
-            var eventFixedToggle = document.getElementById('event_is_fixed_toggle');
-            var fixedTimeFields = document.getElementById('fixed_time_fields');
-            if(eventFixedToggle && fixedTimeFields) {
-                eventFixedToggle.addEventListener('change', function() {
-                    fixedTimeFields.style.display = this.checked ? 'block' : 'none';
-                });
-            }
-
-            var eventLocationSelect = document.getElementById('event_location_type_select');
-            var vLinkWrapper = document.getElementById('virtual_link_wrapper');
-            var inPersWrapper = document.getElementById('in_person_address_wrapper');
-            if(eventLocationSelect && vLinkWrapper && inPersWrapper) {
-                eventLocationSelect.addEventListener('change', function() {
-                    vLinkWrapper.style.display = this.value === 'virtual' ? 'block' : 'none';
-                    inPersWrapper.style.display = this.value === 'in_person' ? 'block' : 'none';
-                });
-            }
-        });
-        </script>
-        <?php
-    }
-
     public function render_storefront_form()
     {
         $user_id = get_current_user_id();
@@ -2148,358 +1254,6 @@ class Obenlo_Booking_Frontend_Dashboard
         </div>
         <?php
     }
-
-    public function handle_save_listing()
-    {
-        if (!isset($_POST['dashboard_listing_nonce']) || !wp_verify_nonce($_POST['dashboard_listing_nonce'], 'dashboard_save_listing')) {
-            $this->redirect_with_error('security_failed');
-        }
-
-        if (!is_user_logged_in() || !(current_user_can('host') || current_user_can('administrator'))) {
-            $this->redirect_with_error('unauthorized');
-        }
-
-        $user = wp_get_current_user();
-
-        $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
-        $title = sanitize_text_field($_POST['listing_title']);
-        $content = wp_kses_post(wp_unslash($_POST['listing_content']));
-        $parent_id = 0;
-        if (isset($_POST['parent_id'])) {
-            $parent_id = intval($_POST['parent_id']);
-        } elseif (isset($_GET['parent_id'])) {
-            $parent_id = intval($_GET['parent_id']);
-        }
-
-        $post_data = array(
-            'post_title'   => $title,
-            'post_content' => $content,
-            'post_status'  => 'publish',
-            'post_type'    => 'listing',
-            'post_parent'  => $parent_id
-        );
-
-        if ($listing_id > 0) {
-            $post_data['ID'] = $listing_id;
-            // Preserve author on edit
-            $existing_post = get_post($listing_id);
-            if ($existing_post) {
-                $post_data['post_author'] = $existing_post->post_author;
-            }
-        } else {
-            // New Listing: Inherit parent author if applicable (crucial for Demo units), else current user
-            if ($parent_id > 0) {
-                $parent = get_post($parent_id);
-                $post_data['post_author'] = $parent ? $parent->post_author : get_current_user_id();
-            } else {
-                $post_data['post_author'] = get_current_user_id();
-            }
-        }
-
-        if ($listing_id > 0) {
-            if ($existing_post->post_author != get_current_user_id() && !current_user_can('administrator')) {
-                $this->redirect_with_error('unauthorized');
-            }
-            $new_post_id = wp_update_post($post_data);
-        } else {
-            $new_post_id = wp_insert_post($post_data);
-
-            // --- Safe Auto-attribution for Demo Listings (Admin Only) ---
-            if (isset($_POST['is_demo']) && $_POST['is_demo'] === '1' && current_user_can('administrator')) {
-                $demo_host_name = !empty($_POST['_obenlo_demo_host_name']) ? sanitize_text_field($_POST['_obenlo_demo_host_name']) : '';
-                
-                if ($demo_host_name) {
-                    $demo_user_login = 'demo_' . sanitize_title($demo_host_name);
-                    
-                    // Look for existing or create new demo host account
-                    $demo_user_id = username_exists($demo_user_login);
-                    if (!$demo_user_id) {
-                        $demo_user_id = wp_create_user($demo_user_login, wp_generate_password(), $demo_user_login . "@obenlo.com");
-                        if (!is_wp_error($demo_user_id)) {
-                            wp_update_user(['ID' => $demo_user_id, 'display_name' => $demo_host_name]);
-                            $du = new WP_User($demo_user_id);
-                            $du->set_role('host');
-                            update_user_meta($demo_user_id, '_obenlo_is_demo_account', 'yes');
-                        }
-                    }
-                    
-                    if ($demo_user_id && !is_wp_error($demo_user_id)) {
-                        wp_update_post(['ID' => $new_post_id, 'post_author' => $demo_user_id]);
-                    }
-                }
-            }
-        }
-
-        if ($new_post_id && !is_wp_error($new_post_id)) {
-            // Meta Fields
-            if (isset($_POST['listing_price'])) {
-                update_post_meta($new_post_id, '_obenlo_price', sanitize_text_field($_POST['listing_price']));
-            }
-            if (isset($_POST['listing_capacity'])) {
-                update_post_meta($new_post_id, '_obenlo_capacity', sanitize_text_field($_POST['listing_capacity']));
-            }
-            if (isset($_POST['available_units'])) {
-                update_post_meta($new_post_id, '_obenlo_available_units', intval($_POST['available_units']));
-            }
-            if (isset($_POST['listing_location']) && !empty($_POST['listing_location'])) {
-                update_post_meta($new_post_id, '_obenlo_location', sanitize_text_field($_POST['listing_location']));
-            } elseif (isset($_POST['listing_event_address']) && !empty($_POST['listing_event_address'])) {
-                update_post_meta($new_post_id, '_obenlo_location', sanitize_text_field($_POST['listing_event_address']));
-                if ($parent_location) {
-                    update_post_meta($new_post_id, '_obenlo_location', $parent_location);
-                }
-            }
-
-            if (isset($_POST['listing_country'])) {
-                update_post_meta($new_post_id, '_obenlo_listing_country', sanitize_text_field($_POST['listing_country']));
-            } elseif ($parent_id > 0) {
-                $parent_country = get_post_meta($parent_id, '_obenlo_listing_country', true);
-                if ($parent_country) {
-                    update_post_meta($new_post_id, '_obenlo_listing_country', $parent_country);
-                }
-            }
-            if (isset($_POST['virtual_link'])) {
-                update_post_meta($new_post_id, '_obenlo_virtual_link', esc_url_raw($_POST['virtual_link']));
-            }
-
-
-
-            // Fixed Event Scheduling
-            update_post_meta($new_post_id, '_obenlo_event_is_fixed', isset($_POST['event_is_fixed']) ? 'yes' : 'no');
-            if (isset($_POST['event_date'])) {
-                update_post_meta($new_post_id, '_obenlo_event_date', sanitize_text_field($_POST['event_date']));
-            }
-            if (isset($_POST['event_start_time'])) {
-                update_post_meta($new_post_id, '_obenlo_event_start_time', sanitize_text_field($_POST['event_start_time']));
-            }
-            if (isset($_POST['event_end_time'])) {
-                update_post_meta($new_post_id, '_obenlo_event_end_time', sanitize_text_field($_POST['event_end_time']));
-            }
-            if (isset($_POST['event_location_type'])) {
-                update_post_meta($new_post_id, '_obenlo_event_location_type', sanitize_text_field($_POST['event_location_type']));
-            }
-
-            // New Booking Meta Fields
-            if (isset($_POST['pricing_model'])) {
-                update_post_meta($new_post_id, '_obenlo_pricing_model', sanitize_text_field($_POST['pricing_model']));
-            }
-            if (isset($_POST['duration_val'])) {
-                update_post_meta($new_post_id, '_obenlo_duration_val', sanitize_text_field($_POST['duration_val']));
-            }
-            if (isset($_POST['duration_unit'])) {
-                update_post_meta($new_post_id, '_obenlo_duration_unit', sanitize_text_field($_POST['duration_unit']));
-            }
-
-            $req_slots = isset($_POST['requires_slots']) && $_POST['requires_slots'] === 'yes' ? 'yes' : 'no';
-            update_post_meta($new_post_id, '_obenlo_requires_slots', $req_slots);
-
-            // Demo Configuration
-            if (isset($_POST['is_demo']) && $_POST['is_demo'] === '1' && current_user_can('administrator')) {
-                update_post_meta($new_post_id, '_obenlo_is_demo', 'yes');
-                
-                if (isset($_POST['_obenlo_demo_host_name'])) {
-                    update_post_meta($new_post_id, '_obenlo_demo_host_name', sanitize_text_field($_POST['_obenlo_demo_host_name']));
-                }
-                if (isset($_POST['_obenlo_demo_host_bio'])) {
-                    update_post_meta($new_post_id, '_obenlo_demo_host_bio', sanitize_textarea_field(wp_unslash($_POST['_obenlo_demo_host_bio'])));
-                }
-                if (isset($_POST['_obenlo_demo_host_location'])) {
-                    update_post_meta($new_post_id, '_obenlo_demo_host_location', sanitize_text_field($_POST['_obenlo_demo_host_location']));
-                }
-                if (isset($_POST['_obenlo_demo_host_tagline'])) {
-                    update_post_meta($new_post_id, '_obenlo_demo_host_tagline', sanitize_text_field($_POST['_obenlo_demo_host_tagline']));
-                }
-                if (isset($_POST['_obenlo_demo_host_instagram'])) {
-                    update_post_meta($new_post_id, '_obenlo_demo_host_instagram', sanitize_text_field($_POST['_obenlo_demo_host_instagram']));
-                }
-                if (isset($_POST['_obenlo_demo_host_facebook'])) {
-                    update_post_meta($new_post_id, '_obenlo_demo_host_facebook', esc_url_raw($_POST['_obenlo_demo_host_facebook']));
-                }
-                if (isset($_POST['_obenlo_demo_host_specialties'])) {
-                    update_post_meta($new_post_id, '_obenlo_demo_host_specialties', sanitize_text_field($_POST['_obenlo_demo_host_specialties']));
-                }
-                if (isset($_POST['_obenlo_demo_host_video'])) {
-                    update_post_meta($new_post_id, '_obenlo_demo_host_video', esc_url_raw($_POST['_obenlo_demo_host_video']));
-                }
-
-                // Sync to Virtual User Meta (for consistent display in author.php and elsewhere)
-                $virtual_user_id = get_post_field('post_author', $new_post_id);
-                if ($virtual_user_id && $virtual_user_id != get_current_user_id()) {
-                    if (isset($_POST['_obenlo_demo_host_name'])) update_user_meta($virtual_user_id, 'obenlo_store_name', sanitize_text_field($_POST['_obenlo_demo_host_name']));
-                    if (isset($_POST['_obenlo_demo_host_bio'])) update_user_meta($virtual_user_id, 'obenlo_store_description', sanitize_textarea_field(wp_unslash($_POST['_obenlo_demo_host_bio'])));
-                    if (isset($_POST['_obenlo_demo_host_location'])) update_user_meta($virtual_user_id, 'obenlo_store_location', sanitize_text_field($_POST['_obenlo_demo_host_location']));
-                    if (isset($_POST['_obenlo_demo_host_tagline'])) update_user_meta($virtual_user_id, 'obenlo_store_tagline', sanitize_text_field($_POST['_obenlo_demo_host_tagline']));
-                    if (isset($_POST['_obenlo_demo_host_specialties'])) update_user_meta($virtual_user_id, 'obenlo_specialties', sanitize_text_field($_POST['_obenlo_demo_host_specialties']));
-                    if (isset($_POST['_obenlo_demo_host_instagram'])) update_user_meta($virtual_user_id, 'obenlo_instagram', sanitize_text_field($_POST['_obenlo_demo_host_instagram']));
-                    if (isset($_POST['_obenlo_demo_host_facebook'])) update_user_meta($virtual_user_id, 'obenlo_facebook', sanitize_text_field($_POST['_obenlo_demo_host_facebook']));
-                }
-
-                // Processing Demo Assets
-                require_once(ABSPATH . 'wp-admin/includes/image.php');
-                require_once(ABSPATH . 'wp-admin/includes/file.php');
-                require_once(ABSPATH . 'wp-admin/includes/media.php');
-
-                if (isset($_FILES['demo_host_logo']) && !empty($_FILES['demo_host_logo']['name'])) {
-                    $attachment_id = media_handle_upload('demo_host_logo', $new_post_id);
-                    if (!is_wp_error($attachment_id)) {
-                        update_post_meta($new_post_id, '_obenlo_demo_host_logo', $attachment_id);
-                    }
-                }
-                if (isset($_FILES['demo_host_banner']) && !empty($_FILES['demo_host_banner']['name'])) {
-                    $attachment_id = media_handle_upload('demo_host_banner', $new_post_id);
-                    if (!is_wp_error($attachment_id)) {
-                        update_post_meta($new_post_id, '_obenlo_demo_host_banner', $attachment_id);
-                    }
-                }
-
-                // Demo Availability
-                if (isset($_POST['demo_hours'])) {
-                    $d_hours = (array)$_POST['demo_hours'];
-                    $sanitized_d_hours = array();
-                    foreach ($d_hours as $day => $d_data) {
-                        $sanitized_d_hours[sanitize_key($day)] = array(
-                            'active' => isset($d_data['active']) && $d_data['active'] === 'yes' ? 'yes' : 'no',
-                            'start' => '09:00',
-                            'end' => '17:00'
-                        );
-                    }
-                    update_post_meta($new_post_id, '_obenlo_demo_business_hours', $sanitized_d_hours);
-                }
-            }
-
-            // Policies (Parent Only)
-            if ($parent_id == 0) {
-                if (isset($_POST['policy_type'])) {
-                    update_post_meta($new_post_id, '_obenlo_policy_type', sanitize_text_field($_POST['policy_type']));
-                }
-                if (isset($_POST['policy_cancel'])) {
-                    update_post_meta($new_post_id, '_obenlo_policy_cancel', sanitize_textarea_field(wp_unslash($_POST['policy_cancel'])));
-                }
-                if (isset($_POST['policy_refund'])) {
-                    update_post_meta($new_post_id, '_obenlo_policy_refund', sanitize_textarea_field(wp_unslash($_POST['policy_refund'])));
-                }
-                if (isset($_POST['policy_other'])) {
-                    update_post_meta($new_post_id, '_obenlo_policy_other', sanitize_textarea_field(wp_unslash($_POST['policy_other'])));
-                }
-            }
-
-            // Structured Addons Repeater
-            $structured_addons = array();
-            if (isset($_POST['addon_names']) && isset($_POST['addon_prices'])) {
-                $names = $_POST['addon_names']; // We aren't doing heavy sanitization inside loop to avoid escaping issues
-                $prices = $_POST['addon_prices'];
-                for ($i = 0; $i < count($names); $i++) {
-                    $name = sanitize_text_field(wp_unslash($names[$i]));
-                    $price = sanitize_text_field(wp_unslash($prices[$i]));
-                    // Only save if name exists
-                    if (!empty($name)) {
-                        $structured_addons[] = array(
-                            'name' => $name,
-                            'price' => $price
-                        );
-                    }
-                }
-            }
-            update_post_meta($new_post_id, '_obenlo_addons_structured', wp_json_encode($structured_addons));
-
-            // Term: Type (Hierarchy Enforcement)
-            $post_type_override = isset($_POST['listing_type']) ? intval($_POST['listing_type']) : 0;
-            if ($parent_id > 0 && !$post_type_override) {
-                // Inherit from parent if sub-category isn't explicitly set
-                $parent_terms = wp_get_post_terms($parent_id, 'listing_type');
-                if ($parent_terms && !is_wp_error($parent_terms)) {
-                    $post_type_override = $parent_terms[0]->term_id;
-                }
-            }
-
-            if ($post_type_override) {
-                wp_set_post_terms($new_post_id, array($post_type_override), 'listing_type');
-            }
-
-            // Term: Amenities (Repeater strings - Available for all)
-            $selected_amenities = array();
-            if (isset($_POST['listing_amenities_repeater']) && is_array($_POST['listing_amenities_repeater'])) {
-                foreach ($_POST['listing_amenities_repeater'] as $amenity_val) {
-                    $term_name = sanitize_text_field(wp_unslash($amenity_val));
-                    $term_name = trim($term_name);
-                    if (!empty($term_name)) {
-                        $term = term_exists($term_name, 'listing_amenity');
-                        if (!$term) {
-                            $term = wp_insert_term($term_name, 'listing_amenity');
-                        }
-                        if (!is_wp_error($term) && isset($term['term_id'])) {
-                            $selected_amenities[] = intval($term['term_id']);
-                        }
-                    }
-                }
-            }
-            // Set all amenities
-            wp_set_post_terms($new_post_id, $selected_amenities, 'listing_amenity');
-
-            // --- Images Processing ---
-
-            // Delete marked images
-            if (isset($_POST['delete_images']) && is_array($_POST['delete_images'])) {
-                foreach ($_POST['delete_images'] as $del_id) {
-                    // Check if it's the featured image and remove it
-                    if (get_post_thumbnail_id($new_post_id) == $del_id) {
-                        delete_post_thumbnail($new_post_id);
-                    }
-                    wp_delete_attachment(intval($del_id), true);
-                }
-            }
-            // Ensure there's a cover image if images remain and featured image was deleted
-            $remaining = get_attached_media('image', $new_post_id);
-            if (!has_post_thumbnail($new_post_id) && count($remaining) > 0) {
-                set_post_thumbnail($new_post_id, array_key_first($remaining));
-            }
-
-            // Handle new image uploads
-            if (isset($_FILES['listing_images']) && !empty($_FILES['listing_images']['name'][0])) {
-                require_once(ABSPATH . 'wp-admin/includes/image.php');
-                require_once(ABSPATH . 'wp-admin/includes/file.php');
-                require_once(ABSPATH . 'wp-admin/includes/media.php');
-
-                $files = $_FILES['listing_images'];
-                $count = count($files['name']);
-
-                // Get current images count to enforce limit
-                $current_images = get_attached_media('image', $new_post_id);
-                $current_count = count($current_images);
-
-                for ($i = 0; $i < $count; $i++) {
-                    if ($files['name'][$i]) {
-                        if ($current_count >= 10)
-                            break; // Limit to 10 images
-
-                        $file = array(
-                            'name' => $files['name'][$i],
-                            'type' => $files['type'][$i],
-                            'tmp_name' => $files['tmp_name'][$i],
-                            'error' => $files['error'][$i],
-                            'size' => $files['size'][$i]
-                        );
-                        $_FILES = array("upload_file" => $file);
-                        $attachment_id = media_handle_upload("upload_file", $new_post_id);
-
-                        if (!is_wp_error($attachment_id)) {
-                            $current_count++;
-                            // Set first uploaded image as featured if none exists
-                            if (!has_post_thumbnail($new_post_id)) {
-                                set_post_thumbnail($new_post_id, $attachment_id);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        $redirect_url = remove_query_arg(array('action', 'parent_id', 'message'), wp_get_referer());
-        $redirect_url = add_query_arg('obenlo_modal', 'listing_saved', $redirect_url);
-        wp_safe_redirect($redirect_url);
-        exit;
-    }
-
     public function handle_save_storefront()
     {
         if (!isset($_POST['dashboard_storefront_nonce']) || !wp_verify_nonce($_POST['dashboard_storefront_nonce'], 'dashboard_save_storefront')) {
@@ -2719,7 +1473,7 @@ class Obenlo_Booking_Frontend_Dashboard
                                 </div>
                                 <div style="border-top:1px solid #f5f5f5; padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
                                     <span style="font-size:0.75rem; color:#aaa;"><?php echo __('Last updated:', 'obenlo'); ?> <?php echo get_the_modified_date('', $ticket->ID); ?></span>
-                                    <a href="<?php echo esc_url(add_query_arg('ticket_id', $ticket->ID, home_url('/support'))); ?>" style="color:#e61e4d; font-weight:700; text-decoration:none; font-size:0.9rem;"><?php echo __('View Conversation →', 'obenlo'); ?></a>
+                                    <a href="<?php echo esc_url(add_query_arg('ticket_id', $ticket->ID, home_url('/support'))); ?>" style="color:#e61e4d; font-weight:700; text-decoration:none; font-size:0.9rem;"><?php echo __('View Conversation â†’', 'obenlo'); ?></a>
                                 </div>
                             </div>
                         <?php
@@ -2796,7 +1550,7 @@ class Obenlo_Booking_Frontend_Dashboard
                     <div style="width:30px; height:30px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:800; font-size:0.8rem;">1</div>
                     <div>
                         <h4 style="margin:0; font-weight:800;"><?php echo __('Approve Requests', 'obenlo'); ?></h4>
-                        <p style="margin:5px 0 0 0; font-size:0.95rem; color:#666;"><?php echo __('Speed is key. Approve bookings in the <b>Bookings</b> tab to lock in the guest’s payment.', 'obenlo'); ?></p>
+                        <p style="margin:5px 0 0 0; font-size:0.95rem; color:#666;"><?php echo __('Speed is key. Approve bookings in the <b>Bookings</b> tab to lock in the guestâ€™s payment.', 'obenlo'); ?></p>
                     </div>
                 </div>
                 <div style="display:flex; gap:20px; align-items:flex-start;">
@@ -2827,7 +1581,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 Reviews are your currency on Obenlo.
             </p>
             <ul style="color:#555; font-size:1rem; line-height:2; margin-top:10px; padding-left:20px;">
-                <li><strong>Review Moderation:</strong> Check the <b>Reviews</b> tab frequently. Approve positive reviews to make them visible and always reply to feedback—it shows future guests you are a pro.</li>
+                <li><strong>Review Moderation:</strong> Check the <b>Reviews</b> tab frequently. Approve positive reviews to make them visible and always reply to feedbackâ€”it shows future guests you are a pro.</li>
                 <li><strong>Obenlo Love:</strong> Submit your own success stories in the <b>Obenlo Love</b> tab. We feature these on our homepage to drive traffic to your storefront.</li>
                 <li><strong>Ranking:</strong> Respond faster to <b>Messages</b> to increase your visibility in search results.</li>
             </ul>
@@ -3104,10 +1858,10 @@ class Obenlo_Booking_Frontend_Dashboard
                 .then(data => {
                     if(data.success) {
                         msg.style.color = '#10b981';
-                        msg.innerText = '✓ ' + data.data.message;
+                        msg.innerText = 'âœ“ ' + data.data.message;
                     } else {
                         msg.style.color = '#ef4444';
-                        msg.innerText = '❌ ' + data.data;
+                        msg.innerText = 'âŒ ' + data.data;
                     }
                 })
                 .finally(() => {
@@ -3139,7 +1893,7 @@ class Obenlo_Booking_Frontend_Dashboard
                             alert(data.data.message);
                             window.location.reload();
                         } else {
-                            alert('❌ ' + data.data);
+                            alert('âŒ ' + data.data);
                             reqBtn.disabled = false;
                             reqBtn.innerText = '<?php echo esc_js(__('Withdraw Earnings', 'obenlo')); ?>';
                         }
@@ -3329,48 +2083,6 @@ class Obenlo_Booking_Frontend_Dashboard
         update_user_meta($user_id, '_obenlo_vacation_blocks', $sanitized_vacations);
 
         wp_safe_redirect(add_query_arg(array('action' => 'availability', 'message' => 'saved'), home_url('/host-dashboard')));
-        exit;
-    }
-
-    /**
-     * Handle listing deletion from the dashboard
-     */
-    public function handle_delete_listing() {
-        if (!is_user_logged_in()) {
-            $this->redirect_with_error('unauthorized');
-        }
-
-        $listing_id = isset($_POST['listing_id']) ? intval($_POST['listing_id']) : 0;
-        if (!$listing_id) {
-            $this->redirect_with_error('invalid_listing');
-        }
-
-        // Security check
-        check_admin_referer('obenlo_delete_listing_' . $listing_id);
-
-        $post = get_post($listing_id);
-        if (!$post || ($post->post_author != get_current_user_id() && !current_user_can('administrator'))) {
-            $this->redirect_with_error('unauthorized');
-        }
-
-
-
-        // Delete children first if it's a parent
-        $children = get_posts(array(
-            'post_type' => 'listing',
-            'post_parent' => $listing_id,
-            'posts_per_page' => -1,
-            'fields' => 'ids'
-        ));
-
-        foreach ($children as $child_id) {
-            wp_delete_post($child_id, true);
-        }
-
-        // Delete the listing
-        wp_delete_post($listing_id, true);
-
-        wp_safe_redirect(add_query_arg(array('action' => 'list', 'message' => 'deleted'), home_url('/host-dashboard')));
         exit;
     }
 

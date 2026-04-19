@@ -176,6 +176,10 @@ class Obenlo_Booking_Payments
         $guests = isset($_POST['guests']) ? intval($_POST['guests']) : 1;
         $payment_method = isset($_POST['payment_method']) ? sanitize_text_field($_POST['payment_method']) : 'stripe';
 
+        // Extract Logistics Info
+        $logistics_pickup = isset($_POST['logistics_pickup']) ? sanitize_text_field($_POST['logistics_pickup']) : '';
+        $logistics_dropoff = isset($_POST['logistics_dropoff']) ? sanitize_text_field($_POST['logistics_dropoff']) : '';
+
         // Verify if payment method is enabled
         $is_enabled = get_option('obenlo_' . $payment_method . '_enabled', 'yes');
         if ($is_enabled !== 'yes') {
@@ -198,6 +202,14 @@ class Obenlo_Booking_Payments
         // Calculate Price based on Pricing Model
         $pricing_model = get_post_meta($listing_id, '_obenlo_pricing_model', true) ?: 'per_night';
         $requires_slots = get_post_meta($listing_id, '_obenlo_requires_slots', true) ?: 'no';
+        $requires_logistics = get_post_meta($listing_id, '_obenlo_requires_logistics', true) ?: 'no';
+
+        // Logistics Validation
+        if ($requires_logistics === 'yes') {
+            if (empty($logistics_pickup) || empty($logistics_dropoff)) {
+                obenlo_redirect_with_error('invalid_data');
+            }
+        }
         $price_per_unit = floatval(get_post_meta($listing_id, '_obenlo_price', true));
         $total_price = $price_per_unit;
         $duration_mins = 0;
@@ -400,6 +412,11 @@ class Obenlo_Booking_Payments
         update_post_meta($booking_id, '_obenlo_booking_status', ($total_price <= 0) ? 'confirmed' : 'pending_payment');
         update_post_meta($booking_id, '_obenlo_confirmation_code', $confirmation_code);
         update_post_meta($booking_id, '_obenlo_guest_id', $guest_id_val);
+
+        if ($requires_logistics === 'yes') {
+            update_post_meta($booking_id, '_obenlo_logistics_pickup', $logistics_pickup);
+            update_post_meta($booking_id, '_obenlo_logistics_dropoff', $logistics_dropoff);
+        }
         
         $payment_mode = get_option('obenlo_payment_mode', 'sandbox');
         update_post_meta($booking_id, '_obenlo_payment_mode', $payment_mode);

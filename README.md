@@ -14,12 +14,12 @@ Obenlo is a custom-engineered WordPress ecosystem designed for high-concurrency 
 | **Frontend** | Vanilla CSS (Premium Aesthetics), React (Planner Subsystem) |
 | **Logic** | custom-built `obenlo-booking` plugin |
 | **Mobile** | PWA (Service Workers, Offline Manifest) |
-| **Payments** | Stripe, PayPal, MonCash, Natcash |
+| **Payments** | Stripe, PayPal |
 
 ---
 
-## 📂 Architecture: Core Plugins
-Obenlo is decentralized across several specialized plugins for maintainability:
+## 📂 Architecture: Modular Plugins
+Obenlo is decentralized across several specialized plugins for maintainability. The core booking engine follows a **"One Class, One Role"** modular architecture:
 
 1. **`obenlo-booking`**: The core "Engine." Handles:
    - CPTs: `listing`, `booking`, `ticket`, `broadcast`.
@@ -29,6 +29,14 @@ Obenlo is decentralized across several specialized plugins for maintainability:
 3. **`obenlo-i18n`**: Advanced translation engine and language filtering.
 4. **`obenlo-seo`**: Smart SEO Engine 2.0. Handles location-aware meta, BreadcrumbList schema, and rich snippets.
 5. **`obenlo-social`**: Provides viral sharing engines, WhatsApp auto-posting, and frontend quick tools for hosts.
+
+---
+
+## 📖 Documentation & Reference
+To maintain a clean repository root, all core logic and guides are centralized in the [`/wp-content/docs/`](file:///c:/Users/obenc/Local%20Sites/obenlo/app/public/wp-content/docs/) directory:
+- **`logic-reference.md`**: Core business rules for Listings and Profiles.
+- **`deployment-guide.md`**: Protocol for migrating between environments.
+- **`ARCHITECTURE.md`**: (Located in `/plugins/obenlo-booking/`) Detailed map of the modular PHP classes.
 
 ---
 
@@ -43,9 +51,9 @@ The `Obenlo_Booking_Payments` class handles the transition of a booking from `pe
 - **Earnings:** Earnings are calculated upon confirmation but only released to the `_obenlo_host_balance` meta upon completion.
 
 ### 3. Frontend Customization
-The `obenlo` theme is decoupled from standard WP templates. Most dynamic content is rendered through Specialized Page Templates:
-- `page-account.php`: Unified Host/Guest single-page dashboard.
-- `single-listing.php`: Heavyweight dynamic listing renderer.
+The `obenlo` theme is decoupled from standard WP templates. Dynamic content is rendered through **Modular Template Parts** to ensure high performance and easy debugging:
+- `page-account.php`: Unified Dashboard hub using fragments in `template-parts/account/`.
+- `single-listing.php`: Dynamic listing renderer using fragments in `template-parts/listing/`.
 
 ---
 
@@ -61,9 +69,10 @@ Manage host/guest disputes using the **Support Status Filters**:
 - Toggle between **Open**, **Resolved**, and **All** tickets.
 - Use the **ID DESC** sort to find the newest issues instantly.
 
-### 3. Local Payment Control
-Haitian-specific gateways (MonCash/Natcash) require valid API keys in the Settings tab.
-- **Conversion Rate:** Admins set the `obenlo_htg_exchange_rate` manually to match market fluctuations.
+### 3. Identity Verification
+Review host KYC and authentication requests through the **Verifications Hub**.
+- **Audit Log:** Every verification transition is logged to ensure platform safety.
+- **Demo Management:** Use the Admin Demo Manager for onboarding specialized test listings.
 
 ---
 
@@ -74,4 +83,4 @@ Haitian-specific gateways (MonCash/Natcash) require valid API keys in the Settin
 ---
 
 **Obenlo Technical Team**
-*v1.7.3 - "Smart Search & Social" Update*
+*v1.9.0 - "Recurring Sessions & Logic Sync" Release*

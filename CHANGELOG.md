@@ -2,6 +2,19 @@
 
 All notable changes to the **Obenlo Platform** will be documented in this file.
 
+## [1.8.0] - 2026-04-19
+### Added
+- **Modular Dashboard Architecture**: Fully decomposed the monolithic `Obenlo_Booking_Admin_Dashboard` into separate domain-specific classes (`Overview`, `Listings`, `Users`, `Payments`, etc.) for better maintainability and performance.
+- **Template Fragmenting**: Refactored `page-account.php` and `single-listing.php` into modular template parts located in `template-parts/account/` and `template-parts/listing/`.
+- **Architectural Reference**: Created a comprehensive `ARCHITECTURE.md` file in the plugin root to document the new modular ecosystem.
+
+### Changed
+- **Router Transition**: Converted the main Admin Dashboard class into a lightweight router, reducing its footprint from 2,500 lines to just 115 lines.
+- **Documentation Migration**: Centralized all core business and technical logic files into a dedicated `/wp-content/docs/` directory.
+
+### Removed
+- **Technical Debt Purge**: Deleted 15+ legacy utility scripts, extraction tools, and debugging files from the `wp-content` root and plugin `includes` folder.
+
 ## [1.7.3] - 2026-04-13
 ### Added
 - **Smart SEO Engine 2.0**: Implemented location-aware dynamic titles and comprehensive JSON-LD schema support for all core industries (Stay, Experience, Service, Event).

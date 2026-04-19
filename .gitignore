@@ -1,16 +1,15 @@
-# Ignore everything in wp-content
+# Obenlo Platform: Git Exclusion Rules
+# Core Policy: Ignore all of wp-content except custom Obenlo assets.
+
 /*
 
-# But not the themes and plugins directories
+# ─── Themes ──────────────────────────────────────────────────────────────────
 !/themes/
-!/plugins/
-
-# Ignore everything inside themes
 /themes/*
-# But not our custom theme
 !/themes/obenlo/
 
-# Ignore everything inside plugins
+# ─── Plugins ─────────────────────────────────────────────────────────────────
+!/plugins/
 /plugins/*
 !/plugins/obenlo-booking/
 !/plugins/obenlo-i18n/
@@ -18,22 +17,27 @@
 !/plugins/obenlo-seo/
 !/plugins/obenlo-social/
 
-# Documentation and Project Files
+# Ignore vendor and node modules inside plugins (manage via composer/npm)
+**/node_modules/
+**/vendor/
+
+# ─── Documentation & Project Metadata ────────────────────────────────────────
+!/docs/
 !/README.md
 !/CHANGELOG.md
-!/obenlo-business.md
-!/OBENLO_BUSINESS_OVERVIEW.md
-!/deployment-guide.md
-!/obenlo_listing_logic.md
-!/obenlo_profile_logic.md
-!/obenlo_chatgpt_prompts.md
-!/sync.ps1
 !/.gitignore
+!/sync.ps1
 
-# Development Files
-/node_modules/
+# ─── System & IDE Artifacts ──────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
-
-# Ignore zip files
+.vscode/
+.idea/
+*.log
+*.bak
+*.swp
 *.zip
+
+# AI/Agent Memory
+.gemini/
+.antigravity/

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Obenlo Booking
  * Description: Custom 100% bespoke booking platform for Stays, Experiences, Events, and Services.
- * Version: 1.7.2
+ * Version: 1.9.0
  * Author: Obenlo
  * Author URI: https://obenlo.com
  */
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
-define('OBENLO_BOOKING_VERSION', '1.7.3');
+define('OBENLO_BOOKING_VERSION', '1.9.0');
 define('OBENLO_BOOKING_DIR', plugin_dir_path(__FILE__));
 define('OBENLO_BOOKING_URL', plugin_dir_url(__FILE__));
 
@@ -24,12 +24,35 @@ if (file_exists(OBENLO_BOOKING_DIR . 'vendor/autoload.php')) {
 require_once OBENLO_BOOKING_DIR . 'includes/class-post-types.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-roles.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-frontend-dashboard.php';
+
+// ─── Modular Dashboard Architecture ────────────────────────────────────────
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-dashboard.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-overview.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-listings.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-bookings.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-reviews.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-storefront.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-availability.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-payouts.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-support.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-trips.php';
+// ─── End Modular Dashboard ─────────────────────────────────────────────────
+require_once OBENLO_BOOKING_DIR . 'includes/class-demo-manager.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-payments.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-stripe.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-paypal.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-reviews.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-frontend-experience.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-admin-dashboard.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-admin-overview.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-admin-listings.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-admin-users.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-admin-settings.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-admin-payments.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-admin-bookings.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-admin-messages.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-admin-demo.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-admin-verifications.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-notifications.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-communication.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-host-verification.php';
@@ -53,6 +76,29 @@ function obenlo_booking_init()
     $frontend = new Obenlo_Booking_Frontend_Dashboard();
     $frontend->init();
 
+    // ─── Modular Dashboard Modules (action hook registration) ──────────────
+    $host_dashboard    = new Obenlo_Host_Dashboard();
+    $host_dashboard->init();
+
+    $host_listings = new Obenlo_Host_Listings();
+    $host_listings->init();
+
+    $host_bookings = new Obenlo_Host_Bookings();
+    $host_bookings->init();
+
+    $host_reviews = new Obenlo_Host_Reviews();
+    $host_reviews->init();
+
+    $host_storefront = new Obenlo_Host_Storefront();
+    $host_storefront->init();
+
+    $host_availability = new Obenlo_Host_Availability();
+    $host_availability->init();
+
+    $host_trips = new Obenlo_Host_Trips();
+    $host_trips->init();
+    // ─── End Modular Dashboard Modules ─────────────────────────────────────
+
     $payments = new Obenlo_Booking_Payments();
     $payments->init();
 
@@ -70,6 +116,17 @@ function obenlo_booking_init()
 
     $admin_dashboard = new Obenlo_Booking_Admin_Dashboard();
     $admin_dashboard->init();
+
+    // Initialize Admin Sub-Modules (Hook Registration)
+    (new Obenlo_Admin_Listings())->init();
+    (new Obenlo_Admin_Users())->init();
+    (new Obenlo_Admin_Settings())->init();
+    (new Obenlo_Admin_Payments())->init();
+    (new Obenlo_Admin_Bookings())->init();
+    (new Obenlo_Admin_Demo_Manager())->init();
+    (new Obenlo_Admin_Verifications())->init();
+    (new Obenlo_Admin_Messages())->init();
+
 
     $notifications = new Obenlo_Booking_Notifications();
     $notifications->init();
