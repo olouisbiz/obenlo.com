@@ -29,6 +29,7 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
         $unit = get_post_meta($listing_id, '_obenlo_duration_unit', true) ?: 'hours';
         $requires_slots = get_post_meta($listing_id, '_obenlo_requires_slots', true) ?: 'no';
         $pricing_model = get_post_meta($listing_id, '_obenlo_pricing_model', true) ?: 'per_session';
+        $capacity = get_post_meta($listing_id, '_obenlo_capacity', true);
 
         // Resolve the subcategory slug (prefer child term)
         $current_slug = $slug;
@@ -72,6 +73,15 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
                     style="width:100%; padding:12px; border:1px solid #bae6fd; border-radius:8px; box-sizing:border-box;">
                 <input type="hidden" name="logistics_dropoff" value="N/A">
             </div>
+            <?php endif; ?>
+
+            <?php if ($capacity && $capacity > 1): ?>
+            <div style="margin-bottom:15px;">
+                <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:5px;">GUESTS / CHILDREN (Max <?php echo esc_html($capacity); ?>)</label>
+                <input type="number" name="guests" value="1" min="1" max="<?php echo esc_attr($capacity); ?>" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:12px;">
+            </div>
+            <?php else: ?>
+                <input type="hidden" name="guests" value="1">
             <?php endif; ?>
 
             <div style="margin-bottom:15px;">
@@ -157,7 +167,7 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
         $pricing_model = get_post_meta($listing_id, '_obenlo_pricing_model', true) ?: 'per_session';
         
         if ($pricing_model === 'per_hour') {
-            $duration = isset($data['duration']) ? floatval($data['duration']) : 1;
+            $duration = isset($data['booking_duration']) ? floatval($data['booking_duration']) : 1;
             return $price * $duration;
         }
         
@@ -203,7 +213,7 @@ class Obenlo_Engine_Slot extends Obenlo_Abstract_Engine {
     public function get_frontend_js_logic($listing_id, $slug = '') {
         $model = get_post_meta($listing_id, '_obenlo_pricing_model', true);
         return "
-            if (bookingMode === 'timeslot' || bookingMode === 'datetime') {
+            if (bookingMode === 'slot' || bookingMode === 'timeslot' || bookingMode === 'datetime') {
                 var model = \"$model\";
                 if (model === 'per_hour') {
                     var dur = form.querySelector('input[name=\"booking_duration\"]');
