@@ -189,9 +189,8 @@ class Obenlo_Host_Bookings
                                                     echo '<a href="' . esc_url($checkin_url) . '" class="btn-primary" style="padding:8px 16px; font-size:0.8rem; background:#e61e4d; box-shadow:none;" onclick="return confirm(\'' . esc_js(__('Check in this guest?', 'obenlo')) . '\')">' . __('Check In', 'obenlo') . '</a>';
                                                 }
                                                 echo '<a href="' . esc_url($complete_url) . '" class="btn-outline" style="padding:7px 15px; font-size:0.8rem;" onclick="return confirm(\'' . esc_js(__('Mark as completed?', 'obenlo')) . '\')">' . __('Complete', 'obenlo') . '</a>';
-                                            }
                                         }
-                                    ?>
+                                    }
 
                                     if (in_array($status, ['confirmed', 'approved', 'completed'])) {
                                         echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="margin:0; display:inline;" onsubmit="return confirm(\'' . esc_js(__('Are you sure you want to initiate a refund?', 'obenlo')) . '\');">';
