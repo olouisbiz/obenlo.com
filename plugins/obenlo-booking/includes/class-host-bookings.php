@@ -143,6 +143,14 @@ class Obenlo_Host_Bookings
                                         <div style="color:#333; padding-left:17px;"><?php echo esc_html($dropoff ?: '──'); ?></div>
                                     </div>
                                 <?php endif; ?>
+                                <?php
+                                $msg = get_post_meta($booking->ID, '_obenlo_inquiry_message', true);
+                                if ($msg): ?>
+                                    <div style="margin-top:10px; padding:12px; background:#fffaf0; border-radius:12px; border:1px solid #fbd38d; font-size:0.85rem; color:#744210; font-style:italic;">
+                                        <div style="font-weight:700; margin-bottom:5px; font-style:normal; font-size:0.7rem; text-transform:uppercase; color:#9c4221;">Guest Note:</div>
+                                        "<?php echo esc_html($msg); ?>"
+                                    </div>
+                                <?php endif; ?>
                             </td>
                             <td data-label="<?php echo esc_attr(__('Price', 'obenlo')); ?>">
                                 <div style="font-size:1.1rem; font-weight:800; color:#222;">$<?php echo number_format(floatval($total), 2); ?></div>
@@ -156,12 +164,18 @@ class Obenlo_Host_Bookings
                             <td data-label="<?php echo esc_attr(__('Actions', 'obenlo')); ?>">
                                 <div style="display:flex; gap:8px; align-items:center; justify-content:flex-end;">
                                     <?php
-                                    if (!in_array($status, ['declined', 'cancelled', 'completed'])) {
-                                        $approve_url  = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=approve'), 'booking_action_' . $booking->ID);
-                                        $decline_url  = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=decline'), 'booking_action_' . $booking->ID);
-                                        $complete_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=complete'), 'booking_action_' . $booking->ID);
+                                        if ($status === 'awaiting_quote') {
+                                            echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:flex; gap:5px; align-items:center;">';
+                                            echo '<input type="hidden" name="action" value="obenlo_dashboard_booking_action">';
+                                            echo '<input type="hidden" name="booking_id" value="' . $booking->ID . '">';
+                                            echo '<input type="hidden" name="do_action" value="send_quote">';
+                                            wp_nonce_field('booking_action_' . $booking->ID);
+                                            echo '<input type="number" name="quoted_price" placeholder="' . esc_attr(__('Price', 'obenlo')) . '" step="0.01" required style="width:70px; padding:6px; border:1.5px solid #eee; border-radius:8px; font-size:0.8rem;">';
+                                            echo '<button type="submit" class="btn-primary" style="padding:8px 12px; font-size:0.8rem; background:#4c51bf;">' . __('Quote', 'obenlo') . '</button>';
+                                            echo '</form>';
+                                        }
 
-                                        if (!in_array($status, ['approved', 'confirmed'])) {
+                                        if (!in_array($status, ['declined', 'cancelled', 'completed', 'awaiting_quote'])) {
                                             echo '<a href="' . esc_url($approve_url) . '" class="btn-primary" style="padding:8px 16px; font-size:0.8rem; background:#10b981; box-shadow:none;" onclick="return confirm(\'' . esc_js(__('Approve this booking?', 'obenlo')) . '\')">' . __('Approve', 'obenlo') . '</a>';
                                             echo '<a href="' . esc_url($decline_url) . '" class="btn-outline" style="padding:7px 15px; font-size:0.8rem; border-color:#fee2e2; color:#ef4444;" onclick="return confirm(\'' . esc_js(__('Decline this booking?', 'obenlo')) . '\')">' . __('Decline', 'obenlo') . '</a>';
                                         } else {
@@ -241,6 +255,16 @@ class Obenlo_Host_Bookings
         if ($do_action === 'approve') {
             update_post_meta($booking_id, '_obenlo_booking_status', 'approved');
             Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'booking_confirmed');
+        } elseif ($do_action === 'send_quote') {
+            $price = isset($_POST['quoted_price']) ? floatval($_POST['quoted_price']) : 0;
+            if ($price <= 0) $this->redirect_with_error('invalid_price');
+            
+            update_post_meta($booking_id, '_obenlo_total_price', $price);
+            update_post_meta($booking_id, '_obenlo_booking_status', 'quote_sent');
+            
+            // Notify Guest
+            Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'quote_received');
+            
         } elseif ($do_action === 'complete') {
             update_post_meta($booking_id, '_obenlo_booking_status', 'completed');
             $payments = new Obenlo_Booking_Payments();

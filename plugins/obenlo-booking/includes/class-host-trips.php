@@ -72,9 +72,30 @@ class Obenlo_Host_Trips
                                     </div>
                                 <?php endif; ?>
                             </div>
-                            <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #f9f9f9; padding-top:20px;">
-                                <a href="<?php echo esc_url($listing_url); ?>" class="btn-outline" style="padding:8px 20px; font-size:0.85rem;"><?php echo __('View Listing', 'obenlo'); ?></a>
-                                <a href="?action=messages" class="btn-primary" style="padding:8px 20px; font-size:0.85rem;"><?php echo __('Contact Host', 'obenlo'); ?></a>
+                            <div style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #f9f9f9; padding-top:20px; align-items:center;">
+                                <?php if ($status === 'quote_sent'): 
+                                    $quoted_price = get_post_meta($booking->ID, '_obenlo_total_price', true);
+                                ?>
+                                    <div style="margin-right:auto;">
+                                        <div style="font-size:0.75rem; color:#888; font-weight:700; text-transform:uppercase;"><?php echo __('Quoted Price', 'obenlo'); ?></div>
+                                        <div style="font-size:1.2rem; font-weight:800; color:#10b981;">$<?php echo number_format(floatval($quoted_price), 2); ?></div>
+                                    </div>
+                                    <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="margin:0; display:flex; gap:10px; align-items:center;">
+                                        <input type="hidden" name="action" value="obenlo_pay_quote">
+                                        <input type="hidden" name="booking_id" value="<?php echo $booking->ID; ?>">
+                                        <?php wp_nonce_field('pay_quote_' . $booking->ID, 'quote_payment_nonce'); ?>
+                                        <select name="payment_method" style="padding:8px; border-radius:10px; border:1.5px solid #eee; font-size:0.85rem; outline:none;">
+                                            <option value="stripe">Card (Stripe)</option>
+                                            <?php if (get_option('obenlo_paypal_enabled', 'yes') === 'yes'): ?>
+                                                <option value="paypal">PayPal</option>
+                                            <?php endif; ?>
+                                        </select>
+                                        <button type="submit" class="btn-primary" style="padding:8px 20px; font-size:0.85rem; background:#10b981;"><?php echo __('Pay & Confirm', 'obenlo'); ?></button>
+                                    </form>
+                                <?php else: ?>
+                                    <a href="<?php echo esc_url($listing_url); ?>" class="btn-outline" style="padding:8px 20px; font-size:0.85rem;"><?php echo __('View Listing', 'obenlo'); ?></a>
+                                    <a href="?action=messages" class="btn-primary" style="padding:8px 20px; font-size:0.85rem;"><?php echo __('Contact Host', 'obenlo'); ?></a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

@@ -22,6 +22,9 @@ class Obenlo_Booking_Payments
 
         // Handle payment returns
         add_action('template_redirect', array($this, 'handle_payment_return'));
+        
+        // Handle Quote Payment
+        add_action('admin_post_obenlo_pay_quote', array($this, 'handle_quote_payment'));
     }
 
     public function handle_get_timeslots()
@@ -457,6 +460,20 @@ class Obenlo_Booking_Payments
         // Notify for new booking request
         // Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'new_booking');
 
+        // Handle Inquiry Flow
+        $is_inquiry = (isset($_POST['inquiry_message']) && !empty($_POST['inquiry_message'])) || $pricing_model === 'inquiry_only';
+        
+        if ($is_inquiry) {
+            $inquiry_message = isset($_POST['inquiry_message']) ? sanitize_textarea_field($_POST['inquiry_message']) : '';
+            update_post_meta($booking_id, '_obenlo_booking_status', 'awaiting_quote');
+            update_post_meta($booking_id, '_obenlo_inquiry_message', $inquiry_message);
+            update_post_meta($booking_id, '_obenlo_is_inquiry', 'yes');
+            
+            // Redirect to inquiry success modal
+            wp_safe_redirect(add_query_arg('obenlo_modal', 'inquiry_sent', home_url()));
+            exit;
+        }
+
         // Redirect to appropriate payment gateway
         if ($total_price <= 0) {
             // Free Booking: Skip payment and redirect to success modal
@@ -647,6 +664,44 @@ class Obenlo_Booking_Payments
             update_post_meta($booking_id, '_obenlo_payout_released', 'yes');
 
             error_log("Obenlo Balance: Booking #$booking_id completed. Host #$host_id balance updated: +$$net_earnings. Total: $$new_balance");
+        }
+
+    /**
+     * Handle payment for a sent quote
+     */
+    public function handle_quote_payment() {
+        if (!is_user_logged_in()) obenlo_redirect_with_error('unauthorized');
+
+        $booking_id = isset($_POST['booking_id']) ? intval($_POST['booking_id']) : 0;
+        $payment_method = isset($_POST['payment_method']) ? sanitize_text_field($_POST['payment_method']) : 'stripe';
+
+        if (!isset($_POST['quote_payment_nonce']) || !wp_verify_nonce($_POST['quote_payment_nonce'], 'pay_quote_' . $booking_id)) {
+            obenlo_redirect_with_error('security_failed');
+        }
+
+        $booking = get_post($booking_id);
+        if (!$booking || $booking->post_type !== 'booking' || $booking->post_author != get_current_user_id()) {
+            obenlo_redirect_with_error('invalid_booking');
+        }
+
+        $status = get_post_meta($booking_id, '_obenlo_booking_status', true);
+        if ($status !== 'quote_sent') {
+            obenlo_redirect_with_error('invalid_status');
+        }
+
+        $total_price = floatval(get_post_meta($booking_id, '_obenlo_total_price', true));
+        $listing_id = get_post_meta($booking_id, '_obenlo_listing_id', true);
+        $listing_title = get_the_title($listing_id);
+
+        // Update payment method on the booking
+        update_post_meta($booking_id, '_obenlo_payment_method', $payment_method);
+
+        if ($payment_method === 'stripe') {
+            $this->process_stripe_checkout($booking_id, $total_price, $listing_title);
+        } elseif ($payment_method === 'paypal') {
+            $this->process_paypal_checkout($booking_id, $total_price, $listing_title);
+        } else {
+            obenlo_redirect_with_error('invalid_payment');
         }
     }
 }
