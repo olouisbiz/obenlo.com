@@ -665,6 +665,7 @@ class Obenlo_Booking_Payments
 
             error_log("Obenlo Balance: Booking #$booking_id completed. Host #$host_id balance updated: +$$net_earnings. Total: $$new_balance");
         }
+    }
 
     /**
      * Handle payment for a sent quote
