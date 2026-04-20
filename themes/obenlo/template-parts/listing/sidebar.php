@@ -81,6 +81,8 @@
                         if ($engine && $engine->get_id() === 'logistics') {
                             $price_unit = 'Base';
                         }
+
+                        $is_inquiry = ($pricing_model === 'inquiry_only' || ($engine && $engine->get_id() === 'inquiry'));
                         ?>
 
                         <!-- Price Header -->
@@ -113,6 +115,15 @@
                                 ?>
                             </div>
 
+                            <?php if ($is_inquiry && ($engine && $engine->get_id() !== 'inquiry')): ?>
+                                <!-- Add Inquiry Message for other engines in Inquiry Mode -->
+                                <div style="margin-top:20px; padding:15px; background:#fcfdff; border:1.5px dashed #dbeafe; border-radius:18px;">
+                                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#1e40af; margin-bottom:10px;">MESSAGE TO HOST (Optional)</label>
+                                    <textarea name="inquiry_message" rows="3" placeholder="Tell the host about your specific needs..." style="width:100%; padding:10px; border:1.5px solid #e2e8f0; border-radius:12px; font-size:0.85rem; resize:none; outline:none;"></textarea>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if (!$is_inquiry): ?>
                             <!-- ── Payment Method ── -->
                             <div class="form-row" style="margin-top: 10px;">
                                 <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;">Payment Method</label>
@@ -148,18 +159,19 @@
                                 </div>
                             <?php
         endif; ?>
-
-                            <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee; display:flex; justify-content:space-between; font-size:1.2em; font-weight:bold;">
-                                <span>Total:</span>
-                                <span>$<span id="live-total"><?php echo esc_html($price); ?></span></span>
-                            </div>
-                            <div id="logistics-info" style="display:none; margin-top:5px; font-size:0.8rem; color:#666; text-align:right;">
-                                <span id="logistics-distance-val"></span> | <span id="logistics-time-val"></span>
-                            </div>
+                            <?php if (!$is_inquiry): ?>
+                                <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee; display:flex; justify-content:space-between; font-size:1.2em; font-weight:bold;">
+                                    <span>Total:</span>
+                                    <span>$<span id="live-total"><?php echo esc_html($price); ?></span></span>
+                                </div>
+                                <div id="logistics-info" style="display:none; margin-top:5px; font-size:0.8rem; color:#666; text-align:right;">
+                                    <span id="logistics-distance-val"></span> | <span id="logistics-time-val"></span>
+                                </div>
+                            <?php endif; ?>
 
                             <div style="margin: 15px 0; text-align: center; color: #666; font-size: 0.85em; display: flex; align-items: center; justify-content: center; gap: 5px;">
                                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                SECURE CHECKOUT: You will be redirected.
+                                <?php echo $is_inquiry ? __('CONSULTATION MODE: Host will reply with quote.', 'obenlo') : __('SECURE CHECKOUT: You will be redirected.', 'obenlo'); ?>
                             </div>
 
                             <button type="submit" class="reserve-btn" id="obenlo-reserve-btn" style="background:#e61e4d; color:white; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:1.1rem; border:none; cursor:pointer; transition:all 0.2s ease-in-out; box-shadow:0 4px 15px rgba(230,30,77,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(230,30,77,0.4)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(230,30,77,0.3)';">
