@@ -87,6 +87,7 @@ class Obenlo_SEO_Head {
                 $desc_prefix .= 'Starting at $' . $price . '. ';
             }
 
+            $location = get_post_meta($post_id, '_obenlo_location', true);
             if ($location) $desc_prefix .= 'Located in ' . $location . '. ';
             
             $description = $content ? wp_trim_words($content, 20, '...') : $description;
