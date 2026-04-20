@@ -52,11 +52,32 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
 
 ?>
 
-<div class="obenlo-account-container listing-layout" style="max-width: 1200px; margin: 60px auto; padding: 0 20px; display: flex; gap: 40px; min-height: 600px;">
+<style>
+    .obenlo-account-wrapper {
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
+    }
+    @media (max-width: 991px) {
+        .obenlo-account-wrapper {
+            flex-direction: column;
+        }
+        .listing-sidebar {
+            width: 100% !important;
+            margin-bottom: 20px;
+        }
+    }
+    .nav-item-account:hover {
+        background: #f8f8f8 !important;
+        transform: translateX(4px);
+    }
+</style>
+
+<div class="obenlo-account-container obenlo-account-wrapper" style="max-width: 1200px; margin: 60px auto; padding: 0 20px; min-height: 800px;">
     
     <!-- Sidebar -->
-    <div class="listing-sidebar" style="width: 280px; flex-shrink: 0; background: #fff; border: 1px solid #eee; border-radius: 24px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); height: fit-content;">
-        <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 25px 0; color: #222; letter-spacing: -0.5px;">Account</h1>
+    <div class="listing-sidebar" style="width: 300px; flex-shrink: 0; background: #fff; border: 1px solid #eee; border-radius: 28px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); height: fit-content; position: sticky; top: 120px;">
+        <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 28px 0; color: #222; letter-spacing: -0.6px;">Account</h1>
         
         <div style="display: flex; flex-direction: column; gap: 6px;">
             <?php
@@ -78,7 +99,7 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
                 $bg        = $is_active ? '#e61e4d' : 'transparent';
                 $icon_color= $is_active ? '#fff' : '#e61e4d';
             ?>
-                <a href="?tab=<?php echo $key; ?>" style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 0.95rem; color: <?php echo $color; ?>; background: <?php echo $bg; ?>; transition: all 0.2s; <?php echo $is_active ? 'box-shadow: 0 4px 15px rgba(230,30,77,0.2);' : ''; ?>" onmouseover="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='#fcfcfc'; this.style.color='#e61e4d';}" onmouseout="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='transparent'; this.style.color='#222';}">
+                <a href="?tab=<?php echo $key; ?>" class="nav-item-account" style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 0.95rem; color: <?php echo $color; ?>; background: <?php echo $bg; ?>; transition: all 0.2s; <?php echo $is_active ? 'box-shadow: 0 4px 15px rgba(230,30,77,0.2);' : ''; ?>" onmouseover="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='#fcfcfc'; this.style.color='#e61e4d';}" onmouseout="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='transparent'; this.style.color='#222';}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 18px; height: 18px; color: <?php echo $is_active ? '#fff' : '#999'; ?>;"><?php echo $item['icon']; ?></svg>
                     <?php echo $item['label']; ?>
                 </a>
