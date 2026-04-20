@@ -107,7 +107,7 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
             if ($obenlo_error === 'invalid_booking') $error_msg = 'The booking reference is invalid.';
             if ($obenlo_error === 'invalid_status') $error_msg = 'This booking is not in a state that can be paid.';
             
-            error_log('Obenlo Account Error: ' . $obenlo_error);
+
         ?>
             <div style="padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; font-weight: 600; background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; display: flex; align-items: center; gap: 10px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>

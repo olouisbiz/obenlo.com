@@ -395,9 +395,6 @@ class Obenlo_Booking_Payments
             }
 
             if ($active_booking_count >= $available_units) {
-                if ($available_units > 1) {
-                    error_log("Obenlo Availability: Slot full. Count ($active_booking_count) >= Units ($available_units)");
-                }
                 obenlo_redirect_with_error('already_booked');
             }
         }
@@ -512,7 +509,6 @@ class Obenlo_Booking_Payments
             if ($stripe->verify_checkout_session($session_id)) {
                 $status_updated = true;
             } else {
-                error_log('Obenlo Stripe Return Verification Failed for Booking #' . $booking_id);
                 obenlo_redirect_with_error('booking_error');
             }
         }
@@ -528,7 +524,6 @@ class Obenlo_Booking_Payments
             if ($capture === true) {
                 $status_updated = true;
             } else {
-                error_log('Obenlo PayPal Return Capture Failed for Booking #' . $booking_id);
                 obenlo_redirect_with_error('booking_error');
             }
         }
@@ -554,7 +549,6 @@ class Obenlo_Booking_Payments
         $checkout_url = $stripe->create_checkout_session($booking_id, $amount);
 
         if (is_wp_error($checkout_url)) {
-            error_log('Obenlo Stripe Error: ' . $checkout_url->get_error_message());
             obenlo_redirect_with_error('booking_error', $checkout_url->get_error_message());
         }
 
@@ -569,7 +563,6 @@ class Obenlo_Booking_Payments
 
         if (is_wp_error($checkout_url)) {
             $error_msg = $checkout_url->get_error_message();
-            error_log('Obenlo PayPal Error: ' . $error_msg);
             
             if (current_user_can('administrator')) {
                 $l_id = get_post_meta($booking_id, '_obenlo_listing_id', true);
@@ -634,8 +627,6 @@ class Obenlo_Booking_Payments
         update_post_meta($booking_id, '_obenlo_booking_commission_pct', $commission_pct);
         update_post_meta($booking_id, '_obenlo_booking_commission_amount', $commission_amount);
         update_post_meta($booking_id, '_obenlo_booking_net_earnings', $net_earnings);
-
-        error_log("Obenlo Earnings: Booking #$booking_id confirmed. Net earnings calculated: +$$net_earnings (Payout pending completion)");
     }
 
     /**
@@ -662,8 +653,6 @@ class Obenlo_Booking_Payments
             $new_balance = $current_balance + $net_earnings;
             update_user_meta($host_id, '_obenlo_host_balance', $new_balance);
             update_post_meta($booking_id, '_obenlo_payout_released', 'yes');
-
-            error_log("Obenlo Balance: Booking #$booking_id completed. Host #$host_id balance updated: +$$net_earnings. Total: $$new_balance");
         }
     }
 
@@ -671,7 +660,7 @@ class Obenlo_Booking_Payments
      * Handle payment for a sent quote
      */
     public function handle_quote_payment() {
-        error_log('Obenlo Debug: handle_quote_payment called. POST: ' . print_r($_POST, true));
+
         if (!is_user_logged_in()) obenlo_redirect_with_error('unauthorized');
 
         $booking_id = isset($_POST['booking_id']) ? intval($_POST['booking_id']) : 0;

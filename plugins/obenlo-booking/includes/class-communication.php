@@ -143,9 +143,9 @@ class Obenlo_Booking_Communication
 
     public function handle_guest_contact_host()
     {
-        error_log('Obenlo Debug: handle_guest_contact_host started');
+
         if (!isset($_POST['guest_contact_nonce']) || !wp_verify_nonce($_POST['guest_contact_nonce'], 'obenlo_guest_contact_nonce')) {
-            error_log('Obenlo Debug: Nonce verification failed');
+
             wp_send_json_error(array('message' => 'Security check failed.'));
         }
 
@@ -155,25 +155,25 @@ class Obenlo_Booking_Communication
         $host_id         = intval($_POST['host_id'] ?? 0);
         $listing_id      = intval($_POST['listing_id'] ?? 0);
 
-        error_log("Obenlo Debug: Visitor: $visitor_name <$visitor_email>, Host ID: $host_id, Listing ID: $listing_id");
+
 
         if (empty($visitor_name) || empty($visitor_email) || empty($visitor_message) || !$host_id) {
-            error_log('Obenlo Debug: Missing fields');
+
             wp_send_json_error(array('message' => 'Please fill in all fields.'));
         }
 
         if (!is_email($visitor_email)) {
-            error_log('Obenlo Debug: Invalid visitor email');
+
             wp_send_json_error(array('message' => 'Please enter a valid email address.'));
         }
 
         $host = get_userdata($host_id);
         if (!$host) {
-            error_log('Obenlo Debug: Host not found');
+
             wp_send_json_error(array('message' => 'Host not found.'));
         }
 
-        error_log("Obenlo Debug: Sending guest contact email to host: " . $host->user_email);
+
 
         $listing_title = $listing_id ? get_the_title($listing_id) : 'a listing';
         $subject       = 'A visitor wants to contact you about: ' . $listing_title;

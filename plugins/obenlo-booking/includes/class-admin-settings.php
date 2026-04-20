@@ -122,14 +122,14 @@ class Obenlo_Admin_Settings
 
     public function handle_save_settings()
     {
-        error_log('Obenlo Settings: Request received.');
+
         if (!current_user_can('administrator')) {
-            error_log('Obenlo Settings: Unauthorized access attempt.');
+
             obenlo_redirect_with_error('unauthorized');
         }
 
         check_admin_referer('save_settings', 'settings_nonce');
-        error_log('Obenlo Settings: Nonce verified.');
+
 
         $redirect_url = add_query_arg('tab', 'settings', wp_get_referer());
 
@@ -157,7 +157,7 @@ class Obenlo_Admin_Settings
 
         update_option('obenlo_hide_demo_frontpage', isset($_POST['hide_demo_frontpage']) ? 'yes' : 'no');
 
-        error_log('Obenlo Settings: Redirecting to ' . $redirect_url);
+
         wp_safe_redirect($redirect_url);
         exit;
     }

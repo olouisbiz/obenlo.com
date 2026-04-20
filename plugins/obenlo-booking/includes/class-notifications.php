@@ -542,7 +542,7 @@ class Obenlo_Booking_Notifications
             return; 
         }
 
-        error_log('Obenlo Push: Attempting send to user ' . $user_id . ' with ' . count($subs) . ' subscriptions.');
+
 
         $auth = array(
             'VAPID' => array(
