@@ -97,14 +97,8 @@
                             <?php endif; ?>
                         </div>
 
-                        <?php if ($pricing_model === 'inquiry_only' || ($engine && $engine->get_id() === 'inquiry')): ?>
-                            <div style="text-align:center; padding:25px 20px; background:#f9fafb; border-radius:15px; margin-top:20px; border:1px solid #e5e7eb;">
-                                <h4 style="margin-top:0; color:#111827; font-size:1.2rem;">Interested in this service?</h4>
-                                <p style="color:#4b5563; font-size:0.95rem; line-height:1.5; margin-bottom:20px;">This listing requires a custom quote or direct consultation. Please contact the host to discuss your exact needs and availability.</p>
-                                <button onclick="<?php if(is_user_logged_in()): ?>if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');} <?php else: ?>window.obenloOpenGuestContact(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');<?php endif; ?>" style="background:#0f172a; color:white; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:1.1rem; border:none; cursor:pointer;" onmouseover="this.style.background='#334155';" onmouseout="this.style.background='#0f172a';">Request a Quote</button>
-                            </div>
-                        <?php else: ?>
-                        <form class="booking-form" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
+                        <!-- Modular Booking Form -->
+                        <form class="booking-form" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post" style="margin-top:20px;">
                             <input type="hidden" name="action" value="obenlo_submit_booking">
                             <input type="hidden" name="listing_id" value="<?php echo esc_attr($listing_id); ?>">
                             <input type="hidden" name="booking_mode" value="<?php echo esc_attr($engine ? $engine->get_id() : 'default'); ?>">
@@ -169,7 +163,15 @@
                             </div>
 
                             <button type="submit" class="reserve-btn" id="obenlo-reserve-btn" style="background:#e61e4d; color:white; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:1.1rem; border:none; cursor:pointer; transition:all 0.2s ease-in-out; box-shadow:0 4px 15px rgba(230,30,77,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(230,30,77,0.4)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(230,30,77,0.3)';">
-                                <?php echo in_array($booking_mode, ['event_datetime']) ? 'Buy Tickets' : 'Book Instantly'; ?>
+                                <?php 
+                                if (in_array($booking_mode, ['event_datetime'])) {
+                                    echo 'Buy Tickets';
+                                } elseif (in_array($booking_mode, ['inquiry'])) {
+                                    echo 'Request a Quote';
+                                } else {
+                                    echo 'Book Instantly';
+                                }
+                                ?>
                             </button>
                         </form>
                         <?php endif; ?>
