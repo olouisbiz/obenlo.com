@@ -27,15 +27,23 @@ class Obenlo_Engine_Inquiry extends Obenlo_Abstract_Engine {
     public function render_booking_widget($listing_id, $slug = '') {
         ob_start();
         ?>
-        <div class="inquiry-booking-fields">
-            <div style="margin-bottom:15px;">
-                <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:8px;">DESCRIBE YOUR REQUEST</label>
-                <textarea name="inquiry_message" rows="4" placeholder="Tell the host about your specific needs..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:12px;"></textarea>
+        <div class="inquiry-booking-fields" style="background:#fcfdff; border:1.5px dashed #dbeafe; padding:20px; border-radius:20px; margin-bottom:20px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; color:#1e40af;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span style="font-weight:800; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.5px;"><?php echo __('Service Inquiry', 'obenlo'); ?></span>
             </div>
             
-            <p style="font-size:0.8rem; color:#888; text-align:center;">
-                <?php echo __('The host will review your request and send a tailored offer.', 'obenlo'); ?>
-            </p>
+            <div style="margin-bottom:15px;">
+                <label style="display:block; font-size:0.75rem; font-weight:700; color:#64748b; margin-bottom:10px;"><?php echo __('DESCRIBE YOUR REQUIREMENTS', 'obenlo'); ?></label>
+                <textarea name="inquiry_message" rows="4" placeholder="<?php echo esc_attr(__('e.g. I need a full day shoot for my wedding on July 10th...', 'obenlo')); ?>" 
+                    style="width:100%; padding:15px; border:1.5px solid #e2e8f0; border-radius:14px; font-family:inherit; font-size:0.9rem; outline:none; transition:border-color 0.2s; resize:none;"
+                    onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+            </div>
+            
+            <div style="display:flex; gap:8px; align-items:flex-start; color:#64748b; font-size:0.8rem; line-height:1.4;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                <span><?php echo __('The host will review your request and reply with a custom price quote.', 'obenlo'); ?></span>
+            </div>
         </div>
         <?php
         return ob_get_clean();
