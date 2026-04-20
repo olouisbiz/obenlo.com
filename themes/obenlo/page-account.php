@@ -98,6 +98,24 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
 
     <!-- Main Content -->
     <div style="flex-grow: 1; min-width: 0;">
+        <?php 
+        $obenlo_error = isset($_GET['obenlo_error']) ? sanitize_text_field($_GET['obenlo_error']) : '';
+        if ($obenlo_error) :
+            $error_msg = 'An unexpected error occurred.';
+            if ($obenlo_error === 'security_failed') $error_msg = 'Security check failed. Please refresh and try again.';
+            if ($obenlo_error === 'booking_error') $error_msg = 'Payment processing failed. Please contact support.';
+            if ($obenlo_error === 'unauthorized') $error_msg = 'You do not have permission to perform this action.';
+            if ($obenlo_error === 'invalid_booking') $error_msg = 'The booking reference is invalid.';
+            if ($obenlo_error === 'invalid_status') $error_msg = 'This booking is not in a state that can be paid.';
+            
+            error_log('Obenlo Account Error: ' . $obenlo_error);
+        ?>
+            <div style="padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; font-weight: 600; background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; display: flex; align-items: center; gap: 10px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <?php echo esc_html( $error_msg ); ?>
+            </div>
+        <?php endif; ?>
+
         <?php if ( $update_message ) : ?>
             <div style="padding: 15px 20px; border-radius: 12px; margin-bottom: 25px; font-weight: 600; <?php echo $message_type === 'success' ? 'background: #ecfdf5; color: #10b981;' : 'background: #fef2f2; color: #ef4444;'; ?>">
                 <?php echo esc_html( $update_message ); ?>

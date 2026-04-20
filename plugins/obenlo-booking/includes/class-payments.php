@@ -671,6 +671,7 @@ class Obenlo_Booking_Payments
      * Handle payment for a sent quote
      */
     public function handle_quote_payment() {
+        error_log('Obenlo Debug: handle_quote_payment called. POST: ' . print_r($_POST, true));
         if (!is_user_logged_in()) obenlo_redirect_with_error('unauthorized');
 
         $booking_id = isset($_POST['booking_id']) ? intval($_POST['booking_id']) : 0;
@@ -701,6 +702,15 @@ class Obenlo_Booking_Payments
             $this->process_stripe_checkout($booking_id, $total_price, $listing_title);
         } elseif ($payment_method === 'paypal') {
             $this->process_paypal_checkout($booking_id, $total_price, $listing_title);
+        } elseif ($payment_method === 'demo_bypass' && wp_get_environment_type() === 'local') {
+            // Local Development Bypass
+            update_post_meta($booking_id, '_obenlo_booking_status', 'confirmed');
+            update_post_meta($booking_id, '_obenlo_payment_status', 'paid');
+            Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'booking_confirmed');
+            
+            $redirect_url = home_url('/account?tab=trips&message=saved');
+            wp_safe_redirect($redirect_url);
+            exit;
         } else {
             obenlo_redirect_with_error('invalid_payment');
         }

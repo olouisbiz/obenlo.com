@@ -86,6 +86,9 @@
                                                             <?php if (get_option('obenlo_paypal_enabled', 'yes') === 'yes'): ?>
                                                                 <option value="paypal">PayPal</option>
                                                             <?php endif; ?>
+                                                            <?php if (wp_get_environment_type() === 'local'): ?>
+                                                                <option value="demo_bypass">Simulate Payment (Local Only)</option>
+                                                            <?php endif; ?>
                                                         </select>
                                                         
                                                         <button type="submit" style="background: #10b981; color: #fff; border: none; padding: 10px 24px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
