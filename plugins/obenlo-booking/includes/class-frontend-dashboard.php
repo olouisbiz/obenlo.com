@@ -19,11 +19,12 @@ class Obenlo_Booking_Frontend_Dashboard
         // add_action('admin_post_obenlo_dashboard_save_listing', ...)         â†’ class-host-listings.php
         // add_action('admin_post_obenlo_dashboard_delete_listing', ...)       â†’ class-host-listings.php
         add_action('admin_post_obenlo_dashboard_save_storefront', array($this, 'handle_save_storefront'));
-        add_action('admin_post_obenlo_dashboard_booking_action', array($this, 'handle_booking_action'));
+        // add_action('admin_post_obenlo_dashboard_booking_action', array($this, 'handle_booking_action'));
         add_action('admin_post_obenlo_dashboard_save_availability', array($this, 'handle_save_availability'));
         // delete_listing â†’ class-host-listings.php
         // add_action('admin_post_obenlo_dashboard_delete_listing', ...) â†’ class-host-listings.php
-        add_action('admin_post_obenlo_export_bookings', array($this, 'handle_export_bookings'));
+        // Moved to Obenlo_Host_Bookings (class-host-bookings.php)
+        // add_action('admin_post_obenlo_export_bookings', array($this, 'handle_export_bookings'));
         add_action('admin_post_obenlo_reply_review', array($this, 'handle_reply_review'));
         add_action('admin_post_obenlo_approve_review', array($this, 'handle_approve_review'));
         add_action('admin_post_obenlo_save_testimony', array($this, 'handle_save_testimony'));
