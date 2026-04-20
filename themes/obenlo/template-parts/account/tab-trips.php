@@ -64,58 +64,55 @@
                                             <?php if ($guests) : ?>&nbsp;&bull;&nbsp;<?php echo esc_html($guests); ?> guest(s)<?php endif; ?>
                                         </div>
                                     </div>
-                                    <div style="text-align: right; flex-shrink: 0; width: 100%;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 10px; gap: 20px;">
-                                            
-                                            <div style="text-align: left;">
-                                                <div style="font-size: 1.4rem; font-weight: 800; color: #222;">$<?php echo number_format(floatval($total), 2); ?></div>
-                                                <div style="font-size: 0.75rem; color: #888; margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                                                    <?php echo ( $status === 'quote_sent' || $status === 'awaiting_quote' ) ? 'Quoted Total' : 'Total Paid'; ?>
-                                                </div>
-                                            </div>
-
-                                            <div style="display: flex; gap: 10px; align-items: center;">
-                                                <?php if ( $status === 'quote_sent' ) : ?>
-                                                    <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="margin: 0; display: flex; gap: 10px; align-items: center;">
-                                                        <input type="hidden" name="action" value="obenlo_pay_quote">
-                                                        <input type="hidden" name="booking_id" value="<?php echo $booking->ID; ?>">
-                                                        <?php wp_nonce_field('pay_quote_' . $booking->ID, 'quote_payment_nonce'); ?>
-                                                        
-                                                        <select name="payment_method" style="padding: 10px; border-radius: 12px; border: 1.5px solid #eee; font-size: 0.85rem; outline: none; background: #fff; font-weight: 600;">
-                                                            <option value="stripe">Card (Stripe)</option>
-                                                            <?php if (get_option('obenlo_paypal_enabled', 'yes') === 'yes'): ?>
-                                                                <option value="paypal">PayPal</option>
-                                                            <?php endif; ?>
-                                                            <?php if (wp_get_environment_type() === 'local'): ?>
-                                                                <option value="demo_bypass">Simulate Payment (Local Only)</option>
-                                                            <?php endif; ?>
-                                                        </select>
-                                                        
-                                                        <button type="submit" style="background: #10b981; color: #fff; border: none; padding: 10px 24px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
-                                                            Pay & Confirm
-                                                        </button>
-                                                    </form>
-                                                <?php endif; ?>
-
-                                                <?php 
-                                                $host_id = get_post_meta($booking->ID, '_obenlo_host_id', true);
-                                                if ($host_id) : 
-                                                    $host_user = get_userdata($host_id);
-                                                    if ($host_user) :
-                                                        $host_name = $host_user->display_name;
-                                                        $host_avatar = get_avatar_url($host_id);
-                                                ?>
-                                                    <button onclick="if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url($host_avatar); ?>');} else { window.location.href='<?php echo esc_url(home_url('/login')); ?>'; }"
-                                                            style="background: #e61e4d; color: #fff; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(230,30,77,0.3);">
-                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 14px; height: 14px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                                        Message Host
-                                                    </button>
-                                                <?php endif; endif; ?>
-                                            </div>
+                                    <div style="text-align: right; flex-shrink: 0;">
+                                        <div style="font-size: 1.4rem; font-weight: 800; color: #222;">$<?php echo number_format(floatval($total), 2); ?></div>
+                                        <div style="font-size: 0.75rem; color: #888; margin-top: 2px; font-weight: 600; text-transform: uppercase;">
+                                            <?php echo ( $status === 'quote_sent' || $status === 'awaiting_quote' ) ? 'Quoted Total' : 'Total Paid'; ?>
                                         </div>
-                                        
-                                        <div style="margin-top: 15px; display: flex; gap: 12px; justify-content: flex-end; align-items: center;">
-                                            <?php if (in_array($status, ['pending', 'pending_payment'])) : ?>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; justify-content:flex-end; gap:12px; align-items:center; border-top:1px solid #f9f9f9; padding-top:20px; margin-top:10px;">
+                                    <?php if ( $status === 'quote_sent' ) : ?>
+                                        <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="margin: 0; display: flex; gap: 10px; align-items: center;">
+                                            <input type="hidden" name="action" value="obenlo_pay_quote">
+                                            <input type="hidden" name="booking_id" value="<?php echo $booking->ID; ?>">
+                                            <?php wp_nonce_field('pay_quote_' . $booking->ID, 'quote_payment_nonce'); ?>
+                                            
+                                            <select name="payment_method" style="padding: 10px 15px; border-radius: 12px; border: 1.5px solid #eee; font-size: 0.85rem; outline: none; background: #fff; font-weight: 700; color: #444;">
+                                                <option value="stripe">Pay with Card</option>
+                                                <?php if (get_option('obenlo_paypal_enabled', 'yes') === 'yes'): ?>
+                                                    <option value="paypal">PayPal</option>
+                                                <?php endif; ?>
+                                                <?php if (wp_get_environment_type() === 'local'): ?>
+                                                    <option value="demo_bypass">Simulate Payment (Local)</option>
+                                                <?php endif; ?>
+                                            </select>
+                                            
+                                            <button type="submit" style="background: #10b981; color: #fff; border: none; padding: 11px 25px; border-radius: 14px; font-weight: 800; cursor: pointer; font-size: 0.9rem; transition: all 0.25s; box-shadow: 0 4px 15px rgba(16,185,129,0.25);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(16,185,129,0.35)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(16,185,129,0.25)';">
+                                                Pay & Confirm
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+
+                                    <?php 
+                                    $host_id = get_post_meta($booking->ID, '_obenlo_host_id', true);
+                                    if ($host_id) : 
+                                        $host_user = get_userdata($host_id);
+                                        if ($host_user) :
+                                            $host_name = $host_user->display_name;
+                                            $host_avatar = get_avatar_url($host_id);
+                                    ?>
+                                        <button onclick="if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url($host_avatar); ?>');} else { window.location.href='<?php echo esc_url(home_url('/login')); ?>'; }"
+                                                style="background: #e61e4d; color: #fff; border: none; padding: 11px 25px; border-radius: 14px; font-weight: 800; cursor: pointer; font-size: 0.9rem; transition: all 0.25s; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(230,30,77,0.25);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(230,30,77,0.35)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(230,30,77,0.25)';">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 16px; height: 16px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                            Message Host
+                                        </button>
+                                    <?php endif; endif; ?>
+                                </div>
+
+                                <div style="margin-top: 15px; display: flex; gap: 12px; justify-content: flex-end; align-items: center;">
+                                    <?php if (in_array($status, ['pending', 'pending_payment'])) : ?>
                                                 <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
                                                     <input type="hidden" name="action" value="obenlo_cancel_booking">
                                                     <input type="hidden" name="booking_id" value="<?php echo $booking->ID; ?>">
