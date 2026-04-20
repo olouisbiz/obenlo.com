@@ -220,11 +220,17 @@ class Obenlo_Booking_Notifications
 
         switch ($event) {
             case 'new_booking':
-                $subject = "New Booking Request: $listing_title";
+                $is_inquiry = get_post_meta($booking_id, '_obenlo_inquiry_message', true) ? true : false;
+                $subject = ($is_inquiry ? "New Service Inquiry: " : "New Booking Request: ") . $listing_title;
                 if (get_option('obenlo_payment_mode') === 'sandbox') {
                     $subject = "[TEST MODE] " . $subject;
                 }
-                $msg     = "A new booking has been requested for your listing: <strong>$listing_title</strong>.<br>Total: <strong>\$$total</strong>";
+                
+                if ($is_inquiry) {
+                    $msg = "A new service inquiry has been received for <strong>$listing_title</strong>.<br>The guest is awaiting your custom quote.";
+                } else {
+                    $msg = "A new booking has been requested for your listing: <strong>$listing_title</strong>.<br>Total: <strong>\$$total</strong>";
+                }
                 
                 $pickup  = get_post_meta($booking_id, '_obenlo_logistics_pickup', true);
                 $dropoff = get_post_meta($booking_id, '_obenlo_logistics_dropoff', true);
@@ -235,9 +241,25 @@ class Obenlo_Booking_Notifications
                 self::send_html_to_user($host_id, $subject, "<p style='margin:0 0 16px 0;'>$msg</p>", 'View Bookings', home_url('/host-dashboard/?action=bookings'), true);
                 
                 $admin_email = get_option('obenlo_admin_email', 'info@obenlo.com');
-                $admin_msg   = "A new booking request for $listing_title (\$$total) has been made.";
-                $admin_html  = self::wrap_template("New Platform Booking #$booking_id", self::text_to_html($admin_msg));
-                self::schedule_mail($admin_email, "New Platform Booking #$booking_id", $admin_html);
+                $admin_msg   = "A new " . ($is_inquiry ? "inquiry" : "booking request") . " for $listing_title has been made.";
+                $admin_html  = self::wrap_template("New Platform " . ($is_inquiry ? "Inquiry" : "Booking") . " #$booking_id", self::text_to_html($admin_msg));
+                self::schedule_mail($admin_email, "New Platform " . ($is_inquiry ? "Inquiry" : "Booking") . " #$booking_id", $admin_html);
+                break;
+
+            case 'quote_sent':
+                $subject = "Special Quote Received: $listing_title";
+                if (get_option('obenlo_payment_mode') === 'sandbox') {
+                    $subject = "[TEST MODE] " . $subject;
+                }
+                $body_html = '
+                <p style="margin:0 0 16px 0;">The host has sent you a custom price quote for <strong>' . esc_html($listing_title) . '</strong>.</p>
+                <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px; padding:24px; margin:0 0 20px 0; text-align:center;">
+                    <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:#0369a1; font-weight:700; margin-bottom:8px;">Quoted Price</div>
+                    <div style="font-size:2.2rem; font-weight:900; color:#111;">$' . number_format(floatval($total), 2) . '</div>
+                </div>
+                <p style="margin:0 0 16px 0;">You can now review the details and complete your payment to confirm the booking.</p>';
+
+                self::send_html_to_user($guest_id, $subject, $body_html, 'Review & Pay', home_url('/account?tab=trips'), true);
                 break;
 
             case 'booking_confirmed':

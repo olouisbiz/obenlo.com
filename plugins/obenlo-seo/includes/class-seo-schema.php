@@ -103,6 +103,10 @@ class Obenlo_SEO_Schema {
                 if (strpos($check, 'service') !== false) { $main_cat = 'Service'; break; }
                 if (strpos($check, 'chauffeur') !== false) { $main_cat = 'TaxiService'; break; }
                 if (strpos($check, 'barber') !== false) { $main_cat = 'BarberShop'; break; }
+                if (strpos($check, 'clean') !== false) { $main_cat = 'Service'; break; }
+                if (strpos($check, 'tutor') !== false) { $main_cat = 'EducationalOrganization'; break; }
+                if (strpos($check, 'photo') !== false) { $main_cat = 'ProfessionalService'; break; }
+                if (strpos($check, 'baby') !== false || strpos($check, 'child') !== false) { $main_cat = 'ChildCare'; break; }
             }
         }
 

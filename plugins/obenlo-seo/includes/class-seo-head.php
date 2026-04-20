@@ -78,10 +78,15 @@ class Obenlo_SEO_Head {
         if ($is_listing) {
             $content = get_post_meta($post_id, '_obenlo_listing_content', true);
             $price = get_post_meta($post_id, '_obenlo_price', true);
-            $location = get_post_meta($post_id, '_obenlo_location', true);
-            
             $desc_prefix = '';
-            if ($price) $desc_prefix .= 'Starting at $' . $price . '. ';
+            $pricing_model = get_post_meta($post_id, '_obenlo_pricing_model', true);
+            
+            if ($pricing_model === 'inquiry_only') {
+                $desc_prefix .= 'Quote Based Service. Contact for custom pricing. ';
+            } elseif ($price) {
+                $desc_prefix .= 'Starting at $' . $price . '. ';
+            }
+
             if ($location) $desc_prefix .= 'Located in ' . $location . '. ';
             
             $description = $content ? wp_trim_words($content, 20, '...') : $description;

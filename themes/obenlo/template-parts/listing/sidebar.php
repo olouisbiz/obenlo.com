@@ -174,10 +174,10 @@
 
                             <button type="submit" class="reserve-btn" id="obenlo-reserve-btn" style="background:#e61e4d; color:white; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:1.1rem; border:none; cursor:pointer; transition:all 0.2s ease-in-out; box-shadow:0 4px 15px rgba(230,30,77,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(230,30,77,0.4)';" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 15px rgba(230,30,77,0.3)';">
                                 <?php 
-                                if (in_array($booking_mode, ['event_datetime'])) {
-                                    echo 'Buy Tickets';
-                                } elseif (in_array($booking_mode, ['inquiry'])) {
+                                if ($is_inquiry) {
                                     echo 'Request a Quote';
+                                } elseif (in_array($booking_mode, ['event_datetime'])) {
+                                    echo 'Buy Tickets';
                                 } else {
                                     echo 'Book Instantly';
                                 }

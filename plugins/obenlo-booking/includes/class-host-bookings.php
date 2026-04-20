@@ -240,10 +240,30 @@ class Obenlo_Host_Bookings
             $this->redirect_with_error('unauthorized');
         }
 
-        $booking_id = isset($_GET['booking_id']) ? intval($_GET['booking_id']) : 0;
-        $do_action  = isset($_GET['do_action']) ? sanitize_text_field($_GET['do_action']) : '';
+        // Extract Booking ID and Action
+        $booking_id = 0;
+        if (isset($_POST['booking_id'])) {
+            $booking_id = intval($_POST['booking_id']);
+        } elseif (isset($_GET['booking_id'])) {
+            $booking_id = intval($_GET['booking_id']);
+        }
 
-        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'booking_action_' . $booking_id)) {
+        $do_action = '';
+        if (isset($_POST['do_action'])) {
+            $do_action = sanitize_text_field($_POST['do_action']);
+        } elseif (isset($_GET['do_action'])) {
+            $do_action = sanitize_text_field($_GET['do_action']);
+        }
+
+        // Handle Nonce Verification
+        $nonce = '';
+        if (isset($_POST['_wpnonce'])) {
+            $nonce = $_POST['_wpnonce'];
+        } elseif (isset($_GET['_wpnonce'])) {
+            $nonce = $_GET['_wpnonce'];
+        }
+
+        if (!$booking_id || !wp_verify_nonce($nonce, 'booking_action_' . $booking_id)) {
             $this->redirect_with_error('security_failed');
         }
 
@@ -268,7 +288,7 @@ class Obenlo_Host_Bookings
             update_post_meta($booking_id, '_obenlo_booking_status', 'quote_sent');
             
             // Notify Guest
-            Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'quote_received');
+            Obenlo_Booking_Notifications::notify_booking_event($booking_id, 'quote_sent');
             
         } elseif ($do_action === 'complete') {
             update_post_meta($booking_id, '_obenlo_booking_status', 'completed');
