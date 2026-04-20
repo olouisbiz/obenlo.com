@@ -105,8 +105,8 @@ class Obenlo_Host_Bookings
                                         <div style="width:50px; height:50px; border-radius:12px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; color:#ccc;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
                                     <?php endif; ?>
                                     <div>
-                                        <div style="font-weight:700; color:#222; font-size:1rem; margin-bottom:2px;"><?php echo esc_html($listing_title); ?></div>
-                                        <div style="font-size:0.75rem; color:#888; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;"><?php echo esc_html($conf_code ?: '───'); ?></div>
+                                        <div style="font-weight:700; color:#222; font-size:1rem; margin-bottom:4px;"><?php echo esc_html($listing_title); ?></div>
+                                        <div style="font-size:0.65rem; color:#666; text-transform:uppercase; font-weight:800; letter-spacing:1px; background:#f5f5f5; padding:3px 8px; border-radius:6px; display:inline-block; font-family:'JetBrains Mono', monospace;"><?php echo esc_html($conf_code ?: '───'); ?></div>
                                     </div>
                                 </div>
                             </td>
