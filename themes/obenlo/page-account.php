@@ -55,42 +55,41 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
 <div class="obenlo-account-container listing-layout" style="max-width: 1200px; margin: 60px auto; padding: 0 20px; display: flex; gap: 40px; min-height: 600px;">
     
     <!-- Sidebar -->
-    <div class="listing-sidebar" style="width: 250px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
-        <h1 style="font-size: 2rem; font-weight: 800; margin: 0 0 20px 0; color: #222;">Account</h1>
+    <div class="listing-sidebar" style="width: 280px; flex-shrink: 0; background: #fff; border: 1px solid #eee; border-radius: 24px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); height: fit-content;">
+        <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 25px 0; color: #222; letter-spacing: -0.5px;">Account</h1>
         
-        <a href="?tab=dashboard" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'dashboard' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'dashboard' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='dashboard')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='dashboard')this.style.background='transparent'">
-            Dashboard
-        </a>
-        <a href="?tab=profile" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'profile' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'profile' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='profile')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='profile')this.style.background='transparent'">
-            Personal Info
-        </a>
-        <a href="?tab=trips" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'trips' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'trips' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='trips')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='trips')this.style.background='transparent'">
-            My Trips & Bookings
-        </a>
-        <a href="?tab=messages" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'messages' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'messages' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='messages')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='messages')this.style.background='transparent'">
-            Messages
-        </a>
-        <a href="?tab=announcements" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'announcements' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'announcements' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='announcements')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='announcements')this.style.background='transparent'">
-            Announcements
-        </a>
-        <a href="?tab=support" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'support' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'support' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='support')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='support')this.style.background='transparent'">
-            Help & Support
-        </a>
-        <a href="?tab=guide" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'guide' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'guide' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='guide')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='guide')this.style.background='transparent'">
-            Guest Guide
-        </a>
-        <a href="?tab=refunds" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'refunds' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'refunds' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='refunds')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='refunds')this.style.background='transparent'">
-            Refunds
-        </a>
-        <a href="?tab=testimony" style="padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; color: <?php echo $tab === 'testimony' ? '#fff' : '#666'; ?>; background: <?php echo $tab === 'testimony' ? '#e61e4d' : 'transparent'; ?>; transition: all 0.2s;" onmouseover="if('<?php echo $tab; ?>'!=='testimony')this.style.background='#f5f5f5'" onmouseout="if('<?php echo $tab; ?>'!=='testimony')this.style.background='transparent'">
-            Obenlo Love
-        </a>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+            <?php
+            $nav_items = array(
+                'dashboard'    => array('label' => 'Dashboard', 'icon' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>'),
+                'profile'      => array('label' => 'Personal Info', 'icon' => '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>'),
+                'trips'        => array('label' => 'My Trips & Bookings', 'icon' => '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>'),
+                'messages'     => array('label' => 'Messages', 'icon' => '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>'),
+                'announcements'=> array('label' => 'Announcements', 'icon' => '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>'),
+                'support'      => array('label' => 'Help & Support', 'icon' => '<circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line>'),
+                'guide'        => array('label' => 'Guest Guide', 'icon' => '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>'),
+                'refunds'      => array('label' => 'Refunds', 'icon' => '<path d="M11 15l-3-3 3-3"></path><path d="M8 12h8"></path><circle cx="12" cy="12" r="10"></circle>'),
+                'testimony'    => array('label' => 'Obenlo Love', 'icon' => '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>'),
+            );
+
+            foreach ($nav_items as $key => $item) :
+                $is_active = ($tab === $key);
+                $color     = $is_active ? '#fff' : '#222';
+                $bg        = $is_active ? '#e61e4d' : 'transparent';
+                $icon_color= $is_active ? '#fff' : '#e61e4d';
+            ?>
+                <a href="?tab=<?php echo $key; ?>" style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 0.95rem; color: <?php echo $color; ?>; background: <?php echo $bg; ?>; transition: all 0.2s; <?php echo $is_active ? 'box-shadow: 0 4px 15px rgba(230,30,77,0.2);' : ''; ?>" onmouseover="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='#fcfcfc'; this.style.color='#e61e4d';}" onmouseout="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='transparent'; this.style.color='#222';}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 18px; height: 18px; color: <?php echo $is_active ? '#fff' : '#999'; ?>;"><?php echo $item['icon']; ?></svg>
+                    <?php echo $item['label']; ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
         
         <?php if ( in_array('host', (array)$user->roles) ) : ?>
-            <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-                <a href="<?php echo esc_url( home_url('/host-dashboard') ); ?>" style="color: #222; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    Switch to Host Dashboard
+            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 25px;">
+                <a href="<?php echo esc_url( home_url('/host-dashboard') ); ?>" style="color: #222; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 14px; background: #fafafa; border: 1px solid #eee; transition: all 0.2s;" onmouseover="this.style.background='#fff'; this.style.borderColor='#e61e4d'; this.style.color='#e61e4d';" onmouseout="this.style.background='#fafafa'; this.style.borderColor='#eee'; this.style.color='#222';">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 18px; height: 18px; color: #999;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Host Dashboard
                 </a>
             </div>
         <?php endif; ?>
