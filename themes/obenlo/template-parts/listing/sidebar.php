@@ -153,13 +153,11 @@
                                                 </span>
                                                 <span style="color:#666;">+$<?php echo esc_html($addon['price']); ?></span>
                                             </label>
-                                        <?php
-            endforeach; ?>
+                                        <?php endforeach; ?>
                                     </div>
                                 </div>
-                            <?php
-        endif; ?>
-                            <?php if (!$is_inquiry): ?>
+                            <?php endif; ?>
+
                                 <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee; display:flex; justify-content:space-between; font-size:1.2em; font-weight:bold;">
                                     <span>Total:</span>
                                     <span>$<span id="live-total"><?php echo esc_html($price); ?></span></span>
