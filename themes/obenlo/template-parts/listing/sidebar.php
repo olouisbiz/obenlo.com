@@ -239,7 +239,6 @@
                             <?php wp_enqueue_script('jquery-ui-autocomplete'); ?>
                             <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
                         <?php endif; ?>
-                    <?php
-    endif; ?>
+                    <?php ?>
                 </div>
             </div>
