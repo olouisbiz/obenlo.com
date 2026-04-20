@@ -164,6 +164,10 @@ class Obenlo_Host_Bookings
                             <td data-label="<?php echo esc_attr(__('Actions', 'obenlo')); ?>">
                                 <div style="display:flex; gap:8px; align-items:center; justify-content:flex-end;">
                                     <?php
+                                        $approve_url  = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=approve'), 'booking_action_' . $booking->ID);
+                                        $decline_url  = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=decline'), 'booking_action_' . $booking->ID);
+                                        $complete_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=complete'), 'booking_action_' . $booking->ID);
+
                                         if ($status === 'awaiting_quote') {
                                             echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="display:flex; gap:5px; align-items:center;">';
                                             echo '<input type="hidden" name="action" value="obenlo_dashboard_booking_action">';
@@ -176,16 +180,18 @@ class Obenlo_Host_Bookings
                                         }
 
                                         if (!in_array($status, ['declined', 'cancelled', 'completed', 'awaiting_quote'])) {
-                                            echo '<a href="' . esc_url($approve_url) . '" class="btn-primary" style="padding:8px 16px; font-size:0.8rem; background:#10b981; box-shadow:none;" onclick="return confirm(\'' . esc_js(__('Approve this booking?', 'obenlo')) . '\')">' . __('Approve', 'obenlo') . '</a>';
-                                            echo '<a href="' . esc_url($decline_url) . '" class="btn-outline" style="padding:7px 15px; font-size:0.8rem; border-color:#fee2e2; color:#ef4444;" onclick="return confirm(\'' . esc_js(__('Decline this booking?', 'obenlo')) . '\')">' . __('Decline', 'obenlo') . '</a>';
-                                        } else {
-                                            if (!$checked_in) {
-                                                $checkin_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=checkin'), 'booking_action_' . $booking->ID);
-                                                echo '<a href="' . esc_url($checkin_url) . '" class="btn-primary" style="padding:8px 16px; font-size:0.8rem; background:#e61e4d; box-shadow:none;" onclick="return confirm(\'' . esc_js(__('Check in this guest?', 'obenlo')) . '\')">' . __('Check In', 'obenlo') . '</a>';
+                                            if (!in_array($status, ['approved', 'confirmed'])) {
+                                                echo '<a href="' . esc_url($approve_url) . '" class="btn-primary" style="padding:8px 16px; font-size:0.8rem; background:#10b981; box-shadow:none;" onclick="return confirm(\'' . esc_js(__('Approve this booking?', 'obenlo')) . '\')">' . __('Approve', 'obenlo') . '</a>';
+                                                echo '<a href="' . esc_url($decline_url) . '" class="btn-outline" style="padding:7px 15px; font-size:0.8rem; border-color:#fee2e2; color:#ef4444;" onclick="return confirm(\'' . esc_js(__('Decline this booking?', 'obenlo')) . '\')">' . __('Decline', 'obenlo') . '</a>';
+                                            } else {
+                                                if (!$checked_in) {
+                                                    $checkin_url = wp_nonce_url(admin_url('admin-post.php?action=obenlo_dashboard_booking_action&booking_id=' . $booking->ID . '&do_action=checkin'), 'booking_action_' . $booking->ID);
+                                                    echo '<a href="' . esc_url($checkin_url) . '" class="btn-primary" style="padding:8px 16px; font-size:0.8rem; background:#e61e4d; box-shadow:none;" onclick="return confirm(\'' . esc_js(__('Check in this guest?', 'obenlo')) . '\')">' . __('Check In', 'obenlo') . '</a>';
+                                                }
+                                                echo '<a href="' . esc_url($complete_url) . '" class="btn-outline" style="padding:7px 15px; font-size:0.8rem;" onclick="return confirm(\'' . esc_js(__('Mark as completed?', 'obenlo')) . '\')">' . __('Complete', 'obenlo') . '</a>';
                                             }
-                                            echo '<a href="' . esc_url($complete_url) . '" class="btn-outline" style="padding:7px 15px; font-size:0.8rem;" onclick="return confirm(\'' . esc_js(__('Mark as completed?', 'obenlo')) . '\')">' . __('Complete', 'obenlo') . '</a>';
                                         }
-                                    }
+                                    ?>
 
                                     if (in_array($status, ['confirmed', 'approved', 'completed'])) {
                                         echo '<form action="' . esc_url(admin_url('admin-post.php')) . '" method="POST" style="margin:0; display:inline;" onsubmit="return confirm(\'' . esc_js(__('Are you sure you want to initiate a refund?', 'obenlo')) . '\');">';
