@@ -92,19 +92,19 @@
         gap: 0 !important;
     }
 
-    /* 3. MENU ITEM TRANSFORM */
-    /* This targets BOTH Guest nav links and Host sidebar links */
+    /* 3. MENU ITEM TRANSFORM (STRICT UNIFORMITY) */
     .sidebar-link, .nav-item-account, .listing-sidebar a {
-        flex: 0 0 75px !important; /* Fixed width for items to prevent overlap */
+        flex: 0 0 75px !important;
+        height: 54px !important; /* Fixed height for all items */
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        justify-content: center !important;
-        padding: 8px 0 !important;
+        justify-content: flex-end !important; /* Bottom align to create common baseline */
+        padding: 5px 0 !important;
         background: transparent !important;
         border: none !important;
         color: #999 !important;
-        font-size: 9px !important; /* Slightly smaller font for tight spaces */
+        font-size: 9px !important;
         font-weight: 700 !important;
         white-space: nowrap !important;
         box-shadow: none !important;
@@ -113,22 +113,12 @@
         text-align: center !important;
     }
 
-    /* Hide scrollbar but keep functionality */
-    .dashboard-sidebar::-webkit-scrollbar, .listing-sidebar::-webkit-scrollbar {
-        display: none !important;
-    }
-    .dashboard-sidebar, .listing-sidebar {
-        -ms-overflow-style: none !important;
-        scrollbar-width: none !important;
-        padding-left: 20px !important;
-        padding-right: 20px !important;
-    }
-
     .sidebar-link svg, .nav-item-account svg, .listing-sidebar a svg {
         width: 24px !important;
         height: 24px !important;
-        margin-bottom: 3px !important;
+        margin-bottom: 4px !important;
         stroke-width: 2.2 !important;
+        display: block !important;
     }
 
     /* Active State (Standardized Brand Red) */
@@ -152,6 +142,7 @@
     .sidebar-link.active span, .nav-item-account.active span {
         color: var(--pwa-red) !important;
         opacity: 1 !important;
+        display: block !important;
     }
 
     /* 4. CONTENT AREA POLISH */
