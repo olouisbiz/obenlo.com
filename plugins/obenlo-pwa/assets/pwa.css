@@ -1,97 +1,36 @@
-/* 
- * Obenlo PWA: Premium Native App Architecture (v2.0)
- * Description: Red & White "Native-feel" styles for Guest, Host, and Admin roles.
- */
+/* Obenlo PWA Standalone App Styles */
+/* These styles ONLY apply when the website is added to the home screen and running as an app */
 
-:root {
-    /* Base Primitives */
-    --pwa-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --pwa-bg: #fdfdfd;
-    --pwa-glass: rgba(255, 255, 255, 0.78);
-    --pwa-border: rgba(0, 0, 0, 0.08);
-    --pwa-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
-    --pwa-red: #e61e4d;
-    --pwa-red-dark: #cc1a44;
-    --pwa-white: #ffffff;
-    
-    /* Animation Tokens */
-    --pwa-ease: cubic-bezier(0.4, 0, 0.2, 1);
-    --pwa-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* Standalone Only Environment */
-@media (display-mode: standalone), (display-mode: minimal-ui) {
-    
+@media (display-mode: standalone) {
+    /* Global App Settings */
     body {
-        margin: 0;
-        padding-top: 0 !important;
-        background: var(--pwa-bg) !important;
-        font-family: var(--pwa-font);
         overscroll-behavior-y: none;
-        user-select: none;
         -webkit-tap-highlight-color: transparent;
-        padding-bottom: calc(90px + env(safe-area-inset-bottom)) !important;
+        background: #fdfdfd !important;
     }
 
-    /* Hide WP Admin Bar */
-    #wpadminbar { display: none !important; }
-    html { margin-top: 0 !important; padding-top: 0 !important; }
+    #wpadminbar {
+        display: none !important;
+    }
+    html {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
 
-    /* 1. NATIVE TOP HEADER (GLASSMORPHISM) */
-    .site-header, .dashboard-header {
+    .obenlo-dashboard-container {
+        display: block !important;
+        padding-top: 20px !important;
+        padding-bottom: 90px !important;
+        background: #fdfdfd !important;
+    }
+
+    .site-header {
         position: sticky !important;
         top: 0 !important;
-        z-index: 9999 !important;
-        background: var(--pwa-glass) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        border-bottom: 1px solid var(--pwa-border) !important;
-        box-shadow: none !important;
-        padding: calc(env(safe-area-inset-top) + 15px) 20px 15px 20px !important;
+        z-index: 1000 !important;
+        background: #fff !important;
     }
 
-    /* 2. RE-SKINNING DASHBOARDS BY ROLE */
-
-    /* Generic Dashboard Content Spacing */
-    .obenlo-dashboard-container, .listing-layout {
-        display: block !important;
-        padding: 0 20px !important;
-        margin: 0 !important;
-        max-width: 100% !important;
-    }
-
-    /* THE RED & WHITE CARD SYSTEM */
-    .pwa-card, .stat-card, .form-section, .listing-sidebar, .pwa-trips-card {
-        background: var(--pwa-white) !important;
-        border: 1px solid var(--pwa-border) !important;
-        border-radius: 24px !important;
-        box-shadow: var(--pwa-shadow) !important;
-        padding: 24px !important;
-        margin-bottom: 20px !important;
-        transition: all 0.3s var(--pwa-ease);
-    }
-
-    /* ROLE: GUEST (Vibrant Red Accents) */
-    body.pwa-role-guest .sidebar-link.active,
-    body.pwa-role-guest .btn-primary,
-    body.pwa-role-guest .nav-item.active {
-        color: var(--pwa-red) !important;
-    }
-
-    /* ROLE: HOST (Professional Red Accents) */
-    body.pwa-role-host .sidebar-link.active,
-    body.pwa-role-host .btn-primary {
-        background: var(--pwa-red) !important;
-        color: #fff !important;
-        box-shadow: 0 8px 16px rgba(230, 30, 77, 0.2) !important;
-    }
-
-    /* ROLE: ADMIN (System Red/Black Identity) */
-    body.pwa-role-admin .pwa-card {
-        border-left: 4px solid var(--pwa-red) !important;
-    }
-
-    /* 3. NATIVE BOTTOM NAVIGATION BAR (FIXED) */
     .dashboard-sidebar {
         position: fixed !important;
         bottom: 0 !important;
@@ -100,119 +39,33 @@
         top: auto !important;
         height: auto !important;
         width: 100% !important;
-        background: var(--pwa-glass) !important;
-        backdrop-filter: blur(25px) !important;
-        -webkit-backdrop-filter: blur(25px) !important;
-        border-top: 1px solid var(--pwa-border) !important;
+        background: #fff !important;
         display: flex !important;
         flex-direction: row !important;
         justify-content: space-around !important;
         padding: 10px 5px calc(10px + env(safe-area-inset-bottom)) 5px !important;
-        z-index: 10000 !important;
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.03) !important;
-        gap: 0 !important;
+        border-top: 1px solid #ebebeb !important;
+        box-shadow: 0 -5px 25px rgba(0,0,0,0.06) !important;
+        z-index: 9999 !important;
     }
 
-    /* Navigation Links as Icons */
-    .sidebar-link, .nav-item-account {
-        flex: 1 !important;
-        display: flex !important;
+    .sidebar-link {
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 4px !important;
-        padding: 8px !important;
-        background: transparent !important;
-        border: none !important;
-        color: #888 !important;
-        font-size: 10px !important;
-        font-weight: 700 !important;
-        text-transform: none !important;
-        white-space: nowrap !important;
-        box-shadow: none !important;
+        padding: 5px !important;
+        margin: 0 !important;
+        min-width: 65px !important;
     }
 
-    .sidebar-link svg, .nav-item-account svg {
+    .sidebar-link svg {
         width: 24px !important;
         height: 24px !important;
-        stroke-width: 2.5 !important;
-        color: #999 !important;
-        transition: transform 0.3s var(--pwa-spring);
     }
 
-    .sidebar-link.active, .nav-item-account.active {
-        color: var(--pwa-red) !important;
-    }
-
-    .sidebar-link.active svg, .nav-item-account.active svg {
-        color: var(--pwa-red) !important;
-        transform: translateY(-2px) scale(1.1);
-    }
-
-    /* 4. PREMIUM COMPONENT FIXES */
-    .btn-primary, #submit_verification {
-        height: 56px !important;
-        border-radius: 18px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        font-size: 1.05rem !important;
-        font-weight: 800 !important;
-        background: var(--pwa-red) !important;
-    }
-
-    .btn-primary:active {
-        transform: scale(0.96);
-        background: var(--pwa-red-dark) !important;
-    }
-
-    /* Native Bottom Sheets simulation */
-    .pwa-bottom-sheet {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #fff;
-        border-radius: 28px 28px 0 0;
-        z-index: 10001;
-        padding: 30px;
-        box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
-        animation: pwa-slide-up 0.4s var(--pwa-ease);
-    }
-
-    /* Data Presentation */
-    .stat-value {
-        color: var(--pwa-red) !important;
-        font-weight: 900 !important;
-        letter-spacing: -1px !important;
-    }
-
-    /* Table to Stack for Admin */
-    .admin-table, .admin-table tbody, .admin-table tr, .admin-table td {
+    .sidebar-link span {
         display: block !important;
-        width: 100% !important;
-    }
-
-    .admin-table tr {
-        background: #fff !important;
-        border-radius: 20px !important;
-        margin-bottom: 15px !important;
-        padding: 15px !important;
-        border: 1px solid var(--pwa-border) !important;
-    }
-
-    .admin-table td {
-        border: none !important;
-        padding: 8px 0 !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-    }
-
-    .admin-table td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: #999;
-        font-size: 0.8rem;
+        font-size: 0.65rem !important;
+        font-weight: 700 !important;
     }
 }
