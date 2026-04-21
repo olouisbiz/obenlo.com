@@ -23,6 +23,7 @@ class Obenlo_PWA
         add_action('parse_request', array($this, 'serve_pwa_assets'), 1);
         add_action('wp_head', array($this, 'inject_pwa_script'), 2);
         add_action('wp_enqueue_scripts', array($this, 'enqueue_pwa_styles'));
+        add_filter('body_class', array($this, 'add_pwa_body_classes'));
 
         // AJAX for PWA subscriptions
         add_action('wp_ajax_obenlo_save_pwa_subscription', array($this, 'handle_save_subscription'));
@@ -335,6 +336,34 @@ class Obenlo_PWA
     public function enqueue_pwa_styles()
     {
         wp_enqueue_style('obenlo-pwa-standalone', OBENLO_PWA_URL . 'assets/pwa.css', array(), time());
+    }
+
+    /**
+     * Add Role-Specific PWA Body Classes
+     */
+    public function add_pwa_body_classes($classes)
+    {
+        $user = wp_get_current_user();
+        
+        if (!$user->ID) {
+            $classes[] = 'pwa-role-guest';
+            return $classes;
+        }
+
+        // Admin check (highest priority)
+        if (current_user_can('manage_options')) {
+            $classes[] = 'pwa-role-admin';
+        } 
+        // Host check
+        else if (in_array('host', (array)$user->roles)) {
+            $classes[] = 'pwa-role-host';
+        } 
+        // Default to guest
+        else {
+            $classes[] = 'pwa-role-guest';
+        }
+
+        return $classes;
     }
 
     /**
