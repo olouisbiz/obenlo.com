@@ -19,39 +19,11 @@
         margin: 0 !important;
     }
 
-    #wpadminbar { display: none !important; }
+    #wpadminbar, .site-header { display: none !important; }
     html { margin-top: 0 !important; }
 
-    /* NATIVE TOP HEADER (REBUILT FOR APP) */
-    .site-header {
-        display: block !important;
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 10000 !important;
-        background: var(--pwa-glass) !important;
-        backdrop-filter: blur(25px) !important;
-        -webkit-backdrop-filter: blur(25px) !important;
-        border-bottom: 1px solid var(--pwa-border) !important;
-        padding: calc(env(safe-area-inset-top) + 5px) 0 5px 0 !important;
-        height: auto !important;
-    }
-
-    .header-inner {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        height: 60px !important;
-        padding: 0 20px !important;
-    }
-
-    .header-search-nav { display: none !important; } /* Hide search in top app bar */
-    .become-host-link { display: none !important; } /* Hide text links to save space */
-
-    .site-branding img {
-        height: 30px !important;
-    }
-
-    /* 2. TRANSFORM SIDEBAR INTO BOTTOM NAV (UNIFIED GEOMETRY) */
+    /* 2. TRANSFORM SIDEBAR INTO BOTTOM NAV */
+    /* This targets BOTH the Host Dashboard sidebar AND the Guest Account sidebar */
     .dashboard-sidebar, .listing-sidebar {
         position: fixed !important;
         bottom: 0 !important;
@@ -59,229 +31,87 @@
         right: 0 !important;
         top: auto !important;
         width: 100% !important;
-        height: 72px !important; /* FIXED BAR HEIGHT */
+        height: auto !important;
         background: var(--pwa-glass) !important;
-        backdrop-filter: blur(25px) !important;
-        -webkit-backdrop-filter: blur(25px) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
         display: flex !important;
         flex-direction: row !important;
-        justify-content: flex-start !important; /* Support horizontal scroll */
-        padding: 0 10px env(safe-area-inset-bottom) 10px !important;
+        justify-content: space-around !important;
+        padding: 12px 5px calc(12px + env(safe-area-inset-bottom)) 5px !important;
         border-top: 1px solid var(--pwa-border) !important;
         border-radius: 0 !important;
         box-shadow: 0 -8px 25px rgba(0,0,0,0.05) !important;
         z-index: 99999 !important;
         overflow-x: auto !important;
         gap: 0 !important;
-        box-sizing: border-box !important;
     }
 
-    /* Hide sidebar specific elements */
+    /* Hide sidebar specific elements not suited for bottom nav */
     .dashboard-sidebar h1, .listing-sidebar h1, 
     .dashboard-sidebar > div[style*="margin-top"],
-    .listing-sidebar > div[style*="margin-top"],
-    .listing-sidebar > div > h1 {
+    .listing-sidebar > div[style*="margin-top"] {
         display: none !important;
     }
 
-    /* 3. MENU ITEM TRANSFORM (STRICT UNIFORMITY) */
-    .sidebar-link, .nav-item-account, .listing-sidebar a, .listing-sidebar > div > a {
-        flex: 0 0 80px !important; /* Uniform width */
-        height: 72px !important; /* MATCH BAR HEIGHT */
+    /* Ensure the inner flex container (if exists) doesn't break the layout */
+    .dashboard-sidebar > div, .listing-sidebar > div {
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        justify-content: space-around !important;
+        gap: 0 !important;
+    }
+
+    /* 3. MENU ITEM TRANSFORM */
+    /* This targets BOTH Guest nav links and Host sidebar links */
+    .sidebar-link, .nav-item-account, .listing-sidebar a {
+        flex: 1 !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        justify-content: center !important; /* Perfectly centered */
-        padding: 0 !important;
-        margin: 0 !important;
+        justify-content: center !important;
+        padding: 6px 2px !important;
         background: transparent !important;
         border: none !important;
         color: #999 !important;
         font-size: 10px !important;
         font-weight: 700 !important;
+        min-width: 60px !important;
         white-space: nowrap !important;
         box-shadow: none !important;
+        margin: 0 !important;
         border-radius: 0 !important;
-        text-align: center !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Hide inner containers that might break flex */
-    .listing-sidebar > div {
-        display: contents !important;
     }
 
     .sidebar-link svg, .nav-item-account svg, .listing-sidebar a svg {
         width: 24px !important;
         height: 24px !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 3px !important;
         stroke-width: 2.2 !important;
-        display: block !important;
     }
 
-    /* Active State (Standardized Brand Red) */
-    .sidebar-link.active, 
-    .nav-item-account.active,
-    .nav-item-account[style*="background: rgb(230, 30, 77)"],
-    .nav-item-account[style*="background:#e61e4d"],
-    .sidebar-link[style*="color: rgb(255, 255, 255)"] {
+    /* Active State (Role-Aware Red) */
+    .sidebar-link.active, .nav-item-account[style*="background: rgb(230, 30, 77)"],
+    .sidebar-link[style*="color: rgb(255, 255, 255)"],
+    .sidebar-link.active span {
         color: var(--pwa-red) !important;
         background: transparent !important;
     }
 
-    .sidebar-link.active svg, 
-    .nav-item-account.active svg,
-    .nav-item-account[style*="background: rgb(230, 30, 77)"] svg,
-    .nav-item-account[style*="background:#e61e4d"] svg {
+    .sidebar-link.active svg, .nav-item-account[style*="background: rgb(230, 30, 77)"] svg {
         color: var(--pwa-red) !important;
-        stroke: var(--pwa-red) !important;
     }
 
-    .sidebar-link.active span, .nav-item-account.active span {
-        color: var(--pwa-red) !important;
-        opacity: 1 !important;
+    /* 4. CONTENT AREA POLISH */
+    .obenlo-dashboard-container, .obenlo-account-container {
         display: block !important;
-    }
-
-    /* 4. HIGH-INTENSITY RESPONSIVENESS (NO-SCROLL ARCHITECTURE) */
-    html, body {
-        overflow-x: hidden !important;
-        width: 100vw !important;
-        position: relative !important;
-        -webkit-text-size-adjust: 100% !important;
-    }
-
-    /* RECLAIM ALL SPACE */
-    .obenlo-dashboard-container, 
-    .obenlo-account-container, 
-    .listing-layout, 
-    .site-content,
-    .dashboard-content,
-    .main-content-inner,
-    .container {
-        width: 100% !important;
-        max-width: 100vw !important;
-        padding: 5px !important; /* Minimal breathing room */
+        padding: 20px !important;
         margin: 0 !important;
-        display: block !important;
-        box-sizing: border-box !important;
     }
 
-    /* REMOVE THEME DECORATIONS THAT BREAK MOBILE (e.g., Blue sidebar borders) */
-    .dashboard-sidebar-active::before, 
-    .dashboard-sidebar-active::after,
-    [style*="border-left: 5px solid blue"],
-    [style*="border-left: 6px solid #e61e4d"] {
-        display: none !important;
-        border: none !important;
-    }
-
-    /* FORCE CARDS TO FULL WIDTH */
-    .dashboard-card, .pwa-card, .stat-card, .form-section, .listing-sidebar + div, .pwa-trips-card, .update-card, .post-item {
+    .dashboard-content, .listing-sidebar + div {
+        padding: 0 !important;
         width: 100% !important;
-        min-width: 0 !important;
-        margin: 10px 0 !important;
-        box-sizing: border-box !important;
-        padding: 15px !important;
-        border-radius: 20px !important;
-        float: none !important;
-    }
-
-    /* BUTTONS: ALWAYS VERTICAL STACK FOR CLARITY */
-    .card-actions, .booking-actions, .form-footer, .action-buttons {
-        display: flex !important;
-        flex-direction: column !important;
-        width: 100% !important;
-        gap: 12px !important;
-        margin-top: 15px !important;
-    }
-    
-    .card-actions button, 
-    .booking-actions a, 
-    .booking-actions button,
-    .btn-primary, .btn-secondary,
-    .obenlo-button {
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 14px !important;
-        text-align: center !important;
-        justify-content: center !important;
-    }
-
-    /* DATA TABLES: THE 'STACK' APPROACH (LABEL ON TOP) */
-    .admin-table, table, .booking-list, .listing-table {
-        display: block !important;
-        width: 100% !important;
-        border: none !important;
-    }
-    .admin-table thead, table thead {
-        display: none !important;
-    }
-    .admin-table tr, table tr {
-        display: block !important;
-        background: #fff !important;
-        border: 1px solid var(--pwa-border) !important;
-        border-radius: 20px !important;
-        padding: 15px !important;
-        margin-bottom: 20px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.04) !important;
-    }
-    .admin-table td, table td {
-        display: block !important; /* STACKED LABELS */
-        width: 100% !important;
-        padding: 8px 0 !important;
-        border-bottom: 1px solid #f9f9f9 !important;
-        text-align: left !important;
-        font-size: 0.95rem !important;
-    }
-    .admin-table td:last-child, table td:last-child {
-        border-bottom: none !important;
-    }
-    .admin-table td::before, table td::before {
-        content: attr(data-label) !important;
-        display: block !important;
-        font-weight: 800 !important;
-        color: #e61e4d !important; /* Use red for labels */
-        text-transform: uppercase !important;
-        font-size: 0.65rem !important;
-        letter-spacing: 0.5px !important;
-        margin-bottom: 4px !important;
-    }
-
-    /* FIX CUT-OFF TEXT & TITLES */
-    h1, h2, h3, .listing-title, .post-title {
-        font-size: 1.5rem !important;
-        word-wrap: break-word !important;
-        overflow-wrap: break-word !important;
-        white-space: normal !important;
-        line-height: 1.2 !important;
-        margin-bottom: 15px !important;
-    }
-
-    p, .description {
-        font-size: 0.95rem !important;
-        line-height: 1.5 !important;
-        color: #444 !important;
-    }
-
-    /* FIX IMAGES */
-    img {
-        max-width: 100% !important;
-        height: auto !important;
-    }
-
-    /* PROFILE / AVATAR ROW */
-    .user-profile-row {
-        flex-direction: column !important;
-        align-items: center !important;
-        text-align: center !important;
-        gap: 15px !important;
-    }
-
-    /* HIDE THEME OVERLAYS */
-    .language-switcher-pwa-bottom {
-        display: none !important; /* Hide floating lang switch as it covers buttons */
     }
 }
-
-
