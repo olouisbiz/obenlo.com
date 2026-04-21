@@ -52,59 +52,6 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
 
 ?>
 
-<style>
-    @media (max-width: 768px) {
-        .obenlo-account-container { flex-direction: column !important; padding-bottom: 90px !important; }
-        .listing-sidebar { 
-            width: 100% !important; 
-            height: auto !important; 
-            position: fixed !important; 
-            bottom: 0 !important; 
-            left: 0 !important; 
-            right: 0 !important; 
-            border-right: none !important; 
-            border-top: 1px solid #f0f0f0 !important; 
-            background: #fff !important; 
-            padding: 10px 5px calc(10px + env(safe-area-inset-bottom)) 5px !important; 
-            flex-direction: row !important; 
-            justify-content: space-around !important; 
-            overflow-x: auto !important; 
-            gap: 0 !important; 
-            z-index: 10000 !important; 
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.05) !important; 
-            top: auto !important;
-            border-radius: 0 !important;
-        }
-        .listing-sidebar h1, .listing-sidebar > div[style*="margin-top"] { display: none !important; }
-        .listing-sidebar > div { flex-direction: row !important; width: 100% !important; justify-content: space-around !important; }
-        
-        .nav-item-account { 
-            flex-direction: column !important; 
-            gap: 2px !important; 
-            padding: 8px 5px !important; 
-            min-width: 60px !important; 
-            background: transparent !important; 
-            color: #999 !important; 
-            border-radius: 0 !important; 
-            white-space: nowrap !important;
-            box-shadow: none !important;
-            font-size: 0.65rem !important;
-            text-align: center;
-        }
-        .nav-item-account svg { width: 22px !important; height: 22px !important; margin-bottom: 2px; }
-        /* Active state for mobile bottom nav */
-        /* Note: The active color is handled by the inline styles in the loop, but we override backgrounds here */
-        .nav-item-account[style*="background: rgb(230, 30, 77)"] {
-            background: transparent !important;
-            color: #e61e4d !important;
-            box-shadow: none !important;
-        }
-    }
-    @media (min-width: 769px) {
-        .listing-sidebar { position: sticky !important; top: 100px !important; }
-    }
-</style>
-
 <div class="obenlo-account-container listing-layout" style="max-width: 1200px; margin: 60px auto; padding: 0 20px; display: flex; gap: 40px; min-height: 600px;">
     
     <!-- Sidebar -->
@@ -131,7 +78,7 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
                 $bg        = $is_active ? '#e61e4d' : 'transparent';
                 $icon_color= $is_active ? '#fff' : '#e61e4d';
             ?>
-                <a href="?tab=<?php echo $key; ?>" class="nav-item-account" style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 0.95rem; color: <?php echo $color; ?>; background: <?php echo $bg; ?>; transition: all 0.2s; <?php echo $is_active ? 'box-shadow: 0 4px 15px rgba(230,30,77,0.2);' : ''; ?>" onmouseover="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='#fcfcfc'; this.style.color='#e61e4d';}" onmouseout="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='transparent'; this.style.color='#222';}">
+                <a href="?tab=<?php echo $key; ?>" style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 0.95rem; color: <?php echo $color; ?>; background: <?php echo $bg; ?>; transition: all 0.2s; <?php echo $is_active ? 'box-shadow: 0 4px 15px rgba(230,30,77,0.2);' : ''; ?>" onmouseover="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='#fcfcfc'; this.style.color='#e61e4d';}" onmouseout="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='transparent'; this.style.color='#222';}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 18px; height: 18px; color: <?php echo $is_active ? '#fff' : '#999'; ?>;"><?php echo $item['icon']; ?></svg>
                     <?php echo $item['label']; ?>
                 </a>
