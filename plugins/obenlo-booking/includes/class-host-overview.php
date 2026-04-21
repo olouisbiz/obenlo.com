@@ -126,7 +126,7 @@ class Obenlo_Host_Overview
         </div>
 
         <div class="dashboard-grid-layout" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px;">
-            <div class="form-section" style="margin-top:0; min-width:0; overflow:hidden;">
+            <div class="form-section" style="margin-top:0; min-width:0; overflow-x:auto;">
                 <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Recent Bookings', 'obenlo'); ?></h4>
                 <?php
                 $bm = new Obenlo_Host_Bookings();
