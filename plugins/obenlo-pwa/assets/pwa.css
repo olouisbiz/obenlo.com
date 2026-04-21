@@ -51,8 +51,7 @@
         height: 30px !important;
     }
 
-    /* 2. TRANSFORM SIDEBAR INTO BOTTOM NAV */
-    /* This targets BOTH the Host Dashboard sidebar AND the Guest Account sidebar */
+    /* 2. TRANSFORM SIDEBAR INTO BOTTOM NAV (UNIFIED GEOMETRY) */
     .dashboard-sidebar, .listing-sidebar {
         position: fixed !important;
         bottom: 0 !important;
@@ -60,57 +59,56 @@
         right: 0 !important;
         top: auto !important;
         width: 100% !important;
-        height: auto !important;
+        height: 72px !important; /* FIXED BAR HEIGHT */
         background: var(--pwa-glass) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
+        backdrop-filter: blur(25px) !important;
+        -webkit-backdrop-filter: blur(25px) !important;
         display: flex !important;
         flex-direction: row !important;
-        justify-content: space-around !important;
-        padding: 12px 5px calc(12px + env(safe-area-inset-bottom)) 5px !important;
+        justify-content: flex-start !important; /* Support horizontal scroll */
+        padding: 0 10px env(safe-area-inset-bottom) 10px !important;
         border-top: 1px solid var(--pwa-border) !important;
         border-radius: 0 !important;
         box-shadow: 0 -8px 25px rgba(0,0,0,0.05) !important;
         z-index: 99999 !important;
         overflow-x: auto !important;
         gap: 0 !important;
+        box-sizing: border-box !important;
     }
 
-    /* Hide sidebar specific elements not suited for bottom nav */
+    /* Hide sidebar specific elements */
     .dashboard-sidebar h1, .listing-sidebar h1, 
     .dashboard-sidebar > div[style*="margin-top"],
-    .listing-sidebar > div[style*="margin-top"] {
+    .listing-sidebar > div[style*="margin-top"],
+    .listing-sidebar > div > h1 {
         display: none !important;
     }
 
-    /* Ensure the inner flex container (if exists) doesn't break the layout */
-    .dashboard-sidebar > div, .listing-sidebar > div {
-        display: flex !important;
-        flex-direction: row !important;
-        width: 100% !important;
-        justify-content: space-around !important;
-        gap: 0 !important;
-    }
-
     /* 3. MENU ITEM TRANSFORM (STRICT UNIFORMITY) */
-    .sidebar-link, .nav-item-account, .listing-sidebar a {
-        flex: 0 0 75px !important;
-        height: 54px !important; /* Fixed height for all items */
+    .sidebar-link, .nav-item-account, .listing-sidebar a, .listing-sidebar > div > a {
+        flex: 0 0 80px !important; /* Uniform width */
+        height: 72px !important; /* MATCH BAR HEIGHT */
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        justify-content: flex-end !important; /* Bottom align to create common baseline */
-        padding: 5px 0 !important;
+        justify-content: center !important; /* Perfectly centered */
+        padding: 0 !important;
+        margin: 0 !important;
         background: transparent !important;
         border: none !important;
         color: #999 !important;
-        font-size: 9px !important;
+        font-size: 10px !important;
         font-weight: 700 !important;
         white-space: nowrap !important;
         box-shadow: none !important;
-        margin: 0 !important;
         border-radius: 0 !important;
         text-align: center !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Hide inner containers that might break flex */
+    .listing-sidebar > div {
+        display: contents !important;
     }
 
     .sidebar-link svg, .nav-item-account svg, .listing-sidebar a svg {
