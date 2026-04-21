@@ -148,40 +148,68 @@
         overflow-x: hidden !important;
         width: 100vw !important;
         position: relative !important;
+        -webkit-text-size-adjust: 100% !important;
     }
 
-    .obenlo-dashboard-container, .obenlo-account-container, .listing-layout, .site-content {
+    /* RECLAIM ALL SPACE */
+    .obenlo-dashboard-container, 
+    .obenlo-account-container, 
+    .listing-layout, 
+    .site-content,
+    .dashboard-content,
+    .main-content-inner,
+    .container {
         width: 100% !important;
-        max-width: 100% !important;
-        padding: 10px !important;
+        max-width: 100vw !important;
+        padding: 5px !important; /* Minimal breathing room */
         margin: 0 !important;
         display: block !important;
         box-sizing: border-box !important;
     }
 
-    /* Force all cards to 100% width */
-    .dashboard-overview, .pwa-card, .stat-card, .form-section, .listing-sidebar + div, .dashboard-content, .pwa-trips-card {
+    /* REMOVE THEME DECORATIONS THAT BREAK MOBILE (e.g., Blue sidebar borders) */
+    .dashboard-sidebar-active::before, 
+    .dashboard-sidebar-active::after,
+    [style*="border-left: 5px solid blue"],
+    [style*="border-left: 6px solid #e61e4d"] {
+        display: none !important;
+        border: none !important;
+    }
+
+    /* FORCE CARDS TO FULL WIDTH */
+    .dashboard-card, .pwa-card, .stat-card, .form-section, .listing-sidebar + div, .pwa-trips-card, .update-card, .post-item {
         width: 100% !important;
         min-width: 0 !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
+        margin: 10px 0 !important;
         box-sizing: border-box !important;
         padding: 15px !important;
+        border-radius: 20px !important;
+        float: none !important;
     }
 
-    /* UI BUTTONS STACKING */
-    .card-actions, .booking-actions, .form-footer {
+    /* BUTTONS: ALWAYS VERTICAL STACK FOR CLARITY */
+    .card-actions, .booking-actions, .form-footer, .action-buttons {
         display: flex !important;
         flex-direction: column !important;
-        gap: 10px !important;
+        width: 100% !important;
+        gap: 12px !important;
+        margin-top: 15px !important;
     }
-    .card-actions button, .booking-actions a, .btn-primary {
+    
+    .card-actions button, 
+    .booking-actions a, 
+    .booking-actions button,
+    .btn-primary, .btn-secondary,
+    .obenlo-button {
         width: 100% !important;
         margin: 0 !important;
+        padding: 14px !important;
+        text-align: center !important;
+        justify-content: center !important;
     }
 
-    /* AGGRESSIVE TABLE COLLAPSE (Card View) */
-    .admin-table, table {
+    /* DATA TABLES: THE 'STACK' APPROACH (LABEL ON TOP) */
+    .admin-table, table, .booking-list, .listing-table {
         display: block !important;
         width: 100% !important;
         border: none !important;
@@ -193,48 +221,67 @@
         display: block !important;
         background: #fff !important;
         border: 1px solid var(--pwa-border) !important;
-        border-radius: 16px !important;
+        border-radius: 20px !important;
         padding: 15px !important;
-        margin-bottom: 15px !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+        margin-bottom: 20px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04) !important;
     }
     .admin-table td, table td {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        padding: 10px 0 !important;
-        border-bottom: 1px solid #f5f5f5 !important;
-        text-align: right !important;
-        font-size: 0.9rem !important;
+        display: block !important; /* STACKED LABELS */
+        width: 100% !important;
+        padding: 8px 0 !important;
+        border-bottom: 1px solid #f9f9f9 !important;
+        text-align: left !important;
+        font-size: 0.95rem !important;
     }
     .admin-table td:last-child, table td:last-child {
         border-bottom: none !important;
     }
     .admin-table td::before, table td::before {
         content: attr(data-label) !important;
+        display: block !important;
         font-weight: 800 !important;
-        color: #888 !important;
+        color: #e61e4d !important; /* Use red for labels */
         text-transform: uppercase !important;
-        font-size: 0.7rem !important;
-        margin-right: 15px !important;
-        text-align: left !important;
-        flex-shrink: 0 !important;
+        font-size: 0.65rem !important;
+        letter-spacing: 0.5px !important;
+        margin-bottom: 4px !important;
     }
 
-    /* FIX CUT-OFF TEXT */
-    h1, h2, h3, .listing-title {
+    /* FIX CUT-OFF TEXT & TITLES */
+    h1, h2, h3, .listing-title, .post-title {
+        font-size: 1.5rem !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
         white-space: normal !important;
-        line-height: 1.3 !important;
+        line-height: 1.2 !important;
+        margin-bottom: 15px !important;
     }
 
-    /* Fix image aspect ratios */
-    .listing-card-image, .pwa-image-thumb {
-        width: 100% !important;
+    p, .description {
+        font-size: 0.95rem !important;
+        line-height: 1.5 !important;
+        color: #444 !important;
+    }
+
+    /* FIX IMAGES */
+    img {
+        max-width: 100% !important;
         height: auto !important;
-        aspect-ratio: 16/9 !important;
-        object-fit: cover !important;
+    }
+
+    /* PROFILE / AVATAR ROW */
+    .user-profile-row {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 15px !important;
+    }
+
+    /* HIDE THEME OVERLAYS */
+    .language-switcher-pwa-bottom {
+        display: none !important; /* Hide floating lang switch as it covers buttons */
     }
 }
+
 
