@@ -95,22 +95,33 @@
     /* 3. MENU ITEM TRANSFORM */
     /* This targets BOTH Guest nav links and Host sidebar links */
     .sidebar-link, .nav-item-account, .listing-sidebar a {
-        flex: 1 !important;
+        flex: 0 0 75px !important; /* Fixed width for items to prevent overlap */
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 6px 2px !important;
+        padding: 8px 0 !important;
         background: transparent !important;
         border: none !important;
         color: #999 !important;
-        font-size: 10px !important;
+        font-size: 9px !important; /* Slightly smaller font for tight spaces */
         font-weight: 700 !important;
-        min-width: 60px !important;
         white-space: nowrap !important;
         box-shadow: none !important;
         margin: 0 !important;
         border-radius: 0 !important;
+        text-align: center !important;
+    }
+
+    /* Hide scrollbar but keep functionality */
+    .dashboard-sidebar::-webkit-scrollbar, .listing-sidebar::-webkit-scrollbar {
+        display: none !important;
+    }
+    .dashboard-sidebar, .listing-sidebar {
+        -ms-overflow-style: none !important;
+        scrollbar-width: none !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
     }
 
     .sidebar-link svg, .nav-item-account svg, .listing-sidebar a svg {
