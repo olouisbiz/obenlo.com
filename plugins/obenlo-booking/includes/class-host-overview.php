@@ -126,12 +126,49 @@ class Obenlo_Host_Overview
         </div>
 
         <div class="dashboard-grid-layout" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px;">
-            <div class="form-section" style="margin-top:0; min-width:0; overflow-x:auto;">
-                <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Recent Bookings', 'obenlo'); ?></h4>
-                <?php
-                $bm = new Obenlo_Host_Bookings();
-                $bm->render_bookings_list(5);
-                ?>
+            <div class="form-section" style="margin-top:0; min-width:0;">
+                <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Recent Activity', 'obenlo'); ?></h4>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <?php
+                    $user_id = get_current_user_id();
+                    $recent_bookings = get_posts(array(
+                        'post_type' => 'booking',
+                        'posts_per_page' => 3,
+                        'meta_query' => array(array('key' => '_obenlo_host_id', 'value' => $user_id)),
+                        'orderby' => 'date',
+                        'order' => 'DESC'
+                    ));
+
+                    if (empty($recent_bookings)) :
+                        echo '<p style="color:#888; font-size:0.9rem;">' . __('No recent booking activity.', 'obenlo') . '</p>';
+                    else :
+                        foreach ($recent_bookings as $b) :
+                            $lid = get_post_meta($b->ID, '_obenlo_listing_id', true);
+                            $status = get_post_meta($b->ID, '_obenlo_booking_status', true);
+                            $guest_id = $b->post_author;
+                            $guest = get_user_by('id', $guest_id);
+                            $badge = 'badge-info';
+                            if (in_array($status, ['confirmed', 'approved', 'completed'])) $badge = 'badge-success';
+                            if (in_array($status, ['declined', 'cancelled'])) $badge = 'badge-danger';
+                            ?>
+                            <div style="background:#f9f9f9; padding:15px; border-radius:14px; border:1px solid #eee; display:flex; align-items:center; gap:15px;">
+                                <div style="width:40px; height:40px; background:#fff; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <?php if ($lid && has_post_thumbnail($lid)) : ?>
+                                        <img src="<?php echo get_the_post_thumbnail_url($lid, 'thumbnail'); ?>" style="width:100%; height:100%; border-radius:10px; object-fit:cover;">
+                                    <?php else : ?>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px; color:#ccc;"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+                                    <?php endif; ?>
+                                </div>
+                                <div style="flex-grow:1; min-width:0;">
+                                    <div style="font-weight:700; font-size:0.95rem; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><?php echo get_the_title($lid); ?></div>
+                                    <div style="font-size:0.8rem; color:#666;"><?php echo __('Guest:', 'obenlo'); ?> <?php echo esc_html($guest ? $guest->display_name : 'Guest'); ?></div>
+                                </div>
+                                <span class="badge <?php echo $badge; ?>" style="font-size:0.65rem; padding:4px 8px;"><?php echo esc_html(str_replace('_', ' ', $status)); ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                        <a href="?action=bookings" style="margin-top:10px; font-size:0.85rem; color:#e61e4d; font-weight:700; text-decoration:none; display:inline-block;"><?php echo __('View all bookings →', 'obenlo'); ?></a>
+                    <?php endif; ?>
+                </div>
             </div>
             <div class="form-section" style="margin-top:0; min-width:0;">
                 <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Performance', 'obenlo'); ?></h4>
