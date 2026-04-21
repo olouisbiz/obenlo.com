@@ -126,14 +126,14 @@ class Obenlo_Host_Overview
         </div>
 
         <div class="dashboard-grid-layout" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px;">
-            <div class="form-section" style="margin-top:0;">
+            <div class="form-section" style="margin-top:0; min-width:0; overflow:hidden;">
                 <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Recent Bookings', 'obenlo'); ?></h4>
                 <?php
                 $bm = new Obenlo_Host_Bookings();
                 $bm->render_bookings_list(5);
                 ?>
             </div>
-            <div class="form-section" style="margin-top:0;">
+            <div class="form-section" style="margin-top:0; min-width:0;">
                 <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Performance', 'obenlo'); ?></h4>
                 <p style="color:#666; font-size:0.9rem;"><?php echo __('Your response rate and booking conversion stats will appear here as your hosting history grows.', 'obenlo'); ?></p>
             </div>
