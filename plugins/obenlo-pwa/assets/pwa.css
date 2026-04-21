@@ -19,8 +19,37 @@
         margin: 0 !important;
     }
 
-    #wpadminbar, .site-header { display: none !important; }
+    #wpadminbar { display: none !important; }
     html { margin-top: 0 !important; }
+
+    /* NATIVE TOP HEADER (REBUILT FOR APP) */
+    .site-header {
+        display: block !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 10000 !important;
+        background: var(--pwa-glass) !important;
+        backdrop-filter: blur(25px) !important;
+        -webkit-backdrop-filter: blur(25px) !important;
+        border-bottom: 1px solid var(--pwa-border) !important;
+        padding: calc(env(safe-area-inset-top) + 5px) 0 5px 0 !important;
+        height: auto !important;
+    }
+
+    .header-inner {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        height: 60px !important;
+        padding: 0 20px !important;
+    }
+
+    .header-search-nav { display: none !important; } /* Hide search in top app bar */
+    .become-host-link { display: none !important; } /* Hide text links to save space */
+
+    .site-branding img {
+        height: 30px !important;
+    }
 
     /* 2. TRANSFORM SIDEBAR INTO BOTTOM NAV */
     /* This targets BOTH the Host Dashboard sidebar AND the Guest Account sidebar */
