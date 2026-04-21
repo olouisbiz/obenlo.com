@@ -131,16 +131,27 @@
         stroke-width: 2.2 !important;
     }
 
-    /* Active State (Role-Aware Red) */
-    .sidebar-link.active, .nav-item-account[style*="background: rgb(230, 30, 77)"],
-    .sidebar-link[style*="color: rgb(255, 255, 255)"],
-    .sidebar-link.active span {
+    /* Active State (Standardized Brand Red) */
+    .sidebar-link.active, 
+    .nav-item-account.active,
+    .nav-item-account[style*="background: rgb(230, 30, 77)"],
+    .nav-item-account[style*="background:#e61e4d"],
+    .sidebar-link[style*="color: rgb(255, 255, 255)"] {
         color: var(--pwa-red) !important;
         background: transparent !important;
     }
 
-    .sidebar-link.active svg, .nav-item-account[style*="background: rgb(230, 30, 77)"] svg {
+    .sidebar-link.active svg, 
+    .nav-item-account.active svg,
+    .nav-item-account[style*="background: rgb(230, 30, 77)"] svg,
+    .nav-item-account[style*="background:#e61e4d"] svg {
         color: var(--pwa-red) !important;
+        stroke: var(--pwa-red) !important;
+    }
+
+    .sidebar-link.active span, .nav-item-account.active span {
+        color: var(--pwa-red) !important;
+        opacity: 1 !important;
     }
 
     /* 4. CONTENT AREA POLISH */
