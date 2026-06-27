@@ -77,16 +77,21 @@ Example format:
 ]
 PROMPT;
 
-        $result = Obenlo_AI_Client::complete( $prompt, 600 );
+        $result = Obenlo_AI_Client::complete( $prompt, 700 );
 
         if ( is_wp_error( $result ) ) {
             wp_send_json_error( [ 'message' => $result->get_error_message() ] );
         }
 
-        $clean = preg_replace( '/^```(?:json)?\s*/i', '', trim( $result ) );
-        $clean = preg_replace( '/\s*```$/', '', $clean );
+        $start = strpos( $result, '[' );
+        $end   = strrpos( $result, ']' );
 
-        $parsed = json_decode( $clean, true );
+        if ( $start === false || $end === false || $end < $start ) {
+            wp_send_json_error( [ 'message' => 'AI returned an invalid format. Please try searching again.', 'raw' => $result ] );
+        }
+
+        $json_text = substr( $result, $start, $end - $start + 1 );
+        $parsed    = json_decode( $json_text, true );
 
         if ( json_last_error() !== JSON_ERROR_NONE || ! is_array( $parsed ) ) {
             wp_send_json_error( [ 'message' => 'AI returned an invalid format. Please try searching again.', 'raw' => $result ] );
