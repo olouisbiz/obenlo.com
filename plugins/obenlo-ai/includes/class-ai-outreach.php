@@ -50,6 +50,10 @@ class Obenlo_AI_Outreach {
 
         $category = sanitize_text_field( $_POST['category'] ?? '' );
         $location = sanitize_text_field( $_POST['location'] ?? '' );
+        $count    = intval( $_POST['count'] ?? 5 );
+        if ( $count < 1 || $count > 25 ) {
+            $count = 5;
+        }
 
         if ( empty( $category ) || empty( $location ) ) {
             wp_send_json_error( [ 'message' => 'Please fill in both Category and Location.' ] );
@@ -59,7 +63,7 @@ class Obenlo_AI_Outreach {
 
         $prompt = <<<PROMPT
 You are an expert lead generator and business intelligence agent for {$platform_name}, a global service and experience marketplace.
-Search for or identify 5 real or highly authentic active local service providers matching:
+Search for or identify {$count} real or highly authentic active local service providers matching:
 Category: {$category}
 Location: {$location}
 
@@ -346,8 +350,8 @@ PROMPT;
             }
             .search-grid {
                 display: grid;
-                grid-template-columns: 1fr 1fr 180px;
-                gap: 20px;
+                grid-template-columns: 1fr 1fr 130px 180px;
+                gap: 16px;
                 align-items: end;
             }
             .form-group label {
@@ -542,6 +546,15 @@ PROMPT;
                         <label for="outreach-location">Location / City</label>
                         <input type="text" id="outreach-location" placeholder="e.g. Miami, FL" value="Boston">
                     </div>
+                    <div class="form-group">
+                        <label for="outreach-count">Leads Count</label>
+                        <select id="outreach-count" style="width:100%; padding:12px; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; background:#f9fafb; outline:none;">
+                            <option value="5">5 Leads</option>
+                            <option value="10" selected>10 Leads</option>
+                            <option value="15">15 Leads</option>
+                            <option value="20">20 Leads</option>
+                        </select>
+                    </div>
                     <div>
                         <button id="btn-search-providers" class="btn-outreach-search">🔍 Search Providers</button>
                     </div>
@@ -732,8 +745,9 @@ PROMPT;
 
             // ── Search Providers ──────────────────────────────────────────
             btnSearch.addEventListener('click', async () => {
-                const cat = catInput.value.trim(), loc = locInput.value.trim();
-                log("Search clicked: " + cat + " in " + loc);
+                const cat   = catInput.value.trim(), loc = locInput.value.trim();
+                const count = document.getElementById('outreach-count').value;
+                log("Search clicked: " + cat + " in " + loc + " (Count: " + count + ")");
                 if (!cat || !loc) return;
 
                 btnSearch.disabled = true;
@@ -749,6 +763,7 @@ PROMPT;
                     fd.append('nonce', NONCE);
                     fd.append('category', cat);
                     fd.append('location', loc);
+                    fd.append('count', count);
 
                     const res  = await fetch(AJAX_URL, { method: 'POST', body: fd });
                     const text = await res.text();
@@ -763,11 +778,16 @@ PROMPT;
                             const tr = document.createElement('tr');
                             let webDisplay = esc(p.website).replace(/^https?:\/\/(www\.)?/,'');
                             let webUrl = p.website.startsWith('http') ? p.website : 'https://' + p.website;
+                            let googleSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(p.name + ' ' + loc + ' ' + cat);
+
                             tr.innerHTML = `
                                 <td><input type="checkbox" class="chk-lead" data-idx="${idx}"></td>
                                 <td><strong>${esc(p.name)}</strong></td>
                                 <td><span style="background:#ede9fe; color:#6d28d9; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">${esc(p.niche)}</span></td>
-                                <td><a href="${esc(webUrl)}" target="_blank" rel="noopener" style="color:#7c3aed; text-decoration:none; font-weight:600;">🌐 ${esc(webDisplay)}</a></td>
+                                <td>
+                                    <a href="${esc(webUrl)}" target="_blank" rel="noopener" style="color:#7c3aed; text-decoration:none; font-weight:600; display:block; margin-bottom:4px;">🌐 ${esc(webDisplay)}</a>
+                                    <a href="${esc(googleSearchUrl)}" target="_blank" rel="noopener" style="color:#2563eb; text-decoration:none; font-size:0.75rem; font-weight:700; background:#eff6ff; padding:2px 6px; border-radius:4px; display:inline-block;">🔍 Verify Google</a>
+                                </td>
                                 <td>${esc(p.email)}</td>
                                 <td><span style="font-size:0.82rem; color:#6b7280;">${esc(p.description)}</span></td>
                                 <td><button class="btn-action-draft" data-idx="${idx}">✍️ Draft Pitch</button></td>
