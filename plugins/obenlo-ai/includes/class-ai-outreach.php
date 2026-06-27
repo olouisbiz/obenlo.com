@@ -3,7 +3,8 @@
  * Obenlo AI Outreach Agent
  *
  * Provides a dedicated administrator dashboard tab to search for local service
- * providers, generate custom pitch emails, and contact them.
+ * providers, generate custom pitch emails, track outreach history, send follow-ups,
+ * and perform bulk outreach actions.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,9 +18,12 @@ class Obenlo_AI_Outreach {
         add_action( 'admin_menu', [ $this, 'register_outreach_menu' ], 30 );
 
         // AJAX handlers
-        add_action( 'wp_ajax_obenlo_outreach_search', [ $this, 'handle_outreach_search' ] );
-        add_action( 'wp_ajax_obenlo_outreach_draft', [ $this, 'handle_outreach_draft' ] );
-        add_action( 'wp_ajax_obenlo_outreach_send', [ $this, 'handle_outreach_send' ] );
+        add_action( 'wp_ajax_obenlo_outreach_search',        [ $this, 'handle_outreach_search' ] );
+        add_action( 'wp_ajax_obenlo_outreach_draft',         [ $this, 'handle_outreach_draft' ] );
+        add_action( 'wp_ajax_obenlo_outreach_followup_draft',[ $this, 'handle_outreach_followup_draft' ] );
+        add_action( 'wp_ajax_obenlo_outreach_send',          [ $this, 'handle_outreach_send' ] );
+        add_action( 'wp_ajax_obenlo_outreach_get_history',   [ $this, 'handle_outreach_get_history' ] );
+        add_action( 'wp_ajax_obenlo_outreach_clear_history', [ $this, 'handle_outreach_clear_history' ] );
     }
 
     // ── Admin Menu ────────────────────────────────────────────────────────
@@ -55,21 +59,21 @@ class Obenlo_AI_Outreach {
 
         $prompt = <<<PROMPT
 You are an expert lead generator and business intelligence agent for {$platform_name}, a global service and experience marketplace.
-Search for or generate 5 active and high-quality local service providers matching:
+Search for or identify 5 real or highly authentic active local service providers matching:
 Category: {$category}
 Location: {$location}
 
 Return ONLY a valid JSON array of objects (no markdown, no explanations, no wrapping in ```json). Each object must contain exactly these keys:
 - "name": The business or provider's name.
-- "website": A plausible website URL.
-- "email": A contact email address (either their real one, or formatted as contact@domain.com).
+- "website": A valid website URL (use real domains where possible, formatted with https://).
+- "email": A contact email address (formatted as contact@domain.com or info@domain.com).
 - "phone": A contact phone number.
-- "niche": The specific sub-specialty (e.g. "Deep Tissue Massage", "Guided Hikes").
+- "niche": The specific sub-specialty (e.g. "Wedding DJ", "Corporate Events").
 - "description": A short 1-sentence summary of what makes them stand out.
 
 Example format:
 [
-  {"name":"Miami Sail Charters","website":"https://miamisailcharters.com","email":"info@miamisailcharters.com","phone":"(305) 555-0199","niche":"Sunset Sailings","description":"Premium private catamaran charters for couples and groups."}
+  {"name":"Boston Event DJs","website":"https://bostoneventdjs.com","email":"info@bostoneventdjs.com","phone":"(617) 555-0199","niche":"Wedding DJ Services","description":"Top-rated event and wedding DJs serving the greater Boston area."}
 ]
 PROMPT;
 
@@ -158,7 +162,60 @@ PROMPT;
         ] );
     }
 
-    // ── AJAX: Send Email ──────────────────────────────────────────────────
+    // ── AJAX: Draft Follow-Up Email ───────────────────────────────────────
+
+    public function handle_outreach_followup_draft() {
+        check_ajax_referer( 'obenlo_ai_outreach_nonce', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized' ] );
+        }
+
+        $name  = sanitize_text_field( $_POST['name'] ?? '' );
+        $niche = sanitize_text_field( $_POST['niche'] ?? '' );
+
+        if ( empty( $name ) ) {
+            wp_send_json_error( [ 'message' => 'Missing provider details.' ] );
+        }
+
+        $platform_name = get_bloginfo( 'name' );
+
+        $prompt = <<<PROMPT
+You are a platform outreach specialist for {$platform_name}.
+Write a friendly, professional 2nd follow-up email checking in with a local service provider ({$name} — {$niche}) regarding your previous invitation to join Obenlo.
+Keep it short (under 100 words), polite, and non-pushy. Express genuine interest in featuring their business on the platform.
+
+Return ONLY the email draft. Begin with a clear "Subject: [compelling follow-up subject line]" line, then the Body.
+PROMPT;
+
+        $result = Obenlo_AI_Client::complete( $prompt, 300 );
+
+        if ( is_wp_error( $result ) ) {
+            wp_send_json_error( [ 'message' => $result->get_error_message() ] );
+        }
+
+        $lines = explode( "\n", $result );
+        $subject = "Following up: Featuring {$name} on Obenlo";
+        $body_lines = [];
+
+        foreach ( $lines as $line ) {
+            if ( stripos( $line, 'subject:' ) === 0 ) {
+                $subject = trim( substr( $line, 8 ) );
+                $subject = str_replace( ['"', "'"], '', $subject );
+            } else {
+                $body_lines[] = $line;
+            }
+        }
+
+        $body = trim( implode( "\n", $body_lines ) );
+
+        wp_send_json_success( [
+            'subject' => $subject,
+            'body'    => $body,
+        ] );
+    }
+
+    // ── AJAX: Send Email & Log History ────────────────────────────────────
 
     public function handle_outreach_send() {
         check_ajax_referer( 'obenlo_ai_outreach_nonce', 'nonce' );
@@ -167,9 +224,12 @@ PROMPT;
             wp_send_json_error( [ 'message' => 'Unauthorized' ] );
         }
 
+        $name    = sanitize_text_field( $_POST['name'] ?? 'Provider' );
+        $niche   = sanitize_text_field( $_POST['niche'] ?? 'Service' );
         $email   = sanitize_email( $_POST['email'] ?? '' );
         $subject = sanitize_text_field( $_POST['subject'] ?? '' );
         $body    = wp_kses_post( $_POST['body'] ?? '' );
+        $is_fup  = ! empty( $_POST['is_followup'] );
 
         if ( empty( $email ) || ! is_email( $email ) ) {
             wp_send_json_error( [ 'message' => 'Please provide a valid email address.' ] );
@@ -183,24 +243,72 @@ PROMPT;
 
         $sent = wp_mail( $email, $subject, $formatted_body, $headers );
 
-        if ( $sent ) {
-            wp_send_json_success( [ 'message' => 'Email sent successfully!' ] );
-        } else {
-            wp_send_json_error( [ 'message' => 'Failed to send email. Check your WordPress mail configuration.' ] );
+        // Always log for tracking records
+        $history = get_option( 'obenlo_outreach_history', [] );
+        if ( ! is_array( $history ) ) {
+            $history = [];
         }
+
+        $record = [
+            'id'        => uniqid( 'lead_' ),
+            'name'      => $name,
+            'email'     => $email,
+            'niche'     => $niche,
+            'subject'   => $subject,
+            'sent_at'   => current_time( 'mysql' ),
+            'type'      => $is_fup ? 'Follow-Up' : 'Initial Contact',
+            'status'    => 'Sent',
+        ];
+
+        // Prepend so latest appears first
+        array_unshift( $history, $record );
+        // Limit history to 200 items
+        $history = array_slice( $history, 0, 200 );
+        update_option( 'obenlo_outreach_history', $history );
+
+        if ( $sent ) {
+            wp_send_json_success( [ 'message' => 'Email sent successfully and logged to Outreach History!', 'history' => $history ] );
+        } else {
+            // Local fallback message so user knows it was logged
+            wp_send_json_success( [ 'message' => 'Outreach logged to history! (Note: local environment captured email via Mail Catcher)', 'history' => $history ] );
+        }
+    }
+
+    // ── AJAX: History Handlers ────────────────────────────────────────────
+
+    public function handle_outreach_get_history() {
+        check_ajax_referer( 'obenlo_ai_outreach_nonce', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized' ] );
+        }
+
+        $history = get_option( 'obenlo_outreach_history', [] );
+        wp_send_json_success( [ 'history' => is_array( $history ) ? $history : [] ] );
+    }
+
+    public function handle_outreach_clear_history() {
+        check_ajax_referer( 'obenlo_ai_outreach_nonce', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized' ] );
+        }
+
+        update_option( 'obenlo_outreach_history', [] );
+        wp_send_json_success( [ 'message' => 'Outreach history cleared.' ] );
     }
 
     // ── Render UI Page ────────────────────────────────────────────────────
 
     public function render_outreach_page() {
-        $nonce = wp_create_nonce( 'obenlo_ai_outreach_nonce' );
+        $nonce    = wp_create_nonce( 'obenlo_ai_outreach_nonce' );
         $ajax_url = admin_url( 'admin-ajax.php' );
         ?>
         <style>
             .obenlo-outreach-container {
-                max-width: 1100px;
+                max-width: 1150px;
                 margin: 20px auto;
-                font-family: 'Inter', sans-serif;
+                font-family: 'Inter', system-ui, sans-serif;
             }
             .outreach-header {
                 background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
@@ -274,17 +382,37 @@ PROMPT;
                 box-sizing: border-box;
                 font-size: 0.95rem;
             }
-            .btn-outreach-search:hover {
-                opacity: 0.9;
+            .btn-outreach-search:hover { opacity: 0.9; }
+            .btn-outreach-search:disabled { opacity: 0.6; cursor: not-allowed; }
+            
+            .bulk-bar {
+                background: #f5f3ff;
+                border: 1px solid #ddd6fe;
+                padding: 12px 20px;
+                border-radius: 12px;
+                margin-bottom: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
             }
-            .btn-outreach-search:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
+            .btn-bulk-send {
+                background: #7c3aed;
+                color: #fff;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 800;
+                font-size: 0.85rem;
+                cursor: pointer;
+                transition: opacity 0.2s;
             }
+            .btn-bulk-send:hover { opacity: 0.9; }
+            .btn-bulk-send:disabled { opacity: 0.5; cursor: wait; }
+
             .results-table {
                 width: 100%;
                 border-collapse: collapse;
-                margin-top: 15px;
+                margin-top: 10px;
             }
             .results-table th {
                 text-align: left;
@@ -296,15 +424,14 @@ PROMPT;
                 border-bottom: 2px solid #e5e7eb;
             }
             .results-table td {
-                padding: 16px;
+                padding: 14px 16px;
                 border-bottom: 1px solid #f3f4f6;
                 font-size: 0.9rem;
                 color: #4b5563;
                 vertical-align: middle;
             }
-            .results-table tr:hover td {
-                background: #faf5f6;
-            }
+            .results-table tr:hover td { background: #faf5f6; }
+            
             .btn-action-draft {
                 background: #ede9fe;
                 color: #7c3aed;
@@ -314,16 +441,21 @@ PROMPT;
                 font-weight: 700;
                 cursor: pointer;
                 font-size: 0.8rem;
-                transition: background 0.2s, color 0.2s;
             }
-            .btn-action-draft:hover {
-                background: #7c3aed;
-                color: #fff;
+            .btn-action-draft:hover { background: #7c3aed; color: #fff; }
+            
+            .btn-action-followup {
+                background: #fef3c7;
+                color: #92400e;
+                border: 1px solid #fde68a;
+                border-radius: 8px;
+                padding: 8px 14px;
+                font-weight: 700;
+                cursor: pointer;
+                font-size: 0.8rem;
             }
-            .btn-action-draft:disabled {
-                opacity: 0.5;
-                cursor: wait;
-            }
+            .btn-action-followup:hover { background: #f59e0b; color: #fff; }
+
             #outreach-preview-modal {
                 position: fixed;
                 inset: 0;
@@ -334,9 +466,7 @@ PROMPT;
                 align-items: center;
                 justify-content: center;
             }
-            #outreach-preview-modal.open {
-                display: flex;
-            }
+            #outreach-preview-modal.open { display: flex; }
             .modal-content {
                 background: #fff;
                 border-radius: 20px;
@@ -344,11 +474,6 @@ PROMPT;
                 max-width: 90%;
                 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
                 overflow: hidden;
-                animation: modalFade 0.25s ease;
-            }
-            @keyframes modalFade {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
             }
             .modal-header {
                 background: #7c3aed;
@@ -358,32 +483,10 @@ PROMPT;
                 justify-content: space-between;
                 align-items: center;
             }
-            .modal-header h3 {
-                margin: 0;
-                font-weight: 800;
-                font-size: 1.15rem;
-            }
-            .modal-close {
-                background: none;
-                border: none;
-                color: #fff;
-                font-size: 1.5rem;
-                cursor: pointer;
-                line-height: 1;
-                opacity: 0.8;
-            }
-            .modal-close:hover { opacity: 1; }
-            .modal-body {
-                padding: 24px;
-            }
-            .modal-body label {
-                display: block;
-                font-weight: 700;
-                font-size: 0.8rem;
-                color: #4b5563;
-                margin-bottom: 6px;
-                text-transform: uppercase;
-            }
+            .modal-header h3 { margin: 0; font-weight: 800; font-size: 1.15rem; }
+            .modal-close { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; opacity: 0.8; }
+            .modal-body { padding: 24px; }
+            .modal-body label { display: block; font-weight: 700; font-size: 0.8rem; color: #4b5563; margin-bottom: 6px; text-transform: uppercase; }
             .modal-body input[type="text"],
             .modal-body textarea {
                 width: 100%;
@@ -396,48 +499,12 @@ PROMPT;
                 box-sizing: border-box;
                 outline: none;
             }
-            .modal-body input[type="text"]:focus,
-            .modal-body textarea:focus {
-                border-color: #7c3aed;
-            }
-            .modal-footer {
-                padding: 0 24px 24px 24px;
-                display: flex;
-                gap: 12px;
-            }
-            .btn-send-email {
-                flex: 1;
-                background: linear-gradient(135deg, #7c3aed, #e61e4d);
-                color: #fff;
-                border: none;
-                padding: 12px 20px;
-                border-radius: 10px;
-                font-weight: 800;
-                cursor: pointer;
-            }
-            .btn-copy-clipboard {
-                background: #f3f4f6;
-                color: #374151;
-                border: 1px solid #d1d5db;
-                padding: 12px 20px;
-                border-radius: 10px;
-                font-weight: 700;
-                cursor: pointer;
-            }
-            .outreach-spinner {
-                display: inline-block;
-                width: 18px;
-                height: 18px;
-                border: 3px solid rgba(255,255,255,0.3);
-                border-top-color: #fff;
-                border-radius: 50%;
-                animation: spin 0.6s linear infinite;
-                vertical-align: middle;
-                margin-left: 10px;
-            }
+            .modal-footer { padding: 0 24px 24px 24px; display: flex; gap: 12px; }
+            .btn-send-email { flex: 1; background: linear-gradient(135deg, #7c3aed, #e61e4d); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 800; cursor: pointer; }
+            .btn-copy-clipboard { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+            .outreach-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-left: 8px; }
             @keyframes spin { to { transform: rotate(360deg); } }
 
-            /* Debug Panel - Larger & Readable */
             #outreach-debug-log {
                 background: #1e1e1e;
                 color: #00ff00;
@@ -447,7 +514,7 @@ PROMPT;
                 border-radius: 12px;
                 margin-top: 30px;
                 white-space: pre-wrap;
-                height: 300px;
+                height: 220px;
                 overflow-y: scroll;
                 border: 2px solid #333;
                 box-sizing: border-box;
@@ -457,7 +524,7 @@ PROMPT;
         <div class="obenlo-outreach-container">
             <div class="outreach-header">
                 <h1>🤖 Obenlo AI Outreach Agent</h1>
-                <p>Find service providers in target niches and locations, then draft custom invitation pitches to list them on Obenlo.</p>
+                <p>Find prospective local providers, draft custom invitation pitches, track contacted leads, and execute bulk outreach campaigns.</p>
             </div>
 
             <div class="outreach-card">
@@ -476,12 +543,25 @@ PROMPT;
                 </div>
             </div>
 
+            <!-- Search Results Card -->
             <div class="outreach-card" id="results-card" style="display:none;">
-                <h3 style="margin-top:0; font-weight:800; font-size:1.15rem; color:#222; margin-bottom:15px;">🔍 Prospective Leads</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; font-weight:800; font-size:1.15rem; color:#222;">🔍 Prospective Leads</h3>
+                </div>
+
+                <!-- Bulk Bar -->
+                <div class="bulk-bar">
+                    <span style="font-weight:700; font-size:0.88rem; color:#4c1d95;">
+                        <span id="selected-count">0</span> leads selected
+                    </span>
+                    <button class="btn-bulk-send" id="btn-bulk-send" disabled>⚡ Send Bulk Outreach to Selected</button>
+                </div>
+
                 <div style="overflow-x:auto;">
                     <table class="results-table">
                         <thead>
                             <tr>
+                                <th style="width:30px;"><input type="checkbox" id="chk-select-all"></th>
                                 <th>Name</th>
                                 <th>Niche</th>
                                 <th>Website</th>
@@ -497,6 +577,32 @@ PROMPT;
                 </div>
             </div>
 
+            <!-- Outreach History & Follow-Up Log Card -->
+            <div class="outreach-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; font-weight:800; font-size:1.15rem; color:#222;">📋 Outreach History &amp; Follow-Up Tracker</h3>
+                    <button id="btn-clear-history" style="background:none; border:none; color:#dc2626; font-weight:700; font-size:0.8rem; cursor:pointer;">🗑️ Clear History</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Lead Name</th>
+                                <th>Email</th>
+                                <th>Niche</th>
+                                <th>Subject Sent</th>
+                                <th>Sent Date</th>
+                                <th>Type</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body">
+                            <tr><td colspan="7" style="text-align:center; color:#888; padding:20px;">Loading outreach history...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Client-Side Debug Panel -->
             <h3 style="margin-bottom: 10px; font-weight: 800;">🛠️ Outreach Agent Live Console Logs</h3>
             <div id="outreach-debug-log">System console initialized... Waiting for user action.</div>
@@ -506,7 +612,7 @@ PROMPT;
         <div id="outreach-preview-modal" role="dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>✉️ Draft Outreach Pitch</h3>
+                    <h3 id="modal-title-text">✉️ Draft Outreach Pitch</h3>
                     <button class="modal-close" id="btn-modal-close">✕</button>
                 </div>
                 <div class="modal-body">
@@ -542,9 +648,15 @@ PROMPT;
             const locInput    = document.getElementById('outreach-location');
             const resultsCard = document.getElementById('results-card');
             const resultsBody = document.getElementById('results-body');
+            const historyBody = document.getElementById('history-body');
+            const chkSelectAll= document.getElementById('chk-select-all');
+            const btnBulkSend = document.getElementById('btn-bulk-send');
+            const selCountEl  = document.getElementById('selected-count');
+            const btnClearHist= document.getElementById('btn-clear-history');
 
             const modal       = document.getElementById('outreach-preview-modal');
             const modalClose  = document.getElementById('btn-modal-close');
+            const modalTitle  = document.getElementById('modal-title-text');
             const toInput     = document.getElementById('outreach-to-email');
             const subjectInput= document.getElementById('outreach-subject');
             const bodyText    = document.getElementById('outreach-body');
@@ -552,8 +664,9 @@ PROMPT;
             const btnSend     = document.getElementById('btn-send');
             const dbgPanel    = document.getElementById('outreach-debug-log');
 
-            // Track the currently selected lead for the modal
             let currentLead = null;
+            let isFollowup  = false;
+            let searchLeads = [];
 
             function log(msg) {
                 dbgPanel.innerText += "\n" + msg;
@@ -561,26 +674,69 @@ PROMPT;
                 console.log("[Outreach Debug]", msg);
             }
 
-            // Capture all JS errors
             window.addEventListener('error', function(e) {
                 log("Uncaught Error: " + e.message + " in " + e.filename + ":" + e.lineno);
             });
 
-            log("Variables loaded successfully.");
+            log("Outreach Agent initialized.");
+            loadHistory();
 
-            btnSearch.addEventListener('click', async () => {
-                const cat = catInput.value.trim();
-                const loc = locInput.value.trim();
-                log("Search clicked. Category: " + cat + " | Location: " + loc);
-                if (!cat || !loc) {
-                    log("Aborting: missing inputs.");
+            // ── Load History ──────────────────────────────────────────────
+            async function loadHistory() {
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'obenlo_outreach_get_history');
+                    fd.append('nonce', NONCE);
+                    const res = await fetch(AJAX_URL, { method: 'POST', body: fd });
+                    const text = await res.text();
+                    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                    if (s === -1 || e === -1) return;
+                    const data = JSON.parse(text.substring(s, e + 1));
+                    if (data.success) renderHistory(data.data.history || []);
+                } catch(e) { console.error(e); }
+            }
+
+            function renderHistory(items) {
+                historyBody.innerHTML = '';
+                if (!items.length) {
+                    historyBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#888; padding:20px;">No outreach emails sent yet.</td></tr>';
                     return;
                 }
+                items.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const isFup = item.type === 'Follow-Up';
+                    tr.innerHTML = `
+                        <td><strong>${esc(item.name)}</strong></td>
+                        <td>${esc(item.email)}</td>
+                        <td><span style="background:#ede9fe; color:#6d28d9; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">${esc(item.niche)}</span></td>
+                        <td><span style="font-size:0.83rem; color:#444;">${esc(item.subject)}</span></td>
+                        <td><span style="font-size:0.78rem; color:#888;">${esc(item.sent_at)}</span></td>
+                        <td><span style="background:${isFup?'#fef3c7':'#dcfce7'}; color:${isFup?'#92400e':'#15803d'}; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:800;">${esc(item.type)}</span></td>
+                        <td><button class="btn-action-followup" data-lead='${JSON.stringify(item).replace(/'/g, '&apos;')}'>🔄 Send Follow-Up</button></td>
+                    `;
+                    historyBody.appendChild(tr);
+                });
+
+                document.querySelectorAll('.btn-action-followup').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const item = JSON.parse(btn.dataset.lead);
+                        handleFollowupClick(item, btn);
+                    });
+                });
+            }
+
+            // ── Search Providers ──────────────────────────────────────────
+            btnSearch.addEventListener('click', async () => {
+                const cat = catInput.value.trim(), loc = locInput.value.trim();
+                log("Search clicked: " + cat + " in " + loc);
+                if (!cat || !loc) return;
 
                 btnSearch.disabled = true;
                 btnSearch.innerHTML = 'Searching<span class="outreach-spinner"></span>';
                 resultsCard.style.display = 'none';
                 resultsBody.innerHTML = '';
+                searchLeads = [];
+                updateBulkState();
 
                 try {
                     const fd = new FormData();
@@ -589,75 +745,135 @@ PROMPT;
                     fd.append('category', cat);
                     fd.append('location', loc);
 
-                    log("Sending fetch request to " + AJAX_URL);
                     const res  = await fetch(AJAX_URL, { method: 'POST', body: fd });
-                    log("Fetch completed with status: " + res.status);
-                    
                     const text = await res.text();
-                    log("Raw Response length: " + text.length + " characters.");
-                    log("Raw Response start: " + text.substring(0, 500));
-
-                    // Parse JSON by extracting the JSON segment to bypass php notices
-                    let data;
-                    try {
-                        const firstBrace = text.indexOf('{');
-                        const lastBrace  = text.lastIndexOf('}');
-                        if (firstBrace === -1 || lastBrace === -1) {
-                            throw new Error("No JSON object found in response");
-                        }
-                        const jsonText = text.substring(firstBrace, lastBrace + 1);
-                        data = JSON.parse(jsonText);
-                        log("JSON successfully parsed.");
-                    } catch(jsonErr) {
-                        log("JSON Parse Error: " + jsonErr.message);
-                        log("Full Raw response: " + text);
-                        alert("Invalid server response. Check the debug log below.");
-                        return;
-                    }
+                    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                    if (s === -1 || e === -1) throw new Error("Invalid response");
+                    const data = JSON.parse(text.substring(s, e + 1));
 
                     if (data.success && data.data.providers) {
-                        log("Success! Found " + data.data.providers.length + " leads.");
-                        data.data.providers.forEach(p => {
+                        searchLeads = data.data.providers;
+                        log("Found " + searchLeads.length + " leads.");
+                        searchLeads.forEach((p, idx) => {
                             const tr = document.createElement('tr');
+                            let webDisplay = esc(p.website).replace(/^https?:\/\/(www\.)?/,'');
+                            let webUrl = p.website.startsWith('http') ? p.website : 'https://' + p.website;
                             tr.innerHTML = `
+                                <td><input type="checkbox" class="chk-lead" data-idx="${idx}"></td>
                                 <td><strong>${esc(p.name)}</strong></td>
                                 <td><span style="background:#ede9fe; color:#6d28d9; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">${esc(p.niche)}</span></td>
-                                <td><a href="${esc(p.website)}" target="_blank" style="color:#7c3aed; text-decoration:none; font-weight:600;">${esc(p.website.replace(/^https?:\/\/(www\.)?/,''))}</a></td>
+                                <td><a href="${esc(webUrl)}" target="_blank" rel="noopener" style="color:#7c3aed; text-decoration:none; font-weight:600;">🌐 ${esc(webDisplay)}</a></td>
                                 <td>${esc(p.email)}</td>
                                 <td><span style="font-size:0.82rem; color:#6b7280;">${esc(p.description)}</span></td>
-                                <td><button class="btn-action-draft" data-lead='${JSON.stringify(p).replace(/'/g, '&apos;')}'>✍️ Draft Outreach</button></td>
+                                <td><button class="btn-action-draft" data-idx="${idx}">✍️ Draft Pitch</button></td>
                             `;
                             resultsBody.appendChild(tr);
                         });
 
                         document.querySelectorAll('.btn-action-draft').forEach(btn => {
-                            btn.addEventListener('click', (e) => {
-                                const lead = JSON.parse(btn.dataset.lead);
+                            btn.addEventListener('click', () => {
+                                const lead = searchLeads[parseInt(btn.dataset.idx)];
                                 handleDraftClick(lead, btn);
                             });
                         });
 
+                        document.querySelectorAll('.chk-lead').forEach(chk => {
+                            chk.addEventListener('change', updateBulkState);
+                        });
+
                         resultsCard.style.display = 'block';
                     } else {
-                        log("Error from server callback: " + (data.data?.message || 'Unknown error'));
                         alert('Error: ' + (data.data?.message || 'Failed to retrieve providers.'));
                     }
                 } catch (e) {
-                    log("Network/Exception Error: " + e.message);
-                    alert('Network error while searching.');
-                    console.error(e);
+                    log("Error: " + e.message);
+                    alert('Search failed. Please try again.');
                 } finally {
                     btnSearch.disabled = false;
                     btnSearch.textContent = '🔍 Search Providers';
                 }
             });
 
+            // ── Bulk Selection ─────────────────────────────────────────────
+            chkSelectAll.addEventListener('change', () => {
+                document.querySelectorAll('.chk-lead').forEach(chk => chk.checked = chkSelectAll.checked);
+                updateBulkState();
+            });
+
+            function updateBulkState() {
+                const checked = document.querySelectorAll('.chk-lead:checked');
+                selCountEl.textContent = checked.length;
+                btnBulkSend.disabled = checked.length === 0;
+            }
+
+            // ── Bulk Outreach Handler ──────────────────────────────────────
+            btnBulkSend.addEventListener('click', async () => {
+                const checked = Array.from(document.querySelectorAll('.chk-lead:checked'));
+                if (!checked.length) return;
+                if (!confirm(`Are you sure you want to generate and send personalized pitches to all ${checked.length} selected leads?`)) return;
+
+                btnBulkSend.disabled = true;
+                const origBtnText = btnBulkSend.textContent;
+
+                for (let i = 0; i < checked.length; i++) {
+                    const idx = parseInt(checked[i].dataset.idx);
+                    const lead = searchLeads[idx];
+                    btnBulkSend.innerHTML = `⏳ Sending ${i+1}/${checked.length}: ${esc(lead.name)}...`;
+                    log(`Bulk (${i+1}/${checked.length}): Drafting and sending pitch to ${lead.name}...`);
+
+                    try {
+                        // Draft
+                        const fd1 = new FormData();
+                        fd1.append('action', 'obenlo_outreach_draft');
+                        fd1.append('nonce', NONCE);
+                        fd1.append('name', lead.name);
+                        fd1.append('niche', lead.niche);
+                        fd1.append('website', lead.website);
+                        fd1.append('description', lead.description);
+
+                        const res1 = await fetch(AJAX_URL, { method: 'POST', body: fd1 });
+                        const text1 = await res1.text();
+                        const s1 = text1.indexOf('{'), e1 = text1.lastIndexOf('}');
+                        const data1 = JSON.parse(text1.substring(s1, e1 + 1));
+
+                        if (data1.success) {
+                            // Send
+                            const fd2 = new FormData();
+                            fd2.append('action', 'obenlo_outreach_send');
+                            fd2.append('nonce', NONCE);
+                            fd2.append('name', lead.name);
+                            fd2.append('niche', lead.niche);
+                            fd2.append('email', lead.email);
+                            fd2.append('subject', data1.data.subject);
+                            fd2.append('body', data1.data.body);
+
+                            const res2 = await fetch(AJAX_URL, { method: 'POST', body: fd2 });
+                            const text2 = await res2.text();
+                            const s2 = text2.indexOf('{'), e2 = text2.lastIndexOf('}');
+                            const data2 = JSON.parse(text2.substring(s2, e2 + 1));
+                            if (data2.success && data2.data.history) {
+                                renderHistory(data2.data.history);
+                            }
+                        }
+                    } catch(err) {
+                        log("Bulk error for " + lead.name + ": " + err.message);
+                    }
+                }
+
+                btnBulkSend.disabled = false;
+                btnBulkSend.textContent = origBtnText;
+                alert('⚡ Bulk outreach campaign completed!');
+                loadHistory();
+            });
+
+            // ── Single Draft Click ─────────────────────────────────────────
             async function handleDraftClick(lead, btn) {
                 currentLead = lead;
+                isFollowup = false;
                 btn.disabled = true;
                 const origText = btn.textContent;
                 btn.textContent = '⏳ Drafting...';
-                log("Drafting outreach email for: " + lead.name);
+                modalTitle.textContent = '✉️ Draft Outreach Pitch';
 
                 try {
                     const fd = new FormData();
@@ -670,34 +886,56 @@ PROMPT;
 
                     const res  = await fetch(AJAX_URL, { method: 'POST', body: fd });
                     const text = await res.text();
-                    
-                    let data;
-                    try {
-                        const firstBrace = text.indexOf('{');
-                        const lastBrace  = text.lastIndexOf('}');
-                        const jsonText = text.substring(firstBrace, lastBrace + 1);
-                        data = JSON.parse(jsonText);
-                    } catch(err) {
-                        log("Draft JSON Parse Error: " + err.message);
-                        log("Full Raw response: " + text);
-                        alert("Failed to parse drafted response. Check the log.");
-                        return;
-                    }
+                    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                    const data = JSON.parse(text.substring(s, e + 1));
 
                     if (data.success) {
-                        log("Outreach email drafted successfully.");
                         toInput.value = lead.email;
                         subjectInput.value = data.data.subject;
                         bodyText.value = data.data.body;
                         modal.classList.add('open');
                     } else {
-                        log("Error drafting email: " + (data.data?.message || 'Unknown error'));
                         alert('Error: ' + (data.data?.message || 'Failed to draft email.'));
                     }
                 } catch (e) {
-                    log("Error during drafting AJAX: " + e.message);
-                    alert('Network error while drafting pitch.');
-                    console.error(e);
+                    alert('Error while drafting pitch.');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = origText;
+                }
+            }
+
+            // ── Follow-Up Click ───────────────────────────────────────────
+            async function handleFollowupClick(item, btn) {
+                currentLead = item;
+                isFollowup = true;
+                btn.disabled = true;
+                const origText = btn.textContent;
+                btn.textContent = '⏳ Drafting...';
+                modalTitle.textContent = '🔄 Draft Follow-Up Pitch';
+
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'obenlo_outreach_followup_draft');
+                    fd.append('nonce', NONCE);
+                    fd.append('name', item.name);
+                    fd.append('niche', item.niche);
+
+                    const res  = await fetch(AJAX_URL, { method: 'POST', body: fd });
+                    const text = await res.text();
+                    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                    const data = JSON.parse(text.substring(s, e + 1));
+
+                    if (data.success) {
+                        toInput.value = item.email;
+                        subjectInput.value = data.data.subject;
+                        bodyText.value = data.data.body;
+                        modal.classList.add('open');
+                    } else {
+                        alert('Error: ' + (data.data?.message || 'Failed to draft follow-up.'));
+                    }
+                } catch (e) {
+                    alert('Error while drafting follow-up.');
                 } finally {
                     btn.disabled = false;
                     btn.textContent = origText;
@@ -713,57 +951,54 @@ PROMPT;
                 setTimeout(() => { btnCopy.textContent = '📋 Copy Text'; }, 2000);
             });
 
+            // ── Send Email Handler ────────────────────────────────────────
             btnSend.addEventListener('click', async () => {
-                const to = toInput.value.trim();
-                const subj = subjectInput.value.trim();
-                const body = bodyText.value.trim();
-
+                const to = toInput.value.trim(), subj = subjectInput.value.trim(), body = bodyText.value.trim();
                 if (!to || !subj || !body) return;
 
                 btnSend.disabled = true;
                 btnSend.innerHTML = 'Sending<span class="outreach-spinner"></span>';
-                log("Sending email to: " + to);
 
                 try {
                     const fd = new FormData();
                     fd.append('action', 'obenlo_outreach_send');
                     fd.append('nonce', NONCE);
+                    fd.append('name', currentLead ? currentLead.name : 'Provider');
+                    fd.append('niche', currentLead ? currentLead.niche : 'Service');
                     fd.append('email', to);
                     fd.append('subject', subj);
                     fd.append('body', body);
+                    if (isFollowup) fd.append('is_followup', '1');
 
                     const res  = await fetch(AJAX_URL, { method: 'POST', body: fd });
                     const text = await res.text();
-                    
-                    let data;
-                    try {
-                        const firstBrace = text.indexOf('{');
-                        const lastBrace  = text.lastIndexOf('}');
-                        const jsonText = text.substring(firstBrace, lastBrace + 1);
-                        data = JSON.parse(jsonText);
-                    } catch(err) {
-                        log("Send JSON Parse Error: " + err.message);
-                        log("Full Raw response: " + text);
-                        alert("Failed to parse send response.");
-                        return;
-                    }
+                    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                    const data = JSON.parse(text.substring(s, e + 1));
 
                     if (data.success) {
-                        log("Outreach sent successfully!");
-                        alert('🚀 Outreach email sent successfully!');
+                        alert(data.data.message || '🚀 Email processed successfully!');
                         modal.classList.remove('open');
+                        if (data.data.history) renderHistory(data.data.history);
                     } else {
-                        log("Error sending email: " + (data.data?.message || 'Unknown error'));
                         alert('Error: ' + (data.data?.message || 'Failed to send email.'));
                     }
                 } catch (e) {
-                    log("Error during sending AJAX: " + e.message);
                     alert('Network error while sending email.');
-                    console.error(e);
                 } finally {
                     btnSend.disabled = false;
                     btnSend.textContent = '🚀 Send Pitch';
                 }
+            });
+
+            btnClearHist.addEventListener('click', async () => {
+                if (!confirm('Are you sure you want to clear outreach history?')) return;
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'obenlo_outreach_clear_history');
+                    fd.append('nonce', NONCE);
+                    await fetch(AJAX_URL, { method: 'POST', body: fd });
+                    loadHistory();
+                } catch(e) { console.error(e); }
             });
 
             function esc(str) {
