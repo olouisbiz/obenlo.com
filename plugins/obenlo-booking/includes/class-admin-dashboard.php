@@ -92,6 +92,7 @@ class Obenlo_Booking_Admin_Dashboard
                     'translation'    => array('label' => 'Translation',    'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>'),
                     'demo_manager'   => array('label' => 'Demo Manager',   'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>'),
                     'payouts'        => array('label' => 'Payouts',        'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>'),
+                    'ai_settings'    => array('label' => '🤖 AI Settings',  'icon' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>'),
                 );
 
                 foreach ($nav_items as $id => $item) {
@@ -121,6 +122,7 @@ class Obenlo_Booking_Admin_Dashboard
                     case 'demo_manager':  (new Obenlo_Admin_Demo_Manager())->render_demo_manager_tab(); break;
                     case 'edit_host':     (new Obenlo_Admin_Users())->render_edit_host_tab(); break;
                     case 'manage_availability': (new Obenlo_Admin_Users())->render_manage_availability_tab(); break;
+                    case 'ai_settings':   if (class_exists('Obenlo_AI_Admin')) { (new Obenlo_AI_Admin())->render_settings_panel(); } else { echo '<p>⚠️ The Obenlo AI plugin is not active. Please activate it in <a href="' . admin_url('plugins.php') . '">Plugins</a>.</p>'; } break;
                     default:              (new Obenlo_Admin_Overview())->render_overview_tab(); break;
                 }
                 ?>

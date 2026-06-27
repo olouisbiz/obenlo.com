@@ -419,37 +419,18 @@ class Obenlo_Booking_Post_Types {
             $query->set('author__not_in', $author_not_in);
         }
 
-        $meta_query = (array) $query->get('meta_query');
-        
-        // Hide Suspended Listings
-        $meta_query[] = array(
-            'relation' => 'OR',
-            array(
-                'key' => '_obenlo_is_suspended',
-                'compare' => 'NOT EXISTS'
-            ),
-            array(
-                'key' => '_obenlo_is_suspended',
-                'value' => 'yes',
-                'compare' => '!='
-            )
-        );
+        // Exclude suspended and hidden listing IDs directly to prevent buggy INNER JOINs in search queries
+        $exclude_ids = $wpdb->get_col( "
+            SELECT post_id FROM $wpdb->postmeta 
+            WHERE (meta_key = '_obenlo_is_suspended' AND meta_value = 'yes')
+               OR (meta_key = '_obenlo_demo_hidden' AND meta_value = 'yes')
+        " );
 
-        // Hide Hidden Demos
-        $meta_query[] = array(
-            'relation' => 'OR',
-            array(
-                'key' => '_obenlo_demo_hidden',
-                'compare' => 'NOT EXISTS'
-            ),
-            array(
-                'key' => '_obenlo_demo_hidden',
-                'value' => 'yes',
-                'compare' => '!='
-            )
-        );
-
-        $query->set('meta_query', $meta_query);
+        if ( !empty($exclude_ids) ) {
+            $post__not_in = (array) $query->get('post__not_in');
+            $post__not_in = array_unique(array_merge($post__not_in, array_map('intval', $exclude_ids)));
+            $query->set('post__not_in', $post__not_in);
+        }
     }
 
     public function hide_suspended_hosts( $query ) {

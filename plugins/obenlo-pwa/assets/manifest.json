@@ -1,18 +1,24 @@
 {
   "name": "Obenlo",
   "short_name": "Obenlo",
-  "description": "Book stays, experiences, and services locally.",
-  "start_url": "/?utm_source=pwa",
+  "description": "Book stays, experiences, and services worldwide — instantly.",
+  "start_url": "/?utm_source=pwa&utm_medium=standalone",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#e61e4d",
   "orientation": "portrait-primary",
-  "categories": ["travel", "business", "lifestyle"],
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["travel", "business", "lifestyle", "shopping"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile.png",
@@ -21,16 +27,52 @@
       "purpose": "any maskable"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Obenlo — Book Anything"
+    }
+  ],
   "shortcuts": [
     {
-      "name": "Host Dashboard",
-      "url": "/account/dashboard/",
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Go to your host or guest dashboard",
+      "url": "/account/?utm_source=pwa_shortcut",
       "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png", "sizes": "192x192" }]
     },
     {
       "name": "My Bookings",
-      "url": "/account/bookings/",
+      "short_name": "Bookings",
+      "description": "View and manage your bookings",
+      "url": "/account/?tab=bookings&utm_source=pwa_shortcut",
+      "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Messages",
+      "short_name": "Messages",
+      "description": "Your conversations with hosts and guests",
+      "url": "/account/?tab=messages&utm_source=pwa_shortcut",
+      "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Explore",
+      "short_name": "Explore",
+      "description": "Browse listings near you",
+      "url": "/listings/?utm_source=pwa_shortcut",
       "icons": [{ "src": "/wp-content/themes/obenlo/assets/images/logo-social-profile-192.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

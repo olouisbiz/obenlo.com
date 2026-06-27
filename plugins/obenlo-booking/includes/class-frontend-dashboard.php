@@ -87,137 +87,382 @@ class Obenlo_Booking_Frontend_Dashboard
 ?>
         <div class="obenlo-dashboard-container">
             <style>
-                .obenlo-dashboard-container { display: flex; min-height: 800px; background: #fff; font-family: 'Inter', sans-serif; gap: 0; }
-                .dashboard-sidebar { width: 260px; background: #fdfdfd; border-right: 1px solid #f0f0f0; padding: 40px 20px; display: flex; flex-direction: column; gap: 5px; position: sticky; top: 0; height: 100vh; }
-                .sidebar-link { display: flex; align-items: center; gap: 12px; padding: 12px 20px; text-decoration: none; color: #666; font-weight: 600; border-radius: 14px; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); font-size: 0.95rem; }
-                .sidebar-link:hover { background: #f7f7f7; color: #222; }
-                .sidebar-link.active { background: #222; color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-                .sidebar-link svg { width: 20px; height: 20px; stroke-width: 2.2; }
-                
-                .dashboard-content { flex-grow: 1; padding: 50px 60px; background: #fff; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-                .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-                .dashboard-title { font-size: 2.4rem; font-weight: 800; color: #222; margin: 0; letter-spacing: -0.5px; }
-                
-                .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px; margin-bottom: 50px; }
-                .stat-card { background: #fff; border: 1px solid #eee; padding: 35px; border-radius: 24px; box-shadow: 0 4px 25px rgba(0,0,0,0.02); text-align: left; transition: all 0.3s; position: relative; overflow: hidden; }
-                .stat-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); border-color: #ddd; }
-                .stat-value { display: block; font-size: 2.4rem; font-weight: 800; color: #222; margin-bottom: 8px; line-height: 1; }
-                .stat-label { color: #888; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1.5px; opacity: 0.8; }
-                
-                .admin-table { width: 100%; border-collapse: separate; border-spacing: 0 12px; background: transparent; margin-top: 10px; }
-                .admin-table th { background: transparent; padding: 15px 25px; text-align: left; font-weight: 700; color: #888; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
-                .admin-table td { background: #fff; padding: 25px; color: #444; font-size: 0.95rem; vertical-align: middle; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; transition: all 0.2s; }
-                .admin-table td:first-child { border-left: 1px solid #f0f0f0; border-top-left-radius: 20px; border-bottom-left-radius: 20px; }
-                .admin-table td:last-child { border-right: 1px solid #f0f0f0; border-top-right-radius: 20px; border-bottom-right-radius: 20px; }
-                .admin-table tr:hover td { background: #fcfcfc; border-color: #e0e0e0; transform: scale(1.002); }
-                
-                .avatar-stack { display: flex; align-items: center; gap: 12px; }
-                .avatar-circle { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                
-                .badge { padding: 8px 16px; border-radius: 30px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: inline-flex; align-items: center; gap: 6px; }
+                /* ── Obenlo Host Dashboard — Premium Design ── */
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+                .obenlo-dashboard-container {
+                    display: flex;
+                    min-height: 100vh;
+                    background: #f8f7f5;
+                    font-family: 'Inter', -apple-system, sans-serif;
+                }
+
+                /* ── Sidebar ── */
+                .dashboard-sidebar {
+                    width: 270px;
+                    flex-shrink: 0;
+                    background: #111;
+                    padding: 32px 16px 24px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    position: sticky;
+                    top: 0;
+                    height: 100vh;
+                    overflow-y: auto;
+                    scrollbar-width: none;
+                }
+                .dashboard-sidebar::-webkit-scrollbar { display: none; }
+
+                .sidebar-brand {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 0 12px 28px;
+                    border-bottom: 1px solid rgba(255,255,255,0.08);
+                    margin-bottom: 12px;
+                    text-decoration: none;
+                }
+                .sidebar-brand-name {
+                    font-size: 1.35rem;
+                    font-weight: 900;
+                    color: #fff;
+                    letter-spacing: -0.5px;
+                }
+                .sidebar-brand-dot { color: #e61e4d; }
+
+                .sidebar-section-label {
+                    font-size: 0.65rem;
+                    font-weight: 700;
+                    letter-spacing: 1.5px;
+                    text-transform: uppercase;
+                    color: rgba(255,255,255,0.3);
+                    padding: 14px 14px 6px;
+                }
+
+                .sidebar-link {
+                    display: flex;
+                    align-items: center;
+                    gap: 11px;
+                    padding: 11px 14px;
+                    text-decoration: none;
+                    color: rgba(255,255,255,0.55);
+                    font-weight: 600;
+                    border-radius: 12px;
+                    transition: all 0.2s ease;
+                    font-size: 0.9rem;
+                    white-space: nowrap;
+                }
+                .sidebar-link:hover {
+                    background: rgba(255,255,255,0.08);
+                    color: #fff;
+                }
+                .sidebar-link.active {
+                    background: #e61e4d;
+                    color: #fff;
+                    box-shadow: 0 4px 20px rgba(230,30,77,0.4);
+                }
+                .sidebar-link svg {
+                    width: 18px;
+                    height: 18px;
+                    stroke-width: 2.2;
+                    flex-shrink: 0;
+                }
+                .sidebar-footer {
+                    margin-top: auto;
+                    padding-top: 16px;
+                    border-top: 1px solid rgba(255,255,255,0.08);
+                }
+
+                /* ── Content ── */
+                .dashboard-content {
+                    flex: 1;
+                    min-width: 0;
+                    padding: 40px 48px;
+                    box-sizing: border-box;
+                }
+
+                /* ── Welcome banner ── */
+                .dash-welcome-banner {
+                    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+                    border-radius: 24px;
+                    padding: 36px 40px;
+                    margin-bottom: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 24px;
+                    flex-wrap: wrap;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .dash-welcome-banner::before {
+                    content: '';
+                    position: absolute;
+                    top: -60px; right: -60px;
+                    width: 220px; height: 220px;
+                    background: radial-gradient(circle, rgba(230,30,77,0.35) 0%, transparent 70%);
+                    pointer-events: none;
+                }
+                .dash-welcome-title {
+                    font-size: 1.9rem;
+                    font-weight: 900;
+                    color: #fff;
+                    margin: 0 0 6px;
+                    letter-spacing: -0.5px;
+                }
+                .dash-welcome-sub {
+                    color: rgba(255,255,255,0.6);
+                    font-size: 0.95rem;
+                    margin: 0 0 14px;
+                }
+
+                /* ── Stat Cards ── */
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 20px;
+                    margin-bottom: 36px;
+                }
+                .stat-card {
+                    background: #fff;
+                    border-radius: 20px;
+                    padding: 28px 24px;
+                    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+                    border: 1px solid #f0ede8;
+                    transition: all 0.25s ease;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .stat-card::after {
+                    content: '';
+                    position: absolute;
+                    top: 0; left: 0;
+                    width: 4px; height: 100%;
+                    border-radius: 4px 0 0 4px;
+                }
+                .stat-card.sc-green::after { background: #10b981; }
+                .stat-card.sc-blue::after  { background: #3b82f6; }
+                .stat-card.sc-orange::after{ background: #f97316; }
+                .stat-card.sc-yellow::after{ background: #eab308; }
+                .stat-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+                }
+                .stat-icon {
+                    width: 44px; height: 44px;
+                    border-radius: 13px;
+                    display: flex; align-items: center; justify-content: center;
+                    margin-bottom: 16px;
+                }
+                .stat-label {
+                    color: #999;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    font-size: 0.7rem;
+                    letter-spacing: 1.2px;
+                    display: block;
+                    margin-bottom: 6px;
+                }
+                .stat-value {
+                    display: block;
+                    font-size: 2rem;
+                    font-weight: 900;
+                    color: #111;
+                    line-height: 1;
+                    margin-bottom: 6px;
+                    letter-spacing: -0.5px;
+                }
+                .stat-sub {
+                    font-size: 0.78rem;
+                    font-weight: 600;
+                }
+
+                /* ── Quick Action Cards ── */
+                .qa-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                    gap: 18px;
+                    margin-bottom: 36px;
+                }
+                .qa-card {
+                    background: #fff;
+                    border: 1px solid #f0ede8;
+                    border-radius: 20px;
+                    padding: 24px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    transition: all 0.25s ease;
+                    text-decoration: none;
+                    color: inherit;
+                }
+                .qa-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 12px 32px rgba(0,0,0,0.07);
+                    border-color: #e0dcd6;
+                }
+                .qa-icon {
+                    width: 48px; height: 48px;
+                    border-radius: 14px;
+                    display: flex; align-items: center; justify-content: center;
+                }
+                .qa-title {
+                    font-size: 1.05rem;
+                    font-weight: 800;
+                    color: #111;
+                    margin: 0;
+                }
+                .qa-desc {
+                    font-size: 0.88rem;
+                    color: #777;
+                    margin: 0;
+                    line-height: 1.5;
+                }
+                .qa-link {
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    margin-top: auto;
+                }
+
+                /* ── Section heading ── */
+                .section-title {
+                    font-size: 1.2rem;
+                    font-weight: 800;
+                    color: #111;
+                    margin: 0 0 18px;
+                    letter-spacing: -0.2px;
+                }
+
+                /* ── Dashboard header ── */
+                .dashboard-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 32px;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                }
+                .dashboard-title {
+                    font-size: 2rem;
+                    font-weight: 900;
+                    color: #111;
+                    margin: 0;
+                    letter-spacing: -0.5px;
+                }
+
+                /* ── Badges ── */
+                .badge { padding: 7px 14px; border-radius: 30px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: inline-flex; align-items: center; gap: 6px; }
                 .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
                 .badge-success { background: #ecfdf5; color: #059669; } .badge-success::before { background: #10b981; }
                 .badge-warning { background: #fff7ed; color: #d97706; } .badge-warning::before { background: #f97316; }
-                .badge-danger { background: #fef2f2; color: #dc2626; } .badge-danger::before { background: #ef4444; }
-                .badge-info { background: #eff6ff; color: #2563eb; } .badge-info::before { background: #3b82f6; }
-                
-                .btn-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #eee; color: #666; transition: all 0.2s; cursor: pointer; }
-                .btn-icon:hover { background: #222; color: #fff; border-color: #222; transform: translateY(-2px); }
-                
-                .btn-primary { background: #222; color: #fff; border: none; padding: 14px 28px; border-radius: 16px; font-weight: 700; cursor: pointer; transition: all 0.25s; text-decoration: none; display: inline-block; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-                .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); background: #333; }
-                
-                .btn-outline { background: #fff; color: #222; border: 1.5px solid #222; padding: 12px 25px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; font-size: 0.9rem; }
-                .btn-outline:hover { background: #222; color: #fff; }
+                .badge-danger  { background: #fef2f2; color: #dc2626; } .badge-danger::before  { background: #ef4444; }
+                .badge-info    { background: #eff6ff; color: #2563eb; } .badge-info::before    { background: #3b82f6; }
 
-                .search-container { position: relative; background: #f9f9f9; border: 1.5px solid #eee; border-radius: 18px; padding: 5px 15px; display: flex; align-items: center; gap: 10px; transition: all 0.2s; max-width: 450px; width: 100%; }
-                .search-container:focus-within { background: #fff; border-color: #222; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-                .search-input { border: none; background: transparent; padding: 10px; font-size: 0.95rem; width: 100%; outline: none; font-weight: 500; color: #222; }
-
-                @media (max-width: 1024px) {
-                    .dashboard-sidebar { width: 80px; padding: 40px 10px; }
-                    .sidebar-link span { display: none; }
-                    .sidebar-link { justify-content: center; padding: 15px; }
-                    .dashboard-content { padding: 40px 25px; }
+                /* ── Buttons ── */
+                .btn-primary {
+                    background: #e61e4d;
+                    color: #fff !important;
+                    border: none;
+                    padding: 13px 26px;
+                    border-radius: 14px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.22s ease;
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 0.92rem;
+                    box-shadow: 0 4px 16px rgba(230,30,77,0.28);
+                    font-family: 'Inter', sans-serif;
                 }
+                .btn-primary:hover {
+                    background: #c41940;
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(230,30,77,0.38);
+                }
+                .btn-outline {
+                    background: #fff;
+                    color: #333;
+                    border: 1.5px solid #e5e5e5;
+                    padding: 11px 22px;
+                    border-radius: 13px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-size: 0.88rem;
+                    font-family: 'Inter', sans-serif;
+                }
+                .btn-outline:hover { background: #f5f5f5; border-color: #bbb; }
 
+                /* ── Tables ── */
+                .admin-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; background: transparent; margin-top: 8px; }
+                .admin-table th { background: transparent; padding: 12px 20px; text-align: left; font-weight: 700; color: #aaa; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 1.2px; }
+                .admin-table td { background: #fff; padding: 20px; color: #444; font-size: 0.9rem; vertical-align: middle; border-top: 1px solid #f0ede8; border-bottom: 1px solid #f0ede8; transition: all 0.18s; }
+                .admin-table td:first-child { border-left: 1px solid #f0ede8; border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+                .admin-table td:last-child  { border-right: 1px solid #f0ede8; border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+                .admin-table tr:hover td { background: #fafafa; border-color: #e5e0d8; }
+
+                /* ── Misc ── */
+                .avatar-circle { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                .btn-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #f5f5f5; border: none; color: #666; transition: all 0.2s; cursor: pointer; }
+                .btn-icon:hover { background: #e61e4d; color: #fff; }
+                .search-container { position: relative; background: #f5f4f2; border: 1.5px solid transparent; border-radius: 16px; padding: 4px 14px; display: flex; align-items: center; gap: 10px; transition: all 0.2s; max-width: 420px; width: 100%; }
+                .search-container:focus-within { background: #fff; border-color: #e61e4d; box-shadow: 0 0 0 3px rgba(230,30,77,0.08); }
+                .search-input { border: none; background: transparent; padding: 10px; font-size: 0.92rem; width: 100%; outline: none; font-weight: 500; color: #222; }
+                .form-section { background: #fff; border-radius: 20px; padding: 30px; border: 1px solid #f0ede8; margin-bottom: 24px; }
+                .form-section h4 { font-size: 1rem; font-weight: 800; color: #111; margin-top: 0; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #f0ede8; }
+
+                @media (max-width: 1100px) {
+                    .dashboard-sidebar { width: 72px; padding: 28px 8px 20px; }
+                    .sidebar-link span, .sidebar-section-label, .sidebar-brand-name { display: none; }
+                    .sidebar-link { justify-content: center; padding: 12px; }
+                    .sidebar-brand { justify-content: center; padding-bottom: 20px; }
+                    .dashboard-content { padding: 32px 28px; }
+                }
                 @media (max-width: 768px) {
-                    .obenlo-dashboard-container { flex-direction: column; padding-bottom: 80px; }
-                    .dashboard-sidebar { 
-                        width: 100%; 
-                        height: auto;
-                        position: fixed;
-                        bottom: 0;
-                        left: 0;
-                        right: 0;
-                        border-right: none; 
-                        border-top: 1px solid #f0f0f0; 
-                        background: #fff;
-                        padding: 10px 5px; 
-                        flex-direction: row; 
-                        justify-content: space-around;
-                        overflow-x: auto; 
-                        gap: 0; 
-                        z-index: 10000;
-                        box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
-                        top: auto;
-                    }
-                    .dashboard-sidebar::-webkit-scrollbar { display: none; }
-                    
-                    .sidebar-link { 
-                        flex-direction: column; 
-                        gap: 2px; 
-                        padding: 8px 5px; 
-                        min-width: 60px;
-                        background: transparent !important;
-                        color: #999;
-                        border-radius: 0;
-                        white-space: nowrap;
-                    }
-                    
-                    .sidebar-link span { display: block; font-size: 0.65rem; font-weight: 700; opacity: 0.8; }
-                    .sidebar-link svg { width: 22px; height: 22px; }
-                    .sidebar-link.active { color: #e61e4d; box-shadow: none; }
-                    .sidebar-link.active span { opacity: 1; }
-                    
-                    .dashboard-content { padding: 30px 20px; }
-                    .dashboard-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+                    .obenlo-dashboard-container { flex-direction: column; background: #f8f7f5; }
+                    .dashboard-sidebar { display: none !important; }
+                    .dashboard-content { padding: 20px 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom,0px)); }
+                    .dashboard-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+                    .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+                    .stat-card { padding: 18px 16px; border-radius: 16px; }
+                    .stat-value { font-size: 1.6rem; }
+                    .stat-icon { width: 36px; height: 36px; border-radius: 10px; margin-bottom: 10px; }
+                    .qa-grid { grid-template-columns: 1fr; gap: 14px; }
+                    .dash-welcome-banner { padding: 24px 22px; border-radius: 18px; }
+                    .dash-welcome-title { font-size: 1.4rem; }
                     .admin-table, .admin-table tr, .admin-table td { display: block; width: 100%; }
                     .admin-table thead { display: none; }
-                    .admin-table td { 
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 15px;
-                        text-align: right;
-                        border-bottom: 1px solid #f9f9f9 !important;
-                        font-size: 0.85rem;
-                        min-height: 45px;
-                        border-radius: 0 !important;
-                    }
-                    .admin-table td::before { 
-                        content: attr(data-label); 
-                        font-weight: 700; 
-                        color: #888; 
-                        text-transform: uppercase; 
-                        font-size: 0.7rem; 
-                        margin-right: 15px;
-                        text-align: left;
-                        flex-shrink: 0;
-                    }
-                    .admin-table td:first-child { padding-top: 25px; border-top-left-radius: 20px !important; border-top-right-radius: 20px !important; }
-                    .admin-table td:last-child { border-bottom-left-radius: 20px !important; border-bottom-right-radius: 20px !important; border-bottom: 1px solid #f0f0f0; }
-                    
-                    .grid-row { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
-                    .grid-row > label { width: 100% !important; margin-bottom: 5px; }
-                    .grid-row > div { width: 100% !important; display: flex; flex-direction: column; gap: 5px; }
+                    .admin-table td { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; text-align: right; border-bottom: 1px solid #f5f3f0 !important; font-size: 0.84rem; border-radius: 0 !important; }
+                    .admin-table td::before { content: attr(data-label); font-weight: 700; color: #aaa; text-transform: uppercase; font-size: 0.68rem; text-align: left; flex-shrink: 0; margin-right: 12px; }
+                    .admin-table td:first-child { border-top-left-radius: 16px !important; border-top-right-radius: 16px !important; }
+                    .admin-table td:last-child { border-bottom-left-radius: 16px !important; border-bottom-right-radius: 16px !important; }
+                    .grid-row { flex-direction: column !important; }
+                    .form-section { padding: 20px 18px; border-radius: 16px; }
                 }
             </style>
 
+
             <!-- Sidebar Navigation -->
             <div class="dashboard-sidebar">
+                <!-- Brand -->
+                <a href="<?php echo home_url('/host-dashboard'); ?>" class="sidebar-brand">
+                    <svg viewBox="0 0 32 32" fill="none" style="width:28px;height:28px;flex-shrink:0"><circle cx="16" cy="16" r="16" fill="#e61e4d"/><path d="M10 22V12l6-4 6 4v10" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="13" y="16" width="6" height="6" rx="1" fill="#fff"/></svg>
+                    <span class="sidebar-brand-name">Obenlo<span class="sidebar-brand-dot">.</span></span>
+                </a>
+
+                <div class="sidebar-section-label"><?php echo __('Main', 'obenlo'); ?></div>
+
                 <a href="?action=overview" class="sidebar-link <?php echo $action === 'overview' ? 'active' : ''; ?>">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
                     <span><?php echo __('Overview', 'obenlo'); ?></span>
                 </a>
 
@@ -239,7 +484,7 @@ class Obenlo_Booking_Frontend_Dashboard
                         <span><?php echo __('Reviews', 'obenlo'); ?></span>
                     </a>
                     <a href="?action=refunds" class="sidebar-link <?php echo $action === 'refunds' ? 'active' : ''; ?>">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2z"></path></svg>
                         <span><?php echo __('Refunds', 'obenlo'); ?></span>
                     </a>
 <?php endif; ?>
@@ -282,13 +527,13 @@ class Obenlo_Booking_Frontend_Dashboard
                     </a>
                 <?php endif; ?>
 
-                <div style="margin-top:auto; padding-top:20px; border-top:1px solid #eee;">
-                    <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" class="sidebar-link" style="opacity:0.8;">
+                <div class="sidebar-footer">
+                    <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" class="sidebar-link">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                         <span><?php echo __('View Storefront', 'obenlo'); ?></span>
                     </a>
                 </div>
-            </div>
+            </nav>
 
             <!-- Content Area -->
             <div class="dashboard-content">
@@ -452,101 +697,101 @@ class Obenlo_Booking_Frontend_Dashboard
             $status_class = 'badge-success';
         if ($verification_status === 'rejected')
             $status_class = 'badge-danger';
-
 ?>
-        <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px;">
+        <!-- Welcome Banner -->
+        <div class="dash-welcome-banner">
             <div>
-                <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; margin-top: 0; color: #222;">Welcome back, <?php echo esc_html( $user->first_name ?: $user->display_name ); ?>!</h2>
-                <p style="color:#666; font-size:1.05rem; margin-top:0; margin-bottom:15px;"><?php echo __('Manage your hosting business, communicate with guests, and view your performance.', 'obenlo'); ?></p>
-                <div style="display:flex; align-items:center; gap:10px;">
+                <p class="dash-welcome-title">Welcome back, <?php echo esc_html($user->first_name ?: $user->display_name); ?>! 👋</p>
+                <p class="dash-welcome-sub"><?php echo __('Manage your hosting business, communicate with guests, and view your performance.', 'obenlo'); ?></p>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
                     <span class="badge <?php echo $status_class; ?>"><?php echo __('Account Status:', 'obenlo'); ?> <?php echo esc_html($status_label); ?></span>
                     <?php if ($verification_status !== 'verified'): ?>
-                        <a href="<?php echo home_url('/host-dashboard?action=verification'); ?>" style="font-size:0.85rem; color:#e61e4d; font-weight:700; text-decoration:none;"><?php echo __('Complete Verification â†’', 'obenlo'); ?></a>
-                    <?php
-        else: ?>
-                        <a href="<?php echo home_url('/host-onboarding?step=3&force=1'); ?>" style="font-size:0.85rem; color:#666; font-weight:600; text-decoration:none;"><?php echo __('Update Payouts', 'obenlo'); ?></a>
-                    <?php
-        endif; ?>
+                        <a href="<?php echo home_url('/host-dashboard?action=verification'); ?>" style="font-size:0.85rem; color:#fca5a5; font-weight:700; text-decoration:none;"><?php echo __('Complete Verification →', 'obenlo'); ?></a>
+                    <?php else: ?>
+                        <a href="<?php echo home_url('/host-onboarding?step=3&force=1'); ?>" style="font-size:0.85rem; color:rgba(255,255,255,0.6); font-weight:600; text-decoration:none;"><?php echo __('Update Payouts', 'obenlo'); ?></a>
+                    <?php endif; ?>
                 </div>
             </div>
-            <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" style="color:#e61e4d; text-decoration:none; font-weight:700; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px; height:16px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                <?php echo __('Preview My Storefront', 'obenlo'); ?>
+            <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" class="btn-primary" style="background:rgba(255,255,255,0.15); backdrop-filter:blur(8px); box-shadow:none; border:1px solid rgba(255,255,255,0.2); white-space:nowrap;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                <?php echo __('Preview Storefront', 'obenlo'); ?>
             </a>
         </div>
 
-        <!-- Quick Actions Grid -->
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-bottom:40px;">
-            <div style="background:#fff; border:1px solid #eee; border-radius:20px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:space-between; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-                <div>
-                    <div style="width:48px; height:48px; background:#eff6ff; color:#3b82f6; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px; height:24px;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    </div>
-                    <h3 style="margin:0 0 8px 0; font-size:1.2rem; font-weight:800;"><?php echo __('My Listings', 'obenlo'); ?></h3>
-                    <p style="color:#666; font-size:0.95rem; margin:0; line-height:1.5;"><?php echo __('Manage your properties, edit details, and adjust pricing.', 'obenlo'); ?></p>
-                </div>
-                <a href="?action=list" style="margin-top:20px; display:inline-block; font-weight:700; color:#3b82f6; text-decoration:none;"><?php echo __('View Listings &rarr;', 'obenlo'); ?></a>
-            </div>
-
-            <div style="background:#fff; border:1px solid #eee; border-radius:20px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:space-between; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-                <div>
-                    <div style="width:48px; height:48px; background:#fef2f2; color:#ef4444; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px; height:24px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    </div>
-                    <h3 style="margin:0 0 8px 0; font-size:1.2rem; font-weight:800;"><?php echo __('Latest Bookings', 'obenlo'); ?></h3>
-                    <p style="color:#666; font-size:0.95rem; margin:0; line-height:1.5;"><?php echo __('Approve requests and prepare for upcoming guests.', 'obenlo'); ?></p>
-                </div>
-                <a href="?action=bookings" style="margin-top:20px; display:inline-block; font-weight:700; color:#ef4444; text-decoration:none;"><?php echo __('Manage Bookings &rarr;', 'obenlo'); ?></a>
-            </div>
-
-            <div style="background:#fff; border:1px solid #eee; border-radius:20px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,0.02); display:flex; flex-direction:column; justify-content:space-between; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-                <div>
-                    <div style="width:48px; height:48px; background:#ecfdf5; color:#10b981; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px; height:24px;"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
-                    </div>
-                    <h3 style="margin:0 0 8px 0; font-size:1.2rem; font-weight:800;"><?php echo __('Host Guide', 'obenlo'); ?></h3>
-                    <p style="color:#666; font-size:0.95rem; margin:0; line-height:1.5;"><?php echo __('Tips on boosting occupancy and following policies.', 'obenlo'); ?></p>
-                </div>
-                <a href="?action=guide" style="margin-top:20px; display:inline-block; font-weight:700; color:#10b981; text-decoration:none;"><?php echo __('Read Guide &rarr;', 'obenlo'); ?></a>
-            </div>
-        </div>
-
-        <h3 style="margin-top:0; margin-bottom:20px; font-weight:800; font-size:1.5rem; color:#222;"><?php echo __('At a Glance', 'obenlo'); ?></h3>
+        <!-- Stat Cards -->
+        <h3 class="section-title"><?php echo __('At a Glance', 'obenlo'); ?></h3>
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card sc-green">
+                <div class="stat-icon" style="background:#ecfdf5; color:#10b981;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
                 <span class="stat-label"><?php echo __('Total Earnings', 'obenlo'); ?></span>
-                <span class="stat-value">$<?php echo number_format($total_earnings, 2); ?></span>
-                <span style="font-size:0.8rem; color:#10b981; font-weight:600;"><?php echo __('Completed Bookings', 'obenlo'); ?></span>
+                <span class="stat-value">$<?php echo number_format($total_earnings, 0); ?></span>
+                <span class="stat-sub" style="color:#10b981;"><?php echo __('Completed bookings', 'obenlo'); ?></span>
             </div>
-            <div class="stat-card">
+            <div class="stat-card sc-blue">
+                <div class="stat-icon" style="background:#eff6ff; color:#3b82f6;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                </div>
                 <span class="stat-label"><?php echo __('Active Listings', 'obenlo'); ?></span>
                 <span class="stat-value"><?php echo $listings_count; ?></span>
-                <span style="font-size:0.8rem; color:#3b82f6; font-weight:600;"><?php echo __('Live on Obenlo', 'obenlo'); ?></span>
+                <span class="stat-sub" style="color:#3b82f6;"><?php echo __('Live on Obenlo', 'obenlo'); ?></span>
             </div>
-            <div class="stat-card">
+            <div class="stat-card sc-orange">
+                <div class="stat-icon" style="background:#fff7ed; color:#f97316;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
                 <span class="stat-label"><?php echo __('Total Bookings', 'obenlo'); ?></span>
                 <span class="stat-value"><?php echo count($bookings); ?></span>
-                <span style="font-size:0.8rem; color:#f97316; font-weight:600;"><?php echo __('Lifetime volume', 'obenlo'); ?></span>
+                <span class="stat-sub" style="color:#f97316;"><?php echo __('Lifetime volume', 'obenlo'); ?></span>
             </div>
-            <div class="stat-card">
+            <div class="stat-card sc-yellow">
+                <div class="stat-icon" style="background:#fefce8; color:#ca8a04;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
                 <span class="stat-label"><?php echo __('Avg. Rating', 'obenlo'); ?></span>
-                <span class="stat-value"><?php echo $avg_rating ?: 'N/A'; ?> ★</span>
-                <span style="font-size:0.8rem; color:#eab308; font-weight:600;"><?php echo __('Host Reputation', 'obenlo'); ?></span>
+                <span class="stat-value"><?php echo $avg_rating ?: '—'; ?></span>
+                <span class="stat-sub" style="color:#ca8a04;"><?php echo __('Host reputation', 'obenlo'); ?></span>
             </div>
         </div>
 
-        <div class="dashboard-grid-layout" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px;">
-            <div class="form-section" style="margin-top:0;">
-                <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Recent Bookings', 'obenlo'); ?></h4>
-                <?php $this->render_bookings_list(5); ?>
-            </div>
-            <div class="form-section" style="margin-top:0;">
-                <h4 style="margin-top:0; margin-bottom:20px;"><?php echo __('Performance', 'obenlo'); ?></h4>
-                <p style="color:#666; font-size:0.9rem;"><?php echo __('Your response rate and booking conversion stats will appear here as your hosting history grows.', 'obenlo'); ?></p>
-            </div>
+        <!-- Quick Actions -->
+        <h3 class="section-title"><?php echo __('Quick Actions', 'obenlo'); ?></h3>
+        <div class="qa-grid">
+            <a href="?action=list" class="qa-card">
+                <div class="qa-icon" style="background:#eff6ff; color:#3b82f6;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                </div>
+                <p class="qa-title"><?php echo __('My Listings', 'obenlo'); ?></p>
+                <p class="qa-desc"><?php echo __('Manage your properties, edit details, and adjust pricing.', 'obenlo'); ?></p>
+                <span class="qa-link" style="color:#3b82f6;"><?php echo __('View Listings →', 'obenlo'); ?></span>
+            </a>
+            <a href="?action=bookings" class="qa-card">
+                <div class="qa-icon" style="background:#fef2f2; color:#ef4444;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <p class="qa-title"><?php echo __('Latest Bookings', 'obenlo'); ?></p>
+                <p class="qa-desc"><?php echo __('Approve requests and prepare for upcoming guests.', 'obenlo'); ?></p>
+                <span class="qa-link" style="color:#ef4444;"><?php echo __('Manage Bookings →', 'obenlo'); ?></span>
+            </a>
+            <a href="?action=guide" class="qa-card">
+                <div class="qa-icon" style="background:#ecfdf5; color:#10b981;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                </div>
+                <p class="qa-title"><?php echo __('Host Guide', 'obenlo'); ?></p>
+                <p class="qa-desc"><?php echo __('Tips on boosting occupancy and following policies.', 'obenlo'); ?></p>
+                <span class="qa-link" style="color:#10b981;"><?php echo __('Read Guide →', 'obenlo'); ?></span>
+            </a>
+        </div>
+
+        <!-- Recent Bookings -->
+        <h3 class="section-title"><?php echo __('Recent Bookings', 'obenlo'); ?></h3>
+        <div class="form-section" style="margin-top:0;">
+            <?php $this->render_bookings_list(5); ?>
         </div>
         <?php
     }
+
 
     private function render_verification_tab() {
         $user_id = get_current_user_id();
@@ -1150,9 +1395,9 @@ class Obenlo_Booking_Frontend_Dashboard
         $store_specialties = get_user_meta($user_id, 'obenlo_specialties', true);
 
 ?>
-        <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="dashboard-header obenlo-sf-header">
             <h2 class="dashboard-title"><?php echo __('Storefront Settings', 'obenlo'); ?></h2>
-            <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" class="btn-primary" style="padding:10px 20px; font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+            <a href="<?php echo esc_url(get_author_posts_url($user_id)); ?>" target="_blank" class="btn-primary obenlo-sf-preview-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px; height:16px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 <?php echo __('View Live Storefront', 'obenlo'); ?>
             </a>
@@ -1172,44 +1417,44 @@ class Obenlo_Booking_Frontend_Dashboard
                     
                     <div style="margin-bottom:20px;">
                         <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Host / Store Name', 'obenlo'); ?></label>
-                        <input type="text" name="store_name" value="<?php echo esc_attr($store_name); ?>" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <input type="text" name="store_name" value="<?php echo esc_attr($store_name); ?>" required autocomplete="organization" autocapitalize="words" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                     </div>
 
                     <div style="margin-bottom:20px;">
                         <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Host Location', 'obenlo'); ?></label>
-                        <input type="text" name="store_location" value="<?php echo esc_attr($store_location); ?>" placeholder="<?php echo esc_attr(__('e.g. New York, NY', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <input type="text" name="store_location" value="<?php echo esc_attr($store_location); ?>" placeholder="<?php echo esc_attr(__('e.g. New York, NY', 'obenlo')); ?>" autocomplete="street-address" autocapitalize="words" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                     </div>
 
                     <div style="margin-bottom:20px;">
                         <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Tagline (Catchy Hook)', 'obenlo'); ?></label>
-                        <input type="text" name="store_tagline" value="<?php echo esc_attr($store_tagline); ?>" placeholder="<?php echo esc_attr(__('e.g. Luxury Haircare in the heart of Paris', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <input type="text" name="store_tagline" value="<?php echo esc_attr($store_tagline); ?>" placeholder="<?php echo esc_attr(__('e.g. Luxury Haircare in the heart of Paris', 'obenlo')); ?>" autocapitalize="on" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                     </div>
 
                     <div style="margin-bottom:20px;">
                         <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Host Specialties', 'obenlo'); ?></label>
-                        <input type="text" name="store_specialties" value="<?php echo esc_attr($store_specialties); ?>" placeholder="<?php echo esc_attr(__('e.g. Organic, Pet Friendly, Multilingual', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <input type="text" name="store_specialties" value="<?php echo esc_attr($store_specialties); ?>" placeholder="<?php echo esc_attr(__('e.g. Organic, Pet Friendly, Multilingual', 'obenlo')); ?>" autocapitalize="none" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         <p style="font-size:0.8rem; color:#888; margin-top:5px;"><?php echo __('Separate your specialties with commas.', 'obenlo'); ?></p>
                     </div>
 
                     <div style="margin-bottom:20px;">
                         <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Description / Bio', 'obenlo'); ?></label>
-                        <textarea name="store_description" rows="5" placeholder="<?php echo esc_attr(__('Tell guests about yourself or your hospitality business...', 'obenlo')); ?>" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($store_desc); ?></textarea>
+                        <textarea name="store_description" rows="5" placeholder="<?php echo esc_attr(__('Tell guests about yourself or your hospitality business...', 'obenlo')); ?>" autocapitalize="on" spellcheck="true" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"><?php echo esc_textarea($store_desc); ?></textarea>
                     </div>
 
                     <div style="margin-bottom:20px;">
                         <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Featured Video (YouTube/Vimeo)', 'obenlo'); ?></label>
-                        <input type="url" name="store_video" value="<?php echo esc_attr($store_video); ?>" placeholder="https://www.youtube.com/watch?v=..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                        <input type="url" name="store_video" value="<?php echo esc_attr($store_video); ?>" placeholder="https://www.youtube.com/watch?v=..." inputmode="url" autocomplete="off" autocapitalize="none" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         <p style="font-size:0.8rem; color:#888; margin-top:5px;"><?php echo __('Share a welcoming video with your future guests.', 'obenlo'); ?></p>
                     </div>
 
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                    <div class="obenlo-social-grid">
                         <div>
                             <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Instagram Profile', 'obenlo'); ?></label>
-                            <input type="text" name="social_insta" value="<?php echo esc_attr($social_insta); ?>" placeholder="@youraccount" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                            <input type="text" name="social_insta" value="<?php echo esc_attr($social_insta); ?>" placeholder="@youraccount" inputmode="text" autocomplete="off" autocapitalize="none" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         </div>
                         <div>
                             <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Facebook Page', 'obenlo'); ?></label>
-                            <input type="text" name="social_fb" value="<?php echo esc_attr($social_fb); ?>" placeholder="facebook.com/yourpage" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
+                            <input type="text" name="social_fb" value="<?php echo esc_attr($social_fb); ?>" placeholder="facebook.com/yourpage" inputmode="url" autocomplete="off" autocapitalize="none" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;">
                         </div>
                     </div>
                 </div>
@@ -1217,7 +1462,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 <div class="form-section">
                     <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Branding & Identity', 'obenlo'); ?></h4>
                     
-                    <div style="display:grid; grid-template-columns: 1fr 2fr; gap:30px;">
+                    <div class="obenlo-branding-grid">
                          <div>
                             <label style="display:block; font-weight:700; margin-bottom:12px; color:#444;"><?php echo __('Host Logo', 'obenlo'); ?></label>
                             <?php if ($store_logo_id): ?>
@@ -1512,7 +1757,7 @@ class Obenlo_Booking_Frontend_Dashboard
                 <li><strong>Brand Presence:</strong> Upload a high-resolution logo and a covering banner that represents your service environment.</li>
                 <li><strong>The Trust Checkmark:</strong> Complete your identity verification in the <b>Verification</b> tab. Businesses with the crimson badge convert 40% better.</li>
                 <li><strong>Social Links:</strong> Connect your Facebook and Instagram in the <b>Storefront</b> settings to show guests you have a wider community.</li>
-                <li><strong>BIO Strategy:</strong> Write in the first person ("I provide" or "We offer"). Explain your expertise and what makes your service unique in the Caribbean.</li>
+                <li><strong>BIO Strategy:</strong> Write in the first person ("I provide" or "We offer"). Explain your expertise and what makes your service unique in your city or region.</li>
             </ul>
         </div>
 

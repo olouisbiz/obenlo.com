@@ -285,6 +285,131 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<?php /* ── MOBILE BOTTOM NAVIGATION BAR ── */ ?>
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav" role="navigation" aria-label="<?php esc_attr_e('Main navigation', 'obenlo'); ?>">
+
+    <?php
+    $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $is_home     = is_front_page();
+    $is_search   = is_search() || (isset($_GET['s']));
+    $is_trips    = is_page('account') || strpos($_SERVER['REQUEST_URI'], '/account') !== false;
+    $is_profile  = is_user_logged_in() && (is_page('host-dashboard') || strpos($_SERVER['REQUEST_URI'], '/host-dashboard') !== false);
+    ?>
+
+    <a href="<?php echo esc_url(home_url('/')); ?>" class="mobile-nav-item <?php echo $is_home ? 'active' : ''; ?>" id="mobile-nav-explore" aria-label="<?php esc_attr_e('Explore', 'obenlo'); ?>">
+        <span class="mobile-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+        </span>
+        <span class="mobile-nav-label"><?php esc_html_e('Explore', 'obenlo'); ?></span>
+    </a>
+
+    <a href="<?php echo esc_url(home_url('/?s=')); ?>" class="mobile-nav-item <?php echo $is_search ? 'active' : ''; ?>" id="mobile-nav-search" aria-label="<?php esc_attr_e('Search', 'obenlo'); ?>">
+        <span class="mobile-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </span>
+        <span class="mobile-nav-label"><?php esc_html_e('Search', 'obenlo'); ?></span>
+    </a>
+
+    <a href="<?php echo esc_url(home_url('/account?tab=trips')); ?>" class="mobile-nav-item <?php echo $is_trips ? 'active' : ''; ?>" id="mobile-nav-trips" aria-label="<?php esc_attr_e('Trips', 'obenlo'); ?>">
+        <span class="mobile-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        </span>
+        <span class="mobile-nav-label"><?php esc_html_e('Trips', 'obenlo'); ?></span>
+    </a>
+
+    <a href="<?php echo is_user_logged_in() ? esc_url(home_url('/account')) : esc_url(wp_login_url(home_url('/account'))); ?>" class="mobile-nav-item <?php echo $is_profile ? 'active' : ''; ?>" id="mobile-nav-profile" aria-label="<?php esc_attr_e('Profile', 'obenlo'); ?>">
+        <span class="mobile-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+        </span>
+        <span class="mobile-nav-label"><?php esc_html_e('Profile', 'obenlo'); ?></span>
+    </a>
+
+</nav><!-- .mobile-bottom-nav -->
+
+<style>
+/* ── Mobile Bottom Nav ── */
+.mobile-bottom-nav {
+    display: none;
+}
+@media (max-width: 768px) {
+    .mobile-bottom-nav {
+        display: flex !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+        background: #ffffff !important;
+        border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+        z-index: 99999 !important;
+        justify-content: space-around !important;
+        align-items: stretch !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    .mobile-nav-item {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 1 !important;
+        gap: 4px !important;
+        text-decoration: none !important;
+        color: #b0b0b0 !important;
+        font-size: 0.68rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.01em !important;
+        padding: 8px 4px 0 4px !important;
+        transition: color 0.2s ease !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .mobile-nav-item:active {
+        transform: scale(0.93) !important;
+    }
+
+    .mobile-nav-item.active {
+        color: #e61e4d !important;
+    }
+
+    .mobile-nav-icon {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+    }
+
+    /* Active icon gets a subtle crimson tint */
+    .mobile-nav-item.active .mobile-nav-icon svg {
+        stroke: #e61e4d !important;
+    }
+
+    .mobile-nav-label {
+        line-height: 1 !important;
+    }
+
+    /* Push footer and main content above the bottom nav */
+    .site-footer {
+        margin-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    body.site-content,
+    .site-content,
+    main#primary,
+    .site-main {
+        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+}
+</style>
+
 <?php wp_footer(); ?>
 </body>
 </html>

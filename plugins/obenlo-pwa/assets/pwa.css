@@ -1,117 +1,951 @@
-/* 
- * Obenlo PWA: Role-Aware Native App Shell (v3.0)
- * Description: Transforms the complex web sidebar into a fixed mobile bottom menu ONLY in standalone mode.
+/*
+ * Obenlo PWA — True Native App Shell (v2.0.0)
+ *
+ * Goals:
+ *   1. Zero browser chrome in standalone mode
+ *   2. Native-feel bottom navigation with safe-area awareness
+ *   3. Hardware-accelerated page transitions
+ *   4. Native scroll behaviour (no rubber-band pull-to-refresh)
+ *   5. Touch-optimised tap targets (min 44px)
+ *   6. Status bar integration on iOS & Android
+ *   7. Offline banner indicator
  */
 
+/* ═══════════════════════════════════════════════════════════════════
+   0.  DESIGN TOKENS  (shared with browser mode for consistency)
+═══════════════════════════════════════════════════════════════════ */
+:root {
+  --pwa-brand:        #e61e4d;
+  --pwa-brand-dark:   #b5143a;
+  --pwa-bg:           #f8f8f8;
+  --pwa-surface:      #ffffff;
+  --pwa-border:       rgba(0, 0, 0, 0.08);
+  --pwa-text:         #1a1a1b;
+  --pwa-muted:        #737373;
+  --pwa-nav-height:   64px;
+  --pwa-nav-glass:    rgba(255, 255, 255, 0.92);
+  --pwa-radius:       16px;
+  --pwa-shadow-nav:   0 -1px 0 rgba(0,0,0,0.06), 0 -8px 30px rgba(0,0,0,0.06);
+  --pwa-shadow-card:  0 2px 12px rgba(0,0,0,0.06);
+  --pwa-transition:   0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --safe-bottom:      env(safe-area-inset-bottom, 0px);
+  --safe-top:         env(safe-area-inset-top, 0px);
+  --safe-left:        env(safe-area-inset-left, 0px);
+  --safe-right:       env(safe-area-inset-right, 0px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   1.  STANDALONE-ONLY RULES
+═══════════════════════════════════════════════════════════════════ */
 @media (display-mode: standalone) {
-    
-    :root {
-        --pwa-red: #e61e4d;
-        --pwa-white: #ffffff;
-        --pwa-border: rgba(0, 0, 0, 0.08);
-        --pwa-glass: rgba(255, 255, 255, 0.9);
-    }
 
-    /* 1. APP SHELL RESET */
-    body {
-        background: #fdfdfd !important;
-        padding-bottom: calc(90px + env(safe-area-inset-bottom)) !important;
-        margin: 0 !important;
-    }
+  /* ── 1a. Global app shell reset ─────────────────────────────── */
+  html {
+    margin-top: 0 !important;
+    /* Smooth scrolling feels more native */
+    scroll-behavior: smooth;
+    /* Prevent pull-to-refresh overscroll on Android Chrome */
+    overscroll-behavior-y: contain;
+  }
 
-    #wpadminbar, .site-header { display: none !important; }
-    html { margin-top: 0 !important; }
+  body {
+    background: var(--pwa-bg) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Push content up above the bottom nav */
+    padding-bottom: calc(var(--pwa-nav-height) + var(--safe-bottom)) !important;
+    /* Prevent text size adjust on rotation */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Disable long-press context menu on non-interactive elements */
+    -webkit-touch-callout: none;
+    touch-action: pan-y;
+  }
 
-    /* 2. TRANSFORM SIDEBAR INTO BOTTOM NAV */
-    /* This targets BOTH the Host Dashboard sidebar AND the Guest Account sidebar */
-    .dashboard-sidebar, .listing-sidebar {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        top: auto !important;
-        width: 100% !important;
-        height: auto !important;
-        background: var(--pwa-glass) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-around !important;
-        padding: 12px 5px calc(12px + env(safe-area-inset-bottom)) 5px !important;
-        border-top: 1px solid var(--pwa-border) !important;
-        border-radius: 0 !important;
-        box-shadow: 0 -8px 25px rgba(0,0,0,0.05) !important;
-        z-index: 99999 !important;
-        overflow-x: auto !important;
-        gap: 0 !important;
-    }
+  /* Remove WordPress admin bar & standard site header */
+  #wpadminbar,
+  .site-header,
+  .site-nav,
+  .wp-admin-bar {
+    display: none !important;
+  }
 
-    /* Hide sidebar specific elements not suited for bottom nav */
-    .dashboard-sidebar h1, .listing-sidebar h1, 
-    .dashboard-sidebar > div[style*="margin-top"],
-    .listing-sidebar > div[style*="margin-top"] {
-        display: none !important;
-    }
+  /* Add status-bar-height top padding to the page wrapper */
+  body::before {
+    content: '';
+    display: block;
+    height: var(--safe-top);
+    background: var(--pwa-brand);
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999999;
+  }
 
-    /* Ensure the inner flex container (if exists) doesn't break the layout */
-    .dashboard-sidebar > div, .listing-sidebar > div {
-        display: flex !important;
-        flex-direction: row !important;
-        width: 100% !important;
-        justify-content: space-around !important;
-        gap: 0 !important;
-    }
+  /* ── 1b. Hardware-accelerated page transition layer ─────────── */
+  .obenlo-dashboard-container,
+  .obenlo-account-container,
+  .site-main,
+  main {
+    transform: translateZ(0);
+    will-change: transform;
+    transition: opacity var(--pwa-transition);
+  }
 
-    /* 3. MENU ITEM TRANSFORM */
-    /* This targets BOTH Guest nav links and Host sidebar links */
-    .sidebar-link, .nav-item-account, .listing-sidebar a {
-        flex: 1 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 6px 2px !important;
-        background: transparent !important;
-        border: none !important;
-        color: #999 !important;
-        font-size: 10px !important;
-        font-weight: 700 !important;
-        min-width: 60px !important;
-        white-space: nowrap !important;
-        box-shadow: none !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-    }
+  /* Fade-in on load (mimics native screen push) */
+  @keyframes obenlo-fadein {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .site-main,
+  main,
+  .obenlo-dashboard-container,
+  .obenlo-account-container {
+    animation: obenlo-fadein 0.3s var(--pwa-transition) both;
+  }
 
-    .sidebar-link svg, .nav-item-account svg, .listing-sidebar a svg {
-        width: 24px !important;
-        height: 24px !important;
-        margin-bottom: 3px !important;
-        stroke-width: 2.2 !important;
-    }
+  /* ── 1c. Content area padding so nothing hides under nav ────── */
+  .obenlo-dashboard-container,
+  .obenlo-account-container {
+    display: block !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
 
-    /* Active State (Role-Aware Red) */
-    .sidebar-link.active, .nav-item-account[style*="background: rgb(230, 30, 77)"],
-    .sidebar-link[style*="color: rgb(255, 255, 255)"],
-    .sidebar-link.active span {
-        color: var(--pwa-red) !important;
-        background: transparent !important;
-    }
+  .dashboard-content,
+  .account-content {
+    padding: 0 !important;
+    width: 100% !important;
+  }
 
-    .sidebar-link.active svg, .nav-item-account[style*="background: rgb(230, 30, 77)"] svg {
-        color: var(--pwa-red) !important;
-    }
+  /* ── 1d. Cards — native app shadow depth ────────────────────── */
+  .form-section,
+  .dashboard-card,
+  .listing-card,
+  .booking-card {
+    box-shadow: var(--pwa-shadow-card) !important;
+    border-radius: var(--pwa-radius) !important;
+    background: var(--pwa-surface) !important;
+    border: 1px solid var(--pwa-border) !important;
+  }
 
-    /* 4. CONTENT AREA POLISH */
-    .obenlo-dashboard-container, .obenlo-account-container {
-        display: block !important;
-        padding: 20px !important;
-        margin: 0 !important;
-    }
+  /* ═══════════════════════════════════════════════════════════════
+     2.  BOTTOM NAVIGATION BAR  (transforms sidebar into tab bar)
+  ═══════════════════════════════════════════════════════════════ */
 
-    .dashboard-content, .listing-sidebar + div {
-        padding: 0 !important;
-        width: 100% !important;
-    }
+  .dashboard-sidebar,
+  .listing-sidebar,
+  .nav-sidebar {
+    /* Fixed bottom bar */
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: var(--pwa-nav-height) !important;
+
+    /* Glassmorphism surface */
+    background: var(--pwa-nav-glass) !important;
+    backdrop-filter: saturate(180%) blur(20px) !important;
+    -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+
+    /* Layout */
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    align-items: stretch !important;
+
+    /* Safe area padding at bottom */
+    padding: 8px max(var(--safe-left), 4px) max(var(--safe-bottom), 8px) max(var(--safe-right), 4px) !important;
+
+    /* Border & shadow */
+    border-top: 1px solid var(--pwa-border) !important;
+    border-radius: 0 !important;
+    box-shadow: var(--pwa-shadow-nav) !important;
+    z-index: 99999 !important;
+
+    /* Horizontal scroll for many tabs */
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Hide scrollbar in nav */
+  .dashboard-sidebar::-webkit-scrollbar,
+  .listing-sidebar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Strip headers/sections inside nav */
+  .dashboard-sidebar h1,
+  .dashboard-sidebar h2,
+  .dashboard-sidebar h3,
+  .dashboard-sidebar > p,
+  .dashboard-sidebar > hr,
+  .dashboard-sidebar > div[style*="margin-top"],
+  .listing-sidebar h1,
+  .listing-sidebar > div[style*="margin-top"] {
+    display: none !important;
+  }
+
+  /* Inner wrapper if present */
+  .dashboard-sidebar > div,
+  .listing-sidebar > div {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    justify-content: space-around !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     3.  NAV ITEMS — native tab bar items
+  ═══════════════════════════════════════════════════════════════ */
+  .sidebar-link,
+  .nav-item-account,
+  .listing-sidebar a {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px 4px !important;
+    min-width: 52px !important;
+    max-width: 100px !important;
+    min-height: 44px !important; /* Apple HIG tap target */
+
+    /* Reset */
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    text-decoration: none !important;
+
+    /* Typography */
+    color: var(--pwa-muted) !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+
+    /* Smooth press feedback */
+    transition: color var(--pwa-transition), transform 0.15s ease !important;
+    -webkit-tap-highlight-color: transparent !important;
+    cursor: pointer !important;
+  }
+
+  /* Press effect */
+  .sidebar-link:active,
+  .nav-item-account:active,
+  .listing-sidebar a:active {
+    transform: scale(0.92) !important;
+    color: var(--pwa-brand) !important;
+  }
+
+  /* Icons inside nav items */
+  .sidebar-link svg,
+  .nav-item-account svg,
+  .listing-sidebar a svg {
+    width: 22px !important;
+    height: 22px !important;
+    margin-bottom: 3px !important;
+    flex-shrink: 0 !important;
+    stroke-width: 2.2 !important;
+    transition: color var(--pwa-transition) !important;
+  }
+
+  /* ── Active state ──────────────────────────────────────────── */
+  .sidebar-link.active,
+  .sidebar-link.active span,
+  .sidebar-link[style*="color: rgb(255, 255, 255)"],
+  .nav-item-account[style*="background: rgb(230"],
+  .nav-item-account[style*="background:#e6"] {
+    color: var(--pwa-brand) !important;
+    background: transparent !important;
+    font-weight: 800 !important;
+  }
+
+  .sidebar-link.active svg,
+  .nav-item-account[style*="background: rgb(230"] svg {
+    color: var(--pwa-brand) !important;
+    stroke: var(--pwa-brand) !important;
+  }
+
+  /* Active indicator dot above icon */
+  .sidebar-link.active::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--pwa-brand);
+    margin-bottom: 2px;
+    animation: obenlo-dot-pop 0.2s ease;
+  }
+
+  @keyframes obenlo-dot-pop {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.4); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     4.  SCROLL INDICATOR (subtle for overflowing nav)
+  ═══════════════════════════════════════════════════════════════ */
+  .pwa-scroll-indicator {
+    position: fixed !important;
+    right: 8px !important;
+    bottom: calc(var(--pwa-nav-height) + var(--safe-bottom) + 2px) !important;
+    background: rgba(0,0,0,0.3) !important;
+    color: #fff !important;
+    border-radius: 50% !important;
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease !important;
+    z-index: 100000 !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     5.  OFFLINE BANNER
+  ═══════════════════════════════════════════════════════════════ */
+  #obenlo-offline-banner {
+    position: fixed !important;
+    top: var(--safe-top) !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #1a1a1b !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    padding: 8px 16px !important;
+    z-index: 999998 !important;
+    transform: translateY(-100%) !important;
+    transition: transform 0.3s ease !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  #obenlo-offline-banner.visible {
+    transform: translateY(0) !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     6.  MODAL & SHEET — native bottom sheet style
+  ═══════════════════════════════════════════════════════════════ */
+  .pwa-sheet {
+    border-radius: 24px 24px 0 0 !important;
+    padding-bottom: calc(20px + var(--safe-bottom)) !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     7.  BUTTONS — larger tap targets
+  ═══════════════════════════════════════════════════════════════ */
+  .btn-primary,
+  button[type="submit"] {
+    min-height: 48px !important;
+    font-size: 15px !important;
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     8.  INPUTS — native feel
+  ═══════════════════════════════════════════════════════════════ */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents iOS auto-zoom on focus */
+    border-radius: 12px !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     9.  ADMIN HUB MODE (Admin PWA session)
+  ═══════════════════════════════════════════════════════════════ */
+  body.pwa-role-admin #wpadminbar {
+    display: none !important;
+  }
+
+  body.pwa-admin-hub .obenlo-dashboard-container {
+    border-top: 3px solid var(--pwa-brand);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     10. UPDATE TOAST
+  ═══════════════════════════════════════════════════════════════ */
+  #obenlo-update-toast {
+    position: fixed !important;
+    bottom: calc(var(--pwa-nav-height) + var(--safe-bottom) + 12px) !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(20px) !important;
+    opacity: 0 !important;
+    background: #1a1a1b !important;
+    color: #fff !important;
+    padding: 12px 20px !important;
+    border-radius: 100px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    z-index: 200000 !important;
+    cursor: pointer !important;
+    transition: transform 0.35s ease, opacity 0.35s ease !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  #obenlo-update-toast.show {
+    transform: translateX(-50%) translateY(0) !important;
+    opacity: 1 !important;
+  }
+
+} /* end @media (display-mode: standalone) */
+
+/* ═══════════════════════════════════════════════════════════════════
+   11.  PWA INSTALL PROMPT — visible in ALL display modes
+═══════════════════════════════════════════════════════════════════ */
+#obenlo-pwa-prompt {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  animation: obenlo-prompt-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes obenlo-prompt-slide-up {
+  from { transform: translate(-50%, calc(100% + 20px)); opacity: 0; }
+  to   { transform: translate(-50%, 0);                 opacity: 1; }
+}
+
+/* Dismiss animation */
+#obenlo-pwa-prompt.dismissing {
+  animation: obenlo-prompt-slide-down 0.3s cubic-bezier(0.4, 0, 1, 1) both !important;
+}
+
+@keyframes obenlo-prompt-slide-down {
+  to { transform: translate(-50%, calc(100% + 20px)); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   12.  MOBILE BROWSER FALLBACK  (max-width: 768px)
+        Activates the bottom nav & native enhancements even when the
+        app is opened in a regular browser tab on a phone — not only
+        in @media (display-mode: standalone).
+═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Body: push content above bottom nav */
+  body {
+    padding-bottom: calc(var(--pwa-nav-height) + var(--safe-bottom)) !important;
+    overscroll-behavior-y: contain;
+  }
+
+  /* ── Bottom Nav ──────────────────────────────────────────────── */
+  .dashboard-sidebar,
+  .listing-sidebar,
+  .nav-sidebar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: var(--pwa-nav-height) !important;
+
+    background: var(--pwa-nav-glass) !important;
+    backdrop-filter: saturate(180%) blur(20px) !important;
+    -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    align-items: stretch !important;
+
+    padding: 8px max(var(--safe-left), 4px) max(var(--safe-bottom), 8px) max(var(--safe-right), 4px) !important;
+
+    border-top: 1px solid var(--pwa-border) !important;
+    border-radius: 0 !important;
+    box-shadow: var(--pwa-shadow-nav) !important;
+    z-index: 9999 !important;
+
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 0 !important;
+    margin: 0 !important;
+
+    /* Override any flex-direction: column from style.css @media */
+    flex-direction: row !important;
+    white-space: nowrap !important;
+  }
+
+  .dashboard-sidebar::-webkit-scrollbar,
+  .listing-sidebar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Hide non-nav content inside the sidebar */
+  .dashboard-sidebar h1,
+  .dashboard-sidebar h2,
+  .dashboard-sidebar h3,
+  .dashboard-sidebar > p,
+  .dashboard-sidebar > hr,
+  .dashboard-sidebar > div[style*="margin-top"],
+  .listing-sidebar h1,
+  .listing-sidebar > div[style*="margin-top"] {
+    display: none !important;
+  }
+
+  /* Inner wrapper */
+  .dashboard-sidebar > div,
+  .listing-sidebar > div {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    justify-content: space-around !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+  }
+
+  /* ── Nav Items ────────────────────────────────────────────────── */
+  .sidebar-link,
+  .nav-item-account,
+  .listing-sidebar a {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px 4px !important;
+    min-width: 52px !important;
+    max-width: 100px !important;
+    min-height: 44px !important;
+
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    text-decoration: none !important;
+
+    color: var(--pwa-muted) !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+
+    transition: color var(--pwa-transition), transform 0.15s ease !important;
+    -webkit-tap-highlight-color: transparent !important;
+    cursor: pointer !important;
+  }
+
+  .sidebar-link:active,
+  .nav-item-account:active,
+  .listing-sidebar a:active {
+    transform: scale(0.92) !important;
+    color: var(--pwa-brand) !important;
+  }
+
+  .sidebar-link svg,
+  .nav-item-account svg,
+  .listing-sidebar a svg {
+    width: 22px !important;
+    height: 22px !important;
+    margin-bottom: 3px !important;
+    flex-shrink: 0 !important;
+    stroke-width: 2.2 !important;
+  }
+
+  /* ── Active State ─────────────────────────────────────────────── */
+  .sidebar-link.active,
+  .sidebar-link.active span,
+  .sidebar-link[style*="color: rgb(255, 255, 255)"],
+  .nav-item-account[style*="background: rgb(230"],
+  .nav-item-account[style*="background:#e6"] {
+    color: var(--pwa-brand) !important;
+    background: transparent !important;
+    font-weight: 800 !important;
+  }
+
+  .sidebar-link.active svg,
+  .nav-item-account[style*="background: rgb(230"] svg {
+    color: var(--pwa-brand) !important;
+    stroke: var(--pwa-brand) !important;
+  }
+
+  .sidebar-link.active::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--pwa-brand);
+    margin-bottom: 2px;
+    animation: obenlo-dot-pop 0.2s ease;
+  }
+
+  /* ── Offline Banner ────────────────────────────────────────────── */
+  #obenlo-offline-banner {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #1a1a1b !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    padding: 8px 16px !important;
+    z-index: 999998 !important;
+    transform: translateY(-100%) !important;
+    transition: transform 0.3s ease !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  #obenlo-offline-banner.visible {
+    transform: translateY(0) !important;
+  }
+
+  /* ── Update Toast ──────────────────────────────────────────────── */
+  #obenlo-update-toast {
+    position: fixed !important;
+    bottom: calc(var(--pwa-nav-height) + var(--safe-bottom) + 12px) !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(20px) !important;
+    opacity: 0 !important;
+    background: #1a1a1b !important;
+    color: #fff !important;
+    padding: 12px 20px !important;
+    border-radius: 100px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    z-index: 200000 !important;
+    cursor: pointer !important;
+    transition: transform 0.35s ease, opacity 0.35s ease !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  #obenlo-update-toast.show {
+    transform: translateX(-50%) translateY(0) !important;
+    opacity: 1 !important;
+  }
+
+  /* ── Content area ──────────────────────────────────────────────── */
+  .obenlo-account-container {
+    /* Override style.css flex-direction: column so content fills width */
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+
+  /* Account container: give trip content a reasonable padding */
+  .obenlo-account-container > .dashboard-content,
+  .obenlo-account-container > div:not(.dashboard-sidebar) {
+    padding: 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Inputs: prevent iOS zoom */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    -webkit-appearance: none !important;
+  }
+
+} /* end @media (max-width: 768px) */
+
+/* ═══════════════════════════════════════════════════════════════════
+   13. UNIVERSAL PWA BOTTOM NAV  (#obenlo-pwa-bottom-nav)
+       Injected on every page by obenlo-pwa.php.
+       Hidden on desktop, native tab bar on mobile ≤ 768px.
+═══════════════════════════════════════════════════════════════════ */
+
+/* Hidden on desktop by default */
+#obenlo-pwa-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+
+  /* ── Show the nav ── */
+  #obenlo-pwa-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+
+    background: rgba(255, 255, 255, 0.93);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow: 0 -1px 0 rgba(0,0,0,0.05), 0 -8px 30px rgba(0,0,0,0.06);
+
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+    min-height: 58px;
+
+    /* Suppress margin/padding from theme resets */
+    margin: 0;
+    list-style: none;
+  }
+
+  /* ── Suppress old dashboard sidebar bottom-bar on pages that have
+        the universal nav — avoids double navbars ── */
+  body:not(.page-template-template-account):not(.page-template-template-host-dashboard)
+    .dashboard-sidebar,
+  body:not(.page-template-template-account):not(.page-template-template-host-dashboard)
+    .nav-sidebar {
+    position: static !important;
+    height: auto !important;
+    flex-direction: column !important;
+    box-shadow: none !important;
+    border-top: none !important;
+    background: transparent !important;
+  }
+
+  /* ── Nav items ── */
+  .obenlo-pwa-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 2px 4px;
+    min-height: 50px;
+    gap: 3px;
+
+    text-decoration: none;
+    color: #737373;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    white-space: nowrap;
+
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s ease, transform 0.15s ease;
+    position: relative;
+  }
+
+  .obenlo-pwa-nav-item:active {
+    transform: scale(0.90);
+    color: #e61e4d;
+  }
+
+  .obenlo-pwa-nav-item svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    stroke-width: 2;
+    transition: stroke 0.2s ease;
+  }
+
+  .obenlo-pwa-nav-item span {
+    font-size: 9.5px;
+    font-weight: 600;
+    margin-top: 1px;
+  }
+
+  /* ── Active tab ── */
+  .obenlo-pwa-nav-item.obenlo-nav-active {
+    color: #e61e4d;
+    font-weight: 800;
+  }
+
+  .obenlo-pwa-nav-item.obenlo-nav-active svg {
+    stroke: #e61e4d;
+  }
+
+  /* Active indicator dot */
+  .obenlo-pwa-nav-item.obenlo-nav-active::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #e61e4d;
+    animation: obenlo-dot-pop 0.25s ease;
+  }
+
+  /* ── Ensure body has bottom padding so content isn't hidden ── */
+  body {
+    padding-bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+} /* end @media (max-width: 768px) — universal nav */
+
+/* ═══════════════════════════════════════════════════════════════════
+   14. STOREFRONT FORM COMPONENTS
+       Desktop baseline + mobile overrides.
+       Lives here (pwa.css) because it loads on ALL pages including
+       the host-dashboard custom page template.
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Desktop baseline ───────────────────────────────────────────── */
+.obenlo-sf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.obenlo-sf-preview-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: #e61e4d;
+  color: #fff;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 700;
+  transition: background 0.2s ease;
+}
+
+.obenlo-sf-preview-btn:hover {
+  background: #c41940;
+  color: #fff;
+}
+
+.obenlo-social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.obenlo-branding-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 30px;
+}
+
+/* ── Mobile overrides (≤768px) ──────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Header: stack title + button vertically */
+  .obenlo-sf-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  /* Button: full-width, centred, always crimson */
+  .obenlo-sf-preview-btn,
+  .obenlo-sf-header a,
+  .obenlo-sf-header .btn-primary {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 13px 20px !important;
+    background: #e61e4d !important;
+    color: #fff !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    border-radius: 12px !important;
+  }
+
+  /* Social grid → single column */
+  .obenlo-social-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* Branding grid → single column */
+  .obenlo-branding-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  /* Logo preview: compact on mobile */
+  .obenlo-branding-grid > div > div[style*="width:120px"],
+  .obenlo-branding-grid > div > div[style*="width: 120px"] {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  /* Dashboard title: tighter on mobile */
+  h2.dashboard-title {
+    font-size: 1.5rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* Host dashboard container padding */
+  .obenlo-dashboard-container {
+    padding: 16px !important;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Reduce inner form section padding */
+  .form-section {
+    padding: 20px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Submit button: full width and legible size */
+  .form-section + div > button[type="submit"],
+  [style*="margin-top:40px"] button[type="submit"],
+  [style*="margin-top: 40px"] button[type="submit"] {
+    font-size: 1rem !important;
+    padding: 14px 20px !important;
+  }
+
+  /* Stats KPI row: 2 columns → fits better on small screens */
+  .dashboard-stats-grid,
+  [style*="grid-template-columns: 1fr 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* 3-col grids → single column */
+  [style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Submit buttons in dashboard forms — keep crimson consistent */
+  .obenlo-dashboard-container button[type="submit"],
+  .obenlo-dashboard-container .btn-primary:not(.obenlo-sf-preview-btn):not(a) {
+    background: #e61e4d !important;
+    color: #fff !important;
+    border-color: #e61e4d !important;
+  }
+
 }

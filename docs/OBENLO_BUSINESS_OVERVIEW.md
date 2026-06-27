@@ -1,4 +1,4 @@
-# Obenlo: The Caribbean Service Operating System
+# Obenlo: The Global Service Operating System
 **Official Business Overview & Investor Whitepaper**
 
 ---
@@ -6,10 +6,10 @@
 ## 🌎 Vision & Mission
 
 ### Vision
-To become the definitive economic engine of the Caribbean service and hospitality industry, providing every local entrepreneur with the tools to compete on a global stage.
+To become the definitive global engine for service and hospitality, providing every entrepreneur — anywhere in the world — with the tools to build, manage, and scale a premium booking business.
 
 ### Mission
-Obenlo empowers service providers and hosts by providing a premium, trust-based marketplace integrated with a powerful business operating system. We bridge the gap between Caribbean talent and international demand through technology, transparency, and high-end design.
+Obenlo empowers service providers and hosts worldwide by providing a premium, trust-based marketplace integrated with a powerful business operating system. We bridge the gap between local talent and global demand through technology, transparency, and high-end design.
 
 ---
 
@@ -48,10 +48,10 @@ Linked to the Main Listing are specific "Bookables" (e.g., individual rooms, spe
 ## 👥 User Ecosystem
 
 ### The Guests (Demand)
-Local and international travelers seeking high-quality Caribbean experiences. They benefit from a unified UI/UX, secure payments (Stripe/PayPal), and a transparent review system.
+Travelers and customers worldwide seeking high-quality, vetted services and experiences. They benefit from a unified UI/UX, secure payments (Stripe/PayPal), and a transparent review system.
 
 ### The Providers (Supply)
-Small to medium-sized Caribbean businesses. Obenlo provides them with a ready-made digital infrastructure:
+Small to medium-sized businesses across every market. Obenlo provides them with a ready-made digital infrastructure:
 -   **PWA Mobile App**: Full business management on the go.
 -   **Support Ecosystem**: Direct line to platform administrators via the Help Center.
 -   **Automated Marketing**: SEO-optimized listings and Social Media auto-posting.
@@ -64,7 +64,7 @@ Obenlo is built on a custom-engineered WordPress core, decoupled into specialize
 
 -   **`obenlo-booking`**: The proprietary transaction and availability engine.
 -   **`obenlo-pwa`**: Delivering a native-app feel for mobile-first users.
--   **`obenlo-i18n`**: Advanced multilingual support for the diverse Caribbean market.
+-   **`obenlo-i18n`**: Advanced multilingual support for a diverse, international user base.
 -   **`obenlo-security`**: Integrated VAPID-key encryption and secure WebHooks.
 
 ---

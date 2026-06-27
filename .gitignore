@@ -11,6 +11,7 @@
 # ─── Plugins ─────────────────────────────────────────────────────────────────
 !/plugins/
 /plugins/*
+!/plugins/obenlo-ai/
 !/plugins/obenlo-booking/
 !/plugins/obenlo-i18n/
 !/plugins/obenlo-pwa/

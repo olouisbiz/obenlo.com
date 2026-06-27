@@ -1,9 +1,9 @@
 # Obenlo Developer & Administrative Guide
 
-Welcome to the technical heart of **Obenlo**, the premium Caribbean-centric service and booking engine.
+Welcome to the technical heart of **Obenlo**, the premium global service and booking engine.
 
 ## 🚀 Project Overview
-Obenlo is a custom-engineered WordPress ecosystem designed for high-concurrency booking, real-time scheduling, and localized Caribbean payments. It uses a **Hybrid Architecture** (PHP/React/PWA) to deliver a mobile-first, app-like experience.
+Obenlo is a custom-engineered WordPress ecosystem designed for high-concurrency booking, real-time scheduling, and global payments. It uses a **Hybrid Architecture** (PHP/React/PWA) to deliver a mobile-first, app-like experience.
 
 ---
 

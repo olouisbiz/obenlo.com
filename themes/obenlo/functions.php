@@ -396,11 +396,27 @@ add_action('init', function () {
 /**
  * Filter Listing Visibility: Only show parent listings in standard shop/archive views.
  * This prevents sub-units (children) from appearing alongside their parent listing.
+ *
+ * Also fixes a WordPress URL rewrite conflict where /listings/?s=query incorrectly
+ * inherits listing_type=stay from the URL pattern, which would restrict all text
+ * searches to only the "Stay" category.
  */
 function obenlo_filter_listing_children($query)
 {
-    if (!is_admin() && $query->is_main_query() && (is_post_type_archive('listing') || is_tax('listing_type') || is_search() || is_front_page())) {
-        $query->set('post_parent', 0);
+    if (!is_admin() && $query->is_main_query()) {
+
+        // Always show only top-level (parent) listings in archive/search/taxonomy views
+        if (is_post_type_archive('listing') || is_tax('listing_type') || is_search() || is_front_page()) {
+            $query->set('post_parent', 0);
+        }
+
+        // Fix URL rewrite conflict: when a ?s= search is performed on the /listings/ archive,
+        // WordPress incorrectly injects listing_type=stay from the URL rewrite rules.
+        // If the user didn't explicitly choose a type via the URL (e.g. /type/stay/), clear it.
+        if ($query->is_search() && isset($_GET['s']) && !is_tax('listing_type')) {
+            $query->set('listing_type', '');
+            $query->set('tax_query', array());
+        }
     }
 }
 add_action('pre_get_posts', 'obenlo_filter_listing_children');
