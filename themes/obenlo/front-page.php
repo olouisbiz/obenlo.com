@@ -155,6 +155,48 @@ if ( count($demo_meta_query) <= 1 ) {
         </div>
     </section>
 
+    <?php 
+    $front_page_viator = get_option('obenlo_ai_front_page_viator', '');
+    if (!empty(trim($front_page_viator))) : 
+    ?>
+    <!-- ── FEATURED TOURS & ACTIVITIES (VIATOR) ── -->
+    <section class="featured-viator-widget" style="margin-bottom: 80px;">
+        <div class="ob-section-header">
+            <div>
+                <h2 class="ob-section-title"><?php esc_html_e('Featured Tours & Activities', 'obenlo'); ?></h2>
+                <p class="ob-section-subtitle"><?php esc_html_e('Book top-rated experiences curated for you', 'obenlo'); ?></p>
+            </div>
+        </div>
+        <div class="viator-widget-container" style="background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:20px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); overflow:hidden;">
+            <?php 
+            // The widget script might have been escaped or restricted by wp_kses.
+            // Outputting raw since it's an admin-only setting.
+            echo wp_specialchars_decode($front_page_viator, ENT_QUOTES); 
+            ?>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <?php 
+    $front_page_tp = get_option('obenlo_ai_front_page_travelpayouts', '');
+    if (!empty(trim($front_page_tp))) : 
+    ?>
+    <!-- ── FEATURED TRAVEL DEALS & TRANSPORT (TRAVELPAYOUTS) ── -->
+    <section class="featured-travelpayouts-widget" style="margin-bottom: 80px;">
+        <div class="ob-section-header">
+            <div>
+                <h2 class="ob-section-title"><?php esc_html_e('Travel Deals & Transport', 'obenlo'); ?></h2>
+                <p class="ob-section-subtitle"><?php esc_html_e('Find the best flights, hotels, and rentals for your trip', 'obenlo'); ?></p>
+            </div>
+        </div>
+        <div class="travelpayouts-widget-container" style="background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:20px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); overflow:hidden;">
+            <?php 
+            echo wp_specialchars_decode($front_page_tp, ENT_QUOTES); 
+            ?>
+        </div>
+    </section>
+    <?php endif; ?>
+
     <!-- ── FEATURED SERVICES ── -->
     <section class="featured-services" style="margin-bottom: 80px;">
         <div class="ob-section-header">

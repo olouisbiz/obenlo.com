@@ -28,12 +28,15 @@ class Obenlo_Engine_Manager {
 
     private function load_engines() {
         $engine_files = array(
-            'nightly'     => 'class-engine-nightly.php',
-            'slot'        => 'class-engine-slot.php',
-            'fixed_block' => 'class-engine-fixed-block.php',
-            'session'     => 'class-engine-session.php',
-            'logistics'   => 'class-engine-logistics.php',
-            'inquiry'     => 'class-engine-inquiry.php',
+            'nightly'       => 'class-engine-nightly.php',
+            'slot'          => 'class-engine-slot.php',
+            'fixed_block'   => 'class-engine-fixed-block.php',
+            'session'       => 'class-engine-session.php',
+            'logistics'     => 'class-engine-logistics.php',
+            'inquiry'       => 'class-engine-inquiry.php',
+            'affiliate'     => 'class-engine-affiliate.php',
+            'viator'        => 'class-engine-viator.php',
+            'travelpayouts' => 'class-engine-travelpayouts.php',
         );
 
         foreach ($engine_files as $id => $file) {

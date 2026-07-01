@@ -437,6 +437,19 @@ class Obenlo_Host_Listings
                                 </select>
                             </div>
                         </div>
+                        
+                        <div class="grid-row" style="margin-bottom:20px;">
+                            <div class="grid-col-1-2">
+                                <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Integration Mode (Optional)', 'obenlo'); ?></label>
+                                <select name="listing_engine" id="listing_engine" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
+                                    <?php $current_engine = get_post_meta($listing_id, '_obenlo_listing_engine', true); ?>
+                                    <option value="" <?php selected($current_engine, ''); ?>><?php echo __('Default (Based on Category)', 'obenlo'); ?></option>
+                                    <option value="viator" <?php selected($current_engine, 'viator'); ?>><?php echo __('Viator Widget', 'obenlo'); ?></option>
+                                    <option value="travelpayouts" <?php selected($current_engine, 'travelpayouts'); ?>><?php echo __('Travelpayouts Widget', 'obenlo'); ?></option>
+                                    <option value="affiliate" <?php selected($current_engine, 'affiliate'); ?>><?php echo __('Affiliate Deep Link', 'obenlo'); ?></option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="grid-row" style="margin-bottom:20px;">
                             <div id="capacity_wrapper" class="grid-col-1-2">
                                 <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Max Capacity (Guests/Tickets)', 'obenlo'); ?></label>
@@ -896,7 +909,12 @@ class Obenlo_Host_Listings
             if (isset($_POST['event_location_type'])) update_post_meta($new_post_id, '_obenlo_event_location_type', sanitize_text_field($_POST['event_location_type']));
 
             // ── Booking Engine Meta ───────────────────────────────────
+            if (isset($_POST['listing_engine'])) {
+                update_post_meta($new_post_id, '_obenlo_listing_engine', sanitize_text_field($_POST['listing_engine']));
+            }
             if (isset($_POST['pricing_model']))  update_post_meta($new_post_id, '_obenlo_pricing_model',  sanitize_text_field($_POST['pricing_model']));
+            if (isset($_POST['obenlo_viator_widget_code'])) update_post_meta($new_post_id, '_obenlo_viator_widget_code', wp_unslash($_POST['obenlo_viator_widget_code']));
+            if (isset($_POST['obenlo_travelpayouts_widget_code'])) update_post_meta($new_post_id, '_obenlo_travelpayouts_widget_code', wp_unslash($_POST['obenlo_travelpayouts_widget_code']));
             if (isset($_POST['duration_val']))   update_post_meta($new_post_id, '_obenlo_duration_val',   sanitize_text_field($_POST['duration_val']));
             if (isset($_POST['duration_unit']))  update_post_meta($new_post_id, '_obenlo_duration_unit',  sanitize_text_field($_POST['duration_unit']));
             update_post_meta($new_post_id, '_obenlo_requires_slots', (isset($_POST['requires_slots']) && $_POST['requires_slots'] === 'yes') ? 'yes' : 'no');

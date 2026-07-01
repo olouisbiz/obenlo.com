@@ -40,10 +40,20 @@ class Obenlo_AI_Admin {
     // ── Admin Menu ────────────────────────────────────────────────────────
 
     public function register_admin_page() {
-        add_submenu_page(
-            null, // Hidden (not in sidebar), accessible via direct URL
+        add_menu_page(
             'Obenlo Agent Settings',
             'Obenlo Agent',
+            'manage_options',
+            'obenlo-ai-settings',
+            [ $this, 'render_standalone_page' ],
+            'dashicons-superhero',
+            30
+        );
+
+        add_submenu_page(
+            'obenlo-ai-settings',
+            'Settings',
+            'Settings',
             'manage_options',
             'obenlo-ai-settings',
             [ $this, 'render_standalone_page' ]
@@ -81,6 +91,10 @@ class Obenlo_AI_Admin {
         $enable_chat    = get_option( 'obenlo_ai_enable_chat', 'yes' );
         $enable_listing = get_option( 'obenlo_ai_enable_listing', 'yes' );
         $enable_search  = get_option( 'obenlo_ai_enable_search', 'yes' );
+        $tp_marker      = get_option( 'obenlo_ai_travelpayouts_marker', '' );
+        $tp_viator      = get_option( 'obenlo_ai_tp_viator', '' );
+        $tp_tripadvisor = get_option( 'obenlo_ai_tp_tripadvisor', '' );
+        $tp_gyg         = get_option( 'obenlo_ai_tp_gyg', '' );
 
         $saved = isset( $_GET['ai_saved'] ) && $_GET['ai_saved'] === '1';
         $error = isset( $_GET['ai_error'] ) ? urldecode( $_GET['ai_error'] ) : '';
@@ -355,6 +369,59 @@ class Obenlo_AI_Admin {
                     <span id="obenlo-ai-test-openai-result" style="margin-left:12px; font-size:0.85rem; font-weight:700;"></span>
                 </div>
 
+                <!-- Affiliate Settings -->
+                <div class="ai-card" id="obenlo-ai-affiliate-section">
+                    <h3>🤝 Travelpayouts Affiliate</h3>
+                    <div class="form-row">
+                        <label class="ai-label">Travelpayouts Marker (Affiliate ID)</label>
+                        <input
+                            type="text"
+                            name="obenlo_ai_travelpayouts_marker"
+                            value="<?php echo esc_attr( $tp_marker ); ?>"
+                            placeholder="e.g. 719345"
+                        />
+                        <p class="form-hint">Your unique Travelpayouts numeric ID. Required for tracking.</p>
+                    </div>
+                    <div style="display:flex; gap:15px;">
+                        <div class="form-row" style="flex:1;">
+                            <label class="ai-label">Viator Program ID (p)</label>
+                            <input type="text" name="obenlo_ai_tp_viator" value="<?php echo esc_attr( $tp_viator ); ?>" placeholder="e.g. 4181">
+                        </div>
+                        <div class="form-row" style="flex:1;">
+                            <label class="ai-label">TripAdvisor Program ID (p)</label>
+                            <input type="text" name="obenlo_ai_tp_tripadvisor" value="<?php echo esc_attr( $tp_tripadvisor ); ?>" placeholder="e.g. 4232">
+                        </div>
+                        <div class="form-row" style="flex:1;">
+                            <label class="ai-label">GetYourGuide Program ID (p)</label>
+                            <input type="text" name="obenlo_ai_tp_gyg" value="<?php echo esc_attr( $tp_gyg ); ?>" placeholder="e.g. 3960">
+                        </div>
+                    </div>
+                    <p class="form-hint">Travelpayouts requires a specific Program ID <code>(p)</code> for each network to generate deep links correctly.</p>
+                </div>
+
+                <!-- Featured Widgets -->
+                <div class="ai-card" id="obenlo-ai-widgets-section">
+                    <h3>🎟️ Global Widgets</h3>
+                    <div class="form-row">
+                        <label class="ai-label">Front Page Viator Widget Code</label>
+                        <textarea
+                            name="obenlo_ai_front_page_viator"
+                            rows="4"
+                            placeholder="<div data-vi-partner-id=...></div><script async src=...></script>"
+                            style="width:100%; padding:11px 14px; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; font-family:monospace; outline:none; background:#f9fafb; box-sizing:border-box; margin-bottom: 20px;"
+                        ><?php echo esc_textarea( get_option( 'obenlo_ai_front_page_viator', '' ) ); ?></textarea>
+                        
+                        <label class="ai-label">Front Page Travelpayouts Widget Code</label>
+                        <textarea
+                            name="obenlo_ai_front_page_travelpayouts"
+                            rows="4"
+                            placeholder="<script async src=...></script>"
+                            style="width:100%; padding:11px 14px; border:1px solid #d1d5db; border-radius:10px; font-size:0.95rem; font-family:monospace; outline:none; background:#f9fafb; box-sizing:border-box;"
+                        ><?php echo esc_textarea( get_option( 'obenlo_ai_front_page_travelpayouts', '' ) ); ?></textarea>
+                        <p class="form-hint">Paste your Viator and/or Travelpayouts widget scripts here. They will automatically be displayed in featured sections on the Obenlo Front Page.</p>
+                    </div>
+                </div>
+
                 <!-- Feature Toggles -->
                 <div class="ai-card">
                     <h3>🎛️ Feature Toggles</h3>
@@ -512,8 +579,17 @@ class Obenlo_AI_Admin {
         update_option( 'obenlo_ai_enable_chat',    isset( $_POST['obenlo_ai_enable_chat'] ) ? 'yes' : 'no' );
         update_option( 'obenlo_ai_enable_listing', isset( $_POST['obenlo_ai_enable_listing'] ) ? 'yes' : 'no' );
         update_option( 'obenlo_ai_enable_search',  isset( $_POST['obenlo_ai_enable_search'] ) ? 'yes' : 'no' );
+        update_option( 'obenlo_ai_travelpayouts_marker', sanitize_text_field( $_POST['obenlo_ai_travelpayouts_marker'] ?? '' ) );
+        update_option( 'obenlo_ai_tp_viator', sanitize_text_field( $_POST['obenlo_ai_tp_viator'] ?? '' ) );
+        update_option( 'obenlo_ai_tp_tripadvisor', sanitize_text_field( $_POST['obenlo_ai_tp_tripadvisor'] ?? '' ) );
+        update_option( 'obenlo_ai_tp_gyg', sanitize_text_field( $_POST['obenlo_ai_tp_gyg'] ?? '' ) );
+        if ( isset( $_POST['obenlo_ai_front_page_viator'] ) ) {
+            update_option( 'obenlo_ai_front_page_viator', wp_unslash( $_POST['obenlo_ai_front_page_viator'] ) );
+        }
+        if ( isset( $_POST['obenlo_ai_front_page_travelpayouts'] ) ) {
+            update_option( 'obenlo_ai_front_page_travelpayouts', wp_unslash( $_POST['obenlo_ai_front_page_travelpayouts'] ) );
+        }
 
-        // Only update keys if they are non-empty (avoid overwriting saved key with placeholder)
         if ( ! empty( $_POST['obenlo_ai_gemini_key'] ) ) {
             update_option( 'obenlo_ai_gemini_key', sanitize_text_field( $_POST['obenlo_ai_gemini_key'] ) );
         }

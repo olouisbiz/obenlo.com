@@ -1,7 +1,10 @@
             <div class="listing-sidebar" style="position: sticky; top: 20px; height: fit-content; align-self: flex-start;">
                 <div class="booking-widget">
                     <?php if (!isset($is_demo_preview)) $is_demo_preview = false; ?>
-                    <?php if ($parent_id == 0): ?>
+                    <?php 
+                    $is_affiliate = (get_post_meta($listing_id, '_obenlo_listing_engine', true) === 'affiliate');
+                    if ($parent_id == 0 && !$is_affiliate): 
+                    ?>
                         <!-- Parent Listing (Business Profile): Show Children, Hide Booking Form -->
                         <h3 style="margin-top:0;">Available Options</h3>
                         <?php if ($has_children): ?>
