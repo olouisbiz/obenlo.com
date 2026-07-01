@@ -91,8 +91,17 @@ class Obenlo_Admin_Listings
             echo '<td data-label="Actions">';
             echo '<a href="' . get_permalink($listing->ID) . '" target="_blank">View</a> | ';
             if (current_user_can('manage_options')) {
-                $location = get_post_meta($listing->ID, '_obenlo_location', true);
-                if(empty($location)) $location = 'Toronto';
+                $city = get_post_meta($listing->ID, '_obenlo_listing_location', true);
+                $country = get_post_meta($listing->ID, '_obenlo_listing_country', true);
+                if ($city && $country) {
+                    $location = $city . ', ' . $country;
+                } elseif ($city) {
+                    $location = $city;
+                } elseif ($country) {
+                    $location = $country;
+                } else {
+                    $location = 'Location Unavailable';
+                }
                 $image = get_the_post_thumbnail_url($listing->ID, 'large');
                 $template = get_option('obenlo_social_listing_template', "New on Obenlo!\n\n{title} in {location}\nJust ${price}!");
                 $caption = str_replace( array('{title}', '${price}', '{location}'), array($listing->post_title, $price, $location), $template );

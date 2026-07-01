@@ -13,55 +13,30 @@ class Obenlo_Engine_Viator extends Obenlo_Abstract_Engine {
     public function get_name() { return 'Viator Widget'; }
 
     public function render_host_fields($listing_id, $slug = '') {
-        $widget_code = get_post_meta($listing_id, '_obenlo_viator_widget_code', true);
+        $url = get_post_meta($listing_id, '_obenlo_viator_url', true);
         ob_start();
         ?>
         <div id="viator_wrapper_modular" style="margin-top:15px; padding:15px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px;">
-            <label style="display:block; font-weight:700; margin-bottom:5px; color:#166534;">Viator Widget HTML/Script Code</label>
-            <textarea name="obenlo_viator_widget_code" rows="5" placeholder='<div data-vi-partner-id="..."></div><script async src="..."></script>' style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; font-family:monospace; font-size:12px;"><?php echo esc_textarea($widget_code); ?></textarea>
-            <p style="font-size:0.8rem; color:#15803d; margin-top:5px;">Paste your exact Viator Product Widget snippet here. It will replace the Obenlo booking form on the frontend.</p>
+            <label style="display:block; font-weight:700; margin-bottom:5px; color:#166534;">Viator Booking URL</label>
+            <input type="url" name="obenlo_viator_url" value="<?php echo esc_attr($url); ?>" placeholder="https://www.viator.com/..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" />
+            <p style="font-size:0.8rem; color:#15803d; margin-top:5px;">Users will be redirected to this URL when they click "Book on Viator".</p>
         </div>
         <?php
         return ob_get_clean();
     }
 
     public function render_booking_widget($listing_id, $slug = '') {
-        $widget_code = get_post_meta($listing_id, '_obenlo_viator_widget_code', true);
+        $url = get_post_meta($listing_id, '_obenlo_viator_url', true);
         ob_start();
         ?>
-        <div class="obenlo-viator-widget-container" style="margin-bottom:15px; width: 100%; overflow: hidden;">
-            <?php 
-            if (empty(trim($widget_code))) {
-                echo '<div style="padding:20px; text-align:center; background:#f9fafb; border:1px dashed #d1d5db; border-radius:12px; color:#6b7280; font-size:0.9rem;">No Viator Widget code provided.</div>';
-            } else {
-                // Output raw script code. Allow iframe, script, and div tags.
-                echo wp_kses($widget_code, array(
-                    'div' => array(
-                        'id' => array(),
-                        'class' => array(),
-                        'data-vi-partner-id' => array(),
-                        'data-vi-widget-ref' => array(),
-                        'data-vi-language' => array(),
-                        'data-vi-currency' => array(),
-                        'style' => array(),
-                    ),
-                    'script' => array(
-                        'src' => array(),
-                        'async' => array(),
-                        'defer' => array(),
-                        'type' => array(),
-                    ),
-                    'iframe' => array(
-                        'src' => array(),
-                        'width' => array(),
-                        'height' => array(),
-                        'frameborder' => array(),
-                        'scrolling' => array(),
-                        'style' => array(),
-                    )
-                ));
-            }
-            ?>
+        <div class="obenlo-viator-container" style="margin-bottom:15px;">
+            <?php if (empty($url)): ?>
+                <div style="padding:20px; text-align:center; background:#f9fafb; border:1px dashed #d1d5db; border-radius:12px; color:#6b7280;">No Viator booking URL provided.</div>
+            <?php else: ?>
+                <a href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener noreferrer" style="display:block; width:100%; padding:15px; background-color:#166534; color:#fff; text-align:center; border-radius:8px; font-weight:bold; text-decoration:none; font-size:1.1rem; transition:background 0.2s;">
+                    Explore Experiences on Viator
+                </a>
+            <?php endif; ?>
             <script>
                 // Hide the default reserve button and total elements
                 document.addEventListener('DOMContentLoaded', function() {
@@ -73,11 +48,14 @@ class Obenlo_Engine_Viator extends Obenlo_Abstract_Engine {
                             checkoutMsg.style.display = 'none';
                         }
                     }
-                    var paymentRow = document.querySelector('select[name="payment_method"]');
-                    if(paymentRow) paymentRow.closest('.form-row').style.display = 'none';
-                    
-                    var totalRow = document.getElementById('live-total');
-                    if(totalRow) totalRow.parentElement.parentElement.style.display = 'none';
+                    var totals = document.querySelector('.obenlo-booking-totals');
+                    if(totals) totals.style.display = 'none';
+                    var guestPicker = document.querySelector('.obenlo-guest-picker');
+                    if(guestPicker) guestPicker.style.display = 'none';
+                    var timePicker = document.querySelector('.obenlo-time-picker');
+                    if(timePicker) timePicker.style.display = 'none';
+                    var datePicker = document.getElementById('obenlo-booking-date');
+                    if(datePicker) datePicker.style.display = 'none';
                 });
             </script>
         </div>

@@ -37,6 +37,9 @@ class Obenlo_Engine_Manager {
             'affiliate'     => 'class-engine-affiliate.php',
             'viator'        => 'class-engine-viator.php',
             'travelpayouts' => 'class-engine-travelpayouts.php',
+            'ticketmaster'  => 'class-engine-ticketmaster.php',
+            'seatgeek'      => 'class-engine-seatgeek.php',
+            'groupon'       => 'class-engine-groupon.php'
         );
 
         foreach ($engine_files as $id => $file) {

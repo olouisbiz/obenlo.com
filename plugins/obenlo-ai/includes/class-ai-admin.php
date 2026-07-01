@@ -399,6 +399,76 @@ class Obenlo_AI_Admin {
                     <p class="form-hint">Travelpayouts requires a specific Program ID <code>(p)</code> for each network to generate deep links correctly.</p>
                 </div>
 
+                <!-- Ticketmaster API -->
+                <div class="ai-card" id="obenlo-ai-ticketmaster-section">
+                    <h3>🎟️ Ticketmaster API</h3>
+                    <div class="form-row">
+                        <label class="ai-label">Ticketmaster Developer API Key</label>
+                        <input
+                            type="password"
+                            name="obenlo_ai_ticketmaster_key"
+                            value="<?php echo esc_attr( get_option('obenlo_ai_ticketmaster_key', '') ); ?>"
+                            placeholder="e.g. ABcdEfG12345..."
+                            autocomplete="new-password"
+                        />
+                        <p class="form-hint">Get your free key at <a href="https://developer.ticketmaster.com/" target="_blank" rel="noopener">developer.ticketmaster.com</a>. This is required to fetch and import live events.</p>
+                    </div>
+                </div>
+
+                <!-- SeatGeek API -->
+                <div class="ai-card" id="obenlo-ai-seatgeek-section">
+                    <h3>🎟️ SeatGeek API</h3>
+                    <div class="form-row">
+                        <label class="ai-label">SeatGeek Client ID (API Key)</label>
+                        <input
+                            type="password"
+                            name="obenlo_ai_seatgeek_key"
+                            value="<?php echo esc_attr( get_option('obenlo_ai_seatgeek_key', '') ); ?>"
+                            placeholder="e.g. MTIzNDU2Nzg5..."
+                            autocomplete="new-password"
+                        />
+                        <p class="form-hint">Get your free Client ID at <a href="https://seatgeek.com/account/develop" target="_blank" rel="noopener">seatgeek.com/account/develop</a>. Required to fetch indie events and sports.</p>
+                    </div>
+                </div>
+
+                <!-- Viator API -->
+                <div class="ai-card" id="obenlo-ai-viator-section">
+                    <h3>🗺️ Viator API</h3>
+                    <div class="form-row">
+                        <label class="ai-label">Viator API Key</label>
+                        <input
+                            type="password"
+                            name="obenlo_ai_viator_key"
+                            value="<?php echo esc_attr( get_option('obenlo_ai_viator_key', '') ); ?>"
+                            placeholder="e.g. 12345678-abcd-..."
+                            autocomplete="new-password"
+                        />
+                        <p class="form-hint">Get your free API Key at <a href="https://partner.viator.com/" target="_blank" rel="noopener">partner.viator.com</a>. Required to fetch local tours and experiences.</p>
+                    </div>
+                </div>
+
+                <!-- Travelpayouts API -->
+                <div class="ai-card" id="obenlo-ai-travelpayouts-section">
+                    <h3>🏨 Travelpayouts API (Hotels & Flights)</h3>
+                    <div class="form-row">
+                        <label class="ai-label">Travelpayouts Affiliate Marker (ID)</label>
+                        <input type="text" name="obenlo_ai_tp_marker" value="<?php echo esc_attr( get_option('obenlo_ai_tp_marker', '') ); ?>" placeholder="e.g. 123456" class="ai-input" />
+                        <label class="ai-label" style="margin-top:15px;">Travelpayouts API Token</label>
+                        <input type="password" name="obenlo_ai_tp_token" value="<?php echo esc_attr( get_option('obenlo_ai_tp_token', '') ); ?>" placeholder="e.g. abcdef123456..." autocomplete="new-password" class="ai-input" />
+                        <p class="form-hint">Get your Token and Marker at <a href="https://www.travelpayouts.com/" target="_blank" rel="noopener">travelpayouts.com</a>. Required for the Hotel Importer.</p>
+                    </div>
+                </div>
+
+                <!-- Groupon / CJ Affiliate API -->
+                <div class="ai-card" id="obenlo-ai-groupon-section">
+                    <h3>💆 Groupon API (Local Deals)</h3>
+                    <div class="form-row">
+                        <label class="ai-label">CJ Affiliate Personal Access Token</label>
+                        <input type="password" name="obenlo_ai_groupon_key" value="<?php echo esc_attr( get_option('obenlo_ai_groupon_key', '') ); ?>" placeholder="e.g. Bearer abcdef123456..." autocomplete="new-password" class="ai-input" />
+                        <p class="form-hint">Get your API Token at <a href="https://developers.cj.com/" target="_blank" rel="noopener">developers.cj.com</a>. Required to fetch Groupon local deals and spas.</p>
+                    </div>
+                </div>
+
                 <!-- Featured Widgets -->
                 <div class="ai-card" id="obenlo-ai-widgets-section">
                     <h3>🎟️ Global Widgets</h3>
@@ -598,6 +668,24 @@ class Obenlo_AI_Admin {
         }
         if ( ! empty( $_POST['obenlo_ai_groq_key'] ) ) {
             update_option( 'obenlo_ai_groq_key', sanitize_text_field( $_POST['obenlo_ai_groq_key'] ) );
+        }
+        if ( ! empty( $_POST['obenlo_ai_ticketmaster_key'] ) ) {
+            update_option( 'obenlo_ai_ticketmaster_key', sanitize_text_field( $_POST['obenlo_ai_ticketmaster_key'] ) );
+        }
+        if ( ! empty( $_POST['obenlo_ai_seatgeek_key'] ) ) {
+            update_option( 'obenlo_ai_seatgeek_key', sanitize_text_field( $_POST['obenlo_ai_seatgeek_key'] ) );
+        }
+        if ( ! empty( $_POST['obenlo_ai_viator_key'] ) ) {
+            update_option( 'obenlo_ai_viator_key', sanitize_text_field( $_POST['obenlo_ai_viator_key'] ) );
+        }
+        if ( ! empty( $_POST['obenlo_ai_tp_marker'] ) ) {
+            update_option( 'obenlo_ai_tp_marker', sanitize_text_field( $_POST['obenlo_ai_tp_marker'] ) );
+        }
+        if ( ! empty( $_POST['obenlo_ai_tp_token'] ) ) {
+            update_option( 'obenlo_ai_tp_token', sanitize_text_field( $_POST['obenlo_ai_tp_token'] ) );
+        }
+        if ( ! empty( $_POST['obenlo_ai_groupon_key'] ) ) {
+            update_option( 'obenlo_ai_groupon_key', sanitize_text_field( $_POST['obenlo_ai_groupon_key'] ) );
         }
 
         wp_safe_redirect( $redirect );

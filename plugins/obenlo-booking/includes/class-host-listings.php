@@ -204,7 +204,7 @@ class Obenlo_Host_Listings
                 $price          = get_post_meta($listing_id, '_obenlo_price', true);
                 $capacity       = get_post_meta($listing_id, '_obenlo_capacity', true);
                 $available_units = get_post_meta($listing_id, '_obenlo_available_units', true) ?: 1;
-                $location       = get_post_meta($listing_id, '_obenlo_location', true);
+                $location       = get_post_meta($listing_id, '_obenlo_listing_location', true);
                 $virtual_link   = get_post_meta($listing_id, '_obenlo_virtual_link', true);
                 $event_is_fixed = get_post_meta($listing_id, '_obenlo_event_is_fixed', true) ?: 'no';
                 $event_date     = get_post_meta($listing_id, '_obenlo_event_date', true);
@@ -446,6 +446,9 @@ class Obenlo_Host_Listings
                                     <option value="" <?php selected($current_engine, ''); ?>><?php echo __('Default (Based on Category)', 'obenlo'); ?></option>
                                     <option value="viator" <?php selected($current_engine, 'viator'); ?>><?php echo __('Viator Widget', 'obenlo'); ?></option>
                                     <option value="travelpayouts" <?php selected($current_engine, 'travelpayouts'); ?>><?php echo __('Travelpayouts Widget', 'obenlo'); ?></option>
+                                    <option value="ticketmaster" <?php selected($current_engine, 'ticketmaster'); ?>><?php echo __('Ticketmaster (API Import)', 'obenlo'); ?></option>
+                                    <option value="seatgeek" <?php selected($current_engine, 'seatgeek'); ?>><?php echo __('SeatGeek (API Import)', 'obenlo'); ?></option>
+                                    <option value="groupon" <?php selected($current_engine, 'groupon'); ?>><?php echo __('Groupon (API Import)', 'obenlo'); ?></option>
                                     <option value="affiliate" <?php selected($current_engine, 'affiliate'); ?>><?php echo __('Affiliate Deep Link', 'obenlo'); ?></option>
                                 </select>
                             </div>
@@ -915,6 +918,9 @@ class Obenlo_Host_Listings
             if (isset($_POST['pricing_model']))  update_post_meta($new_post_id, '_obenlo_pricing_model',  sanitize_text_field($_POST['pricing_model']));
             if (isset($_POST['obenlo_viator_widget_code'])) update_post_meta($new_post_id, '_obenlo_viator_widget_code', wp_unslash($_POST['obenlo_viator_widget_code']));
             if (isset($_POST['obenlo_travelpayouts_widget_code'])) update_post_meta($new_post_id, '_obenlo_travelpayouts_widget_code', wp_unslash($_POST['obenlo_travelpayouts_widget_code']));
+            if (isset($_POST['obenlo_ticketmaster_url'])) update_post_meta($new_post_id, '_obenlo_ticketmaster_url', esc_url_raw($_POST['obenlo_ticketmaster_url']));
+            if (isset($_POST['obenlo_seatgeek_url'])) update_post_meta($new_post_id, '_obenlo_seatgeek_url', esc_url_raw($_POST['obenlo_seatgeek_url']));
+            if (isset($_POST['obenlo_groupon_url'])) update_post_meta($new_post_id, '_obenlo_groupon_url', esc_url_raw($_POST['obenlo_groupon_url']));
             if (isset($_POST['duration_val']))   update_post_meta($new_post_id, '_obenlo_duration_val',   sanitize_text_field($_POST['duration_val']));
             if (isset($_POST['duration_unit']))  update_post_meta($new_post_id, '_obenlo_duration_unit',  sanitize_text_field($_POST['duration_unit']));
             update_post_meta($new_post_id, '_obenlo_requires_slots', (isset($_POST['requires_slots']) && $_POST['requires_slots'] === 'yes') ? 'yes' : 'no');

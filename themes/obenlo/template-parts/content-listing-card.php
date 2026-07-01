@@ -13,10 +13,16 @@ if(empty($price)) {
     }
 }
 
-$location = get_post_meta( get_the_ID(), '_obenlo_location', true ); // Placeholder field
-if(empty($location)){
-     // Mock location
-     $location = __( "Toronto, Canada", "obenlo" );
+$city = get_post_meta( get_the_ID(), '_obenlo_listing_location', true );
+$country = get_post_meta( get_the_ID(), '_obenlo_listing_country', true );
+if ($city && $country) {
+    $location = $city . ', ' . $country;
+} elseif ($city) {
+    $location = $city;
+} elseif ($country) {
+    $location = $country;
+} else {
+    $location = __( "Location Unavailable", "obenlo" );
 }
 ?>
 

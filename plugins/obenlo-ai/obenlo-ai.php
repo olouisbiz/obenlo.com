@@ -27,6 +27,11 @@ require_once OBENLO_AI_DIR . 'includes/class-ai-outreach.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-live-chat.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-blog.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-affiliate.php';
+require_once OBENLO_AI_DIR . 'includes/class-ai-ticketmaster.php';
+require_once OBENLO_AI_DIR . 'includes/class-ai-seatgeek.php';
+require_once OBENLO_AI_DIR . 'includes/class-ai-viator.php';
+require_once OBENLO_AI_DIR . 'includes/class-ai-travelpayouts.php';
+require_once OBENLO_AI_DIR . 'includes/class-ai-groupon.php';
 
 // ── Boot on plugins_loaded (same pattern as obenlo-booking) ───────────────
 function obenlo_ai_init() {
@@ -39,5 +44,10 @@ function obenlo_ai_init() {
     ( new Obenlo_AI_Live_Chat() )->init();
     ( new Obenlo_AI_Blog() )->init();
     ( new Obenlo_AI_Affiliate() )->init();
+    new Obenlo_AI_Ticketmaster();
+    new Obenlo_AI_SeatGeek();
+    new Obenlo_AI_Viator();
+    new Obenlo_AI_Travelpayouts();
+    new Obenlo_AI_Groupon();
 }
 add_action( 'plugins_loaded', 'obenlo_ai_init' );

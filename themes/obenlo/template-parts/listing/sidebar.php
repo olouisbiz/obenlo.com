@@ -2,7 +2,8 @@
                 <div class="booking-widget">
                     <?php if (!isset($is_demo_preview)) $is_demo_preview = false; ?>
                     <?php 
-                    $is_affiliate = (get_post_meta($listing_id, '_obenlo_listing_engine', true) === 'affiliate');
+                    $engine_id = get_post_meta($listing_id, '_obenlo_listing_engine', true);
+                    $is_affiliate = in_array($engine_id, ['affiliate', 'viator', 'travelpayouts', 'ticketmaster']);
                     if ($parent_id == 0 && !$is_affiliate): 
                     ?>
                         <!-- Parent Listing (Business Profile): Show Children, Hide Booking Form -->
