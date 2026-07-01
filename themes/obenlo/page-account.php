@@ -184,17 +184,21 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            padding: 10px 5px;
+            padding: 10px 15px;
             display: flex;
             flex-direction: row;
             justify-content: flex-start;
             overflow-x: auto;
-            gap: 0;
+            gap: 15px;
             z-index: 10000;
             box-shadow: 0 -4px 16px rgba(0,0,0,0.04);
             top: auto;
             border-radius: 0;
             align-items: center;
+            -webkit-overflow-scrolling: touch;
+        }
+        .account-sidebar::-webkit-scrollbar {
+            display: none;
         }
         .account-sidebar h1 {
             display: none;
@@ -202,17 +206,19 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
         .account-nav {
             display: flex;
             flex-direction: row;
-            gap: 0;
+            gap: 15px;
             width: max-content;
         }
         .sidebar-link {
             flex-direction: column;
-            gap: 2px;
-            padding: 8px 12px;
-            min-width: 65px;
+            gap: 4px;
+            padding: 8px 4px;
+            min-width: 70px;
             background: transparent !important;
             box-shadow: none !important;
             justify-content: center;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
         .sidebar-link.active {
             color: var(--dash-brand);
@@ -238,14 +244,16 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
         }
         .host-btn {
             flex-direction: column;
-            gap: 2px;
-            padding: 8px 12px;
-            min-width: 65px;
+            gap: 4px;
+            padding: 8px 4px;
+            min-width: 70px;
             background: transparent !important;
             border: none;
             box-shadow: none !important;
             justify-content: center;
             font-size: 0.65rem;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
         .host-btn svg {
             width: 22px;

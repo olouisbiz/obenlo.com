@@ -388,24 +388,29 @@ class Obenlo_Host_Dashboard
                         background: rgba(255, 255, 255, 0.92);
                         backdrop-filter: blur(20px);
                         -webkit-backdrop-filter: blur(20px);
-                        padding: 10px 5px;
+                        padding: 10px 15px;
                         flex-direction: row;
-                        justify-content: space-around;
+                        justify-content: flex-start;
                         overflow-x: auto;
-                        gap: 0;
+                        gap: 15px;
                         z-index: 10000;
                         box-shadow: 0 -4px 16px rgba(0,0,0,0.04);
                         top: auto;
+                        -webkit-overflow-scrolling: touch;
+                    }
+                    .dashboard-sidebar::-webkit-scrollbar {
+                        display: none;
                     }
                     .sidebar-link {
                         flex-direction: column;
-                        gap: 2px;
+                        gap: 4px;
                         padding: 8px 4px;
-                        min-width: 60px;
+                        min-width: 70px;
                         background: transparent !important;
                         color: #71717a;
                         border-radius: 0;
                         white-space: nowrap;
+                        flex-shrink: 0;
                     }
                     .sidebar-link:hover {
                         transform: none;
