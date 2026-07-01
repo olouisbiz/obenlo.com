@@ -37,6 +37,7 @@ require_once OBENLO_BOOKING_DIR . 'includes/class-host-availability.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-host-payouts.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-host-support.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-host-trips.php';
+require_once OBENLO_BOOKING_DIR . 'includes/class-host-staff.php';
 // ─── End Modular Dashboard ─────────────────────────────────────────────────
 require_once OBENLO_BOOKING_DIR . 'includes/class-demo-manager.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-payments.php';
@@ -98,6 +99,9 @@ function obenlo_booking_init()
 
     $host_trips = new Obenlo_Host_Trips();
     $host_trips->init();
+    
+    $host_staff = new Obenlo_Host_Staff();
+    $host_staff->init();
     // ─── End Modular Dashboard Modules ─────────────────────────────────────
 
     $payments = new Obenlo_Booking_Payments();

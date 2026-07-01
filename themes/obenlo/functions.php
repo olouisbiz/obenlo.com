@@ -292,10 +292,18 @@ add_action('user_register', function($user_id) {
         
         $message .= "Listing/Profile Details:\n";
         $message .= "Listing Title: " . get_the_title($claim_listing_id) . "\n";
-        $message .= "Demo Host Name: " . get_post_meta($claim_listing_id, '_obenlo_demo_host_name', true) . "\n";
+        
+        $demo_host = get_post_meta($claim_listing_id, '_obenlo_demo_host_name', true);
+        if ($demo_host) {
+            $message .= "Demo Host Name: " . $demo_host . "\n";
+        } else {
+            $engine = get_post_meta($claim_listing_id, '_obenlo_listing_engine', true);
+            $message .= "Current Engine: " . $engine . " (Affiliate Import)\n";
+        }
+        
         $message .= "Listing URL: " . get_permalink($claim_listing_id) . "\n\n";
         
-        $message .= "Please review this request in the backend to transfer ownership of the listing/profile to this user.";
+        $message .= "Please review this request in the backend to verify the owner and transfer ownership of the listing to this user.";
         
         $headers = array('Content-Type: text/plain; charset=UTF-8');
         

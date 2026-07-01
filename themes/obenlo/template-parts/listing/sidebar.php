@@ -34,13 +34,13 @@
                             <?php endif; ?>
                         <?php endif; ?>
 
-                        <!-- Claim Demo Listing Button -->
+                        <!-- Claim Listing Button -->
                             <?php 
                             $is_demo_listing = get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes';
-                            if ($is_demo_listing && get_post_meta($listing_id, '_obenlo_claim_pending', true) !== 'yes') {
+                            if (($is_demo_listing || $is_affiliate) && get_post_meta($listing_id, '_obenlo_claim_pending', true) !== 'yes') {
                                 $claim_url = home_url('/login?claim_id=' . $listing_id . '#signup');
                                 echo '<a href="' . esc_url($claim_url) . '" style="display:block; text-align:center; width: 100%; margin-top: 15px; background: transparent; color: #e61e4d; border: 2px solid #e61e4d; padding: 12px; border-radius: 12px; font-weight: 700; text-decoration: none; transition: all 0.2s ease;">';
-                                echo 'Is this your listing? Claim it';
+                                echo 'Are you the owner? Claim this Listing';
                                 echo '</a>';
                             }
                             ?>

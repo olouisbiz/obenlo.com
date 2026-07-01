@@ -24,6 +24,7 @@ require_once OBENLO_AI_DIR . 'includes/class-ai-search.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-admin.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-host-profile.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-outreach.php';
+require_once OBENLO_AI_DIR . 'includes/class-ai-affiliate-outreach.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-live-chat.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-blog.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-affiliate.php';
@@ -41,6 +42,7 @@ function obenlo_ai_init() {
     ( new Obenlo_AI_Admin() )->init();
     ( new Obenlo_AI_Host_Profile() )->init();
     ( new Obenlo_AI_Outreach() )->init();
+    new Obenlo_AI_Affiliate_Outreach();
     ( new Obenlo_AI_Live_Chat() )->init();
     ( new Obenlo_AI_Blog() )->init();
     ( new Obenlo_AI_Affiliate() )->init();

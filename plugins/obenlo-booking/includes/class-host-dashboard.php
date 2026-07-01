@@ -478,6 +478,10 @@ class Obenlo_Host_Dashboard
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         <span><?php echo __('Storefront', 'obenlo'); ?></span>
                     </a>
+                    <a href="?action=staff" class="sidebar-link <?php echo $action === 'staff' ? 'active' : ''; ?>">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        <span><?php echo __('Staff & Team', 'obenlo'); ?></span>
+                    </a>
                     <a href="?action=reviews" class="sidebar-link <?php echo $action === 'reviews' ? 'active' : ''; ?>">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                         <span><?php echo __('Reviews', 'obenlo'); ?></span>
@@ -594,6 +598,9 @@ class Obenlo_Host_Dashboard
                 } elseif ($action === 'messages') {
                     echo '<div class="dashboard-header"><h2 class="dashboard-title">' . __('Inbox', 'obenlo') . '</h2></div>';
                     echo do_shortcode('[obenlo_messages_page]');
+                } elseif ($action === 'staff') {
+                    $staff_module = new Obenlo_Host_Staff();
+                    $staff_module->render_staff_tab();
                 } elseif ($action === 'availability') {
                     $avail_module->render_availability_tab();
                 } elseif ($action === 'testimony') {

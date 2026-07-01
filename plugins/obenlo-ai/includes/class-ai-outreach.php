@@ -258,6 +258,10 @@ PROMPT;
         $formatted_body = nl2br( esc_html( $body ) );
 
         $sent = wp_mail( $email, $subject, $formatted_body, $headers );
+        
+        if ( ! $sent ) {
+            wp_send_json_error( [ 'message' => 'Failed to send email via server.' ] );
+        }
 
         // Always log for tracking records
         $history = get_option( 'obenlo_outreach_history', [] );
