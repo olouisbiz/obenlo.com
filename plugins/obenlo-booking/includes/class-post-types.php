@@ -401,10 +401,63 @@ class Obenlo_Booking_Post_Types {
         if ( is_admin() ) return;
         
         $pt = $query->get('post_type');
-        $is_listing_query = ( $pt === 'listing' ) || ( is_array($pt) && in_array('listing', $pt) ) || is_post_type_archive('listing') || is_tax('listing_type') || is_tax('listing_amenity');
+        $is_listing_query = ( $pt === 'listing' ) || ( is_array($pt) && in_array('listing', $pt) ) || is_post_type_archive('listing') || is_tax('listing_type') || is_tax('listing_amenity') || $query->is_search();
         if ( ! $is_listing_query ) return;
 
         if ( $query->is_singular('listing') ) return;
+
+        // Apply frontend filters for AI Search / Advanced Search (Applies to ALL users)
+        if ( $query->is_main_query() ) {
+            $meta_query = (array) $query->get('meta_query');
+            $has_meta_filter = false;
+
+            if ( ! empty( $_GET['location'] ) ) {
+                $loc = sanitize_text_field( $_GET['location'] );
+                $meta_query[] = array(
+                    'relation' => 'OR',
+                    array( 'key' => '_listing_location', 'value' => $loc, 'compare' => 'LIKE' ),
+                    array( 'key' => '_obenlo_location', 'value' => $loc, 'compare' => 'LIKE' ),
+                );
+                $has_meta_filter = true;
+            }
+
+            if ( ! empty( $_GET['min_price'] ) ) {
+                $min = floatval( $_GET['min_price'] );
+                $meta_query[] = array(
+                    'relation' => 'OR',
+                    array( 'key' => '_listing_price', 'value' => $min, 'type' => 'NUMERIC', 'compare' => '>=' ),
+                    array( 'key' => '_obenlo_price', 'value' => $min, 'type' => 'NUMERIC', 'compare' => '>=' ),
+                );
+                $has_meta_filter = true;
+            }
+
+            if ( ! empty( $_GET['max_price'] ) ) {
+                $max = floatval( $_GET['max_price'] );
+                $meta_query[] = array(
+                    'relation' => 'OR',
+                    array( 'key' => '_listing_price', 'value' => $max, 'type' => 'NUMERIC', 'compare' => '<=' ),
+                    array( 'key' => '_obenlo_price', 'value' => $max, 'type' => 'NUMERIC', 'compare' => '<=' ),
+                );
+                $has_meta_filter = true;
+            }
+
+            if ( ! empty( $_GET['guests'] ) ) {
+                $guests = intval( $_GET['guests'] );
+                $meta_query[] = array(
+                    'key' => '_obenlo_max_guests',
+                    'value' => $guests,
+                    'type' => 'NUMERIC',
+                    'compare' => '>='
+                );
+                $has_meta_filter = true;
+            }
+            
+            if ( $has_meta_filter ) {
+                $query->set('meta_query', $meta_query);
+            }
+        }
+
+        // --- Everything below this line applies only to non-admins and non-authors of the post ---
         if ( current_user_can('administrator') ) return;
 
         $user_id = get_current_user_id();

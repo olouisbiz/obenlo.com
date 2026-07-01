@@ -24,6 +24,8 @@ require_once OBENLO_AI_DIR . 'includes/class-ai-search.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-admin.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-host-profile.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-outreach.php';
+require_once OBENLO_AI_DIR . 'includes/class-ai-live-chat.php';
+require_once OBENLO_AI_DIR . 'includes/class-ai-blog.php';
 
 // ── Boot on plugins_loaded (same pattern as obenlo-booking) ───────────────
 function obenlo_ai_init() {
@@ -33,5 +35,7 @@ function obenlo_ai_init() {
     ( new Obenlo_AI_Admin() )->init();
     ( new Obenlo_AI_Host_Profile() )->init();
     ( new Obenlo_AI_Outreach() )->init();
+    ( new Obenlo_AI_Live_Chat() )->init();
+    ( new Obenlo_AI_Blog() )->init();
 }
 add_action( 'plugins_loaded', 'obenlo_ai_init' );

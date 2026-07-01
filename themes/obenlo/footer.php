@@ -1,77 +1,63 @@
 </div><!-- .site-content -->
 
-<footer class="site-footer" style="background: #f7f7f7; border-top: 1px solid #dddddd; padding: 60px 20px; margin-top: 60px;">
-    <div class="footer-inner" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: left; color: #222;">
-        
-        <div class="footer-col">
-            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e('Support', 'obenlo'); ?></h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.9em; line-height: 2;">
-                <li><a href="<?php echo home_url('/support'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Help Center', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/how-it-works'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('How Obenlo works', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/faq'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('FAQ', 'obenlo'); ?></a></li>
-                <li><a href="#" class="trigger-contact-modal" style="color: inherit; text-decoration: none;">Contact Us</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e('Hosting', 'obenlo'); ?></h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.9em; line-height: 2;">
-                <li><a href="<?php echo home_url('/become-a-host'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Obenlo your home', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/host-dashboard'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Host Dashboard', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/faq?type=host'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Support for Hosts', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/become-a-host'); ?>" style="color: #e61e4d; text-decoration: none; font-weight: bold;"><?php esc_html_e('Become a Host', 'obenlo'); ?></a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e('Obenlo', 'obenlo'); ?></h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.9em; line-height: 2;">
-                <li><a href="<?php echo home_url('/about-us'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('About Us', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/blog'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Blog', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/community'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Community', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/trust-safety'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Trust & Safety', 'obenlo'); ?></a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;"><?php esc_html_e('Legal', 'obenlo'); ?></h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.9em; line-height: 2;">
-                <li><a href="<?php echo home_url('/privacy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Privacy Policy', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/terms'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Terms of Service', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/cancellation-policy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Cancellation Policy', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/refund-policy'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Refund Policy', 'obenlo'); ?></a></li>
-                <li><a href="<?php echo home_url('/guest-rules'); ?>" style="color: inherit; text-decoration: none;"><?php esc_html_e('Guest Rules', 'obenlo'); ?></a></li>
-            </ul>
-        </div>
-
-
-        <div class="footer-col">
-            <h4 style="margin-bottom: 20px; font-weight: bold; border-bottom: 2px solid #e61e4d; display: inline-block; padding-bottom: 5px;">Follow Us</h4>
-            <div style="display: flex; gap: 15px; margin-top: 10px;">
-                <a href="https://www.facebook.com/obenlobooking" target="_blank" style="color: #222; font-size: 1.5em; text-decoration: none;"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-                <a href="https://www.instagram.com/obenlobooking" target="_blank" style="color: #222; font-size: 1.5em; text-decoration: none;"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.332 3.608 1.308.975.975 1.245 2.242 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.063 1.366-.333 2.633-1.308 3.608-.975.975-2.242 1.245-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.063-2.633-.333-3.608-1.308-.975-.975-1.245-2.242-1.308-3.608-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.332-2.633 1.308-3.608.975-.975 2.242-1.245 3.608-1.308 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.058-1.281.072-1.689.072-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.28-.058-1.688-.072-4.947-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
-            </div>
-            
-            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-                <h4 style="margin-bottom: 12px; font-weight: bold; font-size: 1.1rem;"><?php esc_html_e('Request a Demo', 'obenlo'); ?></h4>
-                <p style="font-size: 0.85em; color: #666; line-height: 1.5; margin-bottom: 15px;">
-                    <?php esc_html_e('See exactly how your business would look on Obenlo. Submit your details below and we\'ll build your custom demo storefront instantly.', 'obenlo'); ?>
-                </p>
-                <a href="https://forms.gle/Pb4AzqadQthBGGGA7" target="_blank" style="display: inline-block; background: #e61e4d; color: #fff; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: transform 0.2s;">
-                    Request Instant Demo
+<footer class="site-footer" style="background: #111116; border-top: 1px solid rgba(255,255,255,0.06); padding: 72px 40px 40px; margin-top: 60px;">
+    <div class="footer-inner" style="max-width: 1200px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 48px; margin-bottom: 56px;">
+            <div>
+                <a href="<?php echo esc_url(home_url('/')); ?>" style="display: inline-block; text-decoration: none; margin-bottom: 20px;">
+                    <span style="font-family: 'Inter', sans-serif; font-size: 1.6rem; font-weight: 900; color: #e61e4d; letter-spacing: -0.5px;">Obenlo</span>
                 </a>
+                <p style="color: rgba(255,255,255,0.45); font-size: 0.875rem; line-height: 1.65; margin: 0 0 24px 0;"><?php esc_html_e('Your local marketplace for services, experiences, events & stays.', 'obenlo'); ?></p>
+                <div style="display: flex; gap: 12px;">
+                    <a href="https://www.facebook.com/obenlobooking" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);text-decoration:none;transition:background 0.2s,color 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.14)';this.style.color='#fff';" onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.55)';"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+                    <a href="https://www.instagram.com/obenlobooking" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);text-decoration:none;transition:background 0.2s,color 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.14)';this.style.color='#fff';" onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.55)';"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.332 3.608 1.308.975.975 1.245 2.242 1.308 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.063 1.366-.333 2.633-1.308 3.608-.975.975-2.242 1.245-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.063-2.633-.333-3.608-1.308-.975-.975-1.245-2.242-1.308-3.608-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.332-2.633 1.308-3.608.975-.975 2.242-1.245 3.608-1.308 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.058-1.281.072-1.689.072-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.28-.058-1.688-.072-4.947-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                </div>
+            </div>
+            <div>
+                <h4 style="color:rgba(255,255,255,0.9);font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 20px 0;"><?php esc_html_e('Support','obenlo'); ?></h4>
+                <ul style="list-style:none;padding:0;margin:0;">
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/support'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Help Center','obenlo'); ?></a></li>
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/how-it-works'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('How Obenlo Works','obenlo'); ?></a></li>
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/faq'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('FAQ','obenlo'); ?></a></li>
+                    <li><a href="#" class="trigger-contact-modal" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Contact Us','obenlo'); ?></a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color:rgba(255,255,255,0.9);font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 20px 0;"><?php esc_html_e('Hosting','obenlo'); ?></h4>
+                <ul style="list-style:none;padding:0;margin:0;">
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/become-a-host'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Obenlo your home','obenlo'); ?></a></li>
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/host-dashboard'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Host Dashboard','obenlo'); ?></a></li>
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/faq?type=host'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Support for Hosts','obenlo'); ?></a></li>
+                    <li><a href="<?php echo home_url('/become-a-host'); ?>" style="color:#e61e4d;text-decoration:none;font-size:0.9rem;font-weight:700;"><?php esc_html_e('Become a Host →','obenlo'); ?></a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color:rgba(255,255,255,0.9);font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 20px 0;"><?php esc_html_e('Obenlo','obenlo'); ?></h4>
+                <ul style="list-style:none;padding:0;margin:0;">
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/about-us'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('About Us','obenlo'); ?></a></li>
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/blog'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Blog','obenlo'); ?></a></li>
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/community'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Community','obenlo'); ?></a></li>
+                    <li><a href="<?php echo home_url('/trust-safety'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Trust & Safety','obenlo'); ?></a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color:rgba(255,255,255,0.9);font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 20px 0;"><?php esc_html_e('Legal','obenlo'); ?></h4>
+                <ul style="list-style:none;padding:0;margin:0;">
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/privacy'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Privacy Policy','obenlo'); ?></a></li>
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/terms'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Terms of Service','obenlo'); ?></a></li>
+                    <li style="margin-bottom:12px;"><a href="<?php echo home_url('/cancellation-policy'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Cancellation Policy','obenlo'); ?></a></li>
+                    <li><a href="<?php echo home_url('/refund-policy'); ?>" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;" onmouseover="this.style.color='#fff';" onmouseout="this.style.color='rgba(255,255,255,0.5)';"><?php esc_html_e('Refund Policy','obenlo'); ?></a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color:rgba(255,255,255,0.9);font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 20px 0;"><?php esc_html_e('Get a Demo','obenlo'); ?></h4>
+                <p style="color:rgba(255,255,255,0.45);font-size:0.875rem;line-height:1.6;margin:0 0 18px 0;"><?php esc_html_e("See how your business looks on Obenlo. We'll build your custom demo instantly.",'obenlo'); ?></p>
+                <a href="https://forms.gle/Pb4AzqadQthBGGGA7" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#e61e4d;color:#fff;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:700;font-size:0.875rem;transition:all 0.2s;" onmouseover="this.style.background='#b5143a';this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#e61e4d';this.style.transform='';"><?php esc_html_e('Request Demo','obenlo'); ?> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg></a>
             </div>
         </div>
-    </div>
-    <div style="max-width: 1200px; margin: 40px auto 0; padding-top: 40px; border-top: 1px solid #eee; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-        <a href="<?php echo esc_url(home_url('/')); ?>" style="display: block; text-decoration: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" style="height: 28px; width: auto; opacity: 0.8; filter: grayscale(1); display: block;">
-                <text x="0" y="38" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="38" font-weight="800" fill="#e61e4d" letter-spacing="-1.5">Obenlo</text>
-            </svg>
-        </a>
-
-        <div style="color: #666; font-size: 0.85em;">
-            &copy; <?php echo date('Y'); ?> <?php bloginfo('name'); ?>, Inc. All rights reserved. &middot; <a href="<?php echo home_url('/privacy'); ?>" style="color: inherit; text-decoration: none;">Privacy</a> &middot; <a href="<?php echo home_url('/terms'); ?>" style="color: inherit; text-decoration: none;">Terms</a> &middot; Sitemap
+        <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:32px;display:flex;flex-direction:column;align-items:center;gap:12px;">
+            <a href="<?php echo esc_url(home_url('/')); ?>" style="text-decoration:none;"><span style="font-family:'Inter',sans-serif;font-size:1.3rem;font-weight:900;color:rgba(255,255,255,0.22);letter-spacing:-0.3px;">Obenlo</span></a>
+            <p style="color:rgba(255,255,255,0.25);font-size:0.8rem;margin:0;text-align:center;">&copy; <?php echo date('Y'); ?> <?php bloginfo('name'); ?>, Inc. All rights reserved. &nbsp;&middot;&nbsp;<a href="<?php echo home_url('/privacy'); ?>" style="color:inherit;text-decoration:none;"><?php esc_html_e('Privacy','obenlo'); ?></a> &nbsp;&middot;&nbsp;<a href="<?php echo home_url('/terms'); ?>" style="color:inherit;text-decoration:none;"><?php esc_html_e('Terms','obenlo'); ?></a></p>
         </div>
     </div>
 </footer>
@@ -79,7 +65,7 @@
 <!-- Global Action Confirmation Modal -->
 <div id="obenlo-success-modal">
     <div class="modal-content">
-        <div id="modal-icon" style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+        <div id="modal-icon" style="font-size: 4rem; margin-bottom: 20px;">ðŸŽ‰</div>
         <h2 id="modal-title" style="margin-bottom: 15px; font-size: 1.8rem;">Success!</h2>
         <p id="modal-message" style="color: #666; margin-bottom: 30px; font-size: 1.1rem; line-height: 1.6;">Your action was completed successfully.</p>
         
@@ -120,19 +106,19 @@
             let btn2Url = '<?php echo home_url(); ?>';
 
             if (modalType === 'listing_saved') {
-                icon.innerText = '🏠';
+                icon.innerText = 'ðŸ ';
                 title.innerText = 'Listing Saved!';
                 msg.innerText = 'Your listing has been updated and is now live on Obenlo.';
                 btn1Text = 'Manage Listings';
                 btn1Url = '<?php echo home_url('/host-dashboard#listings'); ?>';
             } else if (modalType === 'booking_confirmed') {
-                icon.innerText = '✨';
+                icon.innerText = 'âœ¨';
                 title.innerText = 'Booking Confirmed!';
                 msg.innerText = 'Pack your bags! Your booking is confirmed and the host has been notified.';
                 btn1Text = 'View My Trips';
                 btn1Url = '<?php echo home_url('/account?tab=trips'); ?>';
             } else if (modalType === 'ticket_submitted') {
-                icon.innerText = '✉️';
+                icon.innerText = 'âœ‰ï¸';
                 title.innerText = 'Ticket Received';
                 msg.innerText = 'Our support team has received your request and will get back to you shortly.';
                 btn1Text = 'Support Center';
@@ -285,131 +271,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php /* ── MOBILE BOTTOM NAVIGATION BAR ── */ ?>
-<nav class="mobile-bottom-nav" id="mobile-bottom-nav" role="navigation" aria-label="<?php esc_attr_e('Main navigation', 'obenlo'); ?>">
-
-    <?php
-    $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $is_home     = is_front_page();
-    $is_search   = is_search() || (isset($_GET['s']));
-    $is_trips    = is_page('account') || strpos($_SERVER['REQUEST_URI'], '/account') !== false;
-    $is_profile  = is_user_logged_in() && (is_page('host-dashboard') || strpos($_SERVER['REQUEST_URI'], '/host-dashboard') !== false);
-    ?>
-
-    <a href="<?php echo esc_url(home_url('/')); ?>" class="mobile-nav-item <?php echo $is_home ? 'active' : ''; ?>" id="mobile-nav-explore" aria-label="<?php esc_attr_e('Explore', 'obenlo'); ?>">
-        <span class="mobile-nav-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-            </svg>
-        </span>
-        <span class="mobile-nav-label"><?php esc_html_e('Explore', 'obenlo'); ?></span>
-    </a>
-
-    <a href="<?php echo esc_url(home_url('/?s=')); ?>" class="mobile-nav-item <?php echo $is_search ? 'active' : ''; ?>" id="mobile-nav-search" aria-label="<?php esc_attr_e('Search', 'obenlo'); ?>">
-        <span class="mobile-nav-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-        </span>
-        <span class="mobile-nav-label"><?php esc_html_e('Search', 'obenlo'); ?></span>
-    </a>
-
-    <a href="<?php echo esc_url(home_url('/account?tab=trips')); ?>" class="mobile-nav-item <?php echo $is_trips ? 'active' : ''; ?>" id="mobile-nav-trips" aria-label="<?php esc_attr_e('Trips', 'obenlo'); ?>">
-        <span class="mobile-nav-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-        </span>
-        <span class="mobile-nav-label"><?php esc_html_e('Trips', 'obenlo'); ?></span>
-    </a>
-
-    <a href="<?php echo is_user_logged_in() ? esc_url(home_url('/account')) : esc_url(wp_login_url(home_url('/account'))); ?>" class="mobile-nav-item <?php echo $is_profile ? 'active' : ''; ?>" id="mobile-nav-profile" aria-label="<?php esc_attr_e('Profile', 'obenlo'); ?>">
-        <span class="mobile-nav-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-        </span>
-        <span class="mobile-nav-label"><?php esc_html_e('Profile', 'obenlo'); ?></span>
-    </a>
-
-</nav><!-- .mobile-bottom-nav -->
-
-<style>
-/* ── Mobile Bottom Nav ── */
-.mobile-bottom-nav {
-    display: none;
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+            registration.unregister();
+        }
+    });
 }
-@media (max-width: 768px) {
-    .mobile-bottom-nav {
-        display: flex !important;
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
-        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
-        background: #ffffff !important;
-        border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
-        z-index: 99999 !important;
-        justify-content: space-around !important;
-        align-items: stretch !important;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06) !important;
-    }
-
-    .mobile-nav-item {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        flex: 1 !important;
-        gap: 4px !important;
-        text-decoration: none !important;
-        color: #b0b0b0 !important;
-        font-size: 0.68rem !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.01em !important;
-        padding: 8px 4px 0 4px !important;
-        transition: color 0.2s ease !important;
-        -webkit-tap-highlight-color: transparent !important;
-    }
-
-    .mobile-nav-item:active {
-        transform: scale(0.93) !important;
-    }
-
-    .mobile-nav-item.active {
-        color: #e61e4d !important;
-    }
-
-    .mobile-nav-icon {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        position: relative !important;
-    }
-
-    /* Active icon gets a subtle crimson tint */
-    .mobile-nav-item.active .mobile-nav-icon svg {
-        stroke: #e61e4d !important;
-    }
-
-    .mobile-nav-label {
-        line-height: 1 !important;
-    }
-
-    /* Push footer and main content above the bottom nav */
-    .site-footer {
-        margin-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
-    }
-    body.site-content,
-    .site-content,
-    main#primary,
-    .site-main {
-        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
-    }
-}
-</style>
-
+</script>
 <?php wp_footer(); ?>
 </body>
 </html>

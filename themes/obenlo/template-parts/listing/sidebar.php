@@ -30,18 +30,7 @@
                             <?php endif; ?>
                         <?php endif; ?>
 
-                        <!-- Contact Host Button (Harmonized) -->
-                        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
-                            <button onclick="<?php if(is_user_logged_in()): ?>if(window.obenloStartChatWith){window.obenloStartChatWith(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');} <?php else: ?>window.obenloOpenGuestContact(<?php echo $host_id; ?>, '<?php echo esc_js($host_name); ?>', '<?php echo esc_url(get_avatar_url($host_id)); ?>');<?php endif; ?>"
-                                    style="width: 100%; background: #e61e4d; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(230,30,77,0.3);"
-                                    onmouseover="this.style.background='#000'; this.style.transform='translateY(-2px)';"
-                                    onmouseout="this.style.background='#e61e4d'; this.style.transform='translateY(0)';"
-                            >
-                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                Contact Host
-                            </button>
-                            
-                            <!-- Claim Demo Listing Button -->
+                        <!-- Claim Demo Listing Button -->
                             <?php 
                             $is_demo_listing = get_post_meta($listing_id, '_obenlo_is_demo', true) === 'yes';
                             if ($is_demo_listing && get_post_meta($listing_id, '_obenlo_claim_pending', true) !== 'yes') {

@@ -44,7 +44,7 @@ class Obenlo_AI_Client {
         }
 
         $model    = get_option( 'obenlo_ai_gemini_model', 'gemini-2.0-flash' );
-        $endpoint = "https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$api_key}";
+        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$api_key}";
 
         $body = wp_json_encode( [
             'contents' => [
@@ -53,6 +53,11 @@ class Obenlo_AI_Client {
                         [ 'text' => $prompt ],
                     ],
                 ],
+            ],
+            'tools' => [
+                [
+                    'googleSearch' => new stdClass()
+                ]
             ],
             'generationConfig' => [
                 'maxOutputTokens' => $max_tokens,

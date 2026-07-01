@@ -4,7 +4,7 @@
  */
 ?>
 
-<div id="obenlo-live-chat" style="position:fixed; bottom:30px; right:30px; z-index:9999; font-family: 'Inter', sans-serif;">
+<div id="obenlo-live-chat" style="position:fixed; bottom:140px; right:30px; z-index:2147483647; font-family: 'Inter', sans-serif;">
     <!-- Chat Bubble -->
     <div id="chat-bubble" style="width:60px; height:60px; background:#e61e4d; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 10px 25px rgba(230,30,77,0.3); transition:transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
         <svg viewBox="0 0 24 24" style="width:28px; height:28px; fill:white;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>

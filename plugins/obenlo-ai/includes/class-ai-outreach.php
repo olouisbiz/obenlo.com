@@ -61,17 +61,22 @@ class Obenlo_AI_Outreach {
 
         $platform_name = get_bloginfo( 'name' );
 
+        $rand_seed = wp_rand(1, 99999);
         $prompt = <<<PROMPT
 You are an expert lead generator and business intelligence agent for {$platform_name}, a global service and experience marketplace.
-Search for or identify {$count} real or highly authentic active local service providers matching:
+You have access to Google Search. You MUST use Google Search to find real, active, and highly authentic local service providers. Do NOT guess. Verify that they are currently in business.
+Search for {$count} providers matching:
 Category: {$category}
 Location: {$location}
 
+IMPORTANT VARIETY INSTRUCTION: Do not return the same common businesses every time. Randomly explore your knowledge base to find lesser-known, highly specific, or different active providers. 
+Random Seed: {$rand_seed}
+
 Return ONLY a valid JSON array of objects (no markdown, no explanations, no wrapping in ```json). Each object must contain exactly these keys:
 - "name": The business or provider's name.
-- "website": A valid website URL (use real domains where possible, formatted with https://).
-- "email": A contact email address (formatted as contact@domain.com or info@domain.com).
-- "phone": A contact phone number.
+- "website": The best online link for the business. This can be their official website. If they do not have one, you MAY use their Facebook page, Instagram profile, Yelp, or other directory link. If absolutely no link exists, return an empty string "".
+- "email": A contact email address. (Aggressively search for this, including checking their Facebook/Instagram "About" sections. If absolutely unknown, return an empty string "").
+- "phone": A contact phone number (If unknown, return an empty string "").
 - "niche": The specific sub-specialty (e.g. "Wedding DJ", "Corporate Events").
 - "description": A short 1-sentence summary of what makes them stand out.
 
@@ -81,7 +86,7 @@ Example format:
 ]
 PROMPT;
 
-        $result = Obenlo_AI_Client::complete( $prompt, 700 );
+        $result = Obenlo_AI_Client::complete( $prompt, 4000 );
 
         if ( is_wp_error( $result ) ) {
             wp_send_json_error( [ 'message' => $result->get_error_message() ] );
@@ -141,6 +146,7 @@ Key Obenlo features to mention:
 - Direct host storefront to showcase their services to travelers and locals.
 
 Return ONLY the email draft. Begin with a clear "Subject: [compelling subject line]" line, then the Body. Keep the tone friendly and tailored to their specific niche.
+Sign off the email simply as "The {$platform_name} Team". Do NOT use placeholders like [Your Name] or titles like Platform Outreach Specialist.
 PROMPT;
 
         $result = Obenlo_AI_Client::complete( $prompt, 450 );
@@ -195,6 +201,7 @@ Write a friendly, professional 2nd follow-up email checking in with a local serv
 Keep it short (under 100 words), polite, and non-pushy. Express genuine interest in featuring their business on the platform.
 
 Return ONLY the email draft. Begin with a clear "Subject: [compelling follow-up subject line]" line, then the Body.
+Sign off the email simply as "The {$platform_name} Team". Do NOT use placeholders like [Your Name] or titles like Platform Outreach Specialist.
 PROMPT;
 
         $result = Obenlo_AI_Client::complete( $prompt, 300 );

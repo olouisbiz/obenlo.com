@@ -52,13 +52,222 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
 
 ?>
 
-<div class="obenlo-account-container listing-layout" style="max-width: 1200px; margin: 60px auto; padding: 0 20px; display: flex; gap: 40px; min-height: 600px;">
+<style>
+    .obenlo-account-container {
+        max-width: 1200px;
+        margin: 60px auto;
+        padding: 0 20px;
+        display: flex;
+        gap: 40px;
+        min-height: 600px;
+        font-family: 'Inter', -apple-system, sans-serif;
+        --dash-brand: #e61e4d;
+        --dash-brand-dark: #b5143a;
+        --dash-radius-md: 14px;
+        --dash-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .account-sidebar {
+        width: 280px;
+        flex-shrink: 0;
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 4px 30px rgba(0,0,0,0.03);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+    .account-sidebar h1 {
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin: 0 0 25px 0;
+        color: #18181b;
+        letter-spacing: -0.5px;
+    }
+    .account-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: var(--dash-radius-md);
+        text-decoration: none;
+        font-weight: 650;
+        font-size: 0.95rem;
+        color: #52525b;
+        transition: var(--dash-transition);
+    }
+    .sidebar-link:hover {
+        background: #f4f4f5;
+        color: #18181b;
+        transform: translateX(4px);
+    }
+    .sidebar-link.active {
+        background: linear-gradient(135deg, var(--dash-brand), var(--dash-brand-dark));
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(230,30,77,0.25);
+    }
+    .sidebar-link svg {
+        width: 18px;
+        height: 18px;
+        stroke-width: 2.2;
+        color: #a1a1aa;
+        transition: transform var(--dash-transition);
+    }
+    .sidebar-link.active svg {
+        color: #ffffff;
+        transform: scale(1.1);
+    }
+    .host-dashboard-link {
+        margin-top: 30px;
+        border-top: 1px solid rgba(0,0,0,0.06);
+        padding-top: 25px;
+    }
+    .host-btn {
+        color: #18181b;
+        font-weight: 700;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: var(--dash-radius-md);
+        background: #fafafa;
+        border: 1px solid rgba(0,0,0,0.06);
+        transition: var(--dash-transition);
+    }
+    .host-btn:hover {
+        background: #ffffff;
+        border-color: var(--dash-brand);
+        color: var(--dash-brand);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .host-btn svg {
+        width: 18px;
+        height: 18px;
+        color: #a1a1aa;
+        stroke-width: 2.2;
+    }
+    .host-btn:hover svg {
+        color: var(--dash-brand);
+    }
+    .account-content {
+        flex-grow: 1;
+        min-width: 0;
+    }
+    @media (max-width: 768px) {
+        body { padding-bottom: 100px !important; }
+        .site-footer { margin-bottom: 90px !important; }
+        .obenlo-account-container {
+            flex-direction: column;
+            gap: 20px;
+            margin: 20px auto;
+            padding: 0 15px;
+            padding-bottom: 20px;
+            min-height: auto;
+        }
+        .account-sidebar {
+            width: 100%;
+            height: auto;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-right: none;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 10px 5px;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            overflow-x: auto;
+            gap: 0;
+            z-index: 10000;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.04);
+            top: auto;
+            border-radius: 0;
+            align-items: center;
+        }
+        .account-sidebar h1 {
+            display: none;
+        }
+        .account-nav {
+            display: flex;
+            flex-direction: row;
+            gap: 0;
+            width: max-content;
+        }
+        .sidebar-link {
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px 12px;
+            min-width: 65px;
+            background: transparent !important;
+            box-shadow: none !important;
+            justify-content: center;
+        }
+        .sidebar-link.active {
+            color: var(--dash-brand);
+            background: transparent !important;
+        }
+        .sidebar-link svg {
+            width: 22px;
+            height: 22px;
+            margin-bottom: 2px;
+            color: inherit;
+        }
+        .sidebar-link span {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+        .host-dashboard-link {
+            margin-top: 0;
+            border-top: none;
+            padding-top: 0;
+            display: flex;
+            align-items: center;
+        }
+        .host-btn {
+            flex-direction: column;
+            gap: 2px;
+            padding: 8px 12px;
+            min-width: 65px;
+            background: transparent !important;
+            border: none;
+            box-shadow: none !important;
+            justify-content: center;
+            font-size: 0.65rem;
+        }
+        .host-btn svg {
+            width: 22px;
+            height: 22px;
+            margin-bottom: 2px;
+            color: inherit;
+        }
+        .host-btn span {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+    }
+</style>
+
+<div class="obenlo-account-container listing-layout">
     
     <!-- Sidebar -->
-    <div class="listing-sidebar" style="width: 280px; flex-shrink: 0; background: #fff; border: 1px solid #eee; border-radius: 24px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); height: fit-content;">
-        <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 25px 0; color: #222; letter-spacing: -0.5px;">Account</h1>
+    <div class="account-sidebar">
+        <h1>Account</h1>
         
-        <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div class="account-nav">
             <?php
             $nav_items = array(
                 'dashboard'    => array('label' => 'Dashboard', 'icon' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>'),
@@ -73,22 +282,19 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
             );
 
             foreach ($nav_items as $key => $item) :
-                $is_active = ($tab === $key);
-                $color     = $is_active ? '#fff' : '#222';
-                $bg        = $is_active ? '#e61e4d' : 'transparent';
-                $icon_color= $is_active ? '#fff' : '#e61e4d';
+                $active_class = ($tab === $key) ? ' active' : '';
             ?>
-                <a href="?tab=<?php echo $key; ?>" style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 0.95rem; color: <?php echo $color; ?>; background: <?php echo $bg; ?>; transition: all 0.2s; <?php echo $is_active ? 'box-shadow: 0 4px 15px rgba(230,30,77,0.2);' : ''; ?>" onmouseover="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='#fcfcfc'; this.style.color='#e61e4d';}" onmouseout="if(!<?php echo $is_active ? 'true' : 'false'; ?>){this.style.background='transparent'; this.style.color='#222';}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 18px; height: 18px; color: <?php echo $is_active ? '#fff' : '#999'; ?>;"><?php echo $item['icon']; ?></svg>
-                    <?php echo $item['label']; ?>
+                <a href="?tab=<?php echo esc_attr($key); ?>" class="sidebar-link<?php echo $active_class; ?>">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><?php echo $item['icon']; ?></svg>
+                    <?php echo esc_html($item['label']); ?>
                 </a>
             <?php endforeach; ?>
         </div>
         
         <?php if ( in_array('host', (array)$user->roles) ) : ?>
-            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 25px;">
-                <a href="<?php echo esc_url( home_url('/host-dashboard') ); ?>" style="color: #222; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 14px; background: #fafafa; border: 1px solid #eee; transition: all 0.2s;" onmouseover="this.style.background='#fff'; this.style.borderColor='#e61e4d'; this.style.color='#e61e4d';" onmouseout="this.style.background='#fafafa'; this.style.borderColor='#eee'; this.style.color='#222';">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 18px; height: 18px; color: #999;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <div class="host-dashboard-link">
+                <a href="<?php echo esc_url( home_url('/host-dashboard') ); ?>" class="host-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                     Host Dashboard
                 </a>
             </div>
@@ -96,7 +302,7 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
     </div>
 
     <!-- Main Content -->
-    <div style="flex-grow: 1; min-width: 0;">
+    <div class="account-content">
         <?php 
         $obenlo_error = isset($_GET['obenlo_error']) ? sanitize_text_field($_GET['obenlo_error']) : '';
         if ($obenlo_error) :

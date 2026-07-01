@@ -114,7 +114,7 @@
 
         <div class="header-search-nav">
             <form role="search" method="get" class="smart-search-bar" action="<?php echo esc_url(home_url('/')); ?>">
-                <input type="text" name="s" class="search-input" placeholder="Search listings, categories, locations or hosts..." value="<?php echo get_search_query(); ?>">
+                <input type="text" name="s" class="search-input" placeholder="Search listings, categories, or ask AI..." value="<?php echo get_search_query(); ?>">
                 <button type="submit" class="search-icon-btn">
                     <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="display:block;fill:none;height:12px;width:12px;stroke:currentColor;stroke-width:5.33333;overflow:visible"><g fill="none"><path d="m13 24c6.0751322 0 11-4.9248678 11-11 0-6.07513225-4.9248678-11-11-11-6.07513225 0-11 4.92486775-11 11 0 6.0751322 4.92486775 11 11 11zm8-3 9 9"></path></g></svg>
                 </button>
@@ -197,5 +197,18 @@ endif; ?>
 
     </div>
 </header>
+
+<script>
+(function(){
+    var hdr = document.querySelector('.site-header');
+    if (!hdr) return;
+    var onScroll = function() {
+        if (window.scrollY > 10) hdr.classList.add('scrolled');
+        else hdr.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+})();
+</script>
 
 <div class="site-content">

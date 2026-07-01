@@ -83,17 +83,17 @@ if(empty($location)){
     </div>
 
     <div class="listing-info" style="display: flex; flex-direction: column; gap: 4px;">
-        <div style="display: flex; justify-content: space-between; align-items: baseline;">
-            <h2 style="margin: 0; font-size: 1rem; font-weight: 600; color: #222;"><?php echo esc_html( $location ); ?></h2>
-            <div style="font-size: 0.9em; display: flex; align-items: center; gap: 4px; color: #222;">
+        <div style="display: flex; justify-content: space-between; align-items: center; line-height: 1.4;">
+            <h2 style="margin: 0; font-size: 1rem; font-weight: 600; color: #222; line-height: 1.4; padding-bottom: 2px;"><?php echo esc_html( $location ); ?></h2>
+            <div style="font-size: 0.9em; display: flex; align-items: center; gap: 4px; color: #222; line-height: 1.4;">
                 <span>★</span> <span>4.9</span>
             </div>
         </div>
-        <div style="color: #717171; font-size: 0.95rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <div style="color: #717171; font-size: 0.95rem; margin: 0; line-height: 1.4; padding-top: 2px;">
             <?php the_title(); ?>
         </div>
         <?php if ( $price ) : ?>
-            <div style="margin-top: 2px;">
+            <div style="margin-top: 4px; line-height: 1.4;">
                 <span style="font-weight: 600; color: #222;">$<?php echo esc_html( $price ); ?></span> 
                 <span style="color: #222; font-size: 0.95rem;">
                     <?php 
