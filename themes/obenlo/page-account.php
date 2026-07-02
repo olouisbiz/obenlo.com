@@ -269,7 +269,7 @@ $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard'
     }
 </style>
 
-<div class="obenlo-account-container listing-layout">
+<div class="obenlo-account-container">
     
     <!-- Sidebar -->
     <div class="account-sidebar">

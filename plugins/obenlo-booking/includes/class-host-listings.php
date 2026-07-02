@@ -304,6 +304,27 @@ class Obenlo_Host_Listings
                 </p>
             <?php endif; ?>
 
+            <?php if (!$is_child && !$listing_id): ?>
+                <!-- AI Import from URL Panel -->
+                <div style="background: linear-gradient(to right, #fdf4ff, #faf5ff); border: 1px solid #e9d5ff; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <h3 style="margin-top:0; color:#7e22ce; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+                                ✨ Import Listing from URL <span style="background:#e61e4d; color:#fff; font-size:0.65rem; padding:2px 6px; border-radius:4px; font-weight:800; text-transform:uppercase;">Beta</span>
+                            </h3>
+                            <p style="color:#6b21a8; font-size:0.9rem; margin-bottom:15px; max-width:600px;">
+                                Have an existing listing on Groupon, Airbnb, or Eventbrite? Paste the public URL below and our AI will instantly recreate it here!
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <input type="url" id="ai-import-url-input" placeholder="https://www.groupon.com/deals/..." style="flex:1; padding:12px; border:1px solid #d8b4fe; border-radius:8px; font-size:0.95rem;">
+                        <button type="button" id="ai-import-url-btn" style="background:#7e22ce; color:#fff; border:none; padding:0 24px; border-radius:8px; font-weight:700; cursor:pointer;">Import Now</button>
+                    </div>
+                    <div id="ai-import-message" style="display:none; margin-top:10px; font-size:0.85rem; font-weight:600;"></div>
+                </div>
+            <?php endif; ?>
+
             <form action="<?php echo $form_action; ?>" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="obenlo_dashboard_save_listing">
                 <input type="hidden" name="listing_id" value="<?php echo esc_attr($listing_id); ?>">
@@ -568,7 +589,10 @@ class Obenlo_Host_Listings
                 <?php if ($is_child): ?>
                     <!-- Add-ons -->
                     <div class="form-section">
-                        <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Add-ons (Optional Upsells)', 'obenlo'); ?></h4>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;">
+                            <h4 style="margin:0;"><?php echo __('Add-ons (Optional Upsells)', 'obenlo'); ?></h4>
+                            <button type="button" id="ai-suggest-addons-btn" class="button" style="border-radius:20px; border:1px solid #7c3aed; color:#7c3aed; font-weight:600; padding:2px 12px; background:rgba(124,58,237,0.05); cursor:pointer;">✨ AI Suggest Add-ons</button>
+                        </div>
                         <div id="addons-container">
                             <?php foreach ($addons as $addon): ?>
                                 <div class="addon-row" style="display:flex; gap:10px; margin-bottom:12px;">
@@ -910,6 +934,123 @@ class Obenlo_Host_Listings
             var fixedTimeFields  = document.getElementById('fixed_time_fields');
             if (eventFixedToggle && fixedTimeFields) {
                 eventFixedToggle.addEventListener('change', function() { fixedTimeFields.style.display = this.checked ? 'block' : 'none'; });
+            }
+
+            // ── AI Suggest Addons ────────────────────────────────────
+            var suggestAddonsBtn = document.getElementById('ai-suggest-addons-btn');
+            if (suggestAddonsBtn) {
+                suggestAddonsBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var origText = suggestAddonsBtn.innerHTML;
+                    suggestAddonsBtn.innerHTML = '✨ Thinking...';
+                    suggestAddonsBtn.disabled = true;
+
+                    var listingTitle = document.querySelector('input[name="listing_title"]')?.value || '';
+                    var listingType = document.querySelector('select[name="listing_type"]')?.value || '';
+                    if (!listingTitle) {
+                        alert('Please enter a listing title first.');
+                        suggestAddonsBtn.innerHTML = origText;
+                        suggestAddonsBtn.disabled = false;
+                        return;
+                    }
+
+                    var fd = new FormData();
+                    fd.append('action', 'obenlo_ai_suggest_addons');
+                    fd.append('nonce', '<?php echo wp_create_nonce("obenlo_ai_listing_nonce"); ?>');
+                    fd.append('listing_title', listingTitle);
+                    fd.append('listing_type', slugMap[listingType] || 'service');
+
+                    fetch('<?php echo admin_url("admin-ajax.php"); ?>', { method: 'POST', body: fd })
+                    .then(r => r.json())
+                    .then(res => {
+                        suggestAddonsBtn.innerHTML = origText;
+                        suggestAddonsBtn.disabled = false;
+                        if (res.success && res.data.addons) {
+                            var container = document.getElementById('addons-container');
+                            var template = document.getElementById('addon-template');
+                            if (container && template) {
+                                res.data.addons.forEach(function(addon) {
+                                    var clone = template.content.cloneNode(true);
+                                    clone.querySelector('input[name="addon_names[]"]').value = addon.name;
+                                    clone.querySelector('input[name="addon_prices[]"]').value = addon.price;
+                                    container.appendChild(clone);
+                                });
+                            }
+                        } else {
+                            alert('Error: ' + (res.data?.message || 'Unknown error.'));
+                        }
+                    })
+                    .catch(err => {
+                        suggestAddonsBtn.innerHTML = origText;
+                        suggestAddonsBtn.disabled = false;
+                        alert('Error communicating with AI.');
+                    });
+                });
+            }
+
+            // ── AI Import from URL ───────────────────────────────────
+            var importUrlBtn = document.getElementById('ai-import-url-btn');
+            if (importUrlBtn) {
+                importUrlBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var urlInput = document.getElementById('ai-import-url-input');
+                    var msgDiv = document.getElementById('ai-import-message');
+                    var url = urlInput.value.trim();
+
+                    if (!url) {
+                        msgDiv.style.display = 'block';
+                        msgDiv.style.color = '#ef4444';
+                        msgDiv.innerHTML = 'Please enter a URL first.';
+                        return;
+                    }
+
+                    var origText = importUrlBtn.innerHTML;
+                    importUrlBtn.innerHTML = '✨ Importing...';
+                    importUrlBtn.disabled = true;
+                    msgDiv.style.display = 'block';
+                    msgDiv.style.color = '#7e22ce';
+                    msgDiv.innerHTML = 'Fetching and analyzing listing... this may take 10-15 seconds.';
+
+                    var fd = new FormData();
+                    fd.append('action', 'obenlo_ai_import_from_url');
+                    fd.append('nonce', '<?php echo wp_create_nonce("obenlo_ai_listing_nonce"); ?>');
+                    fd.append('url', url);
+
+                    fetch('<?php echo admin_url("admin-ajax.php"); ?>', { method: 'POST', body: fd })
+                    .then(r => r.json())
+                    .then(res => {
+                        importUrlBtn.innerHTML = origText;
+                        importUrlBtn.disabled = false;
+                        if (res.success && res.data) {
+                            msgDiv.style.color = '#10b981';
+                            msgDiv.innerHTML = '✅ Import successful! Review the details below and save.';
+                            
+                            // Auto-fill form
+                            if (res.data.title) {
+                                var titleInput = document.querySelector('input[name="listing_title"]');
+                                if (titleInput) titleInput.value = res.data.title;
+                            }
+                            if (res.data.description) {
+                                var descInput = document.querySelector('textarea[name="listing_description"]');
+                                if (descInput) descInput.value = res.data.description;
+                            }
+                            if (res.data.price) {
+                                var priceInput = document.querySelector('input[name="listing_price"]');
+                                if (priceInput) priceInput.value = res.data.price;
+                            }
+                            // Add more fields if necessary...
+                        } else {
+                            msgDiv.style.color = '#ef4444';
+                            msgDiv.innerHTML = '❌ Error: ' + (res.data?.message || 'Unknown error.');
+                        }
+                    })
+                    .catch(err => {
+                        importUrlBtn.innerHTML = origText;
+                        importUrlBtn.disabled = false;
+                        msgDiv.style.color = '#ef4444';
+                        msgDiv.innerHTML = '❌ Error communicating with AI.';
+                    });
+                });
             }
         })();
         </script>

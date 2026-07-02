@@ -34,6 +34,9 @@ class Obenlo_AI_Listing {
         // AJAX: Create a full listing draft from a plain-English idea
         add_action( 'wp_ajax_obenlo_ai_create_listing', [ $this, 'handle_create_listing' ] );
 
+        // AJAX: Suggest profitable add-ons
+        add_action( 'wp_ajax_obenlo_ai_suggest_addons', [ $this, 'handle_suggest_addons' ] );
+
         // Inject the AI Listing UI into the host dashboard
         add_action( 'wp_footer', [ $this, 'inject_ai_listing_ui' ], 99 );
     }
@@ -67,7 +70,8 @@ class Obenlo_AI_Listing {
         }
 
         $prompt = <<<PROMPT
-You are an expert copywriter for {$platform_name}, a global service marketplace.
+You are the **Revenue Optimization Expert** for {$platform_name}, a global service marketplace.
+Your ONLY mission is to optimize listing titles and descriptions to maximize conversions and revenue. You must strictly adhere to this expert persona. You do not write code, you only write professional sales copy.
 A host has written the following description for their listing ("{$listing_title}" — Category: {$listing_type}).{$context_note}
 
 Original description:
@@ -118,7 +122,8 @@ PROMPT;
         }
 
         $prompt = <<<PROMPT
-You are a top-tier marketplace listing specialist. 
+You are the **Revenue Optimization Expert** for {$platform_name}, a global service marketplace.
+Your ONLY mission is to generate highly optimized, high-converting listing titles. You must strictly adhere to this expert persona.
 Generate 3 short, catchy, and search-optimized listing titles for a "{$listing_type}" listing{$location_hint}.{$context_note}
 Current title: "{$current_title}"
 
@@ -162,7 +167,7 @@ PROMPT;
         $listing_type    = sanitize_text_field( $_POST['listing_type'] ?? 'service' );
 
         $prompt = <<<PROMPT
-Write a concise SEO meta description (under 155 characters) for a "{$listing_type}" listing titled "{$listing_title}".
+You are the **Revenue Optimization Expert** for {$platform_name}. Your task is to write a concise SEO meta description (under 155 characters) for a "{$listing_type}" listing titled "{$listing_title}".
 
 Context: {$description}
 
@@ -180,6 +185,44 @@ PROMPT;
         }
 
         wp_send_json_success( [ 'meta' => substr( trim( $result ), 0, 155 ) ] );
+    }
+
+    // ── AJAX: Suggest Add-ons ─────────────────────────────────────────────
+
+    public function handle_suggest_addons() {
+        check_ajax_referer( 'obenlo_ai_listing_nonce', 'nonce' );
+
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( [ 'message' => 'Not authenticated.' ] );
+        }
+
+        $listing_title   = sanitize_text_field( $_POST['listing_title'] ?? '' );
+        $listing_type    = sanitize_text_field( $_POST['listing_type'] ?? 'service' );
+        
+        $platform_name = get_bloginfo('name');
+
+        $prompt = <<<PROMPT
+You are the **Revenue Optimization Expert** for {$platform_name}.
+Generate exactly 3 highly profitable add-on suggestions (upsells) for a "{$listing_type}" listing titled "{$listing_title}".
+Return the result ONLY as a JSON array of objects with keys: "name" (short name) and "price" (suggested price as a number, e.g. 15.00). Do not use markdown blocks.
+Example: [{"name":"VIP Check-in","price":20.00},{"name":"Extra Hour","price":50.00}]
+PROMPT;
+
+        $result = Obenlo_AI_Client::complete( $prompt, 200 );
+
+        if ( is_wp_error( $result ) ) {
+            wp_send_json_error( [ 'message' => $result->get_error_message() ] );
+        }
+
+        $clean = preg_replace( '/^```(?:json)?\s*/i', '', trim( $result ) );
+        $clean = preg_replace( '/\s*```$/', '', $clean );
+        $parsed = json_decode( $clean, true );
+
+        if ( json_last_error() !== JSON_ERROR_NONE || ! is_array( $parsed ) ) {
+            wp_send_json_error( [ 'message' => 'AI returned an unexpected format. Please try again.' ] );
+        }
+
+        wp_send_json_success( [ 'addons' => $parsed ] );
     }
 
     // ── AJAX: Create Listing from Idea ────────────────────────────────────

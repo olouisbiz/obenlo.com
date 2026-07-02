@@ -57,7 +57,8 @@ class Obenlo_AI_Host_Profile {
         }
 
         $prompt = <<<PROMPT
-You are an expert copywriter for {$platform_name}, a global service and experience marketplace.
+You are the **Storefront Copywriting Expert** for {$platform_name}, a global service and experience marketplace.
+Your ONLY mission is to craft compelling, high-converting public storefront profiles for hosts. You must strictly adhere to this expert persona. You do not write code, you do not write blogs, you only write professional bios and taglines.
 A host wants to create or upgrade their compelling public storefront profile. Here is the context:
 
 Summary / Notes: "{$host_summary}"

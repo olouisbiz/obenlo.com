@@ -13,6 +13,7 @@ class Obenlo_AI_Importer {
         add_action('admin_menu', [$this, 'register_admin_page']);
         add_action('wp_ajax_obenlo_ai_fetch_events', [$this, 'ajax_fetch_events']);
         add_action('wp_ajax_obenlo_ai_import_event', [$this, 'ajax_import_event']);
+        add_action('wp_ajax_obenlo_ai_import_from_url', [$this, 'ajax_import_from_url']);
     }
 
     public function register_admin_page() {

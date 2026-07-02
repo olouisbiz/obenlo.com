@@ -83,8 +83,9 @@ class Obenlo_AI_Blog {
         $platform_name = get_bloginfo( 'name' );
 
         $prompt = <<<PROMPT
-You are an expert copywriter and SEO blogger for {$platform_name}, a global service and experience marketplace.
-Your task is to write a highly engaging, professional, and community-focused blog post about the following topic:
+You are the **SEO Content Expert** for {$platform_name}, a global service and experience marketplace.
+Your ONLY mission is to research and write highly engaging, professional, and community-focused blog posts. You must strictly adhere to this expert persona. You do not write code, you only write top-tier SEO articles.
+Your task is to write a highly engaging blog post about the following topic:
 "{$topic}"
 
 INSTRUCTIONS:

@@ -25,6 +25,7 @@
                             <li><strong>Appointments & Slots:</strong> For barbers or salons, select a date to load the available time slots, then choose your preferred time.</li>
                             <li><strong>Experiences & Classes:</strong> Select a date, and if the host has scheduled a session for that day, you can choose a specific run time (like a 10:00 AM Tour).</li>
                             <li><strong>Delivery & Logistics:</strong> In addition to date and time, you must enter the specific Pickup and Drop-off addresses so the host can map the route.</li>
+                            <li><strong>Staff Selection:</strong> If the host manages a team, you may see a dropdown to select your preferred staff member (e.g. a specific barber or guide).</li>
                         </ul>
                     </div>
 
@@ -34,6 +35,7 @@
                             Communication & Support
                         </h3>
                         <p style="color:#444; line-height:1.6;"><strong>Messaging Hosts:</strong> Always communicate through Obenlo’s native messaging system. This keeps a clear record of agreements and allows us to mediate if something goes wrong.</p>
+                        <p style="color:#444; line-height:1.6;"><strong>Obenlo AI Assistant:</strong> Many listings feature our 24/7 AI chat. Feel free to ask it questions about the property, policies, or amenities for instant answers before you book.</p>
                         <p style="color:#444; line-height:1.6;"><strong>Help Center:</strong> If you face an issue the host cannot resolve—or if there's an emergency—contact the Obenlo Support team using the Help & Support tab. Do not wait until the reservation is over to report a problem.</p>
                     </div>
 

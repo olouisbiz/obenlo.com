@@ -128,8 +128,50 @@ class Obenlo_Host_Support
             </div>
         </div>
 
-        <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #10b981; position:relative; overflow:hidden;">
+        <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #8b5cf6; position:relative; overflow:hidden;">
             <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">03</div>
+            <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#8b5cf6; display:flex; align-items:center; gap:15px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <?php echo __('Team Management', 'obenlo'); ?>
+            </h3>
+            <p style="color:#555; font-size:1.05rem; line-height:1.7; margin-top:15px;">Scale your business efficiently by managing your staff and letting guests choose their favorite providers.</p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px; margin-top:25px;">
+                <div style="background:#f5f3ff; padding:25px; border-radius:24px;">
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#4c1d95;">Staff Assignment</h4>
+                    <p style="margin:0; font-size:0.95rem; color:#4c1d95; line-height:1.6;">Add your employees, guides, or stylists in the <b>Staff & Team</b> tab. Once added, edit any listing to assign them. Visitors will be able to select their preferred staff member directly at checkout!</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #f59e0b; position:relative; overflow:hidden;">
+            <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">04</div>
+            <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#f59e0b; display:flex; align-items:center; gap:15px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <?php echo __('Supercharge with Obenlo AI', 'obenlo'); ?>
+            </h3>
+            <p style="color:#555; font-size:1.05rem; line-height:1.7; margin-top:15px;">Leverage our cutting-edge AI tools to put your business on autopilot and maximize your revenue.</p>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px; margin-top:25px;">
+                <div style="background:#fffbeb; padding:25px; border-radius:24px;">
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#b45309;">AI Storefront Generator</h4>
+                    <p style="margin:0; font-size:0.95rem; color:#b45309; line-height:1.6;">Stuck on writing a bio? Head to the Storefront tab and click the AI Generator. It will automatically craft a professional, high-converting bio based on your business type!</p>
+                </div>
+                <div style="background:#fffbeb; padding:25px; border-radius:24px;">
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#b45309;">AI Guest Inbox</h4>
+                    <p style="margin:0; font-size:0.95rem; color:#b45309; line-height:1.6;">Our built-in AI assistant automatically chats with guests in your Inbox, answering common questions based on your listing policies and details so you don't have to.</p>
+                </div>
+                <div style="background:#fffbeb; padding:25px; border-radius:24px;">
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#b45309;">Smart Add-on Suggestions</h4>
+                    <p style="margin:0; font-size:0.95rem; color:#b45309; line-height:1.6;">Not sure what upsells to offer? The Add-ons tab features an AI button that suggests the most profitable extras based on your specific industry.</p>
+                </div>
+                <div style="background:#fffbeb; padding:25px; border-radius:24px;">
+                    <h4 style="margin:0 0 10px 0; font-weight:800; color:#b45309;">AI Import & Sync</h4>
+                    <p style="margin:0; font-size:0.95rem; color:#b45309; line-height:1.6;">Easily migrate your existing listings from platforms like Groupon or Airbnb. Go to Add New Listing, paste your public URL, and our AI will instantly recreate the entire listing for you!</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="background:#fff; border:1px solid #eee; border-radius:32px; padding:45px; margin-bottom:40px; box-shadow: 0 10px 40px rgba(0,0,0,0.02); border-left: 8px solid #10b981; position:relative; overflow:hidden;">
+            <div style="position:absolute; top:40px; right:40px; font-size:4rem; font-weight:900; color:#f8f9fa; line-height:1; user-select:none;">05</div>
             <h3 style="margin-top:0; font-size:1.6rem; font-weight:800; color:#10b981; display:flex; align-items:center; gap:15px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px; height:28px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                 <?php echo __('Delivering an Amazing Experience', 'obenlo'); ?>
