@@ -437,6 +437,10 @@ class Obenlo_Booking_Payments
         update_post_meta($booking_id, '_obenlo_confirmation_code', $confirmation_code);
         update_post_meta($booking_id, '_obenlo_guest_id', $guest_id_val);
 
+        if (isset($_POST['selected_staff']) && !empty($_POST['selected_staff'])) {
+            update_post_meta($booking_id, '_obenlo_selected_staff', sanitize_text_field($_POST['selected_staff']));
+        }
+
         // Always save address info when provided (logistics engine AND mobile service slots)
         if ($logistics_pickup) {
             update_post_meta($booking_id, '_obenlo_logistics_pickup',  $logistics_pickup);

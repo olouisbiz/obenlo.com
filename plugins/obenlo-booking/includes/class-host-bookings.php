@@ -151,6 +151,24 @@ class Obenlo_Host_Bookings
                                         "<?php echo esc_html($msg); ?>"
                                     </div>
                                 <?php endif; ?>
+                                <?php
+                                $selected_staff_id = get_post_meta($booking->ID, '_obenlo_selected_staff', true);
+                                if ($selected_staff_id) {
+                                    $host_staff = get_user_meta(get_current_user_id(), '_obenlo_staff_members', true);
+                                    $staff_name = 'Unknown Staff';
+                                    if (is_array($host_staff)) {
+                                        foreach ($host_staff as $staff) {
+                                            if ($staff['id'] === $selected_staff_id) {
+                                                $staff_name = $staff['name'];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    echo '<div style="margin-top:10px; font-size:0.8rem; color:#047857; background:#d1fae5; padding:6px 10px; border-radius:6px; display:inline-block; font-weight:600;">';
+                                    echo 'Assigned Staff: ' . esc_html($staff_name);
+                                    echo '</div>';
+                                }
+                                ?>
                             </td>
                             <td data-label="<?php echo esc_attr(__('Price', 'obenlo')); ?>">
                                 <div style="font-size:1.1rem; font-weight:800; color:#222;">$<?php echo number_format(floatval($total), 2); ?></div>

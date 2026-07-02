@@ -253,9 +253,11 @@ class Obenlo_Host_Listings
 
         // Derive category flag for dynamic headings
         $category_flag = 'default';
+        $selected_type_slug = '';
         if ($selected_type) {
             $type_term = get_term($selected_type, 'listing_type');
             if ($type_term && !is_wp_error($type_term)) {
+                $selected_type_slug = $type_term->slug;
                 $check_names = [strtolower($type_term->name)];
                 $check_slugs = [$type_term->slug];
                 if ($type_term->parent != 0) {
@@ -596,7 +598,31 @@ class Obenlo_Host_Listings
                                 <button type="button" class="remove-run-btn" style="background:#fef2f2; color:#ef4444; border:none; border-radius:8px; padding:0 15px; cursor:pointer; font-weight:800; height:40px;">&times;</button>
                             </div>
                         </template>
+                        </template>
                     </div>
+
+                    <!-- Staff Assignment -->
+                    <?php 
+                    $host_staff = get_user_meta(get_current_user_id(), '_obenlo_staff_members', true);
+                    if (is_array($host_staff) && !empty($host_staff)): 
+                        $assigned_staff = get_post_meta($listing_id, '_obenlo_assigned_staff', true);
+                        if (!is_array($assigned_staff)) $assigned_staff = array();
+                    ?>
+                        <div class="form-section">
+                            <h4 style="margin-top:0; margin-bottom:25px; border-bottom:1px solid #f5f5f5; padding-bottom:15px;"><?php echo __('Assign Staff (Optional)', 'obenlo'); ?></h4>
+                            <p style="font-size:0.85rem; color:#666; margin-bottom:15px;"><?php echo __('Select which staff members can perform this service. Visitors will be able to choose their preferred staff member at checkout.', 'obenlo'); ?></p>
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <?php foreach ($host_staff as $staff): 
+                                    $is_assigned = in_array($staff['id'], $assigned_staff);
+                                ?>
+                                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                        <input type="checkbox" name="assigned_staff[]" value="<?php echo esc_attr($staff['id']); ?>" <?php checked($is_assigned, true); ?> style="width:18px; height:18px;">
+                                        <span style="font-weight:600; color:#444;"><?php echo esc_html($staff['name'] . ($staff['role'] ? ' (' . $staff['role'] . ')' : '')); ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <!-- Media -->
@@ -1033,6 +1059,14 @@ class Obenlo_Host_Listings
                 }
             }
             update_post_meta($new_post_id, '_obenlo_session_runs', wp_json_encode($session_runs));
+
+            // ── Staff Assignment ──────────────────────────────────────
+            if (isset($_POST['assigned_staff']) && is_array($_POST['assigned_staff'])) {
+                $assigned = array_map('sanitize_text_field', wp_unslash($_POST['assigned_staff']));
+                update_post_meta($new_post_id, '_obenlo_assigned_staff', $assigned);
+            } else {
+                delete_post_meta($new_post_id, '_obenlo_assigned_staff');
+            }
 
             // ── Taxonomy: Type ────────────────────────────────────────
             $post_type_override = isset($_POST['listing_type']) ? intval($_POST['listing_type']) : 0;

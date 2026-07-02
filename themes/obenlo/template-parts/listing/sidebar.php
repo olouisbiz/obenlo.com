@@ -151,6 +151,34 @@
                                 </div>
                             <?php endif; ?>
 
+                            <?php 
+                            $assigned_staff = get_post_meta($listing_id, '_obenlo_assigned_staff', true);
+                            if (!empty($assigned_staff) && is_array($assigned_staff)): 
+                                $host_staff = get_user_meta($host_id, '_obenlo_staff_members', true);
+                                if (is_array($host_staff)):
+                                    $available_staff = array();
+                                    foreach ($host_staff as $staff) {
+                                        if (in_array($staff['id'], $assigned_staff)) {
+                                            $available_staff[] = $staff;
+                                        }
+                                    }
+                                    if (!empty($available_staff)):
+                            ?>
+                                    <div class="form-row" style="margin-top: 15px;">
+                                        <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;">Select Staff Member (Optional)</label>
+                                        <select name="selected_staff" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background: #fff;">
+                                            <option value="">No Preference / Any Available</option>
+                                            <?php foreach ($available_staff as $staff): ?>
+                                                <option value="<?php echo esc_attr($staff['id']); ?>"><?php echo esc_html($staff['name'] . (!empty($staff['role']) ? ' (' . $staff['role'] . ')' : '')); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                            <?php 
+                                    endif;
+                                endif;
+                            endif;
+                            ?>
+
                                 <div style="margin-top:20px; padding-top:20px; border-top:1px solid #eee; display:flex; justify-content:space-between; font-size:1.2em; font-weight:bold;">
                                     <span>Total:</span>
                                     <span>$<span id="live-total"><?php echo esc_html($price); ?></span></span>
