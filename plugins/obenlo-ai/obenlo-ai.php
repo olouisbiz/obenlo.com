@@ -18,28 +18,24 @@ define( 'OBENLO_AI_URL', plugin_dir_url( __FILE__ ) );
 
 // ── Autoload includes ──────────────────────────────────────────────────────
 require_once OBENLO_AI_DIR . 'includes/class-ai-client.php';
-require_once OBENLO_AI_DIR . 'includes/class-ai-chat.php';
+require_once OBENLO_AI_DIR . 'includes/class-ai-conversations.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-listing.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-search.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-admin.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-host-profile.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-outreach.php';
-require_once OBENLO_AI_DIR . 'includes/class-ai-affiliate-outreach.php';
-require_once OBENLO_AI_DIR . 'includes/class-ai-live-chat.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-blog.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-affiliate.php';
 require_once OBENLO_AI_DIR . 'includes/class-ai-importer.php';
 
 // ── Boot on plugins_loaded (same pattern as obenlo-booking) ───────────────
 function obenlo_ai_init() {
-    ( new Obenlo_AI_Chat() )->init();
+    ( new Obenlo_AI_Conversations() )->init();
     ( new Obenlo_AI_Listing() )->init();
     ( new Obenlo_AI_Search() )->init();
     ( new Obenlo_AI_Admin() )->init();
     ( new Obenlo_AI_Host_Profile() )->init();
     ( new Obenlo_AI_Outreach() )->init();
-    new Obenlo_AI_Affiliate_Outreach();
-    ( new Obenlo_AI_Live_Chat() )->init();
     ( new Obenlo_AI_Blog() )->init();
     ( new Obenlo_AI_Affiliate() )->init();
     new Obenlo_AI_Importer();

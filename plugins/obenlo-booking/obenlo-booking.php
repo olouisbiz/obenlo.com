@@ -24,7 +24,6 @@ if (file_exists(OBENLO_BOOKING_DIR . 'vendor/autoload.php')) {
 // Include necessary classes
 require_once OBENLO_BOOKING_DIR . 'includes/class-post-types.php';
 require_once OBENLO_BOOKING_DIR . 'includes/class-roles.php';
-require_once OBENLO_BOOKING_DIR . 'includes/class-frontend-dashboard.php';
 
 // ─── Modular Dashboard Architecture ────────────────────────────────────────
 require_once OBENLO_BOOKING_DIR . 'includes/class-host-dashboard.php';
@@ -74,9 +73,6 @@ function obenlo_booking_init()
 
     $roles = new Obenlo_Booking_Roles();
     $roles->init();
-
-    $frontend = new Obenlo_Booking_Frontend_Dashboard();
-    $frontend->init();
 
     // ─── Modular Dashboard Modules (action hook registration) ──────────────
     $host_dashboard    = new Obenlo_Host_Dashboard();
@@ -150,7 +146,6 @@ function obenlo_booking_init()
     $wishlist = new Obenlo_Booking_Wishlist();
     $wishlist->init();
 
-    // Note: Legacy i18n removed in favor of standalone 'obenlo-i18n' plugin.
 
     $virtual_security = new Obenlo_Booking_Virtual_Security();
     $virtual_security->init();
