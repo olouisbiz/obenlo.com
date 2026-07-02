@@ -34,6 +34,14 @@ class Obenlo_AI_Client {
         }
     }
 
+    /**
+     * Returns true if the active provider supports live web search (Google Search tool).
+     * Useful for conditionally adding "use Google Search" to prompts.
+     */
+    public static function supports_search(): bool {
+        return get_option( 'obenlo_ai_provider', 'gemini' ) === 'gemini';
+    }
+
     // ── Gemini (Google AI Studio free tier) ───────────────────────────────
 
     private static function _gemini( string $prompt, int $max_tokens ) {
@@ -68,7 +76,7 @@ class Obenlo_AI_Client {
         $response = wp_remote_post( $endpoint, [
             'headers'     => [ 'Content-Type' => 'application/json' ],
             'body'        => $body,
-            'timeout'     => 20,
+            'timeout'     => apply_filters( 'obenlo_ai_timeout', 45 ),
             'data_format' => 'body',
         ] );
 
@@ -112,7 +120,7 @@ class Obenlo_AI_Client {
                 'Authorization' => 'Bearer ' . $api_key,
             ],
             'body'        => $body,
-            'timeout'     => 20,
+            'timeout'     => apply_filters( 'obenlo_ai_timeout', 45 ),
             'data_format' => 'body',
         ] );
 
@@ -156,7 +164,7 @@ class Obenlo_AI_Client {
                 'Authorization' => 'Bearer ' . $api_key,
             ],
             'body'        => $body,
-            'timeout'     => 20,
+            'timeout'     => apply_filters( 'obenlo_ai_timeout', 45 ),
             'data_format' => 'body',
         ] );
 

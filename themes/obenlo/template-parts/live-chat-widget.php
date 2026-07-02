@@ -70,6 +70,7 @@ endif; ?>
     const chatInput = document.getElementById('chat-input');
     const chatContent = document.getElementById('chat-content');
     const ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+    const chatNonce = '<?php echo wp_create_nonce('obenlo_live_chat_nonce'); ?>';
 
     chatBubble.addEventListener('click', function() {
         chatBubble.style.display = 'none';
@@ -93,6 +94,7 @@ endif; ?>
 
         const formData = new FormData();
         formData.append('action', 'obenlo_send_live_message');
+        formData.append('nonce', chatNonce);
         formData.append('session_id', sessionId);
         formData.append('message', msg);
 
@@ -102,6 +104,8 @@ endif; ?>
         }).then(response => response.json()).then(res => {
             if (res.success) {
                 fetchMessages();
+            } else {
+                appendMessage('Sorry, I was unable to process your request right now. Please try again.', true);
             }
         }).catch(err => console.error('Error sending message:', err));
     });
@@ -109,6 +113,7 @@ endif; ?>
     function fetchMessages() {
         const formData = new FormData();
         formData.append('action', 'obenlo_fetch_live_messages');
+        formData.append('nonce', chatNonce);
         formData.append('session_id', sessionId);
         formData.append('last_id', lastId);
 

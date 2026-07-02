@@ -76,8 +76,6 @@ class Obenlo_AI_Outreach {
         }
 
         $platform_name = get_bloginfo( 'name' );
-
-        $platform_name = get_bloginfo( 'name' );
         $rand_seed = wp_rand(1, 99999);
 
         $prompt = <<<PROMPT
@@ -166,7 +164,7 @@ PROMPT;
      */
     private function extract_contact_info_from_url( $url ) {
         // Fast timeout so we don't stall the AJAX request
-        $response = wp_remote_get( $url, [ 'timeout' => 3, 'redirection' => 2 ] );
+        $response = wp_remote_get( $url, [ 'timeout' => 6, 'redirection' => 3 ] );
         if ( is_wp_error( $response ) ) {
             return false;
         }
@@ -214,30 +212,27 @@ PROMPT;
     // ── Phase 2: CRM Methods ──────────────────────────────────────────────
 
     public function upgrade_database() {
-        if ( get_option( 'obenlo_outreach_db_version' ) !== '1.0' ) {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'obenlo_leads';
-            $charset_collate = $wpdb->get_charset_collate();
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'obenlo_leads';
+        $charset_collate = $wpdb->get_charset_collate();
 
-            $sql = "CREATE TABLE $table_name (
-                id mediumint(9) NOT NULL AUTO_INCREMENT,
-                name varchar(255) NOT NULL,
-                niche varchar(100) DEFAULT '' NOT NULL,
-                website varchar(255) DEFAULT '' NOT NULL,
-                facebook varchar(255) DEFAULT '' NOT NULL,
-                instagram varchar(255) DEFAULT '' NOT NULL,
-                email varchar(255) DEFAULT '' NOT NULL,
-                phone varchar(100) DEFAULT '' NOT NULL,
-                description text NOT NULL,
-                status varchar(50) DEFAULT 'New' NOT NULL,
-                created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                PRIMARY KEY  (id)
-            ) $charset_collate;";
+        $sql = "CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            name varchar(255) NOT NULL,
+            niche varchar(100) DEFAULT '' NOT NULL,
+            website varchar(255) DEFAULT '' NOT NULL,
+            facebook varchar(255) DEFAULT '' NOT NULL,
+            instagram varchar(255) DEFAULT '' NOT NULL,
+            email varchar(255) DEFAULT '' NOT NULL,
+            phone varchar(100) DEFAULT '' NOT NULL,
+            description text NOT NULL,
+            status varchar(50) DEFAULT 'New' NOT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            PRIMARY KEY  (id)
+        ) $charset_collate;";
 
-            require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-            dbDelta( $sql );
-            update_option( 'obenlo_outreach_db_version', '1.0' );
-        }
+        require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+        dbDelta( $sql );
     }
 
     public function handle_save_lead() {
@@ -410,7 +405,9 @@ PROMPT;
         $platform_name = get_bloginfo( 'name' );
 
         $prompt = <<<PROMPT
-You are a platform outreach specialist for {$platform_name}.
+You are the **Business Development Expert** for {$platform_name}, a global service and experience marketplace.
+Your ONLY mission is to write compelling, hyper-personalized cold outreach emails that convert local service providers into platform partners. You must strictly adhere to this expert persona. You do not write code, you only write persuasive business outreach.
+
 Write a highly personalized, warm, and professional cold outreach email to a local service provider inviting them to list their services on {$platform_name}.
 Keep it conversational, professional, and explain how it will benefit their business.
 
@@ -489,7 +486,9 @@ PROMPT;
         $platform_name = get_bloginfo( 'name' );
 
         $prompt = <<<PROMPT
-You are a platform outreach specialist for {$platform_name}.
+You are the **Business Development Expert** for {$platform_name}, a global service and experience marketplace.
+Your ONLY mission is to write short, punchy, highly engaging social Direct Messages that convert local service providers into platform partners. You must strictly adhere to this expert persona — you only write DMs, nothing else.
+
 Write a friendly, punchy, and highly engaging Direct Message (DM) to a local service provider ({$name} — {$niche}).
 Their Google description is: {$desc}
 {$scraped_context}
@@ -530,8 +529,10 @@ PROMPT;
         $platform_name = get_bloginfo( 'name' );
 
         $prompt = <<<PROMPT
-You are a platform outreach specialist for {$platform_name}.
-Write a friendly, professional 2nd follow-up email checking in with a local service provider ({$name} — {$niche}) regarding your previous invitation to join Obenlo.
+You are the **Business Development Expert** for {$platform_name}, a global service and experience marketplace.
+Your ONLY mission is to write concise, non-pushy follow-up emails that re-engage potential platform partners with genuine warmth. You must strictly adhere to this expert persona — you only write business outreach, nothing else.
+
+Write a friendly, professional 2nd follow-up email checking in with a local service provider ({$name} — {$niche}) regarding your previous invitation to join {$platform_name}.
 Keep it short (under 100 words), polite, and non-pushy. Express genuine interest in featuring their business on the platform.
 
 Return ONLY the email draft. Begin with a clear "Subject: [compelling follow-up subject line]" line, then the Body.
@@ -1181,6 +1182,12 @@ PROMPT;
                     });
                 });
 
+                document.querySelectorAll('.btn-action-save').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        handleSaveLeadClick(searchLeads[parseInt(btn.dataset.idx)], btn);
+                    });
+                });
+
                 document.querySelectorAll('.chk-lead').forEach(chk => {
                     chk.addEventListener('change', updateBulkState);
                 });
@@ -1385,6 +1392,50 @@ PROMPT;
                 } finally {
                     btn.disabled = false;
                     btn.textContent = origText;
+                }
+            }
+
+            // ── Save Lead Click ──────────────────────────────────────────────
+            async function handleSaveLeadClick(lead, btn) {
+                btn.disabled = true;
+                const origText = btn.innerHTML;
+                btn.innerHTML = '⏳ Saving...';
+
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'obenlo_outreach_save_lead');
+                    fd.append('nonce', NONCE);
+                    fd.append('name', lead.name || '');
+                    fd.append('niche', lead.niche || '');
+                    fd.append('email', lead.email || '');
+                    fd.append('website', lead.website || '');
+                    fd.append('facebook', lead.facebook || '');
+                    fd.append('instagram', lead.instagram || '');
+                    fd.append('description', lead.description || '');
+
+                    const res  = await fetch(AJAX_URL, { method: 'POST', body: fd });
+                    const text = await res.text();
+                    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                    const data = JSON.parse(text.substring(s, e + 1));
+
+                    if (data.success) {
+                        btn.innerHTML = '✅ Saved';
+                        btn.style.background = '#dcfce7';
+                        btn.style.color = '#15803d';
+                        btn.style.borderColor = '#86efac';
+                        // Refresh CRM leads if needed
+                        if (typeof loadCRMLeads === 'function') {
+                            loadCRMLeads();
+                        }
+                    } else {
+                        alert('Error: ' + (data.data?.message || 'Failed to save lead.'));
+                        btn.disabled = false;
+                        btn.innerHTML = origText;
+                    }
+                } catch (e) {
+                    alert('Error while saving lead.');
+                    btn.disabled = false;
+                    btn.innerHTML = origText;
                 }
             }
 
@@ -1638,6 +1689,9 @@ PROMPT;
             let crmLeads = [];
 
             function loadLeads() {
+                const tbody = document.getElementById('crm-leads-table');
+                if (!tbody) return;
+
                 const fd = new FormData();
                 fd.append('action', 'obenlo_outreach_get_crm_leads');
                 fd.append('nonce', CRM_NONCE);
@@ -1645,14 +1699,29 @@ PROMPT;
                 fetch(CRM_AJAX_URL, { method: 'POST', body: fd })
                     .then(res => res.text())
                     .then(text => {
-                        const s = text.indexOf('{'), e = text.lastIndexOf('}');
-                        const data = JSON.parse(text.substring(s, e + 1));
-                        if (data.success) {
-                            crmLeads = data.data;
-                            renderLeads();
+                        try {
+                            const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                            if (s === -1 || e === -1) throw new Error('Invalid JSON response');
+                            const data = JSON.parse(text.substring(s, e + 1));
+                            if (data.success) {
+                                crmLeads = data.data;
+                                renderLeads();
+                            } else {
+                                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#ef4444;">Error loading leads: ' + (data.data?.message || 'Unknown error') + '</td></tr>';
+                            }
+                        } catch (err) {
+                            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#ef4444;">Error parsing response. Please refresh the page.</td></tr>';
+                            console.error('CRM leads parse error:', err, text);
                         }
+                    })
+                    .catch(err => {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:#ef4444;">Network error loading leads. Please refresh the page.</td></tr>';
+                        console.error('CRM leads fetch error:', err);
                     });
             }
+
+            // Expose for external calls (e.g., from save lead)
+            window.loadCRMLeads = loadLeads;
 
             function renderLeads() {
                 const tbody = document.getElementById('crm-leads-table');

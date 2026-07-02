@@ -48,6 +48,18 @@ class Obenlo_AI_Search {
     // ── REST Callback ─────────────────────────────────────────────────────
 
     public function handle_ai_search( WP_REST_Request $request ) {
+        // Rate limiting: max 10 requests per IP per 60 seconds
+        $ip          = sanitize_text_field( $_SERVER['REMOTE_ADDR'] ?? '' );
+        $rate_key    = 'obenlo_ai_search_rate_' . md5( $ip );
+        $rate_count  = (int) get_transient( $rate_key );
+        if ( $rate_count >= 10 ) {
+            return new WP_REST_Response(
+                [ 'error' => 'Too many requests. Please wait a moment and try again.' ],
+                429
+            );
+        }
+        set_transient( $rate_key, $rate_count + 1, 60 );
+
         $query = $request->get_param( 'query' );
 
         // Retrieve all available listing types as context for the AI

@@ -38,6 +38,6 @@ function obenlo_ai_init() {
     ( new Obenlo_AI_Outreach() )->init();
     ( new Obenlo_AI_Blog() )->init();
     ( new Obenlo_AI_Affiliate() )->init();
-    new Obenlo_AI_Importer();
+    ( new Obenlo_AI_Importer() )->init();
 }
 add_action( 'plugins_loaded', 'obenlo_ai_init' );

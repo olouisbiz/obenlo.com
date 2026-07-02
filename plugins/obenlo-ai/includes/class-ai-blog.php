@@ -82,6 +82,10 @@ class Obenlo_AI_Blog {
     private function generate_and_draft_post( $topic ) {
         $platform_name = get_bloginfo( 'name' );
 
+        $search_instruction = Obenlo_AI_Client::supports_search()
+            ? '1. You MUST use your Google Search tool to research the topic on the live internet before writing to ensure all information is 100% accurate, verified, and up-to-date. Do not hallucinate facts.'
+            : '1. Research the topic thoroughly using your training knowledge. Ensure facts are accurate and present information confidently.';
+
         $prompt = <<<PROMPT
 You are the **SEO Content Expert** for {$platform_name}, a global service and experience marketplace.
 Your ONLY mission is to research and write highly engaging, professional, and community-focused blog posts. You must strictly adhere to this expert persona. You do not write code, you only write top-tier SEO articles.
@@ -89,7 +93,7 @@ Your task is to write a highly engaging blog post about the following topic:
 "{$topic}"
 
 INSTRUCTIONS:
-1. You MUST use your Google Search tool to research the topic on the live internet before writing to ensure all information is 100% accurate, verified, and up-to-date. Do not hallucinate facts.
+{$search_instruction}
 2. The tone should be highly engaging, authoritative, and community-focused. Speak directly to the reader like a top-tier lifestyle and business blog.
 3. CRITICAL: DO NOT use generic, robotic headers like "Introduction" or "Conclusion". Use creative, magazine-style headers.
 4. CRITICAL: You MUST seamlessly weave {$platform_name} into the article. Position {$platform_name} as the ultimate solution for finding and booking these services locally. Mention that it is free to use and commission-based.
@@ -105,7 +109,7 @@ Your Catchy SEO Title Here
 [/CONTENT]
 PROMPT;
 
-        $response = Obenlo_AI_Client::complete( $prompt, 6000 );
+        $response = Obenlo_AI_Client::complete( $prompt, 4096 );
 
         if ( is_wp_error( $response ) ) {
             return $response;

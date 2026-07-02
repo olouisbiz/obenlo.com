@@ -227,6 +227,8 @@ PROMPT;
     }
 
     public function handle_send_live_message() {
+        check_ajax_referer( 'obenlo_live_chat_nonce', 'nonce' );
+
         $session_id = isset( $_POST['session_id'] ) ? sanitize_text_field( wp_unslash( $_POST['session_id'] ) ) : '';
         $message    = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
 
@@ -282,15 +284,19 @@ PROMPT;
 
         $result = Obenlo_AI_Client::complete( $prompt, 300 );
 
-        if ( ! is_wp_error( $result ) ) {
-            $ai_msg_id = $user_msg_id + 1;
-            $history[] = [
-                'id'       => $ai_msg_id,
-                'content'  => $result,
-                'is_staff' => true,
-                'role'     => 'model',
-            ];
+        if ( is_wp_error( $result ) ) {
+            // Still save the user message to history, but report the AI error
+            set_transient( $transient_key, $history, 12 * HOUR_IN_SECONDS );
+            wp_send_json_error( [ 'message' => $result->get_error_message() ] );
         }
+
+        $ai_msg_id = $user_msg_id + 1;
+        $history[] = [
+            'id'       => $ai_msg_id,
+            'content'  => $result,
+            'is_staff' => true,
+            'role'     => 'model',
+        ];
 
         set_transient( $transient_key, $history, 12 * HOUR_IN_SECONDS );
 
@@ -298,6 +304,8 @@ PROMPT;
     }
 
     public function handle_fetch_live_messages() {
+        check_ajax_referer( 'obenlo_live_chat_nonce', 'nonce' );
+
         $session_id = isset( $_POST['session_id'] ) ? sanitize_text_field( wp_unslash( $_POST['session_id'] ) ) : '';
         $last_id    = isset( $_POST['last_id'] ) ? intval( $_POST['last_id'] ) : 0;
 

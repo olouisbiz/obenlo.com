@@ -101,20 +101,9 @@ class Obenlo_AI_Affiliate {
             wp_send_json_error(['message' => 'Unauthorized']);
         }
 
-        $query = sanitize_text_field($_POST['query']);
-        
-        $prompt = "You are an AI Web Scraper. The user wants to find affiliate listings based on this query: '{$query}'.
-        Use the Google Search tool to find 1 to 3 matching public listings (e.g., from Viator, TripAdvisor, or GetYourGuide).
-        For each listing you find, you MUST rewrite the description to be unique, SEO-friendly, and engaging. DO NOT copy the exact original description.
-        
-        Return a JSON array of objects. Each object must have exactly these keys:
-        - title: The title of the listing
-        - url: The external booking URL where the user can buy it
-        - price: The numeric starting price (just the number)
-        - location: The city or region
-        - description: Your newly rewritten, unique SEO description (at least 3 sentences)
-        
-        ONLY output valid JSON. No markdown wrappers. No explanations.";
+        $query = sanitize_text_field( $_POST['query'] ?? '' );
+        $platform_name = get_bloginfo('name');
+        $prompt = "You are the **Affiliate Listing Expert** for {$platform_name}, a global service and experience marketplace.\nYour ONLY mission is to find, vet, and rewrite external affiliate listings (from Viator, TripAdvisor, GetYourGuide) into unique, high-converting SEO content for the platform. You must strictly adhere to this expert persona.\n\nThe user wants to find affiliate listings based on this query: '{$query}'.\nUse the Google Search tool to find 1 to 3 matching public listings (e.g., from Viator, TripAdvisor, or GetYourGuide).\nFor each listing you find, you MUST rewrite the description to be unique, SEO-friendly, and engaging. DO NOT copy the exact original description.\n\nReturn a JSON array of objects. Each object must have exactly these keys:\n- title: The title of the listing\n- url: The external booking URL where the user can buy it\n- price: The numeric starting price (just the number)\n- location: The city or region\n- description: Your newly rewritten, unique SEO description (at least 3 sentences)\n\nONLY output valid JSON. No markdown wrappers. No explanations.";
 
         // Call the AI (Gemini has Google Search tool hardcoded in the client)
         $ai_response = Obenlo_AI_Client::complete($prompt, 2048);
@@ -128,7 +117,7 @@ class Obenlo_AI_Affiliate {
         $listings = json_decode(trim($json_str), true);
 
         if (!$listings || !is_array($listings)) {
-            wp_send_json_error(['message' => 'Failed to parse AI response. Raw output: ' . $ai_response]);
+            wp_send_json_error(['message' => 'Failed to parse AI response. Please try again.']);
         }
 
         $log = "";
