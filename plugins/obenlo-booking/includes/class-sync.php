@@ -109,7 +109,7 @@ class Obenlo_Booking_Sync {
         // Map pricing model to slug format
         $pricing_model = strtolower(str_replace(' ', '_', $params['pricing_model'] ?? 'per_night'));
         update_post_meta($listing_id, '_obenlo_pricing_model', $pricing_model);
-        update_post_meta($listing_id, '_obenlo_listing_country', sanitize_text_field($params['listing_country'] ?? 'haiti'));
+        update_post_meta($listing_id, '_obenlo_listing_country', sanitize_text_field($params['listing_country'] ?? ''));
 
         if ($is_demo) {
             update_post_meta($listing_id, '_obenlo_is_demo', 'yes');

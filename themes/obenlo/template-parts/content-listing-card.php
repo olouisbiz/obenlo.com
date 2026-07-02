@@ -13,8 +13,24 @@ if(empty($price)) {
     }
 }
 
-$city = get_post_meta( get_the_ID(), '_obenlo_listing_location', true );
+$city = get_post_meta( get_the_ID(), '_obenlo_location', true );
+if (empty($city)) {
+    $city = get_post_meta( get_the_ID(), '_obenlo_listing_location', true );
+}
 $country = get_post_meta( get_the_ID(), '_obenlo_listing_country', true );
+if ($country) {
+    if (strlen(trim($country)) <= 3) {
+        $country = strtoupper(trim($country));
+    } else {
+        $country = ucwords(trim($country));
+    }
+}
+
+// Suppress dummy defaults if no city is provided
+if (empty($city) && in_array(strtolower(trim($country)), ['haiti', 'usa'])) {
+    $country = '';
+}
+
 if ($city && $country) {
     $location = $city . ', ' . $country;
 } elseif ($city) {
@@ -22,7 +38,7 @@ if ($city && $country) {
 } elseif ($country) {
     $location = $country;
 } else {
-    $location = __( "Location Unavailable", "obenlo" );
+    $location = '';
 }
 ?>
 
@@ -32,10 +48,8 @@ if ($city && $country) {
         <?php if ( has_post_thumbnail() ) : ?>
             <?php the_post_thumbnail( 'large', array( 'style' => 'width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;' ) ); ?>
         <?php else : ?>
-            <!-- Fallback Skeleton Design if no image -->
-            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); font-size: 2rem;">
-                ⛰️
-            </div>
+            <!-- Fallback Premium Image if no thumbnail is uploaded -->
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;" alt="Default Listing Image" />
         <?php endif; ?>
         
         <!-- Category Badge -->

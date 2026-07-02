@@ -20,10 +20,18 @@ class Obenlo_AI_Outreach {
         // AJAX handlers
         add_action( 'wp_ajax_obenlo_outreach_search',        [ $this, 'handle_outreach_search' ] );
         add_action( 'wp_ajax_obenlo_outreach_draft',         [ $this, 'handle_outreach_draft' ] );
+        add_action( 'wp_ajax_obenlo_outreach_draft_dm',      [ $this, 'handle_outreach_draft_dm' ] );
         add_action( 'wp_ajax_obenlo_outreach_followup_draft',[ $this, 'handle_outreach_followup_draft' ] );
         add_action( 'wp_ajax_obenlo_outreach_send',          [ $this, 'handle_outreach_send' ] );
         add_action( 'wp_ajax_obenlo_outreach_get_history',   [ $this, 'handle_outreach_get_history' ] );
         add_action( 'wp_ajax_obenlo_outreach_clear_history', [ $this, 'handle_outreach_clear_history' ] );
+
+        // Phase 2 & 3: CRM and Bulk Email
+        add_action( 'admin_init', [ $this, 'upgrade_database' ] );
+        add_action( 'wp_ajax_obenlo_outreach_save_lead', [ $this, 'handle_save_lead' ] );
+        add_action( 'wp_ajax_obenlo_outreach_get_crm_leads', [ $this, 'handle_get_crm_leads' ] );
+        add_action( 'wp_ajax_obenlo_outreach_update_lead_status', [ $this, 'handle_update_lead_status' ] );
+        add_action( 'wp_ajax_obenlo_outreach_send_bulk_email', [ $this, 'handle_send_bulk_email' ] );
     }
 
     // ── Admin Menu ────────────────────────────────────────────────────────
@@ -36,6 +44,14 @@ class Obenlo_AI_Outreach {
             'manage_options',
             'obenlo-outreach-agent',
             [ $this, 'render_outreach_page' ]
+        );
+        add_submenu_page(
+            'obenlo-admin-dashboard',
+            'Obenlo AI CRM',
+            '📈 My CRM',
+            'manage_options',
+            'obenlo-outreach-crm',
+            [ $this, 'render_crm_page' ]
         );
     }
 
@@ -61,28 +77,37 @@ class Obenlo_AI_Outreach {
 
         $platform_name = get_bloginfo( 'name' );
 
+        $platform_name = get_bloginfo( 'name' );
         $rand_seed = wp_rand(1, 99999);
+
         $prompt = <<<PROMPT
 You are an expert lead generator and business intelligence agent for {$platform_name}, a global service and experience marketplace.
-You have access to Google Search. You MUST use Google Search to find real, active, and highly authentic local service providers. Do NOT guess. Verify that they are currently in business.
-Search for {$count} providers matching:
+You MUST find real, active, and highly authentic local service providers. Do NOT guess. Verify that they are currently in business.
+Search for UP TO {$count} providers matching:
 Category: {$category}
 Location: {$location}
 
 IMPORTANT VARIETY INSTRUCTION: Do not return the same common businesses every time. Randomly explore your knowledge base to find lesser-known, highly specific, or different active providers. 
 Random Seed: {$rand_seed}
 
+CRITICAL ANTI-HALLUCINATION RULES:
+1. DO NOT MAKE UP EMAILS: If you do not know the exact, verified email address of the business, YOU MUST RETURN "". Do not guess formats like "name@email.com".
+2. DO NOT MAKE UP SOCIAL MEDIA: LLMs frequently hallucinate Facebook/Instagram handles. YOU ARE STRICTLY FORBIDDEN FROM GUESSING HANDLES. If you do not know the EXACT verified URL, YOU MUST RETURN "".
+3. DO NOT GUESS LOCATIONS: Only return businesses that are verified to be physically located in or primarily serving the EXACT requested location: {$location}.
+
 Return ONLY a valid JSON array of objects (no markdown, no explanations, no wrapping in ```json). Each object must contain exactly these keys:
 - "name": The business or provider's name.
-- "website": The best online link for the business. This can be their official website. If they do not have one, you MAY use their Facebook page, Instagram profile, Yelp, or other directory link. If absolutely no link exists, return an empty string "".
-- "email": A contact email address. (Aggressively search for this, including checking their Facebook/Instagram "About" sections. If absolutely unknown, return an empty string "").
-- "phone": A contact phone number (If unknown, return an empty string "").
+- "website": Their official website (if any).
+- "facebook": Their Facebook page URL. Since many local businesses do not have websites, aggressively search for this. If none, return "".
+- "instagram": Their Instagram profile URL. Aggressively search for this. If none, return "".
+- "email": A contact email address (check Facebook/Instagram About sections if needed). If unknown, return "".
+- "phone": A contact phone number (If unknown, return "").
 - "niche": The specific sub-specialty (e.g. "Wedding DJ", "Corporate Events").
 - "description": A short 1-sentence summary of what makes them stand out.
 
 Example format:
 [
-  {"name":"Boston Event DJs","website":"https://bostoneventdjs.com","email":"info@bostoneventdjs.com","phone":"(617) 555-0199","niche":"Wedding DJ Services","description":"Top-rated event and wedding DJs serving the greater Boston area."}
+  {"name":"Boston Event DJs","website":"https://bostoneventdjs.com","facebook":"https://facebook.com/bostoneventdjs","instagram":"https://instagram.com/bostoneventdjs","email":"info@bostoneventdjs.com","phone":"(617) 555-0199","niche":"Wedding DJ Services","description":"Top-rated event and wedding DJs serving the greater Boston area."}
 ]
 PROMPT;
 
@@ -106,7 +131,254 @@ PROMPT;
             wp_send_json_error( [ 'message' => 'AI returned an invalid format. Please try searching again.', 'raw' => $result ] );
         }
 
-        wp_send_json_success( [ 'providers' => $parsed ] );
+        $verified_providers = [];
+
+        foreach ( $parsed as $provider ) {
+            // If they have a website, we must verify it exists.
+            if ( ! empty( $provider['website'] ) ) {
+                $contact = $this->extract_contact_info_from_url( $provider['website'] );
+                
+                if ( $contact === false ) {
+                    // Scraper failed to connect (DNS error / 404). The AI hallucinated this website. 
+                    // We drop it completely from the results!
+                    continue;
+                }
+
+                // It's a real website! Overwrite AI's guesses with verified HTML data
+                $provider['facebook']  = ! empty( $contact['facebook'] ) ? $contact['facebook'] : '';
+                $provider['instagram'] = ! empty( $contact['instagram'] ) ? $contact['instagram'] : '';
+                $provider['email']     = ! empty( $contact['email'] ) ? $contact['email'] : '';
+                $provider['phone']     = ! empty( $contact['phone'] ) ? $contact['phone'] : ( $provider['phone'] ?? '' );
+            }
+
+            $verified_providers[] = $provider;
+        }
+
+        if ( empty( $verified_providers ) ) {
+            wp_send_json_error( [ 'message' => 'The AI generated leads, but all of them were detected as hallucinations by the verification scraper. Please try searching again.' ] );
+        }
+
+        wp_send_json_success( [ 'providers' => $verified_providers ] );
+    }
+
+    /**
+     * Instantly visits a URL and extracts verified contact info (Socials, Email, Phone).
+     */
+    private function extract_contact_info_from_url( $url ) {
+        // Fast timeout so we don't stall the AJAX request
+        $response = wp_remote_get( $url, [ 'timeout' => 3, 'redirection' => 2 ] );
+        if ( is_wp_error( $response ) ) {
+            return false;
+        }
+
+        $html = wp_remote_retrieve_body( $response );
+        if ( empty( $html ) ) {
+            return false;
+        }
+
+        $contact = [ 'facebook' => '', 'instagram' => '', 'email' => '', 'phone' => '' ];
+
+        // Extract facebook (avoid share links)
+        if ( preg_match_all( '/href=["\'](https?:\/\/(www\.)?facebook\.com\/[^"\']+)["\']/i', $html, $fb_matches ) ) {
+            foreach ( $fb_matches[1] as $fb ) {
+                if ( stripos( $fb, 'sharer' ) === false ) {
+                    $contact['facebook'] = $fb;
+                    break;
+                }
+            }
+        }
+
+        // Extract instagram
+        if ( preg_match_all( '/href=["\'](https?:\/\/(www\.)?instagram\.com\/[^"\']+)["\']/i', $html, $ig_matches ) ) {
+            foreach ( $ig_matches[1] as $ig ) {
+                if ( stripos( $ig, 'share' ) === false ) {
+                    $contact['instagram'] = $ig;
+                    break;
+                }
+            }
+        }
+
+        // Extract email (mailto:)
+        if ( preg_match( '/href=["\']mailto:([^"\']+)["\']/i', $html, $email_match ) ) {
+            $contact['email'] = sanitize_email( $email_match[1] );
+        }
+
+        // Extract phone (tel:)
+        if ( preg_match( '/href=["\']tel:([^"\']+)["\']/i', $html, $phone_match ) ) {
+            $contact['phone'] = sanitize_text_field( $phone_match[1] );
+        }
+
+        return $contact;
+    }
+
+    // ── Phase 2: CRM Methods ──────────────────────────────────────────────
+
+    public function upgrade_database() {
+        if ( get_option( 'obenlo_outreach_db_version' ) !== '1.0' ) {
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'obenlo_leads';
+            $charset_collate = $wpdb->get_charset_collate();
+
+            $sql = "CREATE TABLE $table_name (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                name varchar(255) NOT NULL,
+                niche varchar(100) DEFAULT '' NOT NULL,
+                website varchar(255) DEFAULT '' NOT NULL,
+                facebook varchar(255) DEFAULT '' NOT NULL,
+                instagram varchar(255) DEFAULT '' NOT NULL,
+                email varchar(255) DEFAULT '' NOT NULL,
+                phone varchar(100) DEFAULT '' NOT NULL,
+                description text NOT NULL,
+                status varchar(50) DEFAULT 'New' NOT NULL,
+                created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                PRIMARY KEY  (id)
+            ) $charset_collate;";
+
+            require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+            dbDelta( $sql );
+            update_option( 'obenlo_outreach_db_version', '1.0' );
+        }
+    }
+
+    public function handle_save_lead() {
+        check_ajax_referer( 'obenlo_ai_outreach_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error();
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'obenlo_leads';
+        
+        $website = esc_url_raw( $_POST['website'] ?? '' );
+        if ( ! empty( $website ) ) {
+            $exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table_name WHERE website = %s", $website ) );
+            if ( $exists ) wp_send_json_success( ['message' => 'Already saved'] );
+        }
+
+        $wpdb->insert( $table_name, [
+            'name' => sanitize_text_field( $_POST['name'] ?? '' ),
+            'niche' => sanitize_text_field( $_POST['niche'] ?? '' ),
+            'website' => $website,
+            'facebook' => esc_url_raw( $_POST['facebook'] ?? '' ),
+            'instagram' => esc_url_raw( $_POST['instagram'] ?? '' ),
+            'email' => sanitize_email( $_POST['email'] ?? '' ),
+            'phone' => sanitize_text_field( $_POST['phone'] ?? '' ),
+            'description' => sanitize_text_field( $_POST['description'] ?? '' ),
+            'status' => 'New'
+        ] );
+        wp_send_json_success();
+    }
+
+    public function handle_get_crm_leads() {
+        check_ajax_referer( 'obenlo_ai_outreach_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error();
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'obenlo_leads';
+        $leads = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC" );
+        wp_send_json_success( $leads );
+    }
+
+    public function handle_update_lead_status() {
+        check_ajax_referer( 'obenlo_ai_outreach_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error();
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'obenlo_leads';
+        $id = intval( $_POST['id'] ?? 0 );
+        $status = sanitize_text_field( $_POST['status'] ?? 'New' );
+        
+        if ( $id > 0 ) {
+            $wpdb->update( $table_name, [ 'status' => $status ], [ 'id' => $id ] );
+        }
+        wp_send_json_success();
+    }
+
+    // ── Phase 3: Automated Bulk Email Endpoint ────────────────────────────
+
+    public function handle_send_bulk_email() {
+        check_ajax_referer( 'obenlo_ai_outreach_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error();
+
+        $id      = intval( $_POST['id'] ?? 0 );
+        $name    = sanitize_text_field( $_POST['name'] ?? '' );
+        $niche   = sanitize_text_field( $_POST['niche'] ?? '' );
+        $email   = sanitize_email( $_POST['email'] ?? '' );
+        $website = esc_url_raw( $_POST['website'] ?? '' );
+        $desc    = sanitize_text_field( $_POST['description'] ?? '' );
+
+        if ( empty( $email ) ) wp_send_json_error( [ 'message' => 'No email address' ] );
+
+        $scraped_context = '';
+        if ( ! empty( $website ) ) {
+            $scraped_text = $this->scrape_website_text( $website );
+            if ( ! empty( $scraped_text ) ) {
+                $scraped_context = "\nWebsite Content (Scraped for Deep Research):\n" . $scraped_text . "\n";
+            }
+        }
+
+        $platform_name = get_bloginfo( 'name' );
+        $prompt = <<<PROMPT
+You are a platform outreach specialist for {$platform_name}.
+Write a highly personalized cold outreach email inviting {$name} ({$niche}) to list their services on {$platform_name}.
+{$scraped_context}
+CRITICAL RESEARCH INSTRUCTION: Use the "Website Content" above to deeply personalize the pitch. Do NOT sound like a generic bot.
+Return ONLY the email draft. Begin with a clear "Subject: [compelling subject line]" line, then the Body.
+Sign off as "The {$platform_name} Team".
+PROMPT;
+
+        $result = Obenlo_AI_Client::complete( $prompt, 450 );
+        if ( is_wp_error( $result ) ) wp_send_json_error( [ 'message' => 'AI Error' ] );
+
+        $lines = explode( "\n", $result );
+        $subject = 'Invitation to join Obenlo';
+        $body_lines = [];
+        foreach ( $lines as $line ) {
+            if ( stripos( $line, 'subject:' ) === 0 ) {
+                $subject = trim( substr( $line, 8 ) );
+                $subject = str_replace( ['"', "'"], '', $subject );
+            } else {
+                $body_lines[] = $line;
+            }
+        }
+        $body = trim( implode( "\n", $body_lines ) );
+
+        $headers = [ 'Content-Type: text/plain; charset=UTF-8' ];
+        $sent = wp_mail( $email, $subject, $body, $headers );
+
+        if ( $sent && $id > 0 ) {
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'obenlo_leads';
+            $wpdb->update( $table_name, [ 'status' => 'Contacted' ], [ 'id' => $id ] );
+        }
+
+        wp_send_json_success( [ 'sent' => $sent, 'subject' => $subject ] );
+    }
+
+    /**
+     * Instantly visits a URL and extracts visible text content for deep research.
+     */
+    private function scrape_website_text( $url ) {
+        // Fast timeout so we don't stall the AJAX request too long
+        $response = wp_remote_get( $url, [ 'timeout' => 4, 'redirection' => 2 ] );
+        if ( is_wp_error( $response ) ) {
+            return '';
+        }
+
+        $html = wp_remote_retrieve_body( $response );
+        if ( empty( $html ) ) {
+            return '';
+        }
+
+        // Remove script and style tags
+        $html = preg_replace( '#<script(.*?)>(.*?)</script>#is', '', $html );
+        $html = preg_replace( '#<style(.*?)>(.*?)</style>#is', '', $html );
+        
+        // Extract text
+        $text = wp_strip_all_tags( $html );
+        // Remove extra whitespace
+        $text = preg_replace( '/\s+/', ' ', $text );
+        
+        // Return first 1500 chars for context
+        return substr( trim( $text ), 0, 1500 );
     }
 
     // ── AJAX: Draft Outreach Email ────────────────────────────────────────
@@ -120,8 +392,16 @@ PROMPT;
 
         $name        = sanitize_text_field( $_POST['name'] ?? '' );
         $niche       = sanitize_text_field( $_POST['niche'] ?? '' );
-        $website     = sanitize_text_field( $_POST['website'] ?? '' );
+        $website     = esc_url_raw( $_POST['website'] ?? '' );
         $description = sanitize_text_field( $_POST['description'] ?? '' );
+
+        $scraped_context = '';
+        if ( ! empty( $website ) ) {
+            $scraped_text = $this->scrape_website_text( $website );
+            if ( ! empty( $scraped_text ) ) {
+                $scraped_context = "\nWebsite Content (Scraped for Deep Research):\n" . $scraped_text . "\n";
+            }
+        }
 
         if ( empty( $name ) ) {
             wp_send_json_error( [ 'message' => 'Missing provider details.' ] );
@@ -131,21 +411,24 @@ PROMPT;
 
         $prompt = <<<PROMPT
 You are a platform outreach specialist for {$platform_name}.
-Write a highly personalized, warm, and professional cold outreach email to a local service provider inviting them to list their services on Obenlo.
+Write a highly personalized, warm, and professional cold outreach email to a local service provider inviting them to list their services on {$platform_name}.
 Keep it conversational, professional, and explain how it will benefit their business.
 
 Provider Details:
 Name: {$name}
 Website: {$website}
 Niche: {$niche}
-Description: {$description}
+Google Description: {$description}
+{$scraped_context}
 
-Key Obenlo features to mention:
+CRITICAL RESEARCH INSTRUCTION: Use the "Website Content" above to deeply personalize the pitch. Mention something specific you noticed about their business, services, or ethos to prove you actually researched them. Do NOT sound like a generic bot.
+
+Key {$platform_name} features to mention:
 - Free to list, low commissions on completed bookings.
 - Advanced automated scheduling and secure booking system.
 - Direct host storefront to showcase their services to travelers and locals.
 
-Return ONLY the email draft. Begin with a clear "Subject: [compelling subject line]" line, then the Body. Keep the tone friendly and tailored to their specific niche.
+Return ONLY the email draft. Begin with a clear "Subject: [compelling subject line]" line, then the Body.
 Sign off the email simply as "The {$platform_name} Team". Do NOT use placeholders like [Your Name] or titles like Platform Outreach Specialist.
 PROMPT;
 
@@ -174,6 +457,57 @@ PROMPT;
         wp_send_json_success( [
             'subject' => $subject,
             'body'    => $body,
+        ] );
+    }
+
+    // ── AJAX: Draft Direct Message (DM) ───────────────────────────────────
+
+    public function handle_outreach_draft_dm() {
+        check_ajax_referer( 'obenlo_ai_outreach_nonce', 'nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized' ] );
+        }
+
+        $name    = sanitize_text_field( $_POST['name'] ?? '' );
+        $niche   = sanitize_text_field( $_POST['niche'] ?? '' );
+        $desc    = sanitize_text_field( $_POST['description'] ?? '' );
+        $website = esc_url_raw( $_POST['website'] ?? '' );
+
+        $scraped_context = '';
+        if ( ! empty( $website ) ) {
+            $scraped_text = $this->scrape_website_text( $website );
+            if ( ! empty( $scraped_text ) ) {
+                $scraped_context = "\nWebsite Content (Scraped for Deep Research):\n" . $scraped_text . "\n";
+            }
+        }
+
+        if ( empty( $name ) ) {
+            wp_send_json_error( [ 'message' => 'Missing provider details.' ] );
+        }
+
+        $platform_name = get_bloginfo( 'name' );
+
+        $prompt = <<<PROMPT
+You are a platform outreach specialist for {$platform_name}.
+Write a friendly, punchy, and highly engaging Direct Message (DM) to a local service provider ({$name} — {$niche}).
+Their Google description is: {$desc}
+{$scraped_context}
+
+CRITICAL RESEARCH INSTRUCTION: Use the "Website Content" above to personalize the DM. Mention something specific you noticed about their business so they know you are a real person who researched them.
+
+Keep it very short (under 60 words). Do not include a subject line. Be casual but professional.
+Sign off as "The {$platform_name} Team".
+PROMPT;
+
+        $result = Obenlo_AI_Client::complete( $prompt, 200 );
+
+        if ( is_wp_error( $result ) ) {
+            wp_send_json_error( [ 'message' => $result->get_error_message() ] );
+        }
+
+        wp_send_json_success( [
+            'body' => trim( $result ),
         ] );
     }
 
@@ -576,6 +910,7 @@ PROMPT;
             <div class="outreach-card" id="results-card" style="display:none;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="margin:0; font-weight:800; font-size:1.15rem; color:#222;">🔍 Prospective Leads</h3>
+                    <button id="btn-add-custom-lead" class="button button-secondary">➕ Add Custom Lead</button>
                 </div>
 
                 <!-- Bulk Bar -->
@@ -594,9 +929,10 @@ PROMPT;
                                 <th>Name</th>
                                 <th>Niche</th>
                                 <th>Website</th>
+                                <th>Social Media</th>
                                 <th>Email</th>
                                 <th>Standout Pitch Context</th>
-                                <th>Action</th>
+                                <th style="min-width:180px;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="results-body">
@@ -637,7 +973,7 @@ PROMPT;
             <div id="outreach-debug-log">System console initialized... Waiting for user action.</div>
         </div>
 
-        <!-- Outreach Email Preview Modal -->
+        <!-- Outreach Email/DM Preview Modal -->
         <div id="outreach-preview-modal" role="dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -649,18 +985,61 @@ PROMPT;
                         <label>To:</label>
                         <input type="text" id="outreach-to-email">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="outreach-subject-container">
                         <label>Subject:</label>
                         <input type="text" id="outreach-subject">
                     </div>
                     <div class="form-group">
-                        <label>Email Body:</label>
+                        <label>Message Body:</label>
                         <textarea id="outreach-body" rows="12"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" id="modal-footer-email">
                     <button class="btn-copy-clipboard" id="btn-copy">📋 Copy Text</button>
                     <button class="btn-send-email" id="btn-send">🚀 Send Pitch</button>
+                </div>
+                <div class="modal-footer" id="modal-footer-dm" style="display:none;">
+                    <button class="btn-copy-clipboard" id="btn-copy-dm">📋 Copy Text</button>
+                    <button class="btn-send-email" id="btn-open-social" style="background: linear-gradient(135deg, #1877f2, #c13584);">🚀 Open Social Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Custom Lead Modal -->
+        <div id="custom-lead-modal" role="dialog" style="display:none;">
+            <div class="modal-content" style="max-width:500px;">
+                <div class="modal-header">
+                    <h3>➕ Add Custom Lead</h3>
+                    <button class="modal-close" id="btn-custom-lead-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Business Name</label>
+                        <input type="text" id="cl-name" placeholder="e.g. Joe's Fishing Charters">
+                    </div>
+                    <div class="form-group">
+                        <label>Niche / Category</label>
+                        <input type="text" id="cl-niche" placeholder="e.g. Fishing Tour">
+                    </div>
+                    <div class="form-group">
+                        <label>Facebook / Instagram URL</label>
+                        <input type="text" id="cl-social" placeholder="https://instagram.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="text" id="cl-email" placeholder="joe@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Website</label>
+                        <input type="text" id="cl-website" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>Standout Context (What makes them unique?)</label>
+                        <input type="text" id="cl-desc" placeholder="Top-rated charter on the harbor">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-send-email" id="btn-save-custom-lead" style="width:100%;">Add to Lead List</button>
                 </div>
             </div>
         </div>
@@ -754,6 +1133,61 @@ PROMPT;
                 });
             }
 
+            function renderTable() {
+                resultsBody.innerHTML = '';
+                if (!searchLeads.length) return;
+                
+                searchLeads.forEach((p, idx) => {
+                    const tr = document.createElement('tr');
+                    let webDisplay = esc(p.website || '').replace(/^https?:\/\/(www\.)?/,'');
+                    let webUrl = p.website ? (p.website.startsWith('http') ? p.website : 'https://' + p.website) : '';
+                    let googleSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(p.name + ' ' + (locInput ? locInput.value.trim() : ''));
+
+                    let socialLinks = '';
+                    if (p.facebook) socialLinks += `<a href="${esc(p.facebook)}" target="_blank" rel="noopener" style="color:#1877f2; text-decoration:none; display:block; margin-bottom:4px; font-weight:bold;">🔵 Facebook</a>`;
+                    if (p.instagram) socialLinks += `<a href="${esc(p.instagram)}" target="_blank" rel="noopener" style="color:#c13584; text-decoration:none; display:block; font-weight:bold;">📸 Instagram</a>`;
+
+                    let actionLinks = `<div style="display:flex; flex-direction:column; gap:6px;">
+                        <button class="btn-action-draft" data-idx="${idx}" style="background:#fefce8; border:1px solid #fef08a; padding:4px 8px; border-radius:6px; cursor:pointer;">✍️ Draft Email</button>
+                        <button class="btn-action-draft-dm" data-idx="${idx}" style="background:#f0f9ff; border:1px solid #bae6fd; padding:4px 8px; border-radius:6px; cursor:pointer;">📱 Draft DM</button>
+                        <button class="btn-action-save" data-idx="${idx}" style="background:#f0fdf4; border:1px solid #bbf7d0; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:600; color:#166534;">💾 Save Lead</button>
+                    </div>`;
+
+                    tr.innerHTML = `
+                        <td><input type="checkbox" class="chk-lead" data-idx="${idx}"></td>
+                        <td><strong>${esc(p.name)}</strong></td>
+                        <td><span style="background:#ede9fe; color:#6d28d9; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">${esc(p.niche)}</span></td>
+                        <td>
+                            ${webUrl ? `<a href="${esc(webUrl)}" target="_blank" rel="noopener" style="color:#7c3aed; text-decoration:none; font-weight:600; display:block; margin-bottom:4px;">🌐 ${esc(webDisplay)}</a>` : ''}
+                            <a href="${esc(googleSearchUrl)}" target="_blank" rel="noopener" style="color:#2563eb; text-decoration:none; font-size:0.75rem; font-weight:700; background:#eff6ff; padding:2px 6px; border-radius:4px; display:inline-block;">🔍 Verify Google</a>
+                        </td>
+                        <td>${socialLinks}</td>
+                        <td>${esc(p.email)}</td>
+                        <td><span style="font-size:0.82rem; color:#6b7280;">${esc(p.description)}</span></td>
+                        <td>${actionLinks}</td>
+                    `;
+                    resultsBody.appendChild(tr);
+                });
+
+                document.querySelectorAll('.btn-action-draft').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        handleDraftClick(searchLeads[parseInt(btn.dataset.idx)], btn);
+                    });
+                });
+                
+                document.querySelectorAll('.btn-action-draft-dm').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        handleDraftDMClick(searchLeads[parseInt(btn.dataset.idx)], btn);
+                    });
+                });
+
+                document.querySelectorAll('.chk-lead').forEach(chk => {
+                    chk.addEventListener('change', updateBulkState);
+                });
+
+                resultsCard.style.display = 'block';
+            }
+
             // ── Search Providers ──────────────────────────────────────────
             btnSearch.addEventListener('click', async () => {
                 const cat   = catInput.value.trim(), loc = locInput.value.trim();
@@ -785,39 +1219,7 @@ PROMPT;
                     if (data.success && data.data.providers) {
                         searchLeads = data.data.providers;
                         log("Found " + searchLeads.length + " leads.");
-                        searchLeads.forEach((p, idx) => {
-                            const tr = document.createElement('tr');
-                            let webDisplay = esc(p.website).replace(/^https?:\/\/(www\.)?/,'');
-                            let webUrl = p.website.startsWith('http') ? p.website : 'https://' + p.website;
-                            let googleSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(p.name + ' ' + loc + ' ' + cat);
-
-                            tr.innerHTML = `
-                                <td><input type="checkbox" class="chk-lead" data-idx="${idx}"></td>
-                                <td><strong>${esc(p.name)}</strong></td>
-                                <td><span style="background:#ede9fe; color:#6d28d9; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">${esc(p.niche)}</span></td>
-                                <td>
-                                    <a href="${esc(webUrl)}" target="_blank" rel="noopener" style="color:#7c3aed; text-decoration:none; font-weight:600; display:block; margin-bottom:4px;">🌐 ${esc(webDisplay)}</a>
-                                    <a href="${esc(googleSearchUrl)}" target="_blank" rel="noopener" style="color:#2563eb; text-decoration:none; font-size:0.75rem; font-weight:700; background:#eff6ff; padding:2px 6px; border-radius:4px; display:inline-block;">🔍 Verify Google</a>
-                                </td>
-                                <td>${esc(p.email)}</td>
-                                <td><span style="font-size:0.82rem; color:#6b7280;">${esc(p.description)}</span></td>
-                                <td><button class="btn-action-draft" data-idx="${idx}">✍️ Draft Pitch</button></td>
-                            `;
-                            resultsBody.appendChild(tr);
-                        });
-
-                        document.querySelectorAll('.btn-action-draft').forEach(btn => {
-                            btn.addEventListener('click', () => {
-                                const lead = searchLeads[parseInt(btn.dataset.idx)];
-                                handleDraftClick(lead, btn);
-                            });
-                        });
-
-                        document.querySelectorAll('.chk-lead').forEach(chk => {
-                            chk.addEventListener('change', updateBulkState);
-                        });
-
-                        resultsCard.style.display = 'block';
+                        renderTable();
                     } else {
                         alert('Error: ' + (data.data?.message || 'Failed to retrieve providers.'));
                     }
@@ -927,14 +1329,59 @@ PROMPT;
 
                     if (data.success) {
                         toInput.value = lead.email;
+                        document.getElementById('outreach-subject-container').style.display = 'block';
                         subjectInput.value = data.data.subject;
                         bodyText.value = data.data.body;
+                        document.getElementById('modal-footer-email').style.display = 'flex';
+                        document.getElementById('modal-footer-dm').style.display = 'none';
                         modal.classList.add('open');
                     } else {
                         alert('Error: ' + (data.data?.message || 'Failed to draft email.'));
                     }
                 } catch (e) {
                     alert('Error while drafting pitch.');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = origText;
+                }
+            }
+
+            // ── Single Draft DM Click ─────────────────────────────────────────
+            async function handleDraftDMClick(lead, btn) {
+                currentLead = lead;
+                isFollowup = false;
+                btn.disabled = true;
+                const origText = btn.textContent;
+                btn.textContent = '⏳ Drafting...';
+                modalTitle.textContent = '📱 Draft DM Pitch';
+
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'obenlo_outreach_draft_dm');
+                    fd.append('nonce', NONCE);
+                    fd.append('name', lead.name);
+                    fd.append('niche', lead.niche);
+                    fd.append('website', lead.website);
+                    fd.append('description', lead.description);
+
+                    const res  = await fetch(AJAX_URL, { method: 'POST', body: fd });
+                    const text = await res.text();
+                    const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                    const data = JSON.parse(text.substring(s, e + 1));
+
+                    if (data.success) {
+                        toInput.value = lead.instagram || lead.facebook || 'No social URL found';
+                        document.getElementById('outreach-subject-container').style.display = 'none';
+                        subjectInput.value = '';
+                        bodyText.value = data.data.body;
+                        document.getElementById('modal-footer-email').style.display = 'none';
+                        document.getElementById('modal-footer-dm').style.display = 'flex';
+                        modal.classList.add('open');
+                    } else {
+                        alert('Error: ' + (data.data?.message || 'Failed to draft DM.'));
+                    }
+                } catch (e) {
+                    alert('Error while drafting DM.');
                 } finally {
                     btn.disabled = false;
                     btn.textContent = origText;
@@ -1037,11 +1484,289 @@ PROMPT;
                 } catch(e) { console.error(e); }
             });
 
+            // ── Modal Handlers for DM & Custom Leads ───────────────────────
+            document.getElementById('btn-copy-dm').addEventListener('click', () => {
+                bodyText.select();
+                document.execCommand('copy');
+                const btn = document.getElementById('btn-copy-dm');
+                btn.textContent = '📋 Copied!';
+                setTimeout(() => { btn.textContent = '📋 Copy Text'; }, 2000);
+            });
+
+            document.getElementById('btn-open-social').addEventListener('click', () => {
+                bodyText.select();
+                document.execCommand('copy');
+                let socialUrl = toInput.value.trim();
+                
+                if (socialUrl && socialUrl.startsWith('http')) {
+                    // Deep-link to Facebook Messenger
+                    if (socialUrl.includes('facebook.com')) {
+                        // Extract username and convert to m.me/username
+                        let parts = socialUrl.split('facebook.com/');
+                        if (parts.length > 1) {
+                            let username = parts[1].replace(/\/$/, '');
+                            socialUrl = 'https://m.me/' + username;
+                        }
+                    } 
+                    // Deep-link to Instagram Direct (Works best on mobile)
+                    else if (socialUrl.includes('instagram.com')) {
+                        let parts = socialUrl.split('instagram.com/');
+                        if (parts.length > 1) {
+                            let username = parts[1].replace(/\/$/, '');
+                            socialUrl = 'https://ig.me/m/' + username;
+                        }
+                    }
+
+                    // Change button text to show it copied
+                    const btn = document.getElementById('btn-open-social');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '📋 Copied! Opening Chat...';
+                    setTimeout(() => { btn.innerHTML = originalText; }, 3000);
+
+                    window.open(socialUrl, '_blank');
+                    modal.classList.remove('open');
+                } else {
+                    alert('No valid social media URL found for this lead.');
+                }
+            });
+
+            const customLeadModal = document.getElementById('custom-lead-modal');
+            
+            document.getElementById('btn-add-custom-lead').addEventListener('click', () => {
+                customLeadModal.style.display = 'block';
+                customLeadModal.classList.add('open');
+            });
+            
+            document.getElementById('btn-custom-lead-close').addEventListener('click', () => {
+                customLeadModal.style.display = 'none';
+                customLeadModal.classList.remove('open');
+            });
+
+            document.getElementById('btn-save-custom-lead').addEventListener('click', () => {
+                const name = document.getElementById('cl-name').value.trim();
+                const niche = document.getElementById('cl-niche').value.trim();
+                const social = document.getElementById('cl-social').value.trim();
+                const email = document.getElementById('cl-email').value.trim();
+                const website = document.getElementById('cl-website').value.trim();
+                const desc = document.getElementById('cl-desc').value.trim();
+
+                if (!name || !niche) {
+                    alert('Please enter at least a Business Name and Niche.');
+                    return;
+                }
+
+                const newLead = {
+                    name: name,
+                    niche: niche,
+                    facebook: social && social.includes('facebook') ? social : '',
+                    instagram: social && social.includes('instagram') ? social : (!social.includes('facebook') ? social : ''),
+                    email: email,
+                    website: website,
+                    phone: '',
+                    description: desc || 'Custom added lead.'
+                };
+
+                searchLeads.unshift(newLead); // add to top
+                renderTable();
+                
+                customLeadModal.style.display = 'none';
+                customLeadModal.classList.remove('open');
+                
+                document.getElementById('cl-name').value = '';
+                document.getElementById('cl-niche').value = '';
+                document.getElementById('cl-social').value = '';
+                document.getElementById('cl-email').value = '';
+                document.getElementById('cl-website').value = '';
+                document.getElementById('cl-desc').value = '';
+            });
+
             function esc(str) {
                 if (!str) return '';
                 return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
             }
         })();
+        </script>
+        <?php
+    }
+
+    public function render_crm_page() {
+        ?>
+        <div class="wrap" style="font-family: 'Inter', sans-serif;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1 style="font-size: 2rem; font-weight: 800; color: #111827;">📈 My CRM</h1>
+                <button id="btn-launch-campaign" class="button button-primary button-large" style="background: #e61e4d; border-color: #e61e4d; border-radius: 8px; font-weight: 600; padding: 0 24px; box-shadow: 0 4px 6px rgba(230,30,77,0.2);">
+                    🚀 Launch Automated Email Campaign
+                </button>
+            </div>
+
+            <div style="background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
+                <table class="wp-list-table widefat fixed striped table-view-list" style="border: none;">
+                    <thead>
+                        <tr>
+                            <td id="cb" class="manage-column column-cb check-column"><input id="cb-select-all-1" type="checkbox"></td>
+                            <th scope="col" style="font-weight: 700; color: #374151;">Provider Name</th>
+                            <th scope="col" style="font-weight: 700; color: #374151;">Niche</th>
+                            <th scope="col" style="font-weight: 700; color: #374151;">Contact</th>
+                            <th scope="col" style="font-weight: 700; color: #374151;">Status</th>
+                            <th scope="col" style="font-weight: 700; color: #374151;">Date Added</th>
+                            <th scope="col" style="font-weight: 700; color: #374151; width: 120px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crm-leads-table">
+                        <tr><td colspan="7" style="text-align: center; padding: 20px;">Loading CRM leads...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Campaign Progress Modal -->
+            <div id="campaign-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999999; align-items:center; justify-content:center;">
+                <div style="background:#fff; padding:32px; border-radius:16px; width:400px; text-align:center; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);">
+                    <h2 style="margin-top:0; font-size:1.5rem; font-weight:800; color:#111827;">🚀 Launching Campaign</h2>
+                    <p style="color:#4b5563; margin-bottom:24px;">The AI is deeply researching each lead and firing off hyper-personalized emails. Please do not close this page.</p>
+                    <div style="background:#f3f4f6; border-radius:8px; height:24px; width:100%; overflow:hidden; position:relative; margin-bottom:12px;">
+                        <div id="campaign-progress-bar" style="background:#e61e4d; height:100%; width:0%; transition:width 0.3s ease;"></div>
+                    </div>
+                    <p id="campaign-status-text" style="font-weight:600; color:#111827;">0 / 0 Emails Sent</p>
+                    <button id="btn-close-campaign" class="button" style="display:none; margin-top:16px; border-radius:6px;">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const CRM_AJAX_URL = "<?php echo admin_url('admin-ajax.php'); ?>";
+            const CRM_NONCE = "<?php echo wp_create_nonce('obenlo_ai_outreach_nonce'); ?>";
+            let crmLeads = [];
+
+            function loadLeads() {
+                const fd = new FormData();
+                fd.append('action', 'obenlo_outreach_get_crm_leads');
+                fd.append('nonce', CRM_NONCE);
+
+                fetch(CRM_AJAX_URL, { method: 'POST', body: fd })
+                    .then(res => res.text())
+                    .then(text => {
+                        const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                        const data = JSON.parse(text.substring(s, e + 1));
+                        if (data.success) {
+                            crmLeads = data.data;
+                            renderLeads();
+                        }
+                    });
+            }
+
+            function renderLeads() {
+                const tbody = document.getElementById('crm-leads-table');
+                tbody.innerHTML = '';
+                if (crmLeads.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">No leads found. Go to the Outreach Agent to search and save leads!</td></tr>';
+                    return;
+                }
+
+                crmLeads.forEach(lead => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <th scope="row" class="check-column"><input type="checkbox" class="lead-checkbox" value="${lead.id}"></th>
+                        <td><strong>${lead.name}</strong></td>
+                        <td>${lead.niche}</td>
+                        <td>
+                            ${lead.email ? \`<a href="mailto:${lead.email}">📧 Email</a><br>\` : ''}
+                            ${lead.website ? \`<a href="${lead.website}" target="_blank">🌐 Website</a><br>\` : ''}
+                            ${lead.phone ? \`📱 ${lead.phone}\` : ''}
+                        </td>
+                        <td>
+                            <select onchange="updateLeadStatus(${lead.id}, this.value)" style="font-size:0.8rem; padding:2px 24px 2px 8px;">
+                                <option value="New" ${lead.status==='New'?'selected':''}>New</option>
+                                <option value="Contacted" ${lead.status==='Contacted'?'selected':''}>Contacted</option>
+                                <option value="Replied" ${lead.status==='Replied'?'selected':''}>Replied</option>
+                                <option value="Lost" ${lead.status==='Lost'?'selected':''}>Lost</option>
+                            </select>
+                        </td>
+                        <td>${new Date(lead.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="button" onclick="alert('View details coming soon')">View</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            window.updateLeadStatus = function(id, status) {
+                const fd = new FormData();
+                fd.append('action', 'obenlo_outreach_update_lead_status');
+                fd.append('nonce', CRM_NONCE);
+                fd.append('id', id);
+                fd.append('status', status);
+                fetch(CRM_AJAX_URL, { method: 'POST', body: fd }).then(() => loadLeads());
+            };
+
+            document.getElementById('cb-select-all-1')?.addEventListener('change', function(e) {
+                document.querySelectorAll('.lead-checkbox').forEach(cb => cb.checked = e.target.checked);
+            });
+
+            // Bulk Campaign Logic
+            document.getElementById('btn-launch-campaign')?.addEventListener('click', async function() {
+                const selected = Array.from(document.querySelectorAll('.lead-checkbox:checked')).map(cb => parseInt(cb.value));
+                if (selected.length === 0) {
+                    alert('Please select at least one lead.');
+                    return;
+                }
+                if (!confirm(`Are you sure you want to launch an autonomous campaign to ${selected.length} leads?`)) return;
+
+                const modal = document.getElementById('campaign-modal');
+                const bar = document.getElementById('campaign-progress-bar');
+                const statusText = document.getElementById('campaign-status-text');
+                const closeBtn = document.getElementById('btn-close-campaign');
+                
+                modal.style.display = 'flex';
+                closeBtn.style.display = 'none';
+                
+                let successCount = 0;
+                
+                for (let i = 0; i < selected.length; i++) {
+                    const leadId = selected[i];
+                    const lead = crmLeads.find(l => parseInt(l.id) === leadId);
+                    
+                    if (!lead.email) {
+                        console.log(`Skipping ${lead.name} (No Email)`);
+                        continue;
+                    }
+
+                    statusText.textContent = `Drafting & Sending to ${lead.name}... (${i+1} / ${selected.length})`;
+                    
+                    const fd = new FormData();
+                    fd.append('action', 'obenlo_outreach_send_bulk_email');
+                    fd.append('nonce', CRM_NONCE);
+                    fd.append('id', lead.id);
+                    fd.append('name', lead.name);
+                    fd.append('niche', lead.niche);
+                    fd.append('email', lead.email);
+                    fd.append('website', lead.website);
+                    fd.append('description', lead.description);
+
+                    try {
+                        const res = await fetch(CRM_AJAX_URL, { method: 'POST', body: fd });
+                        const text = await res.text();
+                        const s = text.indexOf('{'), e = text.lastIndexOf('}');
+                        const data = JSON.parse(text.substring(s, e + 1));
+                        if (data.success && data.data.sent) {
+                            successCount++;
+                        }
+                    } catch(e) { console.error(e); }
+
+                    bar.style.width = Math.round(((i + 1) / selected.length) * 100) + '%';
+                }
+
+                statusText.textContent = `Campaign Complete! Sent ${successCount} emails.`;
+                closeBtn.style.display = 'inline-block';
+                closeBtn.onclick = () => {
+                    modal.style.display = 'none';
+                    loadLeads();
+                };
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                if(document.getElementById('crm-leads-table')) loadLeads();
+            });
         </script>
         <?php
     }

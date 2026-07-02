@@ -122,7 +122,7 @@
                                 <label style="display: block; font-size: 0.9em; font-weight: bold; margin-bottom: 5px;">Payment Method</label>
                                 <select name="payment_method" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
                                     <?php 
-                                    $listing_country = get_post_meta($listing_id, '_obenlo_listing_country', true) ?: 'usa';
+                                    $listing_country = get_post_meta($listing_id, '_obenlo_listing_country', true);
                                     $is_haiti = ($listing_country === 'haiti');
                                     ?>
                                     <?php if(get_option('obenlo_stripe_enabled', 'yes') === 'yes'): ?>

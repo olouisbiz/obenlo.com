@@ -204,7 +204,7 @@ class Obenlo_Host_Listings
                 $price          = get_post_meta($listing_id, '_obenlo_price', true);
                 $capacity       = get_post_meta($listing_id, '_obenlo_capacity', true);
                 $available_units = get_post_meta($listing_id, '_obenlo_available_units', true) ?: 1;
-                $location       = get_post_meta($listing_id, '_obenlo_listing_location', true);
+                $location       = get_post_meta($listing_id, '_obenlo_location', true) ?: get_post_meta($listing_id, '_obenlo_listing_location', true);
                 $virtual_link   = get_post_meta($listing_id, '_obenlo_virtual_link', true);
                 $event_is_fixed = get_post_meta($listing_id, '_obenlo_event_is_fixed', true) ?: 'no';
                 $event_date     = get_post_meta($listing_id, '_obenlo_event_date', true);
@@ -219,7 +219,7 @@ class Obenlo_Host_Listings
                 $duration_val   = get_post_meta($listing_id, '_obenlo_duration_val', true);
                 $duration_unit  = get_post_meta($listing_id, '_obenlo_duration_unit', true) ?: 'hours';
                 $requires_slots = get_post_meta($listing_id, '_obenlo_requires_slots', true) ?: 'no';
-                $listing_country = get_post_meta($listing_id, '_obenlo_listing_country', true) ?: 'usa';
+                $listing_country = get_post_meta($listing_id, '_obenlo_listing_country', true);
                 $type_terms     = wp_get_post_terms($listing_id, 'listing_type');
                 if (!empty($type_terms) && !is_wp_error($type_terms)) { $selected_type = $type_terms[0]->term_id; }
                 $policy_type    = get_post_meta($listing_id, '_obenlo_policy_type', true) ?: 'global';
@@ -363,8 +363,29 @@ class Obenlo_Host_Listings
                             <div style="flex:1;">
                                 <label style="display:block; font-weight:700; margin-bottom:8px; color:#444;"><?php echo __('Country', 'obenlo'); ?></label>
                                 <select name="listing_country" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff;">
-                                    <option value="usa" <?php selected($listing_country, 'usa'); ?>><?php echo __('United States (USA)', 'obenlo'); ?></option>
-                                    <option value="haiti" <?php selected($listing_country, 'haiti'); ?>><?php echo __('Haiti 🇭🇹', 'obenlo'); ?></option>
+                                    <option value="" <?php selected($listing_country, ''); ?>><?php echo __('Select Country...', 'obenlo'); ?></option>
+                                    <?php
+                                    $countries = [
+                                        'usa' => 'United States', 'can' => 'Canada', 'gbr' => 'United Kingdom', 'aus' => 'Australia', 
+                                        'fra' => 'France', 'deu' => 'Germany', 'ita' => 'Italy', 'esp' => 'Spain', 'mex' => 'Mexico', 
+                                        'bra' => 'Brazil', 'arg' => 'Argentina', 'col' => 'Colombia', 'chl' => 'Chile',
+                                        'jpn' => 'Japan', 'chn' => 'China', 'ind' => 'India', 'kor' => 'South Korea', 'sgp' => 'Singapore',
+                                        'zaf' => 'South Africa', 'nga' => 'Nigeria', 'ken' => 'Kenya', 'egy' => 'Egypt',
+                                        'are' => 'United Arab Emirates', 'sau' => 'Saudi Arabia', 'tur' => 'Turkey', 'isr' => 'Israel',
+                                        'haiti' => 'Haiti 🇭🇹', 'dom' => 'Dominican Republic', 'jam' => 'Jamaica', 'bhs' => 'Bahamas'
+                                    ];
+                                    asort($countries);
+                                    // Move top priority countries to top
+                                    $top = ['usa' => 'United States', 'can' => 'Canada', 'gbr' => 'United Kingdom', 'haiti' => 'Haiti 🇭🇹'];
+                                    foreach ($top as $k => $v) {
+                                        unset($countries[$k]);
+                                    }
+                                    $countries = array_merge($top, $countries);
+                                    
+                                    foreach ($countries as $code => $name) {
+                                        echo '<option value="' . esc_attr($code) . '" ' . selected($listing_country, $code, false) . '>' . esc_html__($name, 'obenlo') . '</option>';
+                                    }
+                                    ?>
                                     <option value="other" <?php selected($listing_country, 'other'); ?>><?php echo __('Other / International', 'obenlo'); ?></option>
                                 </select>
                             </div>
@@ -604,9 +625,47 @@ class Obenlo_Host_Listings
                         <input type="file" name="listing_images[]" multiple accept="image/*" style="display:none;" id="listing_file_input" data-limit="<?php echo $media_limit; ?>">
                         <label for="listing_file_input" style="cursor:pointer; color:#888;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px; height:40px; margin-bottom:10px; color:#ccc;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                            <div style="font-weight:700; color:#444;"><?php echo __('Click to upload photos', 'obenlo'); ?></div>
+                            <div style="font-weight:700; color:#444;" id="upload_label_text"><?php echo __('Click to upload photos (Hold Shift/Ctrl to select multiple)', 'obenlo'); ?></div>
                             <div style="font-size:0.8rem; color:#e61e4d;"><?php echo esc_html($media_hint); ?></div>
                         </label>
+                        <div id="image_preview_container" style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:20px;"></div>
+                        
+                        <script>
+                            document.getElementById('listing_file_input').addEventListener('change', function(e) {
+                                var numFiles = e.target.files ? e.target.files.length : 0;
+                                var limit = parseInt(e.target.getAttribute('data-limit')) || 10;
+                                var labelText = document.getElementById('upload_label_text');
+                                var previewContainer = document.getElementById('image_preview_container');
+                                previewContainer.innerHTML = ''; // Clear old previews
+                                
+                                if (numFiles > 0) {
+                                    if (numFiles > limit) {
+                                        alert('You can only upload up to ' + limit + ' images.');
+                                        e.target.value = '';
+                                        labelText.innerText = '<?php echo esc_js(__('Click to upload photos', 'obenlo')); ?>';
+                                        labelText.style.color = '#444';
+                                    } else {
+                                        labelText.innerText = '✅ ' + numFiles + ' file(s) selected. Save listing to upload!';
+                                        labelText.style.color = '#10b981';
+                                        // Render previews
+                                        for (var i = 0; i < numFiles; i++) {
+                                            var imgURL = URL.createObjectURL(e.target.files[i]);
+                                            var imgEl = document.createElement('img');
+                                            imgEl.src = imgURL;
+                                            imgEl.style.width = '80px';
+                                            imgEl.style.height = '80px';
+                                            imgEl.style.objectFit = 'cover';
+                                            imgEl.style.borderRadius = '8px';
+                                            imgEl.style.border = '2px solid #ddd';
+                                            previewContainer.appendChild(imgEl);
+                                        }
+                                    }
+                                } else {
+                                    labelText.innerText = '<?php echo esc_js(__('Click to upload photos', 'obenlo')); ?>';
+                                    labelText.style.color = '#444';
+                                }
+                            });
+                        </script>
                     </div>
                 </div>
 
